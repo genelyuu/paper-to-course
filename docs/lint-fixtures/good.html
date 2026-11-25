@@ -10,7 +10,7 @@
   <p>목적 함수는 $J(\theta) = \mathbb{E}[R]$ 이다. 기울기는 다음과 같다.</p>
   <div class="math-block">$$\nabla_\theta J(\theta) = \mathbb{E}\left[ R \, \nabla_\theta \log \pi_\theta(a \mid s) \right]$$</div>
   <p>GPT-3은 크기가 큰 모델이고, LoRA를 쓰면 적은 메모리로 미세 조정할 수 있다. 한 번에 3단계씩 진행한다.</p>
-  <p>이 용어는 <span class="term" data-definition="정책 경사(Policy Gradient): 기대 보상의 기울기를 따라 정책을 직접 갱신하는 강화학습 방법이다.">정책 경사</span>라고 부른다. 코드는 <code>loss = -logp * adv</code> 처럼 한 줄이다.</p>
+  <p>이 용어는 <span class="term" data-definition="정책 경사(Policy Gradient): 기대 보상의 기울기를 따라 정책을 직접 갱신하는 강화학습 방법.">정책 경사</span>라고 부른다. 코드는 <code>loss = -logp * adv</code> 처럼 한 줄이다.</p>
   <p>한자 병기 예시로 <span class="hanja">強化學習</span>이 있다.</p>
   <div class="chat-window" id="chat-3"><div class="chat-messages">
     <div class="chat-message" data-msg="0"><div class="chat-bubble"><span class="chat-sender">리뷰어</span>

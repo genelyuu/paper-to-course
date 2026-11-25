@@ -146,6 +146,12 @@ class Linter(HTMLParser):
             if re.search(r"[（）]", d):
                 self.add(line, "WARN", "KO107", "용어 정의에 전각 괄호가 있습니다",
                          "반각 괄호 ( )를 쓰세요")
+            # KO111: 용어 뜻풀이는 사전식 명사형 종결(~것. ~함. ~임.)로 쓴다 (style-guide §1.8)
+            body = d.split(":", 1)[1] if ":" in d else d
+            m = re.search(r"[가-힣](?:이다|한다|된다|있다|없다|진다|는다|했다|였다|니다|어요|아요|예요|이에요)\.", body)
+            if m:
+                self.add(line, "WARN", "KO111", f"용어 뜻풀이가 서술문으로 끝납니다: '{m.group(0)}'",
+                         "사전식 명사형 종결로 쓰세요 (예: '~하는 값.', '~을 나타냄.', '~인 함수.')")
             # 속성 값에도 한자/전각 문장부호 검사
             self.check_text(d, line, self.lang_ok_now(a), attr=True, ctx=self.ctx(a)[:2] + (True,))
         for k in ("data-explanation-right", "data-explanation-wrong"):

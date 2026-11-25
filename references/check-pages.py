@@ -9,6 +9,7 @@
   - 그 밖의 .screen 하나 = 1페이지
 허용 높이 = 창 높이 - 상단 내비게이션 높이(--nav-height).
 min-height(100vh)를 풀고 내용의 실제 높이를 잰다.
+확인 문제는 모든 해설(정답·오답 중 긴 쪽)을 펼친 최악의 상태로 잰다.
 
 종료 코드: 넘치는 페이지가 있으면 1, 아니면 0. 표준 라이브러리와 Chrome만 쓴다.
 """
@@ -25,10 +26,18 @@ PROBE = r"""
   .animate-in, .animate-in * { opacity: 1 !important; transform: none !important; transition: none !important; }
   .screen.cornell { min-height: 0 !important; }
   html { scroll-snap-type: none !important; }
+  .quiz-feedback { transition: none !important; }
 </style>
 <script>
 window.addEventListener('load', function () {
   setTimeout(function () {
+    // 최악의 경우: 모든 문항의 해설을 더 긴 쪽(정답/오답)으로 펼친 상태에서 잰다
+    document.querySelectorAll('.quiz-question-block').forEach(function (b) {
+      var f = b.querySelector('.quiz-feedback'); if (!f) return;
+      var r = b.dataset.explanationRight || '', w = b.dataset.explanationWrong || '';
+      f.innerHTML = '<strong>오답</strong> ' + (w.length > r.length ? w : r);
+      f.className = 'quiz-feedback show error';
+    });
     var nav = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-height')) || 48;
     var limit = window.innerHeight - nav;
     var pages = [];
@@ -44,7 +53,7 @@ window.addEventListener('load', function () {
           page: si + 1,
           cornell: s.classList.contains('cornell'),
           height: Math.round(r.bottom - top),
-          title: label ? label.textContent.trim().replace(/\s+/g, ' ').slice(0, 40) : ''
+          title: label ? Array.prototype.map.call(label.childNodes, function (n) { return n.textContent.trim(); }).join(' ').replace(/\s+/g, ' ').slice(0, 40) : ''
         });
       });
     });

@@ -2,8 +2,8 @@
   <div class="module-content">
 
     <div class="module-header">
-      <span class="module-number">00</span>
-      <h2 class="module-title">배경 지식과 선수 학습</h2>
+      <span class="module-number">1–2</span>
+      <h2 class="module-title">서론과 배경</h2>
       <p class="module-subtitle">트랜스포머 논문을 읽기 전에 필요한 네 가지 개념을 정리한다</p>
     </div>
 
@@ -24,8 +24,8 @@
         </div>
       </aside>
       <div class="notes">
-        <h3 class="screen-heading">이 논문이 푸는 문제</h3>
-        <p>이 논문은 문장을 다른 언어의 문장으로 바꾸는 <span class="term" data-definition="시퀀스 변환(sequence transduction): 입력 시퀀스를 다른 시퀀스로 바꾸는 과제이다. 기계 번역이 대표적인 예이다.">시퀀스 변환</span>(sequence transduction) 문제를 다룬다. 저자들은 기존 모델의 구조를 걷어 내고 어텐션만으로 모델을 세웠다.</p>
+        <h3 class="screen-heading"><span class="sec-num">1</span>이 논문이 푸는 문제</h3>
+        <p>순환 신경망 없이 어텐션만으로 번역 모델을 만들 수 있을까? 이 논문은 문장을 다른 언어의 문장으로 바꾸는 <span class="term" data-definition="시퀀스 변환(sequence transduction): 입력 시퀀스를 다른 시퀀스로 바꾸는 과제. 기계 번역이 대표적인 예임.">시퀀스 변환</span>(sequence transduction) 문제를 다룬다. 저자들은 기존 모델의 구조를 걷어 내고 어텐션만으로 모델을 세웠다.</p>
         <div class="flow-steps animate-in">
           <div class="flow-step"><div class="flow-step-num">1</div><p>입력 문장(영어)</p></div>
           <div class="flow-arrow">&rarr;</div>
@@ -48,7 +48,7 @@
       </aside>
       <div class="notes">
         <h3 class="screen-heading">벡터와 내적</h3>
-        <p>문장 속 단어는 숫자 여러 개로 이루어진 <span class="term" data-definition="벡터(vector): 숫자를 일렬로 나열한 것이다. 크기와 방향을 함께 나타낸다.">벡터</span>(vector)로 표현된다. 두 벡터가 같은 방향을 가리킬수록 <span class="term" data-definition="내적(dot product): 두 벡터의 같은 위치의 성분끼리 곱하여 모두 더한 값이다. 두 벡터가 비슷한 방향일수록 커진다.">내적</span>(dot product)이 크다.</p>
+        <p>문장 속 단어는 숫자 여러 개로 이루어진 <span class="term" data-definition="벡터(vector): 숫자를 일렬로 나열한 것. 크기와 방향을 함께 나타냄.">벡터</span>(vector)로 표현된다. 두 벡터가 같은 방향을 가리킬수록 <span class="term" data-definition="내적(dot product): 두 벡터의 같은 위치의 성분끼리 곱하여 모두 더한 값. 두 벡터가 비슷한 방향일수록 커짐.">내적</span>(dot product)이 크다.</p>
         <div class="math-derivation animate-in" id="math-deriv-dot">
           <div class="math-step" data-step="0">
             <div class="math-equation">
@@ -88,7 +88,7 @@
       </aside>
       <div class="notes">
         <h3 class="screen-heading"><span class="corner-tag">개념 체크</span>소프트맥스</h3>
-        <p><span class="term" data-definition="소프트맥스(softmax): 실수 여러 개를 모두 양수이고 합이 1인 값으로 바꾸는 함수이다. 큰 값에 더 큰 비중을 준다.">소프트맥스</span>(softmax)는 점수 여러 개를 합이 1인 비중으로 바꾸는 함수이다. 앞에서 구한 내적 2, 1, $-2$에 적용하면 비중은 약 0.72, 0.27, 0.01이 된다.</p>
+        <p><span class="term" data-definition="소프트맥스(softmax): 실수 여러 개를 모두 양수이고 합이 1인 값으로 바꾸는 함수. 큰 값에 더 큰 비중을 줌.">소프트맥스</span>(softmax)는 점수 여러 개를 합이 1인 비중으로 바꾸는 함수이다. 앞에서 구한 내적 2, 1, $-2$에 적용하면 비중은 약 0.72, 0.27, 0.01이 된다.</p>
         <div class="math-equation">
           $$\mathrm{softmax}(x_i) = \frac{e^{x_i}}{\sum_j e^{x_j}}$$
         </div>
@@ -97,7 +97,7 @@
           <div class="quiz-question-block"
                data-correct="option-b"
                data-explanation-right="② | 소프트맥스의 출력은 모두 양수이고 합이 1이므로 비중으로 해석할 수 있다."
-               data-explanation-wrong="| 정답은 ②이다. 소프트맥스의 출력은 모두 양수이고 합이 1이므로 어텐션에서 비중으로 쓰인다.">
+               data-explanation-wrong="| 정답은 ②이다. 소프트맥스의 출력은 모두 양수이고 합이 1이므로 어텐션에서 비중으로 쓰인다. ①은 소프트맥스가 음수 점수도 양수로 바꾸므로 옳지 않다.">
             <h3 class="quiz-question"><span class="q-num">1</span>다음 중 소프트맥스의 출력에 대한 설명으로 옳은 것은?</h3>
             <div class="quiz-options">
               <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
@@ -133,7 +133,7 @@
       </aside>
       <div class="notes">
         <h3 class="screen-heading">인코더-디코더와 순환 신경망</h3>
-        <p><span class="term" data-definition="인코더(encoder): 입력 문장을 벡터 표현으로 바꾸는 부분이다.">인코더</span>(encoder)는 입력 문장을 벡터로 요약하고, <span class="term" data-definition="디코더(decoder): 인코더가 만든 표현을 바탕으로 출력 문장을 한 토큰씩 만드는 부분이다.">디코더</span>(decoder)는 그 벡터에서 출력 문장을 만든다. 논문 이전에는 <span class="term" data-definition="순환 신경망(recurrent neural network, RNN): 토큰을 순서대로 하나씩 읽으면서 이전 단계의 은닉 상태를 다음 단계로 넘기는 신경망이다.">순환 신경망</span>(recurrent neural network, RNN)이 이 두 부분을 맡는 것이 표준이었다.</p>
+        <p><span class="term" data-definition="인코더(encoder): 입력 문장을 벡터 표현으로 바꾸는 부분.">인코더</span>(encoder)는 입력 문장을 벡터로 요약하고, <span class="term" data-definition="디코더(decoder): 인코더가 만든 표현을 바탕으로 출력 문장을 한 토큰씩 만드는 부분.">디코더</span>(decoder)는 그 벡터에서 출력 문장을 만든다. 논문 이전에는 <span class="term" data-definition="순환 신경망(recurrent neural network, RNN): 토큰을 순서대로 하나씩 읽으면서 이전 단계의 은닉 상태를 다음 단계로 넘기는 신경망.">순환 신경망</span>(recurrent neural network, RNN)이 이 두 부분을 맡는 것이 표준이었다.</p>
         <div class="svg-diagram animate-in">
           <svg viewBox="0 0 800 230" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="순환 신경망은 토큰을 순서대로 하나씩 처리한다">
             <rect class="node-rect" x="30" y="70" width="130" height="70" rx="12"/>
@@ -176,26 +176,26 @@
       </aside>
       <div class="notes">
         <h3 class="screen-heading">어텐션과 쿼리, 키, 값</h3>
-        <p><span class="term" data-definition="어텐션(attention): 출력의 각 위치가 입력의 어느 위치를 얼마나 참고할지 비중을 계산하여 정보를 가져오는 방식이다.">어텐션</span>(attention)은 필요한 정보를 가진 위치에 더 큰 비중을 두고 읽는 방식이다. 도서관에서 책을 찾는 과정에 비유하면 세 요소를 구분할 수 있다.</p>
+        <p><span class="term" data-definition="어텐션(attention): 출력의 각 위치가 입력의 어느 위치를 얼마나 참고할지 비중을 계산하여 정보를 가져오는 방식.">어텐션</span>(attention)은 필요한 정보를 가진 위치에 더 큰 비중을 두고 읽는 방식이다. 도서관에서 책을 찾는 과정에 비유하면 세 요소를 구분할 수 있다.</p>
         <div class="step-cards stagger-children animate-in">
           <div class="step-card">
             <div class="step-num">Q</div>
             <div class="step-body">
-              <strong><span class="term" data-definition="쿼리(query): 지금 찾고 있는 정보를 나타내는 벡터이다. 도서관 검색에서 검색어에 해당한다.">쿼리</span>(query)</strong>
+              <strong><span class="term" data-definition="쿼리(query): 지금 찾고 있는 정보를 나타내는 벡터. 도서관 검색에서 검색어에 해당함.">쿼리</span>(query)</strong>
               <p>지금 찾고 있는 내용이다. 검색어에 해당한다.</p>
             </div>
           </div>
           <div class="step-card">
             <div class="step-num">K</div>
             <div class="step-body">
-              <strong><span class="term" data-definition="키(key): 각 위치가 어떤 정보를 가졌는지 알리는 이름표 벡터이다. 쿼리와 비교되어 비중을 정한다.">키</span>(key)</strong>
+              <strong><span class="term" data-definition="키(key): 각 위치가 어떤 정보를 가졌는지 알리는 이름표 벡터. 쿼리와 비교되어 비중을 정함.">키</span>(key)</strong>
               <p>각 책에 붙은 색인이다. 쿼리와 비교하여 얼마나 관련이 있는지 정한다.</p>
             </div>
           </div>
           <div class="step-card">
             <div class="step-num">V</div>
             <div class="step-body">
-              <strong><span class="term" data-definition="값(value): 각 위치가 실제로 전달하는 정보 벡터이다. 비중에 따라 섞여서 출력이 된다.">값</span>(value)</strong>
+              <strong><span class="term" data-definition="값(value): 각 위치가 실제로 전달하는 정보 벡터. 비중에 따라 섞여서 출력이 됨.">값</span>(value)</strong>
               <p>책의 실제 내용이다. 관련도에 따라 섞어서 가져온다.</p>
             </div>
           </div>
@@ -251,7 +251,7 @@
         </ul>
       </aside>
       <div class="notes">
-        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>연구 계보</h3>
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span><span class="sec-num">2</span>연구 계보</h3>
         <p>트랜스포머는 시퀀스 변환 모델과 어텐션의 흐름 위에 놓인다. 노드를 눌러 설명을 확인하시오.</p>
         <div class="lineage-tree animate-in">
           <div class="lineage-node lineage-root" data-detail="트랜스포머(Transformer): 순환과 합성곱 없이 어텐션만으로 인코더와 디코더를 구성한 모델이다.">
@@ -296,6 +296,7 @@
               <li>소프트맥스는 점수를 합이 1인 비중으로 바꾼다.</li>
               <li>순환 신경망은 순서대로 계산해야 하므로 병렬화가 어렵다.</li>
               <li>어텐션은 쿼리와 키의 비교로 값을 섞어 가져오는 방식이다.</li>
+              <li>비중을 비교하는 문항은 쿼리와 각 키의 내적부터 계산하라.</li>
             </ol>
           </div>
         </div>
@@ -306,7 +307,7 @@
           <div class="quiz-question-block"
                data-correct="option-c"
                data-explanation-right="③ | 순환 신경망은 앞 단계의 은닉 상태가 있어야 다음 단계를 계산하므로 한 문장 안에서 병렬로 처리하기 어렵다."
-               data-explanation-wrong="| 정답은 ③이다. 순환 신경망은 앞 단계의 은닉 상태가 있어야 다음 단계를 계산하므로 병렬화가 어렵다.">
+               data-explanation-wrong="| 정답은 ③이다. 순환 신경망은 앞 단계의 은닉 상태가 있어야 다음 단계를 계산하므로 병렬화가 어렵다. ②는 디코더가 출력 문장을 한 토큰씩 만들므로 옳지 않다.">
             <h3 class="quiz-question"><span class="q-num">1</span>다음 중 순환 신경망 기반 인코더-디코더 모델의 한계로 옳은 것은?</h3>
             <div class="quiz-options">
               <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 입력 문장의 길이를 반드시 고정해야 한다.</span></button>
@@ -321,7 +322,7 @@
           <div class="quiz-question-block"
                data-correct="option-d"
                data-explanation-right="④ | 쿼리 (2, 1)과 키 (1, 0)의 내적은 2이고 키 (0, 1)과의 내적은 1이므로 앞의 키에 더 큰 비중이 주어진다."
-               data-explanation-wrong="| 정답은 ④이다. 쿼리와의 내적은 첫째 키가 2, 둘째 키가 1이므로 소프트맥스 이후에도 첫째 키의 비중이 더 크다.">
+               data-explanation-wrong="| 정답은 ④이다. 쿼리와의 내적은 첫째 키가 2, 둘째 키가 1이므로 소프트맥스 이후에도 첫째 키의 비중이 더 크다. ①은 두 키의 내적이 2와 1로 다르므로 옳지 않다.">
             <h3 class="quiz-question"><span class="q-num">2</span>쿼리 $(2, 1)$에 대해 키 $(1, 0)$과 키 $(0, 1)$의 비중을 비교한 결과로 옳은 것은?<span class="q-points">[3점]</span></h3>
             <div class="quiz-options">
               <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 두 키의 비중이 같다.</span></button>
@@ -355,7 +356,7 @@
           <div class="quiz-question-block"
                data-correct="option-b"
                data-explanation-right="② | 값은 비중에 따라 섞여 출력이 되는 정보이고, 위치의 관련도를 정하는 것은 키와 쿼리의 비교이므로 ②가 옳지 않다."
-               data-explanation-wrong="| 정답은 ②이다. 관련도는 쿼리와 키의 비교로 정해지고, 값은 그 비중에 따라 섞이는 정보이므로 ②가 옳지 않다.">
+               data-explanation-wrong="| 정답은 ②이다. 관련도는 쿼리와 키의 비교로 정해지고, 값은 그 비중에 따라 섞이는 정보이므로 ②가 옳지 않다. ⑤는 쿼리와 키의 점수를 소프트맥스로 정규화해 비중을 만들므로 옳다.">
             <h3 class="quiz-question"><span class="q-num">3</span>쿼리, 키, 값에 대한 설명으로 옳지 <u>않은</u> 것은?</h3>
             <div class="quiz-options">
               <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 쿼리는 지금 찾는 정보를 나타낸다.</span></button>

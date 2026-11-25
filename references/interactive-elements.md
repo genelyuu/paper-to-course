@@ -57,8 +57,8 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
   <div class="module-content">
 
     <div class="module-header">
-      <span class="module-number">01</span>
-      <h2 class="module-title">핵심 아이디어: 어텐션 연산</h2>
+      <span class="module-number">3.2</span>
+      <h2 class="module-title">어텐션</h2>
       <p class="module-subtitle">쿼리, 키, 값으로 토큰 사이의 관련도를 계산하는 과정을 익힌다</p>
     </div>
 
@@ -111,7 +111,7 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 
 **Rules:**
 - `<section class="module" id="module-N">`의 `N`은 0부터 연속한 번호이다. 메뉴의 모듈 수보다 적게 만들어도 번호를 건너뛰지 않고 `module-0`, `module-1`, …로 매기고 파일명도 `00-`, `01-`, …로 매긴다.
-- `.module-number`는 두 자리 숫자(`00`, `01`)이다. CSS가 교과 색 64px 사각 블록에 흰 숫자로 표시한다(옅은 장식이 아니다). `.module-header` 아래에는 2px 교과 색 선이 그려진다.
+- `.module-number`는 **논문의 절 번호**(`3.2`, `6`, 여러 절을 묶으면 `1–2`, 논문 밖 선수 학습은 `0`)이다. `.module-title`은 그 절 제목의 한국어 번역이다. CSS가 교과 색 64px 사각 블록에 흰 숫자로 표시한다(옅은 장식이 아니다). `.module-header` 아래에는 2px 교과 색 선이 그려진다.
 - 모듈 제목은 `<h2 class="module-title">`, 화면 제목은 `<h3 class="screen-heading">`이다. 화면 안의 더 작은 제목은 `<h4>`를 쓴다.
 - 모듈 하나의 화면(`.screen.cornell`)은 3~6개이며 각각 한 페이지이다. 코넬 형식이 아닌 `.screen`은 쓰지 않는다(`check-pages.py`가 보고한다).
 - 한 페이지는 데스크톱 한 화면(1440×900)에 스크롤 없이 들어가야 한다. 넘치면 내용을 줄이지 말고 페이지를 나눈다.
@@ -141,7 +141,7 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 **Rules:**
 - `data-target`은 `#` 없이 id만 쓴다(`module-1`). 사이드바의 `href`는 `#module-1`처럼 `#`을 붙인다.
 - `data-tooltip`에는 모듈 제목을 쓴다(CSS가 `attr(data-tooltip)`로 표시한다).
-- `sidebar-item-num`은 모듈 번호와 같은 두 자리, `sidebar-item-label`은 모듈 제목이다.
+- `sidebar-item-num`은 모듈 번호와 같은 논문 절 번호, `sidebar-item-label`은 모듈 제목이다. 내비게이션 점의 `data-tooltip`은 `3.2 어텐션`처럼 번호와 제목을 함께 쓴다.
 - 첫 번째 항목(`module-0`)에만 `active`를 미리 붙이지 않는다. 활성 상태는 스크롤에 따라 `main.js`가 붙인다.
 
 ---
@@ -204,6 +204,7 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 
 ### 단원 도입과 표지 요소
 
+- `.sec-num`: 화면 제목 앞의 논문 절 번호(`<span class="sec-num">3.2.1</span>`). 교과 색 굵은 숫자로 표시되고 네모 표지를 대신한다. `corner-tag`와 함께 쓸 수 있다.
 - `.module-number`: 64px 교과 색 블록에 흰 숫자. `.module-header`는 2px 교과 색 선으로 닫힌다.
 - `.course-cover`: 아래에 8px 교과 색 띠가 붙는다.
 
