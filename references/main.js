@@ -28,6 +28,65 @@
   function $(sel, ctx) { return (ctx || document).querySelector(sel); }
   function $$(sel, ctx) { return Array.from((ctx || document).querySelectorAll(sel)); }
 
+  /* ── I18N (UI strings; language from <html lang>, default ko) ── */
+  const I18N = {
+    // ko: EBS 교재 문체 — 표지(정답/오답) + 한다체 해설, 지시는 '~하시오' (docs/PLAN.md §1)
+    ko: {
+      selectFirst: '먼저 답을 고르시오.',
+      correct: '정답',
+      incorrect: '오답',
+      dropHere: '여기에 끌어다 놓으시오',
+      step: (n, total) => `${n}단계 / ${total}`,
+      clickNextToStart: "'다음'을 눌러 시작하시오.",
+      found: '정답',
+      notThisLine: '이 줄이 아니다. 다시 찾아보시오.'
+    },
+    // zh: upstream 원본 문구 보존 (lang="zh*" 일 때만 사용)
+    zh: {
+      selectFirst: '请先选择一个答案！',
+      correct: '正确！',
+      incorrect: '不太对。',
+      dropHere: '拖放到这里',
+      step: (n, total) => `步骤 ${n} / ${total}`,
+      clickNextToStart: '点击"下一步"开始',
+      found: '找到了！',
+      notThisLine: '不是这一行，继续找...'
+    },
+    en: {
+      selectFirst: 'Please choose an answer first!',
+      correct: 'Correct!',
+      incorrect: 'Not quite.',
+      dropHere: 'Drop here',
+      step: (n, total) => `Step ${n} / ${total}`,
+      clickNextToStart: 'Click "Next" to start',
+      found: 'Found it!',
+      notThisLine: 'Not this line — keep looking…'
+    }
+  };
+  function i18n(key, ...args) {
+    const lang = (document.documentElement.lang || 'ko').toLowerCase().slice(0, 2);
+    const dict = I18N[lang] || I18N.ko;
+    const v = dict[key] ?? I18N.ko[key];
+    return typeof v === 'function' ? v(...args) : v;
+  }
+
+  /* Feedback HTML: set content, then render any $…$ / $$…$$ math inside it
+     (KaTeX auto-render only runs once at page load, so injected math stays raw otherwise). */
+  function setFeedbackHTML(el, html) {
+    el.innerHTML = html;
+    if (typeof window.renderMathInElement === 'function') {
+      try {
+        window.renderMathInElement(el, {
+          delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false}
+          ],
+          throwOnError: false
+        });
+      } catch (e) { /* leave raw text on failure */ }
+    }
+  }
+
   /* ── KATEX AUTO-RENDER ────────────────────────────────────── */
   function initKaTeX() {
     if (typeof renderMathInElement === 'function') {
@@ -81,7 +140,10 @@
   }
 
   window.addEventListener('scroll', () => requestAnimationFrame(updateProgress), { passive: true });
-  updateProgress();
+  // Deferred: updateProgress() → updateSidebar() reads `sidebarItems`, declared further below.
+  // A synchronous call here threw "Cannot access 'sidebarItems' before initialization" (upstream bug)
+  // and aborted the rest of this file, so quizzes and other widgets never registered.
+  setTimeout(updateProgress, 0);
 
   navDots.forEach(dot => {
     dot.addEventListener('click', () => {
@@ -274,7 +336,7 @@
       const wrongExp  = q.dataset.explanationWrong  || '';
 
       if (!selected) {
-        feedback.textContent = '请先选择一个答案！';
+        feedback.textContent = i18n('selectFirst');
         feedback.className = 'quiz-feedback show warning';
         return;
       }
@@ -282,13 +344,13 @@
 
       if (selected.dataset.value === correct) {
         selected.classList.add('correct');
-        feedback.innerHTML = '<strong>正确！</strong> ' + rightExp;
+        setFeedbackHTML(feedback, '<strong>' + i18n('correct') + '</strong> ' + rightExp);
         feedback.className = 'quiz-feedback show success';
       } else {
         selected.classList.add('incorrect');
         const correctBtn = $(`.quiz-option[data-value="${correct}"]`, q);
         if (correctBtn) correctBtn.classList.add('correct');
-        feedback.innerHTML = '<strong>不太对。</strong> ' + wrongExp;
+        setFeedbackHTML(feedback, '<strong>' + i18n('incorrect') + '</strong> ' + wrongExp);
         feedback.className = 'quiz-feedback show error';
       }
     });
@@ -393,7 +455,7 @@
     const container = $('#' + containerId);
     if (!container) return;
     $$('.dnd-zone-target', container).forEach(t => {
-      t.textContent = '拖放到这里';
+      t.textContent = i18n('dropHere');
       delete t.dataset.placed;
       t.classList.remove('correct-placed', 'incorrect-placed');
     });
@@ -482,7 +544,7 @@
     let step = 0;
 
     function updateProgress() {
-      if (progressEl) progressEl.textContent = '步骤 ' + step + ' / ' + stepsData.length;
+      if (progressEl) progressEl.textContent = i18n('step', step, stepsData.length);
     }
 
     function animatePacket(fromId, toId) {
@@ -525,7 +587,7 @@
     function reset() {
       step = 0;
       $$('.flow-actor', containerEl).forEach(a => a.classList.remove('active'));
-      if (labelEl) labelEl.textContent = '点击"下一步"开始';
+      if (labelEl) labelEl.textContent = i18n('clickNextToStart');
       if (packet)  packet.style.display = 'none';
       updateProgress();
     }
@@ -558,14 +620,14 @@
     if (isCorrect) {
       el.classList.add('correct');
       if (feedback) {
-        feedback.innerHTML  = '<strong>找到了！</strong> ' + (el.dataset.explanation || '');
+        setFeedbackHTML(feedback, '<strong>' + i18n('found') + '</strong> ' + (el.dataset.explanation || ''));
         feedback.className  = (feedback.className.includes('bug') ? 'bug-feedback' : 'assumption-feedback') + ' show success';
       }
       $$('.bug-line, .assumption-option', challenge).forEach(l => l.style.pointerEvents = 'none');
     } else {
       el.classList.add('incorrect');
       if (feedback) {
-        feedback.innerHTML  = (el.dataset.hint || '不是这一行，继续找...');
+        setFeedbackHTML(feedback, (el.dataset.hint || i18n('notThisLine')));
         feedback.className  = (feedback.className.includes('bug') ? 'bug-feedback' : 'assumption-feedback') + ' show error';
       }
       setTimeout(() => {
@@ -590,7 +652,7 @@
     const correct  = container.dataset.correct;
 
     if (!selected) {
-      feedback.textContent = '请先选择一个答案！';
+      feedback.textContent = i18n('selectFirst');
       feedback.className = 'assumption-feedback show warning';
       return;
     }
@@ -598,13 +660,13 @@
 
     if (selected.dataset.value === correct) {
       selected.classList.add('correct');
-      feedback.innerHTML = '<strong>正确！</strong> ' + (container.dataset.explanationRight || '');
+      setFeedbackHTML(feedback, '<strong>' + i18n('correct') + '</strong> ' + (container.dataset.explanationRight || ''));
       feedback.className = 'assumption-feedback show success';
     } else {
       selected.classList.add('incorrect');
       const correctBtn = $(`.assumption-option[data-value="${correct}"]`, container);
       if (correctBtn) correctBtn.classList.add('correct');
-      feedback.innerHTML = '<strong>不太对。</strong> ' + (container.dataset.explanationWrong || '');
+      setFeedbackHTML(feedback, '<strong>' + i18n('incorrect') + '</strong> ' + (container.dataset.explanationWrong || ''));
       feedback.className = 'assumption-feedback show error';
     }
   };
@@ -631,7 +693,7 @@
     steps.forEach((s, i) => { s.style.display = i === 0 ? 'block' : 'none'; });
 
     function updateProgress() {
-      if (progressEl) progressEl.textContent = '步骤 ' + (current + 1) + ' / ' + steps.length;
+      if (progressEl) progressEl.textContent = i18n('step', current + 1, steps.length);
     }
 
     function showStep(idx) {
@@ -738,8 +800,13 @@
         const value = bar.dataset[metricName] || bar.dataset.value || '0';
         const fill  = $('.result-fill', bar);
         const valEl = $('.result-value', bar);
-        if (fill) fill.style.width = value + '%';
-        if (valEl) valEl.textContent = value + '%';
+        // data-unit (default '%') and data-max (default 100) on .result-comparison
+        // let unitless metrics such as BLEU be shown on their own scale.
+        const unit = containerEl.dataset.unit !== undefined ? containerEl.dataset.unit : '%';
+        const max  = parseFloat(containerEl.dataset.max) || 100;
+        const pct  = Math.max(0, Math.min(100, (parseFloat(value) || 0) / max * 100));
+        if (fill) fill.style.width = pct + '%';
+        if (valEl) valEl.textContent = value + unit;
       });
     }
 

@@ -1,0 +1,188 @@
+<section class="module" id="module-2">
+  <div class="module-content">
+
+    <div class="module-header">
+      <span class="module-number">02</span>
+      <h2 class="module-title">실험 결과와 분석</h2>
+      <p class="module-subtitle">번역 성능 비교표를 읽고 수치의 의미와 한계를 따진다</p>
+    </div>
+
+    <!-- 화면 1: 학습 목표와 평가 지표 -->
+    <div class="screen">
+      <div class="callout callout-info animate-in">
+        <div class="callout-icon">&#127919;</div>
+        <div class="callout-content">
+          <strong class="callout-title">학습 목표</strong>
+          <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
+          <ol>
+            <li>영어-독일어와 영어-프랑스어 번역에서 트랜스포머와 기준 모델의 BLEU를 비교할 수 있다.</li>
+            <li>기본 모델과 큰 모델의 결과 차이를 해석할 수 있다.</li>
+            <li>헤드 수를 바꾼 제거 실험의 결과에서 한계를 판단할 수 있다.</li>
+          </ol>
+        </div>
+      </div>
+      <h3 class="screen-heading">평가 지표: BLEU</h3>
+      <p>논문은 WMT 2014 영어-독일어와 영어-프랑스어 번역 <span class="term" data-definition="벤치마크(benchmark): 여러 모델의 성능을 같은 조건에서 비교하려고 정해 둔 표준 데이터와 평가 방법이다.">벤치마크</span>(benchmark)에서 모델을 평가한다. 지표는 <span class="term" data-definition="BLEU(번역 품질 지표): 기계가 만든 번역과 사람이 만든 참조 번역에서 겹치는 단어 묶음의 비율로 번역 품질을 재는 지표이다. 0에서 100 사이의 값이고 클수록 좋다.">BLEU</span>(번역 품질 지표)이다.</p>
+      <p>BLEU는 기계 번역과 사람 번역 사이에 겹치는 단어 묶음이 많을수록 높아진다. 같은 벤치마크에서 비교할 때만 수치의 크고 작음이 의미를 가진다.</p>
+    </div>
+
+    <!-- 화면 2: 결과 비교 -->
+    <div class="screen">
+      <h3 class="screen-heading">탐구 자료: 번역 성능 비교</h3>
+      <p>그림은 두 번역 과제에서 <span class="term" data-definition="기준 모델(baseline): 새 방법의 성능을 판단하려고 비교 대상으로 삼는 기존 모델이다.">기준 모델</span>(baseline)과 트랜스포머의 BLEU를 나타낸 것이다. 위의 버튼으로 과제를 바꾸어 보시오.</p>
+      <div class="result-comparison animate-in" data-unit="" data-max="45">
+        <div class="result-header">
+          <h4>WMT 2014 번역 BLEU</h4>
+          <div class="result-metric-toggle">
+            <button class="result-metric active" data-metric="endefull">영어-독일어</button>
+            <button class="result-metric" data-metric="enfr">영어-프랑스어</button>
+          </div>
+        </div>
+        <div class="result-bars">
+          <div class="result-bar" data-endefull="28.4" data-enfr="41.8">
+            <span class="result-label">트랜스포머 큰 모델 (본 논문)</span>
+            <div class="result-bar-track"><div class="result-fill ours" style="width:0%"></div></div>
+            <span class="result-value"></span>
+          </div>
+          <div class="result-bar" data-endefull="27.3" data-enfr="38.1">
+            <span class="result-label">트랜스포머 기본 모델 (본 논문)</span>
+            <div class="result-bar-track"><div class="result-fill ours" style="width:0%"></div></div>
+            <span class="result-value"></span>
+          </div>
+          <div class="result-bar" data-endefull="25.16" data-enfr="40.46">
+            <span class="result-label">합성곱 번역 모델</span>
+            <div class="result-bar-track"><div class="result-fill baseline" style="width:0%"></div></div>
+            <span class="result-value"></span>
+          </div>
+          <div class="result-bar" data-endefull="24.6" data-enfr="39.92">
+            <span class="result-label">GNMT + 강화 학습</span>
+            <div class="result-bar-track"><div class="result-fill baseline" style="width:0%"></div></div>
+            <span class="result-value"></span>
+          </div>
+        </div>
+      </div>
+      <p>막대 옆 수치의 % 기호는 막대 길이를 표시하는 방식에서 붙은 것이며 BLEU의 단위가 아니다. 기준 모델의 수치는 단일 모델 기준이다.</p>
+    </div>
+
+    <!-- 화면 3: 해석 -->
+    <div class="screen">
+      <h3 class="screen-heading">결과 해석</h3>
+      <div class="icon-rows stagger-children animate-in">
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-actor-2)">DE</div>
+          <div>
+            <strong>영어-독일어: 큰 모델 28.4</strong>
+            <p>초록에 따르면 앙상블을 포함한 기존 최고 결과보다 2 BLEU 넘게 높다. 기본 모델도 27.3으로 단일 기준 모델보다 높다.</p>
+          </div>
+        </div>
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-actor-1)">FR</div>
+          <div>
+            <strong>영어-프랑스어: 큰 모델 41.8</strong>
+            <p>단일 모델 기준 최고 성능이며 훈련에 쓴 시간은 GPU 8개로 3.5일이다.</p>
+          </div>
+        </div>
+        <div class="icon-row">
+          <div class="icon-circle" style="background: var(--color-actor-4)">!?</div>
+          <div>
+            <strong>비판적으로 읽기</strong>
+            <p>영어-프랑스어에서 기본 모델은 38.1로 합성곱 번역 모델 40.46보다 낮다. 우위는 큰 모델에서 나타난다.</p>
+          </div>
+        </div>
+      </div>
+      <div class="callout callout-warning animate-in">
+        <div class="callout-icon">&#9888;</div>
+        <div class="callout-content">
+          <strong class="callout-title">더 알아보기</strong>
+          <p>번역 과제 두 개와 구문 분석 과제 하나로 일반화를 보인 연구이다. 모델 크기와 훈련 비용이 서로 다른 모델끼리 비교하므로 BLEU 차이를 모델 구조만의 효과로 읽으면 안 된다.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 화면 4: 제거 실험 -->
+    <div class="screen">
+      <h3 class="screen-heading">탐구 자료: 헤드 수 제거 실험</h3>
+      <p>논문은 <span class="term" data-definition="제거 실험(ablation study): 모델의 구성 요소를 하나씩 바꾸거나 빼고 성능 변화를 측정하여 그 요소의 기여를 확인하는 실험이다.">제거 실험</span>(ablation study)으로 헤드 수를 바꾸며 개발용 데이터 newstest2013의 영어-독일어 BLEU를 쟀다. 탭을 눌러 결과를 비교하시오.</p>
+      <div class="ablation-demo animate-in">
+        <div class="ablation-tabs">
+          <button class="ablation-tab active" onclick="showLayer('abl-h8', this)">헤드 8개 (기본)</button>
+          <button class="ablation-tab" onclick="showLayer('abl-h1', this)">헤드 1개</button>
+          <button class="ablation-tab" onclick="showLayer('abl-h32', this)">헤드 32개</button>
+        </div>
+        <div class="ablation-viewport">
+          <div class="ablation-layer" id="abl-h8" style="display:block">
+            <div class="ablation-metric">25.8 BLEU</div>
+            <div class="ablation-delta neutral">기준</div>
+            <p class="ablation-description">기본 모델의 설정이다. 헤드 8개이고 각 헤드의 차원은 64이다.</p>
+          </div>
+          <div class="ablation-layer" id="abl-h1" style="display:none">
+            <div class="ablation-metric">24.9 BLEU</div>
+            <div class="ablation-delta">기준 대비 0.9 BLEU 낮음</div>
+            <p class="ablation-description">헤드를 하나로 줄이면 성능이 떨어진다. 여러 관점으로 나누어 보는 구조가 도움이 된다.</p>
+          </div>
+          <div class="ablation-layer" id="abl-h32" style="display:none">
+            <div class="ablation-metric">25.4 BLEU</div>
+            <div class="ablation-delta">기준 대비 0.4 BLEU 낮음</div>
+            <p class="ablation-description">헤드가 너무 많아도 성능이 오히려 조금 낮아진다. 각 헤드의 차원이 너무 작아지기 때문으로 해석된다.</p>
+          </div>
+        </div>
+      </div>
+      <p>이 표는 개발용 데이터의 값이어서 앞의 시험용 데이터 수치와 바로 견줄 수 없다. 수치 차이가 1 BLEU 안팎이므로 난수 시드에 따른 변동 범위를 함께 따져야 한다.</p>
+    </div>
+
+    <!-- 핵심 정리 -->
+    <div class="screen">
+      <div class="callout callout-accent animate-in">
+        <div class="callout-icon">&#128161;</div>
+        <div class="callout-content">
+          <strong class="callout-title">핵심 정리</strong>
+          <ol>
+            <li>큰 트랜스포머는 영어-독일어 28.4 BLEU, 영어-프랑스어 41.8 BLEU를 기록하였다.</li>
+            <li>영어-프랑스어에서 기본 모델은 합성곱 번역 모델보다 낮아 우위가 모델 크기에 일부 의존한다.</li>
+            <li>헤드 수 제거 실험은 헤드 1개가 8개보다 낮고, 32개도 8개보다 조금 낮음을 보인다.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <!-- 확인 문제 -->
+    <div class="screen">
+      <h3 class="screen-heading">확인 문제</h3>
+      <div class="quiz-container animate-in" id="quiz-m2">
+        <div class="quiz-question-block"
+             data-correct="option-b"
+             data-explanation-right="② | 표에서 영어-프랑스어 기본 모델은 38.1이고 합성곱 번역 모델은 40.46이므로 기본 모델이 더 낮다."
+             data-explanation-wrong="| 정답은 ②이다. 영어-프랑스어에서 기본 모델은 38.1로 합성곱 번역 모델의 40.46보다 낮으므로 ②가 옳다.">
+          <h3 class="quiz-question">1. 표는 영어-프랑스어 번역의 BLEU 점수이다. 이에 대한 해석으로 옳은 것은?<br>(트랜스포머 기본 모델 38.1, 큰 모델 41.8, 합성곱 번역 모델 40.46)</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 기본 모델이 합성곱 번역 모델보다 높다.</span></button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 기본 모델은 합성곱 번역 모델보다 낮고 큰 모델은 높다.</span></button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 큰 모델도 합성곱 번역 모델보다 낮다.</span></button>
+            <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 두 트랜스포머 모델의 BLEU가 같다.</span></button>
+            <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 이 표만으로는 어느 것도 비교할 수 없다.</span></button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <div class="quiz-question-block"
+             data-correct="option-e"
+             data-explanation-right="⑤ | 헤드 수 실험은 개발용 데이터 한 가지 설정에서 쟀으므로 모든 과제에서 8개가 최선이라는 결론은 뒷받침되지 않는다."
+             data-explanation-wrong="| 정답은 ⑤이다. 헤드 수 실험은 개발용 데이터의 영어-독일어에서만 쟀으므로 모든 과제에서 8개가 최선이라는 결론은 나오지 않는다.">
+          <h3 class="quiz-question">2. 헤드 수 제거 실험(헤드 1개 24.9, 8개 25.8, 32개 25.4)의 결론으로 옳지 <u>않은</u> 것은?</h3>
+          <div class="quiz-options">
+            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 헤드 1개는 8개보다 BLEU가 낮다.</span></button>
+            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 헤드를 32개로 늘려도 8개보다 높아지지 않았다.</span></button>
+            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 헤드 수가 성능에 영향을 줄 수 있음을 시사한다.</span></button>
+            <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 이 수치는 개발용 데이터에서 잰 값이다.</span></button>
+            <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 모든 과제에서 헤드 8개가 최선임이 입증되었다.</span></button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-m2')">정답 확인</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m2')">다시 풀기</button>
+      </div>
+    </div>
+
+  </div>
+</section>

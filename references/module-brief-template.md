@@ -1,52 +1,88 @@
-# Module Brief Template
+# 모듈 브리프 템플릿
 
-> **When to read this:** During Phase 3.5 for complex papers using the parallel path. Fill in one brief per module, save to `course-name/briefs/0N-slug.md`.
+> **읽는 시점:** 병렬 경로로 복잡한 논문을 다루는 3.5단계. 모듈마다 브리프를 하나씩 채워 `course-name/briefs/0N-slug.md`로 저장한다.
+> 브리프 본문은 한국어로 쓴다. 학습 목표와 코스 문구 예시는 EBS 교재 문체(한다체)로 쓴다. 상세 기준은 `references/korean-style-guide.md`, 용어는 `references/glossary-ko.md`를 따른다.
 
 ---
 
-## Module N: [Title]
+## 모듈 N: [제목]
 
-### Teaching Arc
-- **Intuition:** [A plain-language sentence that captures the core idea before any formalism]
-- **Opening hook:** [A question or scenario that makes the learner care about this module]
-- **Key insight:** [The one thing the learner should walk away understanding]
-- **Connection to the paper:** [How this module serves the paper's narrative]
+### 학습 목표
+2~3개를 `~할 수 있다.` 형식으로 쓴다. 행위 동사(설명하다, 비교하다, 구하다, 판단하다)를 쓰고 "이해한다", "안다"는 피한다.
+- [예: 손실 함수의 값이 커지는 조건을 설명할 수 있다.]
+- [예: 두 방법의 훈련 곡선을 비교할 수 있다.]
 
-### Pre-Extracted Content
+### 서사 구조
+- **직관:** [형식 표현에 앞서 핵심 아이디어를 담은 일상어 한 문장]
+- **도입 질문:** [학습자가 이 모듈에 관심을 갖게 하는 질문이나 상황]
+- **핵심 통찰:** [학습자가 반드시 가져가야 할 한 가지]
+- **논문과의 연결:** [이 모듈이 논문의 서사에서 맡는 역할]
 
-#### Key Equations
-[Copy the exact LaTeX from the paper, with equation numbers]
+### EBS 코너 배치
+모듈의 흐름은 `학습 목표 → 개념 설명 → 개념 체크 → 탐구 자료 → 핵심 정리 → 확인 문제`이다. 각 코너에 들어갈 내용을 정한다.
+- **개념 체크:** [개념 설명 직후의 짧은 점검 문항 또는 빈칸. 예: `학습 목표 1`과 연결된 한 문항]
+- **탐구 자료:** [제시할 그림, 표, 실험 결과, 연구 대화와 묻고자 하는 것]
+- **핵심 정리:** [모듈 끝에 정리할 핵심 통찰 2~3개]
+- **보충 설명 / 더 알아보기:** [필요한 경우에만, 둘을 합쳐 모듈당 최대 2개. 부가 사실이나 논문 밖 확장]
+- **확인 문제:** [3~5문항, 그중 하나 이상은 부정형(`옳지 않은 것은?`) 또는 보기형. 발문은 `다음 중 ~으로 옳은 것은?` 형식, 선택지는 ①②③④]
 
-#### Key Figures/Tables
-[Describe what figures/tables should be referenced or recreated as interactive elements]
+### 이 모듈에서 쓰는 용어
+코스 용어표에서 이 모듈에 쓰이는 항목만 발췌한다. 번역어를 새로 만들지 않고 용어표를 따른다. 새 용어가 필요하면 용어표에 먼저 추가한다.
 
-#### Key Quotes
-[Short direct quotes from the paper, with section references]
+| English | 한국어 표기 | 첫 등장 표기 | 처음 나오는 모듈 | 비고 |
+|---|---|---|---|---|
+| Policy Gradient | 정책 경사 | 정책 경사(Policy Gradient) | 모듈 3 | [툴팁 정의(한다체): 보상이 커지는 방향으로 정책 파라미터를 직접 갱신하는 최적화 방법이다.] |
 
-### Interactive Elements
+(열은 `briefs/terms.md`와 같은 5개이다. 약어는 `한글 풀이(English Full Name, ACRONYM)` 형식으로 적는다.)
 
-Check which elements this module needs:
-- [ ] **Math derivation walkthrough** — which equation(s), number of steps
-- [ ] **Pseudocode walkthrough** — which algorithm
-- [ ] **Result comparison** — which table/figure to recreate interactively
-- [ ] **Research dialogue** — actors: [list], topic: [what they discuss]
-- [ ] **Quiz** — [number] questions, style: [prediction / critical-reading / design-decision / tracing]
-- [ ] **Drag-and-drop** — items: [list], targets: [list]
-- [ ] **SVG diagram** — what to illustrate
-- [ ] **Other** — [lineage tree, ablation toggle, concept map, etc.]
+### 사전 추출 내용
 
-### Knowledge Expansion Notes
+#### 핵심 수식
+[논문의 LaTeX를 수식 번호와 함께 그대로 옮긴다.]
 
-What background concepts does this module assume? What related papers should be cited?
+#### 핵심 그림/표
+[참조하거나 인터랙티브 요소로 재현할 그림과 표를 설명한다.]
 
-### Reference Files to Read
-List only the sections the writing agent needs.
-- `references/interactive-elements.md` → [section names]
-- `references/design-system.md` → [only if needed]
-- `references/content-philosophy.md` → [always include]
-- `references/gotchas.md` → [always include]
+#### 핵심 인용문
+[논문에서 가져온 짧은 직접 인용과 절 번호. 번역하여 인용하고 따옴표와 출처를 표기한다.]
 
-### Connections
-- **Previous module:** [Title — what it covered]
-- **Next module:** [Title — what it will cover]
-- **Tone/style notes:** [accent color, naming conventions, etc.]
+### 인터랙티브 요소
+
+이 모듈에 필요한 요소를 체크한다.
+- [ ] **수식 유도 풀이** — 대상 수식, 단계 수
+- [ ] **의사코드 풀이** — 대상 알고리즘
+- [ ] **결과 비교** — 인터랙티브로 재현할 표/그림
+- [ ] **연구 대화** — 등장인물: [목록], 주제: [논의 내용]
+- [ ] **퀴즈** — [문항 수]개, 유형: [예측 / 비판적 읽기 / 설계 결정 / 추적]
+- [ ] **끌어놓기** — 항목: [목록], 대상: [목록]
+- [ ] **SVG 다이어그램** — 그릴 내용
+- [ ] **기타** — [계보 트리, 절제 연구 토글, 개념 지도 등]
+
+### 지식 확장 메모
+
+이 모듈이 전제하는 배경 개념은 무엇인가? 어떤 관련 논문을 인용해야 하는가?
+
+### 읽을 참조 파일
+작성 에이전트에게 필요한 절만 적는다.
+- `references/interactive-elements.md` → [절 이름]
+- `references/design-system.md` → [필요한 경우에만]
+- `references/content-philosophy.md` → [항상 포함]
+- `references/gotchas.md` → [항상 포함]
+- `references/korean-style-guide.md`, `references/glossary-ko.md` → [항상 포함]
+
+### 연결
+- **이전 모듈:** [제목 — 다룬 내용]
+- **다음 모듈:** [제목 — 다룰 내용]
+- **어조·스타일 메모:** [강조색, 명명 규칙 등]
+
+### 문체 확인 항목
+작성을 마친 뒤 다음을 확인한다.
+- [ ] 본문, 학습 목표, 해설이 한다체이다. `~합니다`, `~해요`, `여러분`, 느낌표가 없다.
+- [ ] 학습 목표가 `~할 수 있다.`로 끝난다.
+- [ ] 발문이 `다음 중 ~은?` 형식이고 선택지에 ①②③④가 붙어 있다.
+- [ ] 해설이 `~이므로 ~이다.` 형식이고 칭찬이 없다.
+- [ ] 용어가 코스 용어표와 일치하고, 첫 등장 시 툴팁이 `한글 용어(English Term): 정의이다.` 형식이다.
+- [ ] 번역투(`~에 의해`, `~를 가지고 있다`, `~되어진다`)가 없다.
+- [ ] 약어와 수식 뒤 조사가 읽는 소리에 맞는다.
+- [ ] 괄호가 반각이고 한자나 중국어가 없다.
+- [ ] `python3 references/lint-ko.py <course-dir>`를 통과한다.

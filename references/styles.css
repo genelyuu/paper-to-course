@@ -6,7 +6,8 @@
    ============================================================= */
 
 /* ── GOOGLE FONTS (loaded via _base.html <head>) ───────────────
-   Bricolage Grotesque · DM Sans · JetBrains Mono
+   Bricolage Grotesque · JetBrains Mono (Google Fonts)
+   Pretendard Variable (jsDelivr) — Hangul + Latin body
    ──────────────────────────────────────────────────────────── */
 
 /* ── DESIGN TOKENS ─────────────────────────────────────────── */
@@ -59,9 +60,10 @@
   --color-result-neutral: #6B6560;
 
   /* FONTS */
-  --font-display: 'Bricolage Grotesque', Georgia, serif;
-  --font-body:    'DM Sans', -apple-system, sans-serif;
-  --font-mono:    'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  /* Latin glyphs come from the first family; Hangul falls through to Pretendard */
+  --font-display: 'Bricolage Grotesque', 'Pretendard Variable', Pretendard, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', Georgia, sans-serif;
+  --font-body:    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+  --font-mono:    'JetBrains Mono', 'D2Coding', 'Nanum Gothic Coding', 'Pretendard Variable', Pretendard, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Fira Code', Consolas, monospace;
 
   /* TYPE SCALE */
   --text-xs:   0.75rem;
@@ -76,10 +78,15 @@
   --text-6xl:  3.75rem;
 
   /* LINE HEIGHTS */
-  --leading-tight:  1.15;
-  --leading-snug:   1.3;
-  --leading-normal: 1.6;
-  --leading-loose:  1.8;
+  --leading-tight:  1.35;
+  --leading-snug:   1.45;
+  --leading-normal: 1.75;
+  --leading-loose:  1.9;
+
+  /* label tracking (uppercase Latin labels); overridden for Hangul in KOREAN TYPOGRAPHY */
+  --tracking-label:      0.1em;
+  --tracking-label-wide: 0.12em;
+  --tracking-label-sm:   0.05em;
 
   /* SPACING */
   --space-1:  0.25rem;
@@ -899,7 +906,7 @@ p:last-child { margin-bottom: 0; }
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: var(--tracking-label);
   opacity: 0.5;
 }
 .translation-english .translation-label {
@@ -1034,7 +1041,7 @@ p:last-child { margin-bottom: 0; }
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: var(--tracking-label);
   color: var(--color-info);
   margin-bottom: var(--space-2);
 }
@@ -1146,7 +1153,7 @@ p:last-child { margin-bottom: 0; }
   margin-bottom: var(--space-1);
   font-family: var(--font-mono);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--tracking-label-sm);
 }
 
 .chat-bubble p {
@@ -1301,7 +1308,7 @@ p:last-child { margin-bottom: 0; }
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: var(--tracking-label);
   color: var(--color-text-muted);
   margin-bottom: var(--space-4);
 }
@@ -1535,6 +1542,8 @@ p:last-child { margin-bottom: 0; }
   font-family: var(--font-body);
   line-height: var(--leading-normal);
   width: max(200px, min(320px, 80vw));
+  word-break: keep-all;
+  overflow-wrap: break-word;
   box-shadow: var(--shadow-lg);
   pointer-events: none;
   opacity: 0;
@@ -1708,7 +1717,7 @@ p:last-child { margin-bottom: 0; }
   font-family: var(--font-mono);
   font-size: var(--text-xs);
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: var(--tracking-label-wide);
   color: var(--color-accent);
   background: var(--color-accent-light);
   padding: var(--space-1) var(--space-4);
@@ -2005,4 +2014,114 @@ p:last-child { margin-bottom: 0; }
   20%  { opacity: 1; }
   80%  { opacity: 1; }
   to   { left: var(--packet-to-x);   top: var(--packet-to-y);   opacity: 0; }
+}
+
+
+/* ── KOREAN TYPOGRAPHY ──────────────────────────────────────────
+   Hangul-specific rules (see docs/logs/A3.md, design-system.md).
+   Kept last so they override the generic rules above.
+   ──────────────────────────────────────────────────────────── */
+
+/* Line breaking: break only at spaces (eojeol), never mid-word.
+   overflow-wrap: break-word (not "anywhere") so flex/grid min-content
+   sizes are NOT shrunk; long URLs/English tokens still wrap. */
+:lang(ko) body,
+body:lang(ko),
+html:lang(ko) {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  line-break: strict;
+  font-synthesis: none;            /* never fake bold/italic Hangul */
+  text-spacing-trim: trim-start;   /* tidy fullwidth punctuation where supported */
+}
+/* Fallback for any <html lang> value: course default is Korean */
+body {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  font-synthesis: none;
+}
+
+/* Hangul headings: slightly tighter tracking suits Pretendard; more leading */
+:lang(ko) h1, :lang(ko) h2, :lang(ko) h3, :lang(ko) h4,
+:lang(ko) .module-title, :lang(ko) .screen-heading,
+:lang(ko) .screen-header h3 {
+  letter-spacing: -0.02em;
+  word-break: keep-all;
+}
+:lang(ko) .module-subtitle { letter-spacing: -0.01em; }
+
+/* Body copy: Hangul is full-height, so give it more leading */
+:lang(ko) body { line-height: 1.75; letter-spacing: -0.005em; }
+
+/* Uppercase labels: wide tracking looks wrong on Hangul */
+:lang(ko) {
+  --tracking-label:      0.02em;
+  --tracking-label-wide: 0.03em;
+  --tracking-label-sm:   0.01em;
+}
+
+/* No italic Hangul: swap for color + weight emphasis */
+:lang(ko) .lineage-edge-label { font-style: normal; font-weight: 500; }
+:lang(ko) em, :lang(ko) i, em:lang(ko) {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--color-accent);
+}
+/* Latin/math keep real italics */
+:lang(ko) .katex em, :lang(ko) .katex i { font-style: italic; font-weight: inherit; color: inherit; }
+/* 드러냄표 (traditional Korean emphasis dots), opt-in utility */
+.ko-emphasis {
+  font-style: normal;
+  text-emphasis: dot;
+  text-emphasis-position: over right;
+  -webkit-text-emphasis: dot;
+}
+
+/* KaTeX inside Korean text: restore normal breaking, add breathing room */
+.katex { word-break: normal; overflow-wrap: normal; letter-spacing: normal; font-synthesis: weight style; }
+p .katex, li .katex, td .katex { margin: 0 0.12em; }
+.katex-display { margin: var(--space-4) 0; }
+
+/* Code: keep wrapping long tokens; Hangul in comments/strings stays whole-word */
+pre, code, pre code {
+  word-break: normal;
+  overflow-wrap: anywhere;
+  font-synthesis: none;
+}
+
+/* Tooltips: whole-word wrapping, comfortable width */
+.nav-dot::after { word-break: keep-all; }
+.term-tooltip { max-width: 320px; word-break: keep-all; overflow-wrap: break-word; }
+
+/* <보기> box (EBS 보기형 문항): ㄱ/ㄴ/ㄷ statements under a quiz question */
+.bogi {
+  position: relative;
+  margin: var(--space-4) 0 var(--space-3);
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  border: 1px solid var(--color-text-secondary);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  word-break: keep-all;
+}
+.bogi::before {
+  content: "<보기>";
+  position: absolute;
+  top: -0.8em;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0 var(--space-2);
+  background: var(--color-surface);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text);
+}
+.bogi p { margin: var(--space-1) 0; padding-left: 1.6em; text-indent: -1.6em; }
+
+/* Hangul in monospace labels: JetBrains Mono has no Hangul and its 0.6em space
+   makes Korean words look double-spaced ("모듈  3개"). Labels that carry Korean text
+   switch to the body font; numeric/progress labels (.result-value, .line-num …) stay mono. */
+:lang(ko) :is(.result-metric, .result-label, .ablation-tab, .ablation-metric,
+  .translation-label, .scenario-label, .chat-sender, .flow-actor span,
+  .arch-zone-label, .course-cover-badge, .course-cover-meta-item) {
+  font-family: var(--font-body);
 }

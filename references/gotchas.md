@@ -1,87 +1,186 @@
-# Gotchas — Common Failure Points
+# 주의 사항 — 자주 실패하는 지점
 
-> **When to read this:** During Phase 4 (writing module HTML) and Phase 5 (review). Check every one of these before considering a course complete.
+> **읽는 시점:** 4단계(모듈 HTML 작성)와 5단계(검토). 코스를 완성했다고 판단하기 전에 모든 항목을 확인한다.
+> 한국어 항목의 규칙 ID(KO0xx, KO1xx)는 `references/lint-ko.py`의 검사 규칙이다. 문체·표기의 상세 기준은 `references/korean-style-guide.md`, 용어는 `references/glossary-ko.md`를 따른다.
+
+각 항목은 증상 / 원인 / 해결 순으로 정리한다.
 
 ---
 
-### Tooltip Clipping
+# 1부. 구조와 콘텐츠
 
-Translation blocks and math blocks use `overflow: hidden`. If tooltips use `position: absolute` inside the term element, they get clipped. **Fix:** Tooltips must use `position: fixed` and be appended to `document.body`. Already handled by `main.js`.
+### 툴팁 잘림
+- **증상:** 번역 블록이나 수식 블록 안에서 툴팁이 일부만 보이거나 보이지 않는다.
+- **원인:** 번역 블록과 수식 블록은 `overflow: hidden`이다. 툴팁을 용어 요소 안에서 `position: absolute`로 두면 잘린다.
+- **해결:** 툴팁은 `position: fixed`로 하고 `document.body`에 붙인다. `main.js`가 이미 처리한다.
 
-### Not Enough Tooltips
+### 툴팁 부족
+- **증상:** 낯선 용어와 기호가 설명 없이 나온다. 가장 흔한 실패이며, 특히 수학 기호가 자주 빠진다.
+- **원인:** 학습자가 이미 안다고 가정한다.
+- **해결:** 비전문가 친구와의 일상 대화에 나오지 않을 용어는 모두 툴팁을 단다. 많을수록 낫다. 형식은 `정책 경사(Policy Gradient): ~ 방법이다.` (KO107)
 
-The #1 failure is under-tooltipping. Math symbols are the most commonly missed. If a term wouldn't appear in everyday conversation with a non-technical friend, tooltip it. Err heavily on the side of too many.
+### 직관 없는 수식
+- **증상:** 수식이 일상어 설명 없이 제시된다.
+- **원인:** 수식을 곧바로 보여 주려 한다.
+- **해결:** 모든 수식에 다음 세 가지를 갖춘다. (1) 앞에서 의미를 풀이하는 직관 문장, (2) 수식, (3) 뒤에서 그 수식이 왜 중요한지 밝히는 문장.
 
-### Math Without Intuition
+### 맥락 없는 결과
+- **증상:** "정확도 78.3%"만 제시한다.
+- **원인:** 숫자의 의미를 설명하지 않는다.
+- **해결:** 이 값이 좋은 수치인지, 무엇과 비교한 것인지, 상한은 얼마인지 밝힌다. 모든 결과 수치에 비교 기준을 둔다.
 
-Showing an equation without first explaining what it means in plain language. **Every equation must have:**
-1. A preceding intuition sentence (what does this mean?)
-2. The equation itself
-3. A following "what this means" sentence (why does this matter?)
+### 글 벽
+- **증상:** 시각 요소 없이 2~3문장 넘게 글이 이어진다.
+- **원인:** 서술로 모든 내용을 전달하려 한다.
+- **해결:** 화면의 절반 이상을 시각 요소로 채운다. 3개 이상의 항목은 카드로, 순서가 있는 내용은 단계 카드나 흐름도로 바꾼다. 한 문단이 너무 길면 린트가 지적한다. (KO106)
 
-### Results Without Context
+### 선수 개념 건너뛰기
+- **증상:** 모듈 1 이후에 KL 발산, 정책 경사 같은 개념이 설명 없이 나온다.
+- **원인:** 학습자가 안다고 가정한다.
+- **해결:** 모듈 1 이후에 나오는 개념은 모듈 0에서 가르쳤거나 툴팁으로 설명되어야 한다.
 
-Showing "78.3% accuracy" without explaining what that number means. Is that good? Compared to what? What is the ceiling? Every result number needs a comparison anchor.
+### 논문을 무오류로 취급
+- **증상:** 성과만 칭송하고 한계를 다루지 않는다.
+- **원인:** 비판적 읽기 원칙을 적용하지 않는다.
+- **해결:** 한계를 드러낸다. 데이터셋이 하나뿐이라면, 개선 폭이 오차 범위 이내라면 그렇게 밝힌다. 비판적 읽기도 하나의 기술이다.
 
-### Walls of Text
+### 인용 남발
+- **증상:** 관련 논문 15편이 글 덩어리로 나열된다.
+- **원인:** 선별 없이 나열한다.
+- **해결:** 가장 중요한 3~5편만 골라 `.paper-citation` 인용 카드에 한 문장 요약과 함께 제시한다.
 
-Writing more than 2-3 sentences in a row without a visual break. Every screen must be at least 50% visual. Convert any list of 3+ items into cards, any sequence into step cards or flow diagrams.
+### KaTeX 렌더링 실패
+- **증상:** 수식이 렌더링되지 않고 원문 그대로 보인다.
+- **원인:** LaTeX 문법 오류. 흔한 경우는 다음과 같다.
+  - `\begin{align}` 사용: 설정 없이는 KaTeX 자동 렌더링이 지원하지 않는다.
+  - 단일 `$` 구분자가 본문과 충돌: 인라인 수식 앞뒤에 공백이 있어야 한다.
+- **해결:** `$$...$$` 안에서 `aligned`를 사용한다. `\mathbb`는 KaTeX가 기본 지원한다.
 
-### Skipping Prerequisites
+### 코드 같은 의사코드
+- **증상:** 의사코드가 Python이나 C++처럼 보인다.
+- **원인:** 특정 언어 문법을 사용한다.
+- **해결:** 프로그래밍을 모르는 사람도 읽을 수 있는 언어 중립 형태로 쓴다. `입력`, `출력`, `각 항목에 대해`, `만약 ~이면` 형식을 쓴다.
 
-Assuming the learner knows what "KL divergence" or "policy gradient" means. Module 0 (Background & Prerequisites) exists for this reason. If a concept appears in Module 1+, it must have been taught in Module 0 or tooltipped.
+### 스크롤 스냅 mandatory
+- **증상:** 긴 모듈에서 사용자가 화면에 갇힌다.
+- **원인:** `scroll-snap-type: y mandatory` 사용.
+- **해결:** 항상 `proximity`를 쓴다.
 
-### Treating the Paper as Infallible
+### 모듈 품질 저하
+- **증상:** 뒤쪽 모듈일수록 내용이 부실하다.
+- **원인:** 모든 모듈을 한 번에 작성한다.
+- **해결:** 모듈을 하나씩 작성한다. 복잡한 논문은 모듈 브리프를 쓰는 병렬 경로를 사용한다.
 
-The course should surface limitations, not just celebrate results. If the paper only tested on one dataset, say so. If the improvement is within noise margins, say so. Critical reading is a skill.
+### 인터랙티브 요소 누락
+- **증상:** 텍스트와 수식만 있는 모듈이 있다.
+- **원인:** 상호작용 요소를 계획하지 않는다.
+- **해결:** 모든 모듈에 퀴즈, 데이터 흐름 애니메이션, 연구 대화, 수식 유도, 의사코드 풀이, 결과 비교 중 하나 이상을 넣는다.
 
-### Citation Sprawl
+### SVG가 반응형이 아님
+- **증상:** 화면 폭이 달라지면 그림이 잘리거나 어긋난다.
+- **원인:** `viewBox`가 없거나 `width`/`height`가 픽셀로 고정되어 있다.
+- **해결:** 항상 `viewBox="0 0 W H"`와 `width="100%"`를 쓰고 높이는 고정하지 않는다.
 
-Listing 15 related papers in a wall of text. Instead, pick the 3-5 most important related papers and give each a styled citation card (`.paper-citation`) with a one-sentence summary.
+### 표지 누락
+- **증상:** 논문 제목, 저자, 초록, 메타데이터 없이 모듈 1부터 시작한다.
+- **해결:** 모든 코스는 모듈 앞에 `_cover.html` 히어로 영역을 둔다.
 
-### KaTeX Rendering Failures
+### 모듈 0(선수 개념) 누락
+- **증상:** 선수 개념 없이 논문의 문제로 곧장 들어간다.
+- **해결:** 모듈 0은 필수이다. "호기심 많은 실무자"가 논문을 읽기 전에 필요한 기초 지식을 가르친다.
 
-Math blocks that don't render because of LaTeX syntax errors. Common pitfalls:
-- Using `\begin{align}` — not supported by KaTeX auto-render without config. Use `aligned` inside `$$...$$` instead.
-- Using `\mathbb` without ensuring KaTeX supports it (it does by default).
-- Single `$` delimiters conflicting with text — ensure spaces around inline math.
+### 사이드바 동기화 실패
+- **증상:** 스크롤해도 사이드바의 활성 항목이 바뀌지 않거나 클릭 이동이 되지 않는다.
+- **해결:** 사이드바 항목은 모듈과 1:1로 대응해야 하며(nav-dots와 같은 순서), `updateProgress()`에서 `updateSidebar()`를 호출한다.
 
-### Pseudocode That Is Actually Code
+### 표지에 `.module` 클래스 사용
+- **증상:** nav-dot과 사이드바의 대응이 어긋난다.
+- **원인:** 둘 다 `$$('.module')`로 요소를 찾는데 표지가 `.module`을 쓴다.
+- **해결:** 표지는 `.module`이 아니라 `.course-cover`를 쓴다.
 
-Writing pseudocode that looks like Python or C++. Pseudocode should be language-agnostic and readable by someone who does not program. Use `INPUT`, `OUTPUT`, `FOR EACH`, `IF...THEN` style.
+---
 
-### Scroll-Snap Mandatory
+# 2부. 한국어 출력
 
-Using `scroll-snap-type: y mandatory` traps users inside long modules. Always use `proximity`.
+### 출력 언어 불일치
+- **증상:** 코스 안에 한국어와 다른 언어가 섞인다. `<html lang>`이 `ko`가 아니다.
+- **원인:** 원문 논문이나 이전 예시의 언어를 그대로 따른다.
+- **해결:** 출력 언어는 한국어가 기본값이다. 사용자가 다른 언어를 명시적으로 요청한 경우에만 바꾼다. 확정한 뒤에는 모든 내용을 그 언어로 쓰고, 전문 용어만 괄호 안에 영어 원어를 병기한다. (KO001)
 
-### Module Quality Degradation
+### 문체 혼용
+- **증상:** 한다체 본문에 `~합니다`, `~해요`가 섞인다. 본문에 `여러분`, 느낌표, 수사 의문문이 나온다.
+- **원인:** 모듈마다, 또는 하위 에이전트마다 문체 기준이 다르다.
+- **해결:** 본문, 학습 목표, 해설을 한다체(`~이다`, `~한다`)로 통일한다. 학습 목표는 `~할 수 있다.`로 끝맺고 지시문은 `~하시오.`로 쓴다. 연구 대화의 등장인물 대사만 구어체를 허용한다. (KO102, KO109)
 
-Trying to write all modules in one pass causes later modules to be thin. Build one module at a time. For complex papers, use the parallel path with module briefs.
+### 번역투
+- **증상:** `~에 의해 ~되어진다`, `~를 가지고 있다`, `~에 있어서`, 불필요한 `~들`, 무생물 주어 같은 영어식 문장이 나온다.
+- **원인:** 영어 논문의 문장 구조를 그대로 옮긴다.
+- **해결:** 능동 서술로 고친다. `섀튼 교수에 의해 작성되었다` → `섀튼 교수가 썼다`, `~를 가지고 있다` → `~이 있다`, `실험을 통해 확인했다` → `실험으로 확인했다`, `발전되었다` → `발전하였다`. `되어진다` 같은 이중 피동은 쓰지 않는다. `정의된다`, `주어진다` 같은 수학 서술의 피동은 허용한다. 한 문장에는 한 가지 주장만 담는다. (KO101)
 
-### Missing Interactive Elements
+### 용어 불일치
+- **증상:** 같은 개념이 모듈마다 다른 번역어로 나온다. (예: 모듈 1은 `보상`, 모듈 3은 `리워드`)
+- **원인:** 모듈을 서로 독립적으로 작성하면서 용어표를 보지 않는다.
+- **해결:** 3단계에서 코스 용어표를 확정하고 모든 모듈 브리프에 발췌하여 넣는다. 새 번역어가 필요하면 용어표에 먼저 추가한다. 관용 음차가 굳은 용어(트랜스포머, 어텐션)는 관용 표기를 쓴다.
 
-A module with only text and equations, no interactivity. Every module needs at least one of: quiz, data flow animation, research dialogue, math derivation, pseudocode walkthrough, result comparison.
+### 약어 뒤 조사 오류
+- **증상:** `GPT이`, `LoRA을`, `RLHF가`처럼 조사가 읽는 소리와 어긋난다.
+- **원인:** 철자가 아니라 발음에 맞춰야 하는데 받침 유무를 철자로 판단한다.
+- **해결:** 읽는 발음을 기준으로 고른다. `LoRA를`(로라), `GPT가`(지피티), `RLHF가`(알엘에이치에프), `PPO를`(피피오). 판단이 어려우면 `GPT 모델은`처럼 명사를 붙여 피한다. (KO104)
 
-### SVG Diagrams Not Responsive
+### KaTeX 수식 뒤 조사
+- **증상:** `$x$은`, `$\theta$를`처럼 수식 뒤 조사가 어색하다.
+- **원인:** 수식의 읽는 소리를 고려하지 않는다.
+- **해결:** 수식을 읽는 소리 기준으로 조사를 고른다. `$x$는`(엑스는), `$y$는`(와이는), `$\theta$를`(세타를), `$\alpha$가`(알파가). 소리가 불분명한 긴 수식은 `$L$의 값은`처럼 명사를 넣거나 `수식 (3)은`으로 바꾼다. (KO104)
 
-SVG without `viewBox` or with fixed `width`/`height` in pixels. Always use `viewBox="0 0 W H"` with `width="100%"` and no fixed height.
+### 해설의 정답/오답 표지 중복
+- **증상:** 퀴즈 피드백이 `정답 정답. ~이다.`처럼 표지를 두 번 보여 준다.
+- **원인:** `main.js`가 피드백 앞에 `정답`/`오답`을 자동으로 붙이는데, 해설 속성에도 표지를 썼다.
+- **해결:** 해설 속성은 표지 없이 쓴다. 맞힌 경우 `data-explanation-right="② | ~이다."`, 틀린 경우 `data-explanation-wrong="| 정답은 ②이다. ~이다."`. (KO110)
 
-### Language Inconsistency
+### 숫자와 단위 띄어쓰기
+- **증상:** `78.3 %`, `5 배`, `3개의 층`과 `3 개의 층`이 뒤섞인다.
+- **원인:** 단위 표기 규칙이 통일되지 않았다.
+- **해결:** 아라비아 숫자 뒤의 한글 단위 명사(`개`, `배`, `번`, `명`, `분`, `단계`, `가지` 등)는 붙여 쓴다(`3개`, `5배`, `45분`). 한글 맞춤법 제43항은 띄어 쓰는 것을 원칙으로 하되 아라비아 숫자 뒤에서는 붙여 쓰는 것을 허용하며, 이 스킬은 허용 규정으로 통일한다. `%`·`%p`·`°`는 붙인다(`78.3%`, `2.1%p`). 라틴 SI·컴퓨팅 단위 기호는 SI 관행대로 한 칸 띄운다(`3 kg`, `10 ms`, `16 GB`). (KO105)
 
-Mixing languages within a course. Once the output language is determined (default: 简体中文), ALL content should be in that language. Only technical terms keep their English originals in parentheses.
+### 괄호 간격과 전각 문장 부호
+- **증상:** `정책 경사 (Policy Gradient)`처럼 괄호 앞에 공백이 있거나, `（ ）`, `，`, `。`, `：` 같은 전각 부호가 나온다.
+- **원인:** 중국어·일본어 예시나 이전 템플릿의 표기를 따른다.
+- **해결:** 괄호는 반각 `( )`를 쓰고 앞에 공백을 두지 않는다. 쉼표와 마침표는 `,` `.`를 쓴다. (KO003, KO103)
 
-### Missing Cover Page
+### 한자·중국어 잔존
+- **증상:** 한글 문장 속에 한자나 중국어 문장이 남는다. 원문 논문이 중국어이거나 이전 예시가 중국어일 때 특히 많다.
+- **원인:** 하위 에이전트가 중국어 예시를 모방하거나 원문을 번역 없이 인용한다.
+- **해결:** 한자는 한글로 옮긴다. 원문 인용이 불가피하면 번역하여 제시한다. 한자는 의도적 예외 목록에 근거와 함께 올린 경우에만 허용한다. (KO002)
 
-Starting the course directly with Module 1 — no paper title, authors, abstract, or metadata. Every course must have a `_cover.html` hero section before the modules.
+### 한글 SVG 라벨 잘림
+- **증상:** SVG 안의 한글 라벨이 박스 밖으로 넘치거나 잘린다.
+- **원인:** 한글은 글자당 약 1em 폭을 차지하는데 라틴 문자 폭(약 0.55em)으로 계산하여 박스를 만든다.
+- **해결:** 박스 폭을 글자 수 × 1em 이상으로 잡는다. 줄 수에 따라 하나의 규칙을 따른다. 한 줄 라벨은 `<text>`를 쓴다. 두 줄이면 `<tspan x="…" dy="1.3em">`으로 나눌 수 있으나 어절 경계에서만 끊고 어절 중간에서는 끊지 않는다(글자 수로 기계적으로 자르지 않는다). 세 줄 이상이거나 문단 길이의 텍스트는 `<foreignObject>` 안의 HTML 요소에 `word-break: keep-all`을 적용한다. (`design-system.md`와 같은 규칙)
 
-### Missing Module 0 (Prerequisites)
+### `keep-all`로 인한 긴 영문 토큰 넘침
+- **증상:** 모바일에서 긴 영문 토큰이나 URL이 가로 스크롤을 만든다.
+- **원인:** 한글 본문은 `word-break: keep-all`이므로 어절이 줄바꿈되지 않는다.
+- **해결:** `styles.css`의 `overflow-wrap`이 처리하므로 CSS를 따른다. 수동으로 `<br>`을 넣어 해결하지 않는다.
 
-Jumping straight into the paper's problem without teaching prerequisite concepts. Module 0 is mandatory — it should teach the foundational knowledge a "curious practitioner" needs before reading the paper.
+### `<em>` 이탤릭 기대
+- **증상:** 강조 의도로 `<em>`을 썼는데 이탤릭이 아니라 굵은 글씨나 강조색으로 보인다.
+- **원인:** 한글에는 이탤릭체가 없어 가짜 기울임을 쓰지 않도록 스타일을 정하였다. 한글 `em`은 굵게 또는 강조색으로 렌더링된다.
+- **해결:** `<em>`은 기울임을 기대하지 말고 강조 용도로만 쓴다. 영어 논문 제목처럼 기울임이 꼭 필요하면 라틴 문자 구간에만 적용한다.
 
-### Sidebar Not Syncing
+### 퀴즈 피드백에 칭찬·격려
+- **증상:** 해설이 `정답이에요!`, `훌륭해요`, `아쉬워요`처럼 칭찬이나 감탄으로 쓰였다.
+- **해결:** `정답` / `오답` 표지 뒤에 `~이므로 ~이다.` 형식의 한다체 해설만 쓴다. (KO108)
 
-Sidebar active state not updating on scroll, or click navigation not working. The sidebar items must map 1:1 to modules (same order as nav-dots), and `updateSidebar()` must be called from `updateProgress()`.
+---
 
-### Cover Page Using `.module` Class
+## 최종 점검
 
-The cover page must NOT use the `.module` class — it should use `.course-cover`. Using `.module` would break nav-dot and sidebar mapping since they query `$$('.module')`.
+코스를 완성하기 전에 다음을 실행하고 지적된 항목을 모두 고친다.
+
+```
+python3 -I <skill-dir>/references/lint-ko.py <course-dir> --strict
+```
+
+결과는 ERROR 0, WARN 0이어야 한다. 예외는 `korean-style-guide.md` §3.3에 적힌 알려진 린터 한계(KO104 서술격 `이다` 오탐 등)뿐이며, 남긴 경우 사용자에게 보고한다.
+
+규칙 목록: KO001 언어 / KO002 중국어 / KO003 전각 부호 / KO004 `data-steps` JSON / KO101 번역투 / KO102 문체(EBS 한다체) / KO103 괄호 간격 / KO104 조사 / KO105 숫자+단위 / KO106 긴 문단 / KO107 툴팁 형식 / KO108 피드백 칭찬 / KO109 `여러분` / KO110 해설 표지 중복.

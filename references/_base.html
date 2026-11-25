@@ -1,16 +1,18 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="ko">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>COURSE_TITLE</title>
 
-  <!-- Google Fonts: Bricolage Grotesque · DM Sans · JetBrains Mono -->
+  <!-- 폰트: Pretendard Variable(한글+라틴 본문, jsDelivr 고정 버전) · Bricolage Grotesque(라틴 디스플레이) · JetBrains Mono(코드) -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <!-- KaTeX for math rendering -->
+  <!-- KaTeX: 수식 렌더링 -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"
@@ -26,9 +28,9 @@
   <link rel="stylesheet" href="styles.css">
 
   <!--
-    CUSTOMIZE PER COURSE — change only the three accent variables below.
-    Options:
-      vermillion  #D94F30 / #C4432A / #FDEEE9 / #E8836C  (default)
+    강의별 설정 — 아래 네 개의 강조색 변수만 바꿉니다.
+    선택지:
+      vermillion  #D94F30 / #C4432A / #FDEEE9 / #E8836C  (기본값)
       coral       #E06B56 / #C85A47 / #FDECEA / #E89585
       teal        #2A7B9B / #1F6280 / #E4F2F7 / #5A9DB8
       amber       #D4A843 / #BF9530 / #FDF5E0 / #E0C070
@@ -57,7 +59,7 @@
     </div>
   </nav>
 
-  <aside class="sidebar" id="sidebar" aria-label="Course navigation">
+  <aside class="sidebar" id="sidebar" aria-label="강의 목차">
     <div class="sidebar-header">
       <span class="sidebar-title">COURSE_TITLE</span>
     </div>
@@ -66,7 +68,7 @@
     </nav>
   </aside>
 
-  <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle navigation" aria-expanded="false">
+  <button class="sidebar-toggle" id="sidebar-toggle" aria-label="목차 열기/닫기" aria-expanded="false">
     <span class="sidebar-toggle-icon"></span>
   </button>
 

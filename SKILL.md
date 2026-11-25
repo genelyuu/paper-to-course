@@ -1,285 +1,340 @@
 ---
 name: paper-to-course
-description: "将任何学术论文转换为精美的交互式 HTML 教程，帮助读者全面理解论文内容及相关知识体系。Turn any academic paper into a beautiful, interactive HTML tutorial. Use this skill whenever someone wants to create a tutorial, course, or educational walkthrough from a research paper. Trigger when users mention: 'turn this paper into a course,' 'explain this paper interactively,' 'make a tutorial from this paper,' 'teach me this paper,' 'interactive walkthrough of this research,' 'convert this PDF to a tutorial,' '把论文变成教程,' '帮我读懂这篇论文,' '论文转课程,' '做一份论文教程.'"
+description: "학술 논문을 EBS 교재 문체의 한국어 인터랙티브 HTML 강의로 바꾼다. 논문의 기여, 배경 지식, 수식, 실험 결과, 연구 계보를 단계별로 익히게 한다. 사용자가 '이 논문을 강의로 만들어 줘', '논문 쉽게 설명해 줘', '논문을 튜토리얼로', '논문 해설 강의', '이 PDF로 강의 만들어 줘', 'arXiv 논문 강의로'처럼 말하면 사용한다. Turn any academic paper into a beautiful, interactive HTML course written in Korean (EBS textbook style). Trigger when users mention: 'turn this paper into a course,' 'explain this paper interactively,' 'make a tutorial from this paper,' 'teach me this paper,' 'interactive walkthrough of this research,' 'convert this PDF to a tutorial.'"
 ---
 
 # Paper-to-Course
 
-将任何学术论文转换为精美的交互式教程。输出是一个**目录**，包含预构建的 `styles.css`、`main.js`、各模块 HTML 文件和组装后的 `index.html` —— 直接在浏览器中打开即可，唯一外部依赖是 Google Fonts CDN 和 KaTeX CDN。
+학술 논문을 아름다운 인터랙티브 한국어 강의로 바꿉니다. 출력물은 **디렉터리**입니다. 미리 만들어 둔 `styles.css`, `main.js`, 모듈별 HTML, 이를 조립한 `index.html`이 들어 있고, 브라우저로 바로 열면 됩니다. 외부 의존성은 Google Fonts, jsDelivr(Pretendard), KaTeX CDN뿐입니다.
 
-## First-Run Welcome
+## 첫 실행 안내 (First-Run Welcome)
 
-When the skill is first triggered and the user hasn't specified a paper yet:
+스킬이 호출됐는데 사용자가 아직 논문을 지정하지 않았다면 다음과 같이 안내합니다.
 
-> **我可以把任何学术论文变成一份交互式教程，帮助你全面理解论文内容和背后的知识体系。**
+> **어떤 학술 논문이든 인터랙티브 한국어 강의로 만들어 드립니다. 논문의 내용과 그 바탕이 되는 지식까지 차근차근 익힐 수 있습니다.**
 >
-> 只需要告诉我论文来源：
-> - **本地 PDF 文件** —— 例如 "把 ./paper.pdf 转成教程"
-> - **在线论文链接** —— 例如 "用 https://arxiv.org/abs/xxxx.xxxxx 做教程"
-> - **当前目录中的 PDF** —— 如果目录中有论文，直接说 "把这篇论文做成教程"
+> 논문을 어디서 가져올지 알려 주세요.
+> - **로컬 PDF 파일**: 예) "./paper.pdf를 강의로 만들어 줘"
+> - **온라인 논문 링크**: 예) "https://arxiv.org/abs/xxxx.xxxxx 로 강의 만들어 줘"
+> - **현재 폴더의 PDF**: 폴더에 논문이 있다면 "이 논문을 강의로 만들어 줘"라고만 하셔도 됩니다.
 >
-> 我会深入阅读论文，梳理其中的知识脉络，然后生成一份精美的 HTML 教程，包含公式推导、实验对比、研究脉络图和交互式测验。整个教程在浏览器中运行，无需任何配置。
+> 논문을 꼼꼼히 읽고 지식의 흐름을 정리한 뒤, 수식 유도, 실험 결과 비교, 연구 계보도, 확인 문제가 들어간 HTML 강의를 만듭니다. 영어 논문도 한국어 강의로 만들어지며, 브라우저에서 바로 열 수 있습니다.
 
-If the user provides an arXiv URL, construct the PDF URL: `https://arxiv.org/pdf/xxxx.xxxxx`. Use WebFetch or Read to get the content. If they provide a DOI, resolve it via WebFetch.
+arXiv URL을 받으면 PDF 주소 `https://arxiv.org/pdf/xxxx.xxxxx`를 만들어 WebFetch 또는 Read로 내용을 가져옵니다. DOI를 받으면 WebFetch로 해석합니다.
 
-## Language Strategy / 语言策略
+## 언어 전략
 
-**自动检测用户输入语言**（论文语言、用户消息语言），课程内容以该语言输出。
+- **출력은 항상 한국어가 기본입니다.** 논문이 영어든 중국어든 한국어 강의로 만듭니다. 사용자의 메시지가 영어여도 마찬가지입니다.
+- 사용자가 **명시적으로** 다른 언어를 요청할 때만 바꿉니다(예: "영어로 만들어 줘"). 이때는 `<html lang>`과 UI 문구도 그 언어로 맞춥니다.
+- 버튼, 진행 표시, 퀴즈 피드백 같은 UI 문구도 모두 한국어입니다. `main.js`의 i18n 사전이 `<html lang>`을 보고 문구를 고르므로 `_base.html`의 `<html lang="ko">`는 **절대 바꾸지 않습니다**(다른 언어를 요청받은 경우만 예외).
+- 중국어(한자 포함) 문구가 출력물에 남으면 안 됩니다. 원문 인용이 꼭 필요하면 해당 요소에 `lang` 속성을 답니다.
 
-**如果无法检测，默认使用简体中文。**
+## 문체: EBS 교재 문체
 
-术语提示（glossary tooltip）格式：`中文解释（English Term）` —— 同时提供中文解释和英文原文。
+생성되는 강의 본문은 **EBS 교재 문체**로 씁니다. 전체 규칙은 `references/korean-style-guide.md`에 있고, 아래는 꼭 지켜야 할 요약입니다. (이 SKILL.md 자체는 Claude에게 주는 지침이라 합니다체로 썼습니다. EBS 문체는 생성물에만 적용합니다.)
 
-课程中所有 UI 文本（按钮、进度指示器等）跟随课程内容语言。
+| 요소 | 규칙 | 좋은 예 | 나쁜 예 |
+|---|---|---|---|
+| 본문 설명 | 한다체 평서형. `여러분`, 수사 의문문, 감탄은 최소화 | 어텐션은 각 토큰이 다른 토큰을 얼마나 참고할지 계산한다. | 여러분, 어텐션이 뭘까요? 정말 놀랍죠! |
+| 학습 목표 | `~할 수 있다.`로 끝나는 2~3개 항목 | LoRA가 학습 파라미터 수를 줄이는 원리를 설명할 수 있다. | LoRA에 대해 알아봅시다. |
+| 문항 발문 | `다음 중 ~으로 옳은 것은?` / `옳지 않은 것은?` / `<보기>에서 있는 대로 고른 것은?` + 선택지 `①②③④(⑤)` | 다음 중 GRPO에 대한 설명으로 옳은 것은? | GRPO는 어떤 방법일까요? |
+| 해설·피드백 | `정답`/`오답` 표지 + 한다체 해설(`~이므로 ~이다.`). 칭찬 금지 | (`data-explanation-right`) ② \| 기준선을 그룹 평균으로 두므로 가치 함수가 필요 없다. — 표지 `정답`/`오답`은 main.js가 붙이므로 쓰지 않는다 | 훌륭해요! 완벽하게 이해했네요! |
+| UI 지시 | `~하시오` | 먼저 답을 고르시오. | 답을 골라 주세요~ |
+| 연구 대화(채팅) | **예외**: 등장인물 대사는 해요체 구어 허용(인용된 대사이므로) | 학생 A: 그럼 노이즈를 넣어도 정답률이 안 떨어져요? | (본문을 해요체로 쓰는 것은 여전히 금지) |
 
-## Who This Is For
+**코너 이름**은 다음 이름을 그대로 씁니다: `학습 목표`, `개념 체크`, `탐구 자료`, `보충 설명`, `핵심 정리`, `더 알아보기`, 모듈 끝 `확인 문제`.
 
-目标学习者是"好奇的实践者" —— 在工作中遇到学术论文（AI/ML 论文之于工程师、医学论文之于临床医生、金融论文之于分析师），想要深入理解但不想花几小时和晦涩的术语搏斗的人。他们有一定的领域直觉，但缺乏论文子领域的系统训练。
+번역투도 피합니다: `~에 의해`, `~을 가지다`, `~에 있어서`, `되어지다`, `~로부터` 대신 능동문과 자연스러운 조사를 씁니다(예: "모델에 의해 생성된" → "모델이 생성한").
 
-**他们的目标：**
-- 理解论文的**实际贡献**（不只是摘要）
-- 评估结果是否有意义
-- 将论文与已知的工作联系起来
-- 能够与领域专家讨论这篇论文
-- 建立完整的知识体系，理解论文所涉及的整个学科脉络
+## 용어 표기
 
-## Why This Approach Works
+- **첫 등장**: `한글 용어(English Term)`. 반각(ASCII) 괄호를 쓰고 괄호 앞에 공백을 두지 않으며, 괄호 안 영어는 Title Case로 씁니다. 예: `정책 경사(Policy Gradient)`. 전각 괄호 `（）`는 금지입니다.
+- **이후**: 한글만 씁니다.
+- **약어**는 첫 등장 시 `한글 풀이(English Full Name, ACRONYM)`로 쓰고 이후에는 약어만 씁니다. 예: `저랭크 적응(Low-Rank Adaptation, LoRA)` → `LoRA`. 약어가 한국어 실무에서 이름처럼 굳었으면(GRPO, BLEU, GPU) `ACRONYM(English Full Name, 한글 풀이)`로 써도 됩니다(예: `GRPO(Group Relative Policy Optimization, 그룹 상대 정책 최적화)`). 한 코스에서 같은 약어는 한 형식만 씁니다.
+- **숫자와 단위**: 한글 단위 명사와 `%`, `%p`, `°`는 숫자에 붙이고(`3개`, `45분`, `78.3%`), 라틴 SI·컴퓨팅 단위 기호는 한 칸 띄웁니다(`3 kg`, `10 ms`, `16 GB`).
+- **관용 음차**가 굳은 용어는 관용 표기를 우선합니다(트랜스포머, 어텐션, 임베딩).
+- **조사**는 읽는 발음에 맞춥니다: `LoRA를`, `GPT-3은`(삼은), `GPT가`, `$x$는`(엑스는).
+- **번역어가 갈리는 용어**는 첫 등장 시 병기하고 이후 하나로 통일합니다. 예: likelihood → `가능도(우도, Likelihood)`, 이후 `가능도`.
+- **용어 출처**: `references/glossary-ko.md`를 기준으로 삼고, 거기 없는 용어는 학술 관행과 검색으로 정합니다.
+- **강의별 용어표**: Phase 3에서 `course-name/briefs/terms.md`를 만들어 이 강의에서 쓰는 모든 용어의 번역어를 고정합니다. 병렬로 작업하는 모듈 에이전트가 같은 번역어를 쓰게 하기 위해서입니다.
 
-传统论文阅读：从头到尾逐行阅读 → 被数学公式卡住 → 放弃或只记住摘要。
+## 대상 학습자
 
-本方法：**先建立直觉 → 理解问题背景 → 掌握前置知识 → 再看方法和公式 → 用实验验证理解 → 批判性思考**。
+목표 학습자는 "호기심 많은 실무자"입니다. 일하다가 학술 논문을 만나는 사람들입니다(엔지니어에게 AI/ML 논문, 임상의에게 의학 논문, 애널리스트에게 금융 논문). 깊이 이해하고 싶지만 어려운 용어와 몇 시간씩 씨름하고 싶지는 않습니다. 분야 감각은 있지만 논문의 세부 분야를 체계적으로 배우지는 않았습니다.
 
-每个模块先回答"为什么我应该关心这个？"，再讲"这是怎么工作的？"。先用日常语言解释概念，再引入数学形式化。
+**학습자가 원하는 것:**
+- 초록 너머 논문의 **실제 기여**를 이해한다
+- 결과가 의미 있는지 판단한다
+- 논문을 이미 아는 연구와 연결한다
+- 분야 전문가와 이 논문을 두고 이야기할 수 있다
+- 논문이 딛고 있는 분야 전체의 지식 체계를 세운다
+
+## 이 방식이 통하는 이유
+
+기존 논문 읽기: 처음부터 한 줄씩 읽는다 → 수식에서 막힌다 → 포기하거나 초록만 기억한다.
+
+이 방식: **직관을 먼저 세우고 → 문제 배경을 이해하고 → 선수 지식을 익히고 → 방법과 수식을 보고 → 실험으로 이해를 확인하고 → 비판적으로 생각한다.**
+
+모듈마다 "왜 이것이 중요한가?"에 먼저 답하고 "어떻게 작동하는가?"를 다룹니다. 개념은 일상 언어로 먼저 설명하고 수학적 형식화는 그다음에 들어갑니다.
 
 ---
 
-## The Process
+## 작업 절차
 
-### Phase 1: Paper Acquisition & Deep Reading
+### Phase 1: 논문 확보와 정독
 
-Before writing any course HTML, deeply understand the paper. Read it systematically — title, abstract, introduction, related work, method, experiments, results, discussion, conclusion, references.
+강의 HTML을 쓰기 전에 논문을 깊이 이해합니다. 제목, 초록, 서론, 관련 연구, 방법, 실험, 결과, 논의, 결론, 참고문헌 순으로 체계적으로 읽습니다.
 
-**What to extract:**
-- Research question and hypothesis
-- Key contributions (numbered list)
-- Mathematical formulations (equation by equation, with LaTeX)
-- Algorithm pseudocode
-- Datasets used and why they were chosen
-- Baselines compared against
-- Evaluation metrics
-- Key results (exact numbers)
-- Limitations acknowledged by the authors
-- Future work suggested
-- The paper's "narrative arc" — what story is it telling?
+**추출할 것:**
+- 연구 질문과 가설
+- 핵심 기여(번호 목록)
+- 수식(식 하나하나, LaTeX로)
+- 알고리즘 의사코드
+- 사용한 데이터셋과 선택 이유
+- 비교한 기준선(baseline)
+- 평가 지표
+- 핵심 결과(정확한 수치)
+- 저자가 인정한 한계
+- 제안된 후속 연구
+- 논문의 "서사 구조": 어떤 이야기를 하고 있는가?
 
-**Read the paper multiple times:**
-1. First pass: skim to understand the big picture
-2. Second pass: extract structured data (equations, results, datasets)
-3. Third pass: identify the narrative and pedagogical opportunities
+**여러 번 읽습니다:**
+1. 1회독: 훑어보며 큰 그림을 잡는다
+2. 2회독: 수식, 결과, 데이터셋 같은 구조화된 정보를 추출한다
+3. 3회독: 서사와 가르칠 지점을 찾는다
 
-### Phase 2: Knowledge Expansion
+### Phase 2: 지식 확장
 
-This phase is unique to paper-to-course. A paper is not self-contained — it exists within a research lineage.
+paper-to-course만의 단계입니다. 논문은 혼자 완결되지 않고 연구 계보 안에 있습니다.
 
-**Identify prerequisite concepts:**
-- What mathematical foundations does the paper assume? (e.g., probability theory, optimization, information theory)
-- What domain concepts does the paper build on? (e.g., attention mechanism, policy gradient, transformer architecture)
-- What would a curious practitioner NOT know that they need to know?
+**선수 개념 찾기:**
+- 논문이 전제하는 수학 기초는? (확률론, 최적화, 정보 이론 등)
+- 논문이 딛고 있는 분야 개념은? (어텐션 메커니즘, 정책 경사, 트랜스포머 구조 등)
+- 호기심 많은 실무자가 **모르지만** 알아야 하는 것은?
 
-**Identify related work:**
-- What are the most important predecessor papers?
-- What alternative approaches exist?
-- How does this paper differ from prior work?
+**관련 연구 찾기:**
+- 가장 중요한 선행 논문은?
+- 다른 접근법은 무엇이 있는가?
+- 이 논문은 선행 연구와 무엇이 다른가?
 
-**Use WebSearch** to find:
-- Highly-cited related papers
-- Tutorial or blog explanations of foundational concepts
-- The historical evolution of the research area
+**WebSearch로 찾을 것:**
+- 많이 인용된 관련 논문
+- 기초 개념을 설명한 튜토리얼이나 블로그(한국어 자료가 있으면 용어 확인에 활용)
+- 연구 분야의 역사적 흐름
+- 선수 개념별로 가장 명확한 설명 1~2개, 그리고 실무자가 그 개념을 모를 가능성
 
-**Research prerequisite concepts using WebSearch:**
-- Search for each prerequisite concept to find the clearest explanations
-- Verify which concepts a "curious practitioner" would likely NOT know
-- Find 1-2 good blog posts or tutorials for each prerequisite concept
-- Structure findings into the Module 0 brief (for complex papers) or Module 0 content (for simple papers)
+**정리 방식:**
+- **선수 개념**: 논문을 읽기 전에 알아야 할 것
+- **관련 연구**: 이전에 시도된 것, 이 논문과의 차이
+- **연구 맥락**: 이 논문이 분야의 흐름에서 차지하는 위치
 
-**Structure the expansion into:**
-- **Prerequisite concepts** — things you need to know before reading the paper
-- **Related work** — what else has been tried, how this paper differs
-- **Research context** — where this paper fits in the field's evolution
+이 내용은 모듈 0 브리프(복잡한 논문) 또는 모듈 0 본문(단순한 논문)으로 이어집니다.
 
-### Phase 3: Curriculum Design
+### Phase 3: 커리큘럼 설계
 
-Structure the course as **5-8 modules**. Papers are dense; they typically need more modules than codebases.
+강의는 **모듈 5~8개**로 구성합니다. 논문은 밀도가 높아 코드베이스보다 모듈이 더 필요한 경우가 많습니다. 흐름은 항상 배경 → 맥락 → 세부 순입니다.
 
-The arc always builds from background to context to specifics:
-
-| Module Position | Purpose | Why it matters |
+| 모듈 | 목적 (모듈 제목 예) | 이유 |
 |---|---|---|
-| 0 (mandatory) | "Background & Prerequisites: what you need to know first" | Teach the foundational concepts, math, and domain vocabulary the paper assumes. Use WebSearch to research what a curious practitioner would not know. |
-| 1 | "Here is the problem and why you should care" | Ground the paper in a real-world scenario the learner has experienced |
-| 2 | "The landscape: what has been tried before" | Situate the paper in its field; build vocabulary for the approach |
-| 3 | "The key insight: what this paper proposes" | The method/approach, step by step with math derivations |
-| 4 | "How they tested it: experimental design" | Datasets, baselines, metrics — why these choices? |
-| 5 | "What they found: results and analysis" | Result tables/charts, comparison with baselines, what the numbers mean |
-| 6 | "The bigger picture: implications and limitations" | What this means for the field, what the authors could not do |
-| 7 | "Going further: related work and open questions" | Research lineage, connections to other areas |
+| 0 (필수) | 배경 지식과 선수 학습 | 논문이 전제하는 기초 개념, 수학, 분야 용어를 가르친다. WebSearch로 실무자가 모를 내용을 조사한다. |
+| 1 | 문제 상황: 왜 이 연구가 필요한가 | 학습자가 겪어 봤을 실제 상황에 논문을 연결한다. |
+| 2 | 선행 연구: 지금까지의 시도 | 분야 안에서 논문의 위치를 잡고, 접근법을 이해할 어휘를 만든다. |
+| 3 | 핵심 아이디어: 이 논문의 제안 | 방법을 단계별로, 수식 유도와 함께 설명한다. |
+| 4 | 실험 설계: 어떻게 검증했는가 | 데이터셋, 기준선, 지표와 그렇게 고른 이유. |
+| 5 | 실험 결과와 분석 | 결과 표·차트, 기준선 비교, 수치의 의미. |
+| 6 | 의의와 한계 | 분야에 주는 의미, 저자가 하지 못한 것. |
+| 7 | 더 나아가기: 관련 연구와 열린 문제 | 연구 계보, 다른 분야와의 연결. |
 
-This is a **menu, not a checklist**. A simple empirical paper might need 5 modules (0-4). A theory-heavy paper with multiple contributions might need 8 (0-7).
+이 표는 **체크리스트가 아니라 메뉴**입니다. 메뉴보다 적은 모듈을 만들 때는 번호를 건너뛰지 않고 0부터 연속으로 매깁니다(`module-0`, `module-1`, …, 파일 `00-`, `01-`, …). 단순한 실증 논문은 5개(0~4)로 충분하고, 기여가 여럿인 이론 중심 논문은 8개(0~7)가 필요할 수 있습니다.
 
-**Module 0 is mandatory.** It should contain:
-- 3-5 prerequisite concepts, each explained with intuition + visual + optional formalism
-- A "knowledge map" SVG showing how concepts connect
-- At least one quiz to verify understanding
-- Clear markers distinguishing "background" content from "paper content"
-- Use WebSearch to verify prerequisite concepts and find good explanations
+**모든 모듈은 EBS 교재 구성을 따릅니다:**
+- 시작: `학습 목표` 2~3개 (`~을 설명할 수 있다.` 형식)
+- 본문: 화면(sub-section) 3~6개. 그 안에 `개념 체크`(짧은 확인 질문), `탐구 자료`(그림·표·대화로 된 분석 자료), 필요하면 `보충 설명`, `더 알아보기`
+- 인터랙티브 요소 최소 1개(퀴즈, 시각화, 애니메이션)
+- 선택 코너(`보충 설명`, `더 알아보기`)는 모듈당 합계 최대 2개(`학습 목표`, `핵심 정리`는 개수에 넣지 않음), 필요한 곳에 SVG 다이어그램
+- 끝: `핵심 정리`(요점 3~5개) → `확인 문제`(객관식 3~5문항, 그중 하나 이상은 부정형 `옳지 않은 것은?` 또는 `<보기>`형, EBS 발문 형식)
 
-**Each module should contain:**
-- 3-6 screens (sub-sections within the module)
-- At least one interactive element (quiz, visualization, animation)
-- One or two "aha!" callout boxes with key insights
-- SVG diagrams for visual explanation where appropriate
+**모듈 0은 필수이며 다음을 담습니다:**
+- 선수 개념 3~5개. 각각 직관 + 시각 자료 + (선택) 형식화
+- 개념들의 관계를 보여 주는 "지식 지도" SVG
+- 이해를 확인하는 `확인 문제`(다른 모듈과 같은 3~5문항)
+- "배경 지식"과 "논문 내용"을 분명히 구분하는 표시: 모듈 0의 화면 맨 위에 `callout callout-info` 콜아웃 `배경 지식`을 둡니다(마크업은 `interactive-elements.md`의 "모듈 골격과 내비게이션" 절, 상한 개수에 넣지 않음)
+- WebSearch로 선수 개념을 검증하고 좋은 설명을 찾는다
 
-**Mandatory interactive elements per course:**
-- **Math Derivation Walkthrough** — at least one step-by-step equation derivation
-- **Research Lineage Tree** — at least one visual showing how this paper relates to prior work
-- **Pseudocode Walkthrough** — at least one pseudocode block with line-by-line explanation
-- **Result Comparison Interactive** — at least one interactive result comparison
-- **Quizzes** — at least one per module
-- **Glossary Tooltips** — on every technical/mathematical term, first use per module
+**강의 전체에 반드시 들어갈 인터랙티브 요소:**
+- **수식 유도 단계별 풀이**: 최소 1개
+- **연구 계보 트리**: 이 논문과 선행 연구의 관계를 보여 주는 시각 자료 최소 1개
+- **의사코드 단계별 풀이**: 줄별 설명이 달린 의사코드 최소 1개
+- **결과 비교 인터랙티브**: 최소 1개
+- **확인 문제(퀴즈)**: 모듈마다 3~5문항
+- **용어 툴팁**: 모듈별로 기술·수학 용어가 처음 나올 때마다
 
-**Do NOT present the curriculum for approval — just build it.** The user wants a tutorial, not a planning document.
+**강의별 용어표 만들기:** 커리큘럼이 정해지면 `course-name/briefs/terms.md`를 씁니다. `references/glossary-ko.md`에서 이 논문에 나오는 용어를 고르고, 없는 용어는 번역어를 정해 추가합니다. 형식은 5열 표 `| English | 한국어 표기 | 첫 등장 표기 | 처음 나오는 모듈 | 비고 |`입니다(`korean-style-guide.md` §2.6과 같습니다). 단순한 논문(순차 경로)이라도 만들어 둡니다. 모든 모듈은 이 표의 번역어만 씁니다.
 
-**After designing the curriculum, decide which build path:**
-- **Simple paper** (5-6 modules, single clear contribution) → Phase 4 Sequential
-- **Complex paper** (7+ modules, multiple contributions, heavy math) → Phase 3.5 first, then Phase 4 Parallel
+**커리큘럼을 승인받으려고 보여 주지 마십시오. 바로 만듭니다.** 사용자가 원하는 것은 기획서가 아니라 강의입니다.
 
-### Phase 3.5: Module Briefs (complex papers only)
+**커리큘럼을 정한 뒤 빌드 경로를 고릅니다:**
+- **단순한 논문** (모듈 5~6개, 기여 하나가 분명함) → Phase 4 순차 경로
+- **복잡한 논문** (모듈 7개 이상, 기여가 여럿, 수식이 많음) → Phase 3.5 → Phase 4 병렬 경로
 
-For complex papers, write a brief for each module before writing any HTML. Read `references/module-brief-template.md` for the template.
+### Phase 3.5: 모듈 브리프 (복잡한 논문만)
 
-**For each module, write a brief to `course-name/briefs/0N-slug.md` containing:**
-- Teaching arc (intuition, opening hook, key insight)
-- Pre-extracted equations (copy-pasted with LaTeX)
-- Pre-extracted key figures/tables descriptions
-- Interactive elements checklist with enough detail to build them
-- Knowledge expansion notes (what background concepts this module assumes)
-- Which sections of which reference files the writing agent needs
-- What the previous and next modules cover
+HTML을 쓰기 전에 모듈마다 브리프를 씁니다. 템플릿은 `references/module-brief-template.md`입니다.
 
-### Phase 4: Build the Course
+**모듈마다 `course-name/briefs/0N-slug.md`에 다음을 적습니다:**
+- 강의 흐름(직관, 도입 훅, 핵심 통찰)과 `학습 목표` 2~3개
+- 미리 추출한 수식(LaTeX 그대로)
+- 주요 그림·표 설명
+- 만들 인터랙티브 요소 목록과 구현할 수 있을 만큼의 세부 사항
+- 지식 확장 메모(이 모듈이 전제하는 배경 개념)
+- 이 모듈에서 처음 나오는 용어(용어표 `terms.md` 기준)
+- 작성 에이전트가 읽어야 할 참고 파일의 절(section)
+- 앞뒤 모듈이 다루는 내용
 
-The course output is a **directory**, not a single file. All CSS and JS are pre-built reference files — never regenerate them.
+### Phase 4: 강의 빌드
 
-**Output structure:**
+출력물은 단일 파일이 아니라 **디렉터리**입니다. CSS와 JS는 모두 미리 만들어 둔 참고 파일이며, 절대 새로 만들지 않습니다.
+
+**출력 구조:**
 ```
 course-name/
-  styles.css       ← copied verbatim from references/styles.css
-  main.js          ← copied verbatim from references/main.js
-  _base.html       ← customized shell (title, accent color, nav dots, sidebar items, KaTeX)
-  _cover.html      ← custom cover/hero page with paper metadata
-  _footer.html     ← copied verbatim from references/_footer.html
-  build.sh         ← copied verbatim from references/build.sh
-  briefs/          ← module briefs (complex papers only)
+  styles.css       ← references/styles.css를 그대로 복사
+  main.js          ← references/main.js를 그대로 복사
+  _base.html       ← 맞춤 셸(제목, 강조색, 내비게이션 점, 사이드바 항목, KaTeX)
+  _cover.html      ← 논문 메타데이터가 담긴 표지
+  _footer.html     ← references/_footer.html을 그대로 복사
+  build.sh         ← references/build.sh를 그대로 복사
+  briefs/          ← terms.md(용어표, 항상), 모듈 브리프(복잡한 논문만)
   modules/
     00-background.html
     01-problem.html
     02-landscape.html
     ...
-  index.html       ← assembled by build.sh
+  index.html       ← build.sh가 조립
 ```
 
-**Step 1 (both paths): Setup** — Create the course directory. Copy these four files verbatim using Read + Write:
+**Step 1 (공통): 준비.** 강의 디렉터리를 만들고 다음 네 파일을 Read + Write로 **한 글자도 바꾸지 않고** 복사합니다.
 - `references/styles.css` → `course-name/styles.css`
 - `references/main.js` → `course-name/main.js`
 - `references/_footer.html` → `course-name/_footer.html`
 - `references/build.sh` → `course-name/build.sh`
 
-**Step 2 (both paths): Customize `_base.html`** — Read `references/_base.html`, then write it to `course-name/_base.html` with substitutions:
-- `COURSE_TITLE` → the actual course title (in the detected language)
-- `ACCENT_*` → chosen accent color values (pick one palette from comments)
-- `NAV_DOTS` → one `<button class="nav-dot" ...>` per module
-- `SIDEBAR_ITEMS` → one `<a class="sidebar-item" ...>` per module, with matching `data-module` and `href="#module-N"` attributes
+`references/lint-ko.py`는 복사하지 않습니다. Phase 5에서 스킬 디렉터리의 파일을 그대로 실행합니다.
 
-**Step 2.5: Build `_cover.html`** — Write a cover page file `course-name/_cover.html` containing the course hero section. Read the pattern from `references/interactive-elements.md` (Cover Page section). The cover must include:
-- Paper title (in the detected language, with English original in parentheses if translated)
-- Author list
-- One-sentence topic overview (as subtitle)
-- Abstract (abbreviated to 2-3 sentences)
-- Metadata badges: difficulty level, estimated reading time, number of modules
-- A "Start Learning" button that scrolls to Module 0
+**Step 2 (공통): `_base.html` 맞춤.** `references/_base.html`을 읽고 다음을 치환해 `course-name/_base.html`로 씁니다.
+- `COURSE_TITLE` → 한국어 강의 제목
+- `ACCENT_*` → 고른 강조색 값(주석의 팔레트 중 하나)
+- `NAV_DOTS` → 모듈마다 `<button class="nav-dot" data-target="module-N" data-tooltip="…" aria-label="…">` 하나
+- `SIDEBAR_ITEMS` → 모듈마다 `<a class="sidebar-item" data-module="N" href="#module-N">` 하나(자식 `sidebar-item-num`, `sidebar-item-label`, `sidebar-item-indicator`)
+- 두 목록의 순서와 개수는 모듈과 같아야 합니다. 정확한 마크업은 `references/interactive-elements.md`의 "모듈 골격과 내비게이션" 절을 따릅니다.
+- `<html lang="ko">`, Pretendard·폰트 링크, KaTeX 스크립트는 건드리지 않습니다.
 
-**Step 3: Write modules** — Two paths:
+**Step 2.5: `_cover.html` 작성.** 표지 파일 `course-name/_cover.html`을 씁니다. 패턴은 `references/interactive-elements.md`의 "표지와 히어로 섹션 (Cover Page)" 절을 따르며, 이 파일은 Step 2(`_base.html` 맞춤)부터 필요합니다. 표지는 `<section class="course-cover">`이며 `.module`이 **아닙니다**(내비게이션 점·스크롤 스냅 없음). 표지에 들어갈 것:
+- 논문 제목(`한국어 제목(English Original Title)` 형식, 괄호 앞 공백 없음)
+- 저자 목록
+- 주제를 한 문장으로 요약한 부제
+- 2~3문장으로 줄인 초록
+- 메타 배지: 난이도, 예상 소요 시간, 모듈 수
+- 모듈 0으로 스크롤하는 "학습 시작하기" 버튼
 
-#### Sequential path (simple papers)
-Read `references/content-philosophy.md` and `references/gotchas.md`. Then write modules one at a time. For each module, write `course-name/modules/0N-slug.html` containing only the `<section class="module" id="module-N">` block.
+**Step 3: 모듈 작성.** 두 경로가 있습니다.
 
-Read `references/interactive-elements.md` for HTML patterns. Read `references/design-system.md` for visual conventions.
+#### 순차 경로 (단순한 논문)
+`references/content-philosophy.md`, `references/gotchas.md`, `references/korean-style-guide.md`, `references/glossary-ko.md`, `course-name/briefs/terms.md`를 읽은 뒤 모듈을 하나씩 씁니다. 각 모듈은 `course-name/modules/0N-slug.html`이며 `<section class="module" id="module-N">` 블록만 담습니다. 모듈 골격(`.module-content`, `.module-header`, `.screen`, `.screen-heading`)은 `references/interactive-elements.md`의 "모듈 골격과 내비게이션" 절을 따릅니다.
 
-#### Parallel path (complex papers)
-Dispatch modules to subagents in batches of up to 3. Each agent receives:
-- Its module brief
-- `references/content-philosophy.md` and `references/gotchas.md`
-- Only the sections of `references/interactive-elements.md` and `references/design-system.md` listed in the brief
+메뉴보다 적은 모듈을 만들 때는 번호를 0부터 연속으로 매깁니다(`module-0`, `module-1`, …, 파일 `00-`, `01-`, …).
 
-**Step 4 (both paths): Assemble** — Run `build.sh`:
+HTML 패턴은 `references/interactive-elements.md`, 시각 규칙은 `references/design-system.md`를 봅니다.
+
+#### 병렬 경로 (복잡한 논문)
+모듈을 최대 3개씩 묶어 하위 에이전트에게 맡깁니다. 각 에이전트가 받는 것:
+- 자기 모듈의 브리프
+- `references/korean-style-guide.md` (EBS 문체 전체 규칙)
+- `course-name/briefs/terms.md` (강의 용어표. 여기 없는 용어를 새로 번역해야 하면 결과 보고에 적게 하고, 메인이 용어표에 반영한 뒤 통일합니다)
+- `references/content-philosophy.md`, `references/gotchas.md`
+- 브리프에 적힌 `references/interactive-elements.md`, `references/design-system.md`의 해당 절만
+
+**Step 4 (공통): 조립.** `build.sh`를 실행합니다.
 ```bash
 cd course-name && bash build.sh
 ```
 
-**Critical rules:**
-- **Never regenerate** `styles.css` or `main.js` — always copy from references
-- Module files contain only `<section>` content — no boilerplate
-- Use `scroll-snap-type: y proximity` (NOT `mandatory`)
-- Use `min-height: 100dvh` with `100vh` fallback
-- Interactive element JS is in `main.js`; wire via `data-*` attributes and CSS classes
-- Chat containers need `id` attributes
-- Flow animations need `data-steps='[...]'` JSON
-- Use inline SVG for diagrams, following design system conventions
-- KaTeX renders `$$...$$` automatically via `_base.html` script
+**핵심 규칙:**
+- `styles.css`, `main.js`는 **절대 새로 만들지 않습니다**. 항상 references에서 복사합니다.
+- 모듈 파일에는 `<section>` 내용만 넣습니다. 보일러플레이트는 넣지 않습니다.
+- `scroll-snap-type: y proximity`를 씁니다(`mandatory` 금지).
+- `min-height: 100dvh`를 쓰고 `100vh`를 폴백으로 둡니다.
+- 인터랙티브 요소의 JS는 `main.js`에 있습니다. `data-*` 속성과 CSS 클래스로 연결합니다.
+- 채팅 컨테이너에는 `id` 속성이 필요합니다.
+- 흐름 애니메이션에는 `data-steps='[...]'` JSON이 필요합니다.
+- 다이어그램은 디자인 시스템을 따르는 인라인 SVG로 그립니다. 한글 라벨은 한 줄이면 `<text>`, 두 줄이면 어절 경계에서만 나눈 `<tspan x=… dy="1.3em">`, 세 줄 이상이나 문단이면 `<foreignObject>` 안의 `<div>`(`word-break: keep-all`)를 씁니다.
+- 수식은 `_base.html`의 KaTeX 스크립트가 `$$...$$`를 자동 렌더링합니다.
+- 한글에 이탤릭을 쓰지 않습니다. 강조는 굵기나 강조색으로 합니다.
 
-### Phase 5: Review and Open
+### Phase 5: 검토와 열기
 
-After running `build.sh`, open `index.html` in the browser. Walk the user through what was built and ask for feedback.
+`build.sh` 실행 후 한국어 린터를 돌립니다.
 
-**Review checklist:**
-- [ ] Cover page displays paper title, authors, abstract, metadata badges, and "Start Learning" button
-- [ ] Module 0 (Background & Prerequisites) exists and teaches prerequisite concepts before the paper's content
-- [ ] Sidebar navigation shows all module names, highlights current module on scroll
-- [ ] Sidebar collapses to toggle button on mobile (≤1024px)
-- [ ] All math renders correctly (no raw LaTeX visible)
-- [ ] All interactive elements work (quizzes, derivations, comparisons)
-- [ ] Glossary tooltips appear on hover/click
-- [ ] No walls of text — every screen is 50%+ visual
-- [ ] Every equation has intuition → formalism → interpretation
-- [ ] Results have context (compared to what? is this good?)
-- [ ] Limitations are surfaced, not hidden
-- [ ] SVG diagrams are responsive
-- [ ] Language is consistent throughout
-- [ ] Module transitions are coherent
+```bash
+python3 -I <skill-dir>/references/lint-ko.py course-name/ --strict
+```
+
+**ERROR 0개, WARN 0개여야 합니다.** 하나라도 있으면 해당 모듈을 고치고 `build.sh`와 린터를 다시 실행합니다. 예외는 `references/korean-style-guide.md` §3.3에 적힌 알려진 린터 한계(예: 약어 뒤 서술격 `이다`를 주격 `이`로 오판하는 KO104)뿐입니다. 이런 WARN이 남으면 파일·줄과 이유를 사용자에게 보고합니다. 연구 대화의 해요체는 린터가 이미 제외합니다.
+
+그다음 브라우저로 `index.html`을 열고, 만든 내용을 사용자에게 한국어로 안내하며 피드백을 요청합니다.
+
+**검토 체크리스트:**
+- [ ] 표지에 논문 제목, 저자, 초록, 메타 배지, "학습 시작하기" 버튼이 있다
+- [ ] 모듈 0(배경 지식과 선수 학습)이 있고, 논문 내용보다 먼저 선수 개념을 가르친다
+- [ ] 사이드바에 모든 모듈 이름이 있고, 스크롤하면 현재 모듈이 강조된다
+- [ ] 모바일(1024px 이하)에서 사이드바가 토글 버튼으로 접힌다
+- [ ] 모든 수식이 제대로 렌더링된다(LaTeX 원문 노출 없음)
+- [ ] 모든 인터랙티브 요소(퀴즈, 유도, 비교)가 작동한다
+- [ ] 용어 툴팁이 마우스 오버·클릭에 나타난다
+- [ ] 글만 빽빽한 화면이 없다. 화면마다 시각 자료가 50% 이상이다
+- [ ] 모든 수식이 직관 → 형식화 → 해석 순서를 따른다
+- [ ] 결과에 맥락이 있다(무엇과 비교했나? 좋은 수치인가?)
+- [ ] 한계를 숨기지 않고 드러낸다
+- [ ] SVG 다이어그램이 반응형이다
+- [ ] 모듈 사이 연결이 자연스럽다
+- [ ] `lint-ko.py --strict` ERROR 0개, WARN 0개(알려진 린터 한계는 보고)
+- [ ] **EBS 문체 일관성**: 본문 한다체, 학습 목표 `~할 수 있다.`, 발문 `옳은 것은?` + ①②③④, 해설에 칭찬 없음, 지시 `~하시오`
+- [ ] 모듈마다 `학습 목표` → 본문(`개념 체크`/`탐구 자료`) → `핵심 정리` → `확인 문제` 구성이 있다
+- [ ] **용어 일관성**: 모든 모듈이 `terms.md`의 번역어를 쓰고, 첫 등장 병기 `한글(English)` 형식이 맞다
+- [ ] **줄바꿈**: 본문·카드·표·툴팁에서 한글 어절 중간 줄바꿈이 없다(`keep-all`)
+- [ ] **중국어 잔존 없음**: 한자·전각 괄호(`（）`)가 남아 있지 않다
+- [ ] **SVG 한글 라벨**: 한글 라벨이 잘리거나 상자를 넘치지 않는다
 
 ---
 
-## Design Identity
+## 디자인 정체성
 
-The visual design should feel like a **beautiful research notebook** — warm, inviting, academic but not cold. Read `references/design-system.md` for the full token system.
+시각 디자인은 **아름다운 연구 노트**처럼 느껴져야 합니다. 따뜻하고 친근하며, 학술적이지만 차갑지 않게. 전체 토큰 체계는 `references/design-system.md`를 봅니다.
 
-**Non-negotiable principles:**
-- **Warm palette**: Off-white backgrounds, warm grays, NO cold whites
-- **Bold accent**: One confident accent color (vermillion, teal, amber — NOT purple gradients)
-- **Distinctive typography**: Bricolage Grotesque for headings, DM Sans for body, JetBrains Mono for code/math
-- **Generous whitespace**: Modules breathe. Max 3-4 short paragraphs per screen.
-- **Alternating backgrounds**: Even/odd modules alternate between two warm tones
-- **Dark code blocks**: IDE-style with Catppuccin syntax highlighting on #1E1E2E
-- **SVG diagrams**: Use design system colors, responsive with viewBox
+**양보할 수 없는 원칙:**
+- **따뜻한 팔레트**: 오프화이트 배경, 따뜻한 회색. 차가운 흰색 금지
+- **과감한 강조색**: 확신 있는 강조색 하나(버밀리언, 틸, 앰버). 보라색 그라데이션 금지
+- **개성 있는 타이포그래피**:
+  - 본문(한글+라틴): **Pretendard Variable** (jsDelivr, v1.3.9)
+  - 제목의 영문·숫자: **Bricolage Grotesque**. 한글 글리프는 Pretendard로 자동 폴백
+  - 코드·수식 보조: **JetBrains Mono** (한글 주석은 D2Coding/Pretendard로 폴백)
+- **한글 타이포그래피**: `word-break: keep-all` + `overflow-wrap: break-word`, 본문 행간 약 1.7, 제목 자간을 살짝 좁게, 한글 이탤릭 금지(`em`은 굵기 600 + 강조색), 대문자 라벨용 넓은 자간은 한글에 쓰지 않음
+- **넉넉한 여백**: 모듈에 숨 쉴 공간을 둡니다. 화면당 짧은 문단 3~4개까지
+- **배경 교차**: 짝수·홀수 모듈이 따뜻한 두 톤을 번갈아 씁니다
+- **어두운 코드 블록**: #1E1E2E 바탕에 Catppuccin 구문 강조, IDE 스타일
+- **SVG 다이어그램**: 디자인 시스템 색상, viewBox로 반응형
 
 ---
 
-## Reference Files
+## 참고 파일
 
-The `references/` directory contains detailed specs. **Read them only when you reach the relevant phase.**
+`references/` 디렉터리에 상세 명세가 있습니다. **해당 단계에 도달했을 때만 읽습니다.** (단계 안내가 더 앞선 단계를 가리키면 그 안내를 따릅니다.)
 
-- **`references/content-philosophy.md`** — Teaching principles, quiz design, tooltip rules. Read during Phase 3.5 and Phase 4.
-- **`references/gotchas.md`** — Common failure points checklist. Read during Phase 4 and Phase 5.
-- **`references/module-brief-template.md`** — Template for Phase 3.5 module briefs. Read only for complex papers.
-- **`references/design-system.md`** — CSS tokens, color palette, typography, SVG conventions. Read during Phase 4.
-- **`references/interactive-elements.md`** — HTML patterns for every interactive element. Read during Phase 4.
+- **`references/korean-style-guide.md`**: EBS 교재 문체, 조사, 띄어쓰기, 번역투, 문항·해설 형식의 전체 규칙. Phase 3.5와 Phase 4에서 읽고, 병렬 경로의 모든 모듈 에이전트에 전달합니다.
+- **`references/glossary-ko.md`**: 분야별 한국어 표준 용어집과 쟁점 용어 처리 방침. Phase 3에서 용어표(`terms.md`)를 만들 때, 그리고 순차 경로에서 새 용어를 쓰기 전에 읽습니다.
+- **`references/lint-ko.py`**: 한국어 강의 린터(한자 잔존, `lang`, 전각 괄호, 번역투, EBS 문체 검사). Phase 5에서 실행합니다.
+- **`references/content-philosophy.md`**: 교수 원칙, 퀴즈 설계, 툴팁 규칙. Phase 3.5와 Phase 4에서 읽습니다.
+- **`references/gotchas.md`**: 자주 실패하는 지점 체크리스트. Phase 4와 Phase 5에서 읽습니다.
+- **`references/module-brief-template.md`**: Phase 3.5 모듈 브리프 템플릿. 복잡한 논문일 때만 읽습니다.
+- **`references/design-system.md`**: CSS 토큰, 색상, 한글 타이포그래피, SVG 규칙. Phase 4에서 읽습니다.
+- **`references/interactive-elements.md`**: 모듈 골격, 내비게이션 마크업, 모든 인터랙티브 요소의 HTML 패턴. Phase 4의 Step 2(`_base.html`)부터 읽습니다.

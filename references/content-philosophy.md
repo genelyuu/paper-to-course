@@ -1,118 +1,160 @@
-# Content Philosophy — Teaching Academic Papers
+# 콘텐츠 철학 — 학술 논문 가르치기
 
-> **When to read this:** During Phase 3.5 (writing module briefs) and Phase 4 (writing module HTML). These principles guide every content decision.
+> **읽는 시점:** 3.5단계(모듈 브리프 작성)와 4단계(모듈 HTML 작성). 모든 콘텐츠 결정의 기준이다.
+> **함께 볼 문서:** 문체·표기 규칙은 `references/korean-style-guide.md`, 용어 번역어는 `references/glossary-ko.md`를 따른다. 생성하는 코스 본문은 EBS 교재 문체(한다체)로 쓴다. 이 문서의 지시문은 개조식이고, 따옴표 안의 예시가 코스 본문에 들어갈 문장이다.
 
-## Core Principles
+## 핵심 원칙
 
-### Intuition First, Then Formalism
+### 직관 먼저, 형식은 나중에
 
-Every equation must be preceded by a plain-language sentence explaining what it means. Every algorithm must be preceded by an intuitive description of what it does. The learner should think "oh, that makes sense" before they see the math — the math then formalizes what they already understand.
+모든 수식 앞에는 그 수식이 무엇을 뜻하는지 일상어로 풀이한 문장을 둔다. 모든 알고리즘 앞에는 그 알고리즘이 하는 일을 직관적으로 서술한 문장을 둔다. 학습자가 수식을 보기 전에 "그렇구나" 하고 납득하게 하고, 수식은 이미 이해한 내용을 형식화하는 역할만 맡긴다.
 
-**Example:** "The loss function measures how surprised the model is by its own answers — if it expected a different answer, the loss is high" → then show $L = -\log P(y|x)$.
+**예시:** "손실 함수는 모델이 자신의 답에 얼마나 놀라는지를 나타내는 값이다. 모델이 예상한 답과 정답이 다를수록 손실이 커진다." → 이어서 $L = -\log P(y|x)$를 제시한다.
 
-### The Paper's Story
+### 논문의 이야기
 
-Every paper tells a story. Make that story explicit and narrative. "This paper is about a team that noticed their RL training was getting stuck, tried something counterintuitive (adding nonsense to prompts), and discovered it worked." This narrative framing helps learners remember the technical content.
+모든 논문에는 이야기가 있다. 그 이야기를 서사로 드러낸다. 예: "이 논문의 연구진은 강화학습 훈련이 정체되는 문제를 발견하고, 프롬프트에 의미 없는 문장을 덧붙이는 반직관적 방법을 시도하였다. 그 결과 성능이 향상되었다." 이러한 서사 구성은 기술 내용을 기억하는 데 도움이 된다.
 
-Structure each module as a chapter in that story, not as a section summary.
+각 모듈을 절 요약이 아니라 이야기의 한 장으로 구성한다.
 
-### Show, Don't Tell — Aggressively Visual
+### 보여 주기, 말하지 않기 — 시각 우선
 
-**Text limits:**
-- Max 2-3 sentences per text block
-- Every screen must be at least 50% visual (diagrams, equations, cards, animations, SVG figures)
-- Convert lists of 3+ items into cards, sequences into step cards or flow diagrams
+**텍스트 한도**
+- 텍스트 블록 하나는 2~3문장 이내로 쓴다.
+- 모든 화면의 절반 이상을 시각 요소(다이어그램, 수식, 카드, 애니메이션, SVG 그림)로 채운다.
+- 3개 이상의 항목 나열은 카드로, 순서가 있는 내용은 단계 카드나 흐름도로 바꾼다.
 
-**Convert text to visuals:**
-- A list of methods → concept cards or pattern cards
-- A pipeline of steps → SVG flow diagram or animated data flow
-- An experimental framework → SVG architecture diagram
-- Comparing results → interactive result comparison bars
-- Research relationships → lineage tree (SVG or HTML)
+**텍스트를 시각 요소로 바꾸는 방법**
+- 방법 목록 → 개념 카드 또는 패턴 카드
+- 단계별 파이프라인 → SVG 흐름도 또는 데이터 흐름 애니메이션
+- 실험 구성 → SVG 구조도
+- 결과 비교 → 인터랙티브 결과 비교 막대
+- 연구 간 관계 → 계보 트리(SVG 또는 HTML)
 
-### One Concept Per Screen
+### 화면 하나에 개념 하나
 
-No walls of text. Each screen teaches exactly one idea. If you need more space, add another screen.
+글이 빽빽한 화면을 만들지 않는다. 화면 하나는 한 가지 아이디어만 가르친다. 분량이 늘면 화면을 추가한다.
 
-### Original Text, Not Paraphrase
+### 원문 그대로가 아니라 풀이
 
-The paper's actual text should be quoted sparingly — only for key definitions or claims. The course EXPLAINS the paper, not reproduces it. Direct quotes should be clearly marked with quotation marks and citation references.
+논문 원문은 핵심 정의나 주장에 한하여 최소한만 인용한다. 코스는 논문을 재현하는 것이 아니라 설명하는 것이다. 직접 인용은 따옴표와 출처 표기로 분명히 구별한다.
 
-### Question Everything — Critical Reading
+### 비판적 읽기
 
-Teach learners to read papers critically:
-- Every experimental result should prompt: "Is this significant?"
-- Every method choice should prompt: "Why this and not something else?"
-- Every limitation should be surfaced, not hidden
-- If the paper only tested on one dataset, say so
-- If the improvement is within noise margins, say so
+학습자가 논문을 비판적으로 읽도록 이끈다.
+- 모든 실험 결과에 "이 차이는 유의미한가?"를 묻는다.
+- 모든 방법 선택에 "왜 다른 방법이 아니라 이 방법인가?"를 묻는다.
+- 모든 한계를 감추지 않고 드러낸다.
+- 논문이 데이터셋 하나로만 평가했다면 그 사실을 명시한다.
+- 개선 폭이 오차 범위 이내라면 그 사실을 명시한다.
 
-### Knowledge Expansion — Beyond the Paper
+### 지식 확장 — 논문 너머
 
-A paper exists within a research lineage. Actively expand beyond the paper:
-- **Prerequisite concepts**: things you need to know before reading (math, algorithms, domain concepts)
-- **Related work**: what else has been tried, how this paper differs
-- **Research context**: where this paper fits in the field's evolution
-- Pick the 3-5 most important related papers and give each a styled citation card
+논문은 연구 계보 안에 놓여 있다. 논문 밖으로 적극적으로 확장한다.
+- **선수 개념:** 논문을 읽기 전에 알아야 할 내용(수학, 알고리즘, 분야 개념)
+- **관련 연구:** 다른 시도와 이 논문의 차이점
+- **연구 맥락:** 이 논문이 분야의 흐름에서 차지하는 위치
+- 가장 중요한 관련 논문 3~5편을 골라 각각 인용 카드로 제시한다.
 
-### Guided Entry — Background Before Content
+### 안내된 진입 — 본론 전에 배경
 
-Never start a course by throwing the learner into the paper's problem statement. A "curious practitioner" needs context first. Module 0 (Background & Prerequisites) should:
+논문의 문제 제기부터 학습자에게 던지며 코스를 시작하지 않는다. "호기심 많은 실무자"에게는 맥락이 먼저 필요하다. 모듈 0(배경 지식과 선수 개념)은 다음을 갖춘다.
 
-- Identify the 3-5 most important prerequisite concepts
-- Explain each with intuition first, then formalism only if needed
-- Use a "knowledge map" SVG to show how concepts connect
-- Clearly mark this content as "background you need" vs. "what the paper says"
-- Include at least one quiz to verify understanding before proceeding
+- 가장 중요한 선수 개념 3~5개를 선정한다.
+- 각 개념을 직관으로 먼저 설명하고, 필요한 경우에만 형식 표현을 덧붙인다.
+- "지식 지도" SVG로 개념 간 연결을 보인다.
+- "필요한 배경"과 "논문의 주장"을 명확히 구분하여 표시한다. 모듈 0의 화면 맨 위에 `배경 지식` 콜아웃(`callout callout-info`)을 두는 것이 표준 표시이다(마크업은 `interactive-elements.md` 모듈 골격 절).
+- 모듈 0도 다른 모듈처럼 끝에 `확인 문제`를 둔다(3~5문항). 최소 1개는 부정형(`옳지 않은 것은?`) 또는 보기형이다.
 
-The goal is that by the time the learner reaches Module 1, they have the vocabulary and mental models to understand the paper's contribution without getting lost in jargon.
+모듈 1에 도착했을 때 학습자가 전문 용어에 휘둘리지 않고 논문의 기여를 이해할 어휘와 사고 모형을 갖추는 것이 목표이다.
 
-### Make It Memorable
+### EBS 교재 흐름
 
-Use "aha!" callout boxes for key insights. Use humor where natural. Give methods and concepts personality.
+각 모듈은 EBS 교재의 구성을 따라 다음 순서로 전개한다.
 
-### Glossary Tooltips — No Term Left Behind
+**학습 목표 → 개념 설명 → 개념 체크 → 탐구 자료 → 핵심 정리 → 확인 문제**
 
-Every technical term gets a tooltip on first use per module. Be extremely aggressive:
-- Mathematical symbols ($\mathbb{E}$, $\arg\max$, softmax, KL divergence)
-- Domain jargon (rollout, advantage function, policy gradient, perplexity)
-- Acronyms (GRPO, PPO, RLHF, LoRA) — ALWAYS tooltip on first use
-- Software/model names the learner might not know
+| 코너 | 역할 | 작성 지침 |
+|---|---|---|
+| 학습 목표 | 모듈 첫머리에 2~3개 | `~을 설명할 수 있다.`, `~을 비교할 수 있다.`처럼 행위 동사로 끝맺는다. "이해한다", "안다"는 쓰지 않는다. |
+| 개념 설명 | 직관 → 수식 → 의미 | 한다체 평서문. 정의는 `A는 B이다.` 또는 `A란 B를 말한다.`로 쓴다. |
+| 개념 체크 | 짧은 확인 문항 또는 빈칸 | 방금 설명한 개념을 즉시 점검한다. |
+| 탐구 자료 | 그림, 표, 실험 결과, 연구 대화 | 자료를 제시한 뒤 `이 자료에서 알 수 있는 것은?`을 묻는다. |
+| 핵심 정리 | 모듈 끝의 요약 | 이전의 "aha!" 강조 상자 중 핵심 통찰을 옮긴다. |
+| 확인 문제 | 모듈 끝 퀴즈, 3~5문항 | 부정형 또는 보기형을 하나 이상 포함한다. 아래 "퀴즈 철학"을 따른다. |
 
-**Tooltip format (bilingual):** `中文解释（English Term）` — e.g., "策略梯度（Policy Gradient）：一种通过计算策略的梯度来更新模型参数的优化方法"
+**"aha!" 강조 상자의 대응**
+- 모듈의 핵심 통찰 → `핵심 정리`
+- 부가적 사실, 배경, 사례 → `보충 설명`
+- 논문 밖의 확장 내용 → `더 알아보기`
 
-Do NOT tooltip terms the learner likely knows from general education (e.g., "hypothesis," "experiment," "control group").
+감탄문, 느낌표, 독자를 직접 부르는 표현(`여러분`)은 쓰지 않는다. 재미와 개성은 비유와 구체적인 사례로 전달한다.
 
-### SVG Diagrams for Visual Explanation
+### 기억에 남게 하기
 
-Use inline SVG for:
-- Concept relationship diagrams
-- Research lineage trees
-- Experimental framework overviews
-- Algorithm flowcharts
-- Comparison matrices
+핵심 통찰은 `핵심 정리` 상자에 담는다. 방법과 개념에 이름 붙이기, 비유, 구체적 사례로 개성을 부여한다. 어조는 한다체를 유지한다.
 
-SVGs should use the design system's CSS variables for colors, fonts, radii, and shadows. Keep them responsive with `viewBox` + `width="100%"`.
+### 용어 툴팁 — 빠뜨리는 용어 없이
+
+모듈마다 전문 용어가 처음 나올 때 반드시 툴팁을 단다. 매우 적극적으로 단다.
+- 수학 기호($\mathbb{E}$, $\arg\max$, 소프트맥스, KL 발산)
+- 분야 전문 용어(롤아웃, 이점 함수, 정책 경사, 퍼플렉서티)
+- 약어(GRPO, PPO, RLHF, LoRA) — 첫 등장 시 반드시 툴팁
+- 학습자가 모를 수 있는 소프트웨어·모델 이름
+
+**툴팁 형식:** `한글 용어(English Term): 한다체 정의문.` 괄호는 반각(ASCII)이고, 정의는 `~이다.`로 끝낸다.
+
+예: `정책 경사(Policy Gradient): 보상이 커지는 방향으로 정책 파라미터를 직접 갱신하는 최적화 방법이다.`
+
+번역어는 코스 용어표(`references/glossary-ko.md` 기준)에 맞추고, 모듈마다 달라지지 않게 한다. 일반 교육 과정에서 이미 아는 용어(가설, 실험, 대조군 등)에는 툴팁을 달지 않는다.
+
+### 시각적 설명을 위한 SVG 다이어그램
+
+다음에 인라인 SVG를 쓴다.
+- 개념 관계도
+- 연구 계보 트리
+- 실험 구성 개요
+- 알고리즘 순서도
+- 비교 행렬
+
+SVG는 디자인 시스템의 CSS 변수(색, 글꼴, 모서리 반경, 그림자)를 사용한다. `viewBox`와 `width="100%"`로 반응형을 유지한다. 한글 라벨은 글자당 약 1em 폭을 차지하므로 여유 폭을 둔다(`references/gotchas.md` 참조).
 
 ---
 
-## Quiz Philosophy
+## 퀴즈 철학
 
-Quizzes should test whether the learner can APPLY their knowledge, not regurgitate definitions.
+퀴즈는 정의를 암기했는지가 아니라 지식을 적용할 수 있는지를 확인해야 한다. 발문과 선택지는 EBS 문항 형식을 따른다.
 
-**What to quiz (in order of value):**
-1. **"What would you expect?" scenarios** — Given a modified experimental setup, what result would you predict?
-2. **"What went wrong?" scenarios** — Given a surprising result, what explanation fits?
-3. **Design decisions** — Why did the authors choose X over Y?
-4. **Critical reading** — "Which of these conclusions is NOT supported by the data shown?"
-5. **Tracing exercises** — "Trace the path from input to output in this algorithm."
+**발문 형식**
+- `다음 중 ~에 대한 설명으로 옳은 것은?`
+- `다음 중 ~으로 옳지 않은 것은?`
+- `<보기>에서 ~인 것만을 있는 대로 고른 것은?` (보기는 ㄱ, ㄴ, ㄷ으로 제시하고 선택지는 `ㄱ, ㄴ`처럼 조합한다.)
+- 주관식은 `~하시오.`로 끝낸다.
 
-**What NOT to quiz:**
-- Definitions — that's what glossary tooltips are for
-- Factual recall — nobody memorizes author names or years
-- Anything answerable by scrolling up and copying
+**선택지:** 번호는 ①②③④로 붙인다(원문자). 오답 선택지도 그럴듯한 오개념에서 만든다.
 
-**Quiz tone:**
-- Wrong answers get encouraging explanations ("不太对，原因是...")
-- Correct answers get brief reinforcement ("正确！这是因为...")
-- Never punitive, never score-focused
+**무엇을 출제하는가 (가치 순)**
+1. **예측 상황** — 실험 설정이 바뀌면 결과가 어떻게 되는가?
+   예: `다음 중 보상 모델 없이 훈련할 때 나타날 결과로 가장 타당한 것은?`
+2. **원인 추론 상황** — 예상 밖 결과를 어떻게 설명하는가?
+   예: `다음 중 [그림]의 손실 곡선이 중간에 급증한 원인으로 가장 타당한 것은?`
+3. **설계 결정** — 연구진이 X 대신 Y를 선택한 이유는 무엇인가?
+   예: `다음 중 연구진이 배치 크기를 키운 이유로 옳은 것은?`
+4. **비판적 읽기** — 제시된 데이터로 뒷받침되지 않는 결론은 무엇인가?
+   예: `다음 중 [표]에서 도출한 결론으로 옳지 않은 것은?`
+5. **추적 연습** — 입력에서 출력까지 알고리즘의 경로를 따라가 보는 문제
+   예: `<보기>의 입력이 알고리즘을 통과할 때 3단계 직후의 값을 구하시오.`
+
+**출제하지 않는 것**
+- 정의 — 용어 툴팁이 그 역할을 한다.
+- 단순 사실 암기 — 저자 이름이나 연도는 외우지 않는다.
+- 위로 스크롤하여 그대로 베낄 수 있는 문제
+
+**해설 문체**
+- `main.js`가 피드백 앞에 `정답`/`오답` 표지를 자동으로 붙이므로 해설 속성에는 표지를 쓰지 않는다. 형식은 `~이므로 ~이다.`이다.
+  - 맞혔을 때: `data-explanation-right="② | 보상 모델이 없으면 정책이 기준 없이 갱신되므로 훈련이 불안정해진다."`
+  - 틀렸을 때: `data-explanation-wrong="| 정답은 ②이다. 보상 모델이 없으면 정책이 기준 없이 갱신되므로 훈련이 불안정해진다."`
+  - 화면에는 각각 **정답** ② | … 과 **오답** | 정답은 ②이다. …로 나온다. (KO110)
+- 해설 속성에는 `$…$` 수식을 쓸 수 있다. `main.js`가 피드백을 삽입한 뒤 KaTeX를 다시 렌더링한다.
+- 칭찬("훌륭하다", "잘했다"), 격려, 감탄, 느낌표를 쓰지 않는다. 처벌적이거나 점수 중심의 어조도 쓰지 않는다.
+- 오답 해설은 어느 부분이 왜 틀렸는지를 근거와 함께 한 줄로 밝힌다.
