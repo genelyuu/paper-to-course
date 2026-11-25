@@ -48,7 +48,8 @@ TONGHAE_MAX = 3
 # (?!아): "아니다"(한다체 부정)는 합니다체가 아니다 — C1 E2E 테스트에서 오탐 확인
 FORMAL_RE = re.compile(r"(?:(?!아)[가-힣]니다|십시오)(?=\s*[.!?]|\s*$)")
 POLITE_RE = re.compile(r"(?:(?<![필중주수개긴소불])요|죠)(?=\s*[.!?])")
-PRAISE_RE = re.compile(r"잘\s*했|훌륭|멋져|멋지|대단|축하|!(?=\s|$)")
+PRAISE_RE = re.compile(r"잘\s*했|훌륭|멋져|멋지|대단|축하|(?<=[가-힣])!(?=\s|$)")
+MATH_RE = re.compile(r"\$\$.*?\$\$|\$(?=\S)[^$\n]*?(?<=\S)\$(?!\d)", re.S)
 YEOREOBUN_RE = re.compile(r"여러분")
 CHAT_WORDS = ("chat", "dialogue", "message", "bubble")
 PROSE_TAGS = {"p", "li", "td", "th"}
@@ -166,10 +167,9 @@ class Linter(HTMLParser):
 
     def handle_startendtag(self, tag, attrs):
         # <br/> 등: 스택에 올리지 않고 시작 처리만
-        if tag in VOID or True:
-            saved = len(self.stack)
-            self.handle_starttag(tag, attrs)
-            del self.stack[saved:]
+        saved = len(self.stack)
+        self.handle_starttag(tag, attrs)
+        del self.stack[saved:]
 
     def handle_endtag(self, tag):
         if tag in VOID:
@@ -261,10 +261,19 @@ class Linter(HTMLParser):
                 self.add(ln(m), "WARN", "KO108", f"해설에 칭찬·감탄 표현 '{m.group(0)}'",
                          "정답/오답 표지와 한다체 해설(~이므로 ~이다.)만 쓰세요")
             # KO110: main.js가 '정답'/'오답' 표지를 자동으로 붙이므로 해설에 다시 쓰면 화면에 두 번 나온다
-            m = re.match(r"\s*(정답|오답)\s*[.:!|]?", text)
+            m = re.match(r"\s*(정답|오답)(?![가-힣])\s*[.:!|]?", text)
             if m:
                 self.add(ln(m), "WARN", "KO110", f"해설이 '{m.group(1)}' 표지로 시작합니다 (main.js가 표지를 자동으로 붙여 중복 표시됨)",
                          "표지를 빼고 쓰세요: 맞힌 경우 '② | ~이다.', 틀린 경우 '| 정답은 ②이다. ~이다.'")
+        # KO112: 수식은 모두 이탤릭체 (\mathrm·\mathbf·\text·\operatorname 대신 \mathit·\boldsymbol)
+        # 파싱된 본문·속성에서만 본다(script/style/pre/code/주석은 handle_data 단계에서 이미 제외).
+        # 통화 기호($5, $10 등)를 수식으로 오인하지 않도록 여는 $ 뒤는 공백이 아니고, 닫는 $ 앞은 공백이 아니며 뒤에 숫자가 오지 않아야 한다
+        for m in MATH_RE.finditer(raw):
+            u = re.search(r"\\(mathrm|mathbf|text|textrm|operatorname|rm|bf)\b", m.group(0))
+            if u:
+                self.add(line + raw.count("\n", 0, m.start() + u.start()), "WARN", "KO112",
+                         f"수식에 똑바른 글꼴 명령 '\\{u.group(1)}'이 있습니다 (수식은 모두 이탤릭체)",
+                         "\\mathrm·\\text·\\operatorname → \\mathit, \\mathbf → \\boldsymbol")
         if attr:
             return
         for rx, desc, fix in TRANSLATIONESE:
@@ -327,6 +336,10 @@ def collect(target):
 
 def main(argv):
     args = [a for a in argv if not a.startswith("--")]
+    unknown = [a for a in argv if a.startswith("--") and a not in ("--strict", "--json")]
+    if unknown:
+        print(f"알 수 없는 옵션: {' '.join(unknown)} (사용 가능: --strict, --json)", file=sys.stderr)
+        return 2
     strict, as_json = "--strict" in argv, "--json" in argv
     if len(args) != 1:
         print(__doc__)

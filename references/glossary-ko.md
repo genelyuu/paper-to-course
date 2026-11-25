@@ -9,10 +9,10 @@
 - **첫 등장 표기 예**는 모듈마다 처음 나올 때의 병기 형식이다. 괄호는 ASCII 반각, 괄호 앞 공백 없음. 괄호 안 영어는 Title Case(`Policy Gradient`)로 쓰고, 약어·고유 명칭은 원래 표기를 따른다. 약어가 있는 용어는 `한글 풀이(English Full Name, ACRONYM)` 형식이다.
 - **대안(허용)**은 틀린 표기는 아니지만 기본값이 아니다. 대안을 택하면 코스 용어표에 이유를 적는다.
 - **비고/출처 약호**
-  - `G`: Google 머신러닝 용어집 한국어판(https://developers.google.com/machine-learning/glossary?hl=ko). `docs/research/korean-references.md`(이하 "조사 문서") §4.2에서 확인한 항목만 표시했다. 업계 번역 관행을 반영하지만 학회 표준은 아니다.
-  - `조사`: 조사 문서 §4.2 표에 있는 항목이며 거기서 (일반 지식)으로 분류된 판단.
-  - `관행`: 검증한 출처 없이 국내 교재·논문·커뮤니티의 일반적 쓰임에 기댄 표기. 학회·TTA·대한수학회 용어집과는 대조하지 못했다(조사 문서 §4.1, (미확인)).
-  - `논쟁`: 표기가 갈리는 용어. 선택 이유는 `korean-style-guide.md` §2.4와 `docs/logs/B2.md`에 있다.
+  - `G`: Google 머신러닝 용어집 한국어판(https://developers.google.com/machine-learning/glossary?hl=ko). 공식 용어집에서 확인한 항목만 표시했다. 업계 번역 관행을 반영하지만 학회 표준은 아니다.
+  - `조사`: 공개 자료를 조사해 (일반 지식)으로 분류한 판단.
+  - `관행`: 검증한 출처 없이 국내 교재·논문·커뮤니티의 일반적 쓰임에 기댄 표기. 학회·TTA·대한수학회 용어집과는 대조하지 못했다((미확인)).
+  - `논쟁`: 표기가 갈리는 용어. 선택 이유는 `korean-style-guide.md` §2.4에 있다.
 - 띄어쓰기: 전문 용어는 단어별로 띄어 쓰고, 사전에 한 단어로 오른 말(신경망, 표준편차, 기댓값)은 붙인다(가이드 §2.3).
 
 ---
@@ -83,7 +83,7 @@
 | decoder | 디코더 | 디코더(Decoder) | | 조사 |
 | embedding | 임베딩 | 임베딩(Embedding) | | G |
 | latent space | 잠재 공간 | 잠재 공간(Latent Space) | | G |
-| attention | 어텐션 | 어텐션(Attention) | 주의 집중 | 조사. 관용 음차 우선(PLAN.md §1) |
+| attention | 어텐션 | 어텐션(Attention) | 주의 집중 | 조사. 관용 음차 우선 |
 | self-attention | 셀프 어텐션 | 셀프 어텐션(Self-Attention) | 자기 주의 | G |
 | multi-head attention | 멀티헤드 어텐션 | 멀티헤드 어텐션(Multi-Head Attention) | 다중 헤드 어텐션 | 관행 |
 | query / key / value | 쿼리 / 키 / 값 | 쿼리(Query), 키(Key), 값(Value) | 밸류 | 관행 |

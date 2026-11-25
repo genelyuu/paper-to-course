@@ -2142,8 +2142,7 @@ pre, code, pre code {
 
 body { background-image: none; }
 
-/* 페이지 단위로 넘긴다 */
-html { scroll-snap-type: y proximity; }
+/* 페이지 단위로 넘긴다(scroll-snap-type은 위쪽 RESET & BASE의 html에 한 번만 선언) */
 
 .module {
   padding: var(--space-8) var(--space-6) var(--space-8);
@@ -2206,6 +2205,7 @@ html { scroll-snap-type: y proximity; }
 .screen-heading,
 .screen-header h3 {
   display: flex;
+  flex-wrap: wrap;   /* .paper-ref가 긴 제목 옆에서 밀리지 않고 다음 줄로 */
   align-items: center;
   gap: var(--space-3);
   font-size: var(--text-xl);
@@ -2767,3 +2767,173 @@ html { scroll-snap-type: y proximity; }
   border-top: 1px solid var(--color-border);
   background: var(--color-surface);
 }
+
+/* ── 문항 삽화 (수능특강식) ──────────────────────────────────────
+   발문 아래에 선택지와 그림을 나란히 둔다(그림이 페이지 높이를 늘리지 않게).
+   그림 규칙: 검은 선 + 교과 색 하나, 평면, 그림자·그라데이션 없음, 글자는 SVG <text>.
+   <div class="q-body">
+     <div class="quiz-options">…</div>
+     <figure class="q-figure"><svg …>…</svg></figure>
+   </div> */
+.q-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: var(--space-6);
+  align-items: start;
+}
+.q-figure {
+  margin: 0;
+  width: var(--q-figure-width, 280px);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+}
+.q-figure svg, .q-figure img { display: block; width: 100%; height: auto; }
+.q-figure svg { color: var(--ink, #1F2328); font-family: var(--font-body); }
+.q-figure .ink { stroke: #1F2328; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.q-figure .ink-fill { fill: #1F2328; stroke: none; }
+.q-figure .accent { stroke: var(--color-accent); }
+.q-figure .accent-fill { fill: var(--color-accent); stroke: none; }
+.q-figure .guide { stroke: var(--color-border); stroke-width: 1; fill: none; }
+.q-figure text { font-size: 13px; fill: #1F2328; font-variant-numeric: tabular-nums; }
+.q-figure text.accent-text { fill: var(--color-accent); font-weight: 700; }
+.q-figure .q-figure-caption { margin: var(--space-2) 0 0; font-size: var(--text-xs); color: var(--color-text-muted); text-align: center; }
+/* 탐구 자료 본문용 그림: 같은 선 규칙, 노트 칸 가운데 최대 60% */
+.figure { margin: var(--space-4) auto; max-width: 60%; }
+.figure svg, .figure img { display: block; width: 100%; height: auto; }
+@media (max-width: 640px) {
+  .q-body { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-4); }
+  .q-figure { justify-self: center; }
+  .figure { max-width: 100%; }
+}
+/* 본문 옆 그림: 흐름·목록 오른쪽에 작은 삽화를 둔다(페이지 높이를 늘리지 않게)
+   <div class="with-figure"> …본문 요소… <figure class="figure side"><img src="assets/fig-x.svg" alt="…"></figure></div> */
+.with-figure {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: var(--space-6);
+  align-items: center;
+}
+.figure.side { margin: 0; width: var(--figure-side-width, 200px); max-width: none; }
+@media (max-width: 640px) {
+  .with-figure { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-4); }
+  .figure.side { justify-self: center; }
+}
+
+/* ── 개념 그림 (본문 도식·그래프) ────────────────────────────────
+   .figure(본문 그림)와 .svg-diagram(도식) 안에서 쓰는 선·면 클래스. 규칙은 문항 삽화와 같다:
+   먹선 + 교과 색 하나, 회색은 모눈·바탕에만, 그림자·그라데이션 없음. 글자는 SVG <text>. */
+:is(.figure, .svg-diagram) .ink { stroke: #1F2328; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+:is(.figure, .svg-diagram) .ink.strong { stroke-width: 2; }
+:is(.figure, .svg-diagram) .ink-fill { fill: #1F2328; stroke: none; }
+:is(.figure, .svg-diagram) .accent { stroke: var(--color-accent); }
+:is(.figure, .svg-diagram) .accent-fill { fill: var(--color-accent); stroke: none; }
+:is(.figure, .svg-diagram) .guide { stroke: var(--color-border); stroke-width: 1; fill: none; }
+:is(.figure, .svg-diagram) .guide-axis { stroke: #8C959F; stroke-width: 1; }
+:is(.figure, .svg-diagram) .guide-fill { fill: #EEF0F2; stroke: none; }
+:is(.figure, .svg-diagram) .row-accent { fill: var(--color-accent); opacity: .85; }
+:is(.figure, .svg-diagram) .edge-line.thin { stroke-width: 1; }
+:is(.figure, .svg-diagram) .edge-line.dashed { stroke-dasharray: 3 3; stroke-width: 1.5; }
+:is(.figure, .svg-diagram) .dot { fill: var(--color-border); }
+:is(.figure, .svg-diagram) .dot-accent { fill: var(--color-accent); }
+:is(.figure, .svg-diagram) text { font-family: var(--font-body); fill: #1F2328; font-variant-numeric: tabular-nums; }
+:is(.figure, .svg-diagram) text.mono { font-family: var(--font-mono); }
+:is(.figure, .svg-diagram) text.muted { fill: var(--color-text-muted); }
+:is(.figure, .svg-diagram) text.accent-text { fill: var(--color-accent); font-weight: 700; }
+.figure-caption { margin: var(--space-2) 0 0; font-size: var(--text-xs); color: var(--color-text-muted); text-align: center; }
+/* 도식 폭: 내용이 좁은 도식은 원래 크기 이상으로 키우지 않는다 */
+.svg-diagram.fit svg { max-width: var(--diagram-max, 100%); margin: 0 auto; }
+
+/* ── 페이지 넘김 ─────────────────────────────────────────────────
+   방향키(←→↑↓), PageUp/PageDown, Home/End로 한 페이지씩 넘긴다(main.js initPager).
+   페이지 = 표지, 단원 도입+첫 화면, 그 밖의 .screen 하나. */
+/* 세 값은 한 묶음이다: html scroll-padding-top(고정 내비 높이만큼 비움)과 .module의 음수 scroll-margin-top이
+   서로 상쇄되어 단원은 화면 맨 위(내비 아래 padding-top 포함)에서 시작하고, 일반 .screen은 내비 바로 아래에 붙는다.
+   main.js initPager의 topOf(단원·표지 = top, 화면 = top - navH)가 이 오프셋과 같아야 한다. */
+html { scroll-padding-top: var(--nav-height); }
+.module { scroll-margin-top: calc(-1 * var(--nav-height)); }   /* scroll-snap-align은 위쪽 .module에 있다 */
+.module-header + .screen.cornell { scroll-snap-align: none; }
+.pager {
+  position: fixed; right: var(--space-6); bottom: var(--space-6); z-index: 90;
+  display: flex; align-items: center; gap: var(--space-1);
+  padding: var(--space-1);
+  background: var(--color-bg); border: 1px solid var(--color-border); border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(31, 35, 40, .08);
+  font-size: var(--text-sm); font-variant-numeric: tabular-nums;
+}
+.pager-btn {
+  width: 36px; height: 36px; display: grid; place-items: center;
+  border: 0; border-radius: 50%; background: transparent; color: var(--color-text);
+  font-size: 18px; line-height: 1; cursor: pointer;
+}
+.pager-btn:hover:not(:disabled) { background: var(--color-accent-light); color: var(--color-accent); }
+.pager-btn:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.pager-btn:disabled { color: var(--color-border); cursor: default; }
+.pager-pos { min-width: 64px; text-align: center; color: var(--color-text-secondary); }
+.pager-pos b { color: var(--color-text); font-weight: 700; }
+.pager-hint { position: absolute; right: 0; bottom: calc(100% + var(--space-2)); white-space: nowrap;
+  font-size: var(--text-xs); color: var(--color-text-muted); opacity: 0; transition: opacity .2s; pointer-events: none; }
+.pager:hover .pager-hint, .pager:focus-within .pager-hint { opacity: 1; }
+/* 표지에서는 목차 패널 모서리와 겹치므로 숨긴다(main.js가 .on-cover를 토글) */
+.pager.on-cover { opacity: 0; pointer-events: none; }
+/* 좁은 화면: 오른쪽 아래의 .sidebar-toggle이 가리지 않도록 가운데 아래로 */
+@media (max-width: 1024px) {
+  .pager { right: auto; left: 50%; transform: translateX(-50%); bottom: var(--space-4); }
+}
+@media print {
+  .nav, .sidebar, .sidebar-toggle, .progress-bar, .pager { display: none !important; }
+  .screen { break-inside: avoid; min-height: 0; }
+}
+
+/* 논문 절 표시: 목차 번호(1, 2, 3)와 별도로, 화면 제목 끝에 원문 위치를 작게 적는다
+   <h3 class="screen-heading">스케일드 내적 어텐션<span class="paper-ref">논문 3.2.1</span></h3> */
+.paper-ref {
+  margin-left: auto; padding-left: var(--space-3); flex: none; align-self: center;
+  font-size: var(--text-xs); font-weight: 500; color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums; letter-spacing: 0;
+}
+/* 행렬·벡터 막대처럼 각진 상자: .node-rect의 둥근 모서리(rx)를 덮어쓴다 */
+:is(.figure, .svg-diagram) .node-rect.sq { rx: 2px; }
+
+/* 연구 계보: 갈래마다 "이어받은 것 → 달라진 것" 한 줄, 새로운 점 강조 */
+.lineage-branch .lineage-node { flex: none; width: 168px; }
+.cornell .notes .lineage-note {
+  flex: 1; margin: 0; font-size: var(--text-sm); line-height: 1.6; color: var(--color-text-secondary);
+}
+.lineage-note .novelty, .novelty { color: var(--color-accent); font-weight: 700; }
+.novelty-badge {
+  margin-top: var(--space-2); padding: 2px var(--space-2);
+  font-size: var(--text-xs); font-weight: 700; color: #fff; background: var(--color-accent); border-radius: var(--radius-sm);
+}
+
+/* 그림 속 수학 기호: 수식(KaTeX)과 같은 이탤릭 수학 글꼴. 본문 서체에는 이탤릭이 없다 */
+:is(.figure, .svg-diagram, .q-figure) [font-style="italic"] { font-family: KaTeX_Math, "Times New Roman", serif; font-style: italic; }
+:is(.figure, .svg-diagram, .q-figure) [font-style="italic"] tspan[font-style="normal"] { font-family: var(--font-body); font-style: normal; }
+/* 도식 라벨(HTML) 속 수학 기호: <i class="mi">d</i><sub>k</sub> */
+.mi { font-family: KaTeX_Math, "Times New Roman", serif; font-style: italic; }
+
+/* 색상 규약: 다색 행위자 색과 붉은 경고 콜아웃을 교과 색·먹색 계열로 묶는다(유채색은 교과 색 하나) */
+:root {
+  --color-actor-1: var(--color-accent);
+  --color-actor-2: #1F2328;
+  --color-actor-3: var(--color-accent-hover);
+  --color-actor-4: #57606A;
+  --color-actor-5: var(--color-accent-muted);
+}
+.callout-warning { --callout-c: #1F2328; background: #F1F3F5; border-color: #1F2328; }
+
+/* 헤더 세로 정렬
+   1) 상단 내비게이션 내용(제목·점)을 본문 열(사이드바 오른쪽, page-width)과 같은 세로선에 맞춘다
+   2) 단원 도입: 번호 상자(64px)와 제목+부제 묶음의 위아래 끝을 맞춘다 */
+@media (min-width: 1025px) {
+  .nav-inner {
+    box-sizing: border-box;
+    max-width: calc(var(--page-width) + 2 * var(--space-6));
+    margin: 0 0 0 calc(var(--sidebar-width) + max(0px, (100% - var(--sidebar-width) - var(--page-width) - 2 * var(--space-6)) / 2));
+  }
+}
+.module-header { align-items: center; row-gap: 0; }
+.module-header .module-number { grid-row: 1 / span 2; align-self: center; }
+.module-header .module-title { line-height: 1.15; align-self: end; margin: 0; }
+.module-header .module-subtitle { line-height: 1.45; align-self: start; margin: 4px 0 0; }

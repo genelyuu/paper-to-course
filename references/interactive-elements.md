@@ -8,6 +8,8 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 ## 목차
 0. [모듈 골격과 내비게이션 (Module Skeleton & Navigation)](#모듈-골격과-내비게이션-module-skeleton--navigation)
 0.5. [코넬식 페이지와 지면 요소](#코넬식-페이지와-지면-요소)
+   - [개념 그림 (Concept Figures)](#개념-그림-concept-figures)
+   - [페이지 넘김 (Page Navigation)](#페이지-넘김-page-navigation)
 1. [표지와 히어로 섹션 (Cover Page)](#표지와-히어로-섹션-cover-page)
 2. [수식 유도 단계별 풀이 (Math Derivation Walkthrough)](#수식-유도-단계별-풀이-math-derivation-walkthrough)
 3. [의사코드 단계별 풀이 (Pseudocode Walkthrough)](#의사코드-단계별-풀이-pseudocode-walkthrough)
@@ -15,6 +17,7 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 5. [연구 계보 트리 (Research Lineage Tree)](#연구-계보-트리-research-lineage-tree)
 6. [연구 대화 (Research Dialogue)](#연구-대화-research-dialogue)
 7. [SVG 다이어그램 (SVG Diagrams)](#svg-다이어그램-svg-diagrams)
+   - [문항 삽화 (Question Figure)](#문항-삽화-question-figure)
 8. [객관식 퀴즈 (Multiple-Choice Quizzes)](#객관식-퀴즈-multiple-choice-quizzes)
 9. [드래그 앤 드롭 매칭 (Drag-and-Drop Matching)](#드래그-앤-드롭-매칭-drag-and-drop-matching)
 10. [숨은 가정 찾기 (Spot the Assumption)](#숨은-가정-찾기-spot-the-assumption)
@@ -26,6 +29,8 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 16. [용어 툴팁 (Glossary Tooltips)](#용어-툴팁-glossary-tooltips)
 17. [번호 단계 카드 (Numbered Step Cards)](#번호-단계-카드-numbered-step-cards)
 18. [아이콘 라벨 행 (Icon-Label Rows)](#아이콘-라벨-행-icon-label-rows)
+19. [첫 페이지: 왜 썼는가와 새로운 점](#첫-페이지-왜-썼는가와-새로운-점)
+20. [연구 계보: 이어받은 것과 달라진 것](#연구-계보-이어받은-것과-달라진-것)
 
 ---
 
@@ -57,7 +62,7 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
   <div class="module-content">
 
     <div class="module-header">
-      <span class="module-number">3.2</span>
+      <span class="module-number">2</span>
       <h2 class="module-title">어텐션</h2>
       <p class="module-subtitle">쿼리, 키, 값으로 토큰 사이의 관련도를 계산하는 과정을 익힌다</p>
     </div>
@@ -111,13 +116,13 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 
 **Rules:**
 - `<section class="module" id="module-N">`의 `N`은 0부터 연속한 번호이다. 메뉴의 모듈 수보다 적게 만들어도 번호를 건너뛰지 않고 `module-0`, `module-1`, …로 매기고 파일명도 `00-`, `01-`, …로 매긴다.
-- `.module-number`는 **논문의 절 번호**(`3.2`, `6`, 여러 절을 묶으면 `1–2`, 논문 밖 선수 학습은 `0`)이다. `.module-title`은 그 절 제목의 한국어 번역이다. CSS가 교과 색 64px 사각 블록에 흰 숫자로 표시한다(옅은 장식이 아니다). `.module-header` 아래에는 2px 교과 색 선이 그려진다.
+- `.module-number`는 **모듈의 연속 번호**(`1`, `2`, `3` …)이다. 논문 절 번호(`3.2`, `1–2`)나 `0`을 쓰지 않는다. `.module-title`은 해당 논문 절 제목의 한국어 번역이다. 논문 위치는 화면 제목 끝의 `.paper-ref`에 적는다(예: `<h3 class="screen-heading">스케일드 내적 어텐션<span class="paper-ref">논문 3.2.1절</span></h3>`). CSS가 교과 색 64px 사각 블록에 흰 숫자로 표시한다(옅은 장식이 아니다). `.module-header` 아래에는 2px 교과 색 선이 그려진다.
 - 모듈 제목은 `<h2 class="module-title">`, 화면 제목은 `<h3 class="screen-heading">`이다. 화면 안의 더 작은 제목은 `<h4>`를 쓴다.
 - 모듈 하나의 화면(`.screen.cornell`)은 3~6개이며 각각 한 페이지이다. 코넬 형식이 아닌 `.screen`은 쓰지 않는다(`check-pages.py`가 보고한다).
 - 한 페이지는 데스크톱 한 화면(1440×900)에 스크롤 없이 들어가야 한다. 넘치면 내용을 줄이지 말고 페이지를 나눈다.
 - `.module-content` 밖에 보일러플레이트(`<html>`, `<head>`, `<script>`)를 두지 않는다.
 
-**배경 지식 표시:** 논문 이전의 배경만 다루는 화면(모듈 0의 모든 화면, 그 밖의 배경 전용 콜아웃)은 화면 맨 위에 `배경 지식` 콜아웃을 둔다. 전용 소형 라벨 클래스가 `styles.css`에 없으므로 `callout callout-info`를 쓴다. 이 콜아웃은 `보충 설명`·`더 알아보기`의 모듈당 2개 상한에 넣지 않는다.
+**배경 지식 표시:** 논문 이전의 배경만 다루는 화면(모듈 0, 곧 id 기준 첫 모듈이자 화면 번호 1인 모듈의 모든 화면, 그 밖의 배경 전용 콜아웃)은 화면 맨 위에 `배경 지식` 콜아웃을 둔다. 전용 소형 라벨 클래스가 `styles.css`에 없으므로 `callout callout-info`를 쓴다. 이 콜아웃은 `보충 설명`·`더 알아보기`의 모듈당 2개 상한에 넣지 않는다.
 ```html
 <div class="callout callout-info animate-in">
   <div class="callout-icon">&#128214;</div>
@@ -131,17 +136,17 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 
 **`_base.html`의 NAV_DOTS(모듈마다 하나):**
 ```html
-<button class="nav-dot" data-target="module-1" data-tooltip="핵심 아이디어: 어텐션 연산" aria-label="모듈 1: 핵심 아이디어: 어텐션 연산"></button>
+<button class="nav-dot" data-target="module-1" data-tooltip="2 어텐션" aria-label="2단원 어텐션"></button>
 ```
 **`_base.html`의 SIDEBAR_ITEMS(모듈마다 하나):**
 ```html
-<a class="sidebar-item" data-module="1" href="#module-1"><span class="sidebar-item-num">01</span><span class="sidebar-item-label">핵심 아이디어: 어텐션 연산</span><span class="sidebar-item-indicator"></span></a>
+<a class="sidebar-item" data-module="1" href="#module-1"><span class="sidebar-item-num">2</span><span class="sidebar-item-label">어텐션</span><span class="sidebar-item-indicator"></span></a>
 ```
 
 **Rules:**
 - `data-target`은 `#` 없이 id만 쓴다(`module-1`). 사이드바의 `href`는 `#module-1`처럼 `#`을 붙인다.
-- `data-tooltip`에는 모듈 제목을 쓴다(CSS가 `attr(data-tooltip)`로 표시한다).
-- `sidebar-item-num`은 모듈 번호와 같은 논문 절 번호, `sidebar-item-label`은 모듈 제목이다. 내비게이션 점의 `data-tooltip`은 `3.2 어텐션`처럼 번호와 제목을 함께 쓴다.
+- `data-tooltip`에는 연속 번호와 모듈 제목을 함께 쓴다(`2 어텐션`, CSS가 `attr(data-tooltip)`로 표시한다). `aria-label`은 `2단원 어텐션` 형식이다.
+- `sidebar-item-num`은 모듈 번호(`1`, `2`, `3` …, 앞에 0을 붙이지 않는다), `sidebar-item-label`은 모듈 제목이다. 표지 `toc-num`도 같은 번호를 쓴다.
 - 첫 번째 항목(`module-0`)에만 `active`를 미리 붙이지 않는다. 활성 상태는 스크롤에 따라 `main.js`가 붙인다.
 
 ---
@@ -204,9 +209,26 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 
 ### 단원 도입과 표지 요소
 
-- `.sec-num`: 화면 제목 앞의 논문 절 번호(`<span class="sec-num">3.2.1</span>`). 교과 색 굵은 숫자로 표시되고 네모 표지를 대신한다. `corner-tag`와 함께 쓸 수 있다.
+- `.paper-ref`: 화면 제목 끝에 붙이는 작고 흐린 논문 위치 태그(`<span class="paper-ref">논문 3.2.1절</span>`). 논문의 해당 절에서 온 화면에만 붙이고, 논문 밖 배경 지식·확장 화면(모듈 0 등)에는 붙이지 않는다. 모듈 번호와 별개이다. `.sec-num`(제목 앞 절 번호)은 폐기됐다. 옛 강의용으로 CSS만 남아 있으니 새로 쓰지 않는다.
 - `.module-number`: 64px 교과 색 블록에 흰 숫자. `.module-header`는 2px 교과 색 선으로 닫힌다.
 - `.course-cover`: 아래에 8px 교과 색 띠가 붙는다.
+
+### 개념 그림 (Concept Figures)
+
+새로 도입하는 개념·알고리즘·수식마다 코드로 그린 그림을 둔다. 숫자는 본문과 같게 하고, 페이지가 765px를 넘지 않도록 `.with-figure` + `figure.figure.side`로 본문 옆에 둔다. `.figure`와 `.svg-diagram` 안에서 쓰는 클래스는 다음과 같다.
+- 선·면: `.ink`, `.ink.strong`, `.ink-fill`(검정 계열), `.accent`, `.accent-fill`(교과 색), `.guide`, `.guide-axis`, `.guide-fill`(격자·축·보조 면), `.row-accent`(강조 행), `.edge-line.thin`, `.edge-line.dashed`(간선), `.dot`, `.dot-accent`(점)
+- 글자: `text.mono`, `text.muted`, `text.accent-text`. 수학 기호는 라벨 안에서 `<i class="mi">q</i>`(KaTeX 수학 글꼴 + 이탤릭), SVG `<text>`에서는 `font-style="italic"`.
+- 모양·크기: `.node-rect.sq`(거의 직각인 노드, 행렬·칩). 본문 옆 그림 폭은 `figure.figure.side`에 `--figure-side-width`(기본 200px)를 주어 바꾼다.
+- 색 사용 기준(먹색 + 교과 색 + 회색만, 그림당 유채색 하나)은 `design-system.md` "색상 규약"을 따른다.
+- 설명: `.figure-caption`. 너비에 맞추려면 `.svg-diagram.fit`에 `--diagram-max`를 준다.
+- 새 개념을 도입하는데 그림이 없으면 안 된다. 개념마다 그림 하나를 둔다.
+- 예: 격자 위 내적 벡터, 소프트맥스 가중치 막대, 행렬 형상 n×d_k · d_k×n = n×n, 스케일 전후 소프트맥스 막대, 멀티헤드 분할 512→8×64→연결, BLEU n-gram 겹침 칩.
+
+### 페이지 넘김 (Page Navigation)
+
+`main.js`의 `initPager()`가 쪽을 모은다. 쪽은 표지, 모듈마다 단원 도입과 첫 화면, 그 뒤의 각 `.screen`이다. ←/↑/PageUp은 이전 쪽, →/↓/PageDown은 다음 쪽, Home/End는 처음/끝 쪽으로 간다. 우하단 고정 `.pager`(‹ n / N ›와 "방향키로도 넘길 수 있다" 안내)는 JS가 넣으므로 마크업을 쓰지 않는다. 방향키를 `preventDefault`하는 다른 `keydown` 핸들러를 추가하지 않는다.
+
+**Space 키.** Space는 현재 페이지의 주 버튼을 누른다. 수식 유도와 의사코드 풀이에서는 다음 단계로 간다. 확인 문제 페이지에서는 선택 없이 정답과 해설을 바로 공개한다. Shift+Space는 이전 단계이다. 더 할 일이 없으면(마지막 단계이거나 주 버튼이 없으면) 다음 페이지로 넘어간다. 따라서 한 페이지에는 주 인터랙티브 요소를 가능하면 하나만 둔다. 버튼은 마우스 사용자를 위해 그대로 둔다. Space를 `preventDefault`하는 다른 `keydown` 핸들러를 추가하지 않는다. `.module`에는 `scroll-snap-align: start`와 `scroll-margin-top`이 걸려 있다.
 
 ---
 
@@ -241,8 +263,8 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
     <nav class="course-cover-toc" aria-label="차례">
       <span class="course-cover-toc-label">차례</span>
       <ol>
-        <li><a href="#module-0"><span class="toc-num">00</span>배경 지식과 선수 학습</a></li>
-        <li><a href="#module-1"><span class="toc-num">01</span>…</a></li>
+        <li><a href="#module-0"><span class="toc-num">1</span>서론과 배경</a></li>
+        <li><a href="#module-1"><span class="toc-num">2</span>…</a></li>
       </ol>
     </nav>
   </div>
@@ -272,7 +294,7 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 <div class="math-derivation animate-in" id="math-deriv-1">
   <div class="math-step" data-step="0">
     <div class="math-equation">
-      $$L_{GRPO} = -\mathbb{E}_{q \sim P(Q)} \left[ \frac{1}{G} \sum_{i=1}^{G} \min\left( \frac{\pi_\theta(o_i|q)}{\pi_{ref}(o_i|q)} A_i, \text{clip}(\cdot) A_i \right) \right]$$
+      $$L_{\mathit{GRPO}} = -\mathbb{E}_{q \sim P(Q)} \left[ \frac{1}{G} \sum_{i=1}^{G} \min\left( \frac{\pi_\theta(o_i|q)}{\pi_{\mathit{ref}}(o_i|q)} A_i, \mathit{clip}(\cdot) A_i \right) \right] \tag{1}$$
     </div>
     <div class="math-explanation">
       <p>GRPO의 손실 함수는 모델의 응답이 참조 정책(Reference Policy)과 얼마나 다른지를 측정한다. 어드밴티지(Advantage) $A_i$는 각 응답이 평균에 비해 얼마나 좋은지를 나타낸다.</p>
@@ -281,7 +303,7 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 
   <div class="math-step" data-step="1" style="display:none">
     <div class="math-equation">
-      $$A_i = \frac{r_i - \text{mean}(\{r_1, ..., r_G\})}{\text{std}(\{r_1, ..., r_G\})}$$
+      $$A_i = \frac{r_i - \mathit{mean}(\{r_1, ..., r_G\})}{\mathit{std}(\{r_1, ..., r_G\})}$$
     </div>
     <div class="math-explanation">
       <p>어드밴티지는 그룹 내 정규화로 계산한다. 각 응답의 보상에서 평균을 빼고 표준편차로 나눈다. 이렇게 하면 같은 그룹의 다른 응답과 비교해 각 응답이 얼마나 나은지 알 수 있다.</p>
@@ -302,6 +324,7 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 **Rules:**
 - 각 단계에서는 변형 하나 또는 통찰 하나만 설명합니다.
 - 설명은 "미분한다" 같은 기계적 서술이 아니라 쉬운 말로 풀어 씁니다.
+- 수식은 모두 이탤릭이다. 함수 이름·첨자 낱말은 `\mathit{}`, 벡터는 `\boldsymbol{}`를 쓰고 `\text`·`\mathrm`·`\mathbf`는 쓰지 않는다(KO112). 논문에 번호가 있는 식에만 `\tag{n}`을 단다(위 예의 `\tag{1}`). 규칙은 `korean-style-guide.md` §7.
 - KaTeX가 `$$...$$` 블록을 자동으로 렌더링하며, 새 단계가 나타날 때 `main.js`가 다시 렌더링합니다.
 - 설명 안의 인라인 수식은 `$...$`를 씁니다. 수식 앞뒤는 한 칸 띄우고, 조사는 읽는 발음에 맞춥니다(`$A_i$는`).
 
@@ -351,6 +374,7 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 ```
 
 **Rules:**
+- **코드 색:** 코드 칸은 IDE 토큰 색(Catppuccin, `styles.css`의 `.code-keyword`·`.code-function`·`.code-comment`·`.code-number`·`.code-operator`·`.code-string`)을 따른다. `main.js`가 줄을 읽어 대문자 제어어(INPUT, FOR, DO, END, OUTPUT …)는 키워드, `이름(`은 함수, `//` 뒤는 주석, 숫자와 `= / * + -`는 각각 숫자·연산자로 자동 색칠한다. 줄은 일반 텍스트로 쓰면 되고, 직접 `<span class="code-…">`로 칠한 줄은 건드리지 않는다. 다른 색을 새로 정하지 않는다.
 - `.pseudocode-controls`(이전·다음·처음부터 버튼과 `.pseudocode-progress`)는 반드시 `.pseudocode-translation` 컨테이너 **안**에 둔다. `main.js`가 컨테이너 안에서만 버튼을 찾으므로 밖에 두면 동작하지 않는다.
 - 의사코드는 특정 언어에 얽매이지 않게 씁니다. `INPUT`, `OUTPUT`, `FOR EACH`, `IF...THEN` 같은 키워드는 관례대로 영어를 유지하고(Python/C++ 문법은 쓰지 않습니다), 주석(`//`)과 오른쪽 설명만 한국어로 씁니다.
 - 각 줄은 설명 줄과 1:1로 대응합니다.
@@ -438,25 +462,26 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 </div>
 ```
 
-**SVG 기반 트리 (복잡한 계보용):**
+**SVG 기반 트리 (복잡한 계보용):** 간선은 직각 `<path>`와 화살촉 `<polygon>`, 노드 라벨은 `foreignObject > div.node-label > span`이다.
 ```html
 <div class="svg-diagram">
-  <svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
-    <rect class="node-rect accent" x="300" y="20" width="200" height="60" rx="12"/>
-    <text x="400" y="50" text-anchor="middle" font-weight="700" font-size="14">LoPE</text>
-    <text x="400" y="68" text-anchor="middle" font-size="11" fill="#9E9790">본 논문, 2026</text>
+  <svg viewBox="0 0 800 368" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="LoPE가 GRPO를 거쳐 PPO를 이어받음">
+    <rect class="node-rect accent" x="300" y="8" width="200" height="72" rx="12"/>
+    <foreignObject x="308" y="12" width="184" height="64"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label"><span>LoPE<br/>본 논문, 2026</span></div></foreignObject>
 
-    <line class="edge-line accent" x1="400" y1="80" x2="200" y2="150"/>
-    <text x="280" y="115" font-size="10" fill="#9E9790" font-weight="500">개선</text>
-    <rect class="node-rect" x="100" y="150" width="200" height="60" rx="12"/>
-    <text x="200" y="180" text-anchor="middle" font-weight="700" font-size="14">GRPO</text>
+    <path class="edge-line accent" d="M400,80 V115 H200 V140"/>
+    <polygon class="edge-arrow accent" points="195,140 205,140 200,150"/>
+    <rect class="node-rect" x="100" y="150" width="200" height="72" rx="12"/>
+    <foreignObject x="108" y="154" width="184" height="64"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label"><span>GRPO<br/>Shao et al., 2024</span></div></foreignObject>
 
-    <line class="edge-line" x1="200" y1="210" x2="200" y2="280"/>
-    <rect class="node-rect" x="100" y="280" width="200" height="60" rx="12"/>
-    <text x="200" y="310" text-anchor="middle" font-weight="700" font-size="14">PPO</text>
+    <path class="edge-line" d="M200,222 V270"/>
+    <polygon class="edge-arrow" points="195,270 205,270 200,280"/>
+    <rect class="node-rect" x="100" y="280" width="200" height="72" rx="12"/>
+    <foreignObject x="108" y="284" width="184" height="64"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label"><span>PPO<br/>Schulman et al., 2017</span></div></foreignObject>
   </svg>
 </div>
 ```
+간선은 수평·수직 선분만 쓴다(`design-system.md` "도식 간선은 직각으로"). 화살촉은 마지막 선분 끝에 두고, 선은 화살촉 밑변에서 멈춘다.
 
 ---
 
@@ -513,7 +538,7 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 <div class="svg-diagram animate-in">
   <svg viewBox="0 0 800 128" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="그림 내용을 한 문장으로">
     <rect class="node-rect" x="16" y="8" width="156" height="64" rx="12"/>
-    <foreignObject x="24" y="12" width="140" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span>원본 프롬프트 <i>q</i></span></div></foreignObject>
+    <foreignObject x="24" y="12" width="140" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span>원본 프롬프트 <i class="mi">q</i></span></div></foreignObject>
     <line class="edge-line" x1="172" y1="40" x2="210" y2="40"/>
     <polygon class="edge-arrow" points="210,45 220,40 210,35"/>
     <!-- 다음 노드 x = 16 + i × (156 + 48) -->
@@ -531,7 +556,40 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 - 강조(`accent`)는 논문의 결론 노드와 그리로 들어가는 간선 하나에만 쓴다.
 - 반응형으로 만들기 위해 `viewBox`와 `width="100%"`를 쓴다. 색상은 CSS 변수를 쓴다.
 - **한글 라벨은 박스를 더 넓게 잡는다.** 한글은 글자당 약 1em이다(14px면 글자당 약 14px).
-- SVG 텍스트에 이탤릭을 쓰지 않는다. 한글에는 이탤릭이 없다.
+- **간선은 직각이다.** 대각선 `<line>`을 쓰지 않고 `<path class="edge-line" d="M400,80 V115 H200 V140"/>`처럼 수평·수직 선분과 화살촉 `<polygon>`으로 그린다. 같은 단계로 갈라질 때는 세로 버스 한 줄에서 분기한다.
+- **수학 기호는 이탤릭, 한글은 똑바로.** 라벨 속 기호는 `<i class="mi">q</i>`(일반 `<i>`는 똑바른 글씨가 된다), `<text>` 속 기호는 `font-style="italic"`. 한글 라벨에는 이탤릭을 쓰지 않는다.
+- 각진 노드는 `.node-rect.sq`, 너비 맞춤은 `.svg-diagram.fit` + `--diagram-max`, 본문 옆 그림 폭은 `--figure-side-width`이다. 색은 `design-system.md` "색상 규약"을 따른다.
+
+---
+
+## 문항 삽화 (Question Figure)
+
+수능특강 문항처럼 발문 아래에 그림을 둔다. 선택지 오른쪽에 놓아 페이지 높이를 늘리지 않는다. 그림을 만드는 방법과 스타일 규칙은 `illustration.md`에 있다.
+
+```html
+<div class="quiz-question-block" data-correct="option-d" data-explanation-right="④ | …" data-explanation-wrong="| 정답은 ④이다. …">
+  <h3 class="quiz-question"><span class="q-num">3</span>그림은 좌표평면 위에 쿼리 벡터 $\boldsymbol{q}$와 키 벡터 $\boldsymbol{k}_1$, $\boldsymbol{k}_2$를 나타낸 것이다. 모눈 한 칸의 길이는 1이다. 이에 대한 설명으로 옳지 <u>않은</u> 것은?</h3>
+  <div class="q-body">
+    <div class="quiz-options">…선택지 5개…</div>
+    <figure class="q-figure" aria-label="그림 내용을 한 문장으로">
+      <svg viewBox="0 0 216 136" xmlns="http://www.w3.org/2000/svg" role="img">
+        <path class="guide" d="…모눈…"/>
+        <line class="ink" …/>                       <!-- 먹선 1.5 -->
+        <line class="ink accent" stroke-width="2" …/> <!-- 강조는 하나 -->
+        <text font-style="italic" …>O</text>   <!-- 수학 기호는 이탤릭 -->
+      </svg>
+    </figure>
+  </div>
+  <div class="quiz-feedback"></div>
+</div>
+```
+
+- 발문은 `그림은 ~을 나타낸 것이다.`로 그림을 먼저 소개한 뒤 묻는다. 그림 번호(그림 1)는 쓰지 않는다.
+- 색은 먹색 + 교과 색 + 회색만 쓴다(`design-system.md` "색상 규약").
+- 클래스: `ink`(먹선), `ink-fill`(먹 채움), `accent`·`accent-fill`(교과 색), `guide`(모눈·보조선, 회색 1px), `accent-text`(강조 라벨).
+- 폭은 기본 280px(`--q-figure-width`로 조절). 640px 이하에서는 선택지 아래로 내려간다.
+- 탐구 자료 본문의 그림은 `<figure class="figure">`(노트 칸 가운데, 최대 60%)를 쓴다.
+- `check-pages.py`가 래스터 이미지, 불러오지 못한 이미지, 교과 색 외 유채색을 검출한다.
 
 ---
 
@@ -853,3 +911,38 @@ codebase-to-course와 같은 패턴이며 개념과 정의, 방법과 논문 등
   </div>
 </div>
 ```
+
+
+## 첫 페이지: 왜 썼는가와 새로운 점
+
+1단원 첫 페이지(단원 도입 + 첫 화면)는 한 장으로 논문의 동기와 기여를 전한다. 765px 안에 다음 세 가지를 순서대로 둔다.
+
+1. **문제 문단:** 이전 방식의 한계와 이 논문을 쓴 이유를 2~3문장으로.
+2. **비교 그림:** `.svg-diagram`을 둘로 나누어 왼쪽 "이전 방식", 오른쪽 "제안 방식"(교과 색). 같은 입력(예: $x_1, \ldots, x_4$)을 같은 위치에 두고 처리 경로만 다르게 그린다. 간선은 직각, 패널 아래에 차이를 한 줄로(예: "순차 단계 $n$번" 대 "1번").
+3. **새로운 점:** `.callout.callout-accent` 안 `<ol>` 3개 이내. 항목마다 `<strong>이름:</strong>` + 논문 수치 근거.
+
+**비교 그림 골격.** 하나의 `.svg-diagram` 안 viewBox를 둘로 나눈다(왼쪽 0~392 이전 방식, 오른쪽 408~800 제안 방식). 입력 노드는 두 패널에서 같은 y에 놓고, 간선은 직각 `<path>`로 그린다.
+```html
+<div class="svg-diagram animate-in">
+  <svg viewBox="0 0 800 216" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="이전 방식은 순차 처리, 제안 방식은 한 번에 처리함">
+    <!-- 왼쪽: 이전 방식 (먹색) -->
+    <foreignObject x="16" y="8" width="360" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label"><span>이전 방식</span></div></foreignObject>
+    <rect class="node-rect" x="16" y="48" width="72" height="48" rx="12"/>
+    <foreignObject x="20" y="52" width="64" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label"><span><i class="mi">x</i><sub>1</sub></span></div></foreignObject>
+    <path class="edge-line" d="M88,72 H112"/>
+    <polygon class="edge-arrow" points="112,67 122,72 112,77"/>
+    <!-- … 같은 간격으로 x₂, x₃, x₄ -->
+    <!-- 오른쪽: 제안 방식 (교과 색) — 입력 위치는 왼쪽과 같게 -->
+    <rect class="node-rect accent" x="408" y="48" width="72" height="48" rx="12"/>
+    <!-- … -->
+    <!-- 패널 아래: 차이 한 줄 -->
+    <foreignObject x="16" y="176" width="368" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; color:var(--color-text-secondary)"><span>순차 단계 <i class="mi">n</i>번</span></div></foreignObject>
+    <foreignObject x="408" y="176" width="376" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>한 번에 1번</span></div></foreignObject>
+  </svg>
+</div>
+```
+교과 색(`accent`)은 제안 방식 쪽에만 쓴다(그림당 유채색 하나).
+
+## 연구 계보: 이어받은 것과 달라진 것
+
+갈래마다 노드 뒤에 `<p class="lineage-note">이어받은 것. → <strong class="novelty">달라진 것</strong>.</p>`를 둔다. 루트 노드에는 `<span class="novelty-badge">한 줄 기여</span>`. 단서 칸에는 "새로운 점" 콜아웃으로 앞선 연구와의 차이를 한 문장으로 쓴다.

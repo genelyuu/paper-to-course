@@ -2,7 +2,7 @@
   <div class="module-content">
 
     <div class="module-header">
-      <span class="module-number">6</span>
+      <span class="module-number">3</span>
       <h2 class="module-title">결과</h2>
       <p class="module-subtitle">번역 성능 비교표를 읽고 수치의 의미와 한계를 따진다</p>
     </div>
@@ -25,8 +25,56 @@
       </aside>
       <div class="notes">
         <h3 class="screen-heading">평가 지표 BLEU</h3>
-        <p>어텐션만 쓴 모델은 기존 번역 모델보다 정말 나을까? 논문은 WMT 2014 영어-독일어와 영어-프랑스어 번역 <span class="term" data-definition="벤치마크(benchmark): 여러 모델의 성능을 같은 조건에서 비교하려고 정해 둔 표준 데이터와 평가 방법.">벤치마크</span>(benchmark)에서 모델을 평가한다. 지표는 <span class="term" data-definition="BLEU(번역 품질 지표): 기계가 만든 번역과 사람이 만든 참조 번역에서 겹치는 단어 묶음의 비율로 번역 품질을 재는 지표. 0에서 100 사이의 값이며 클수록 좋음.">BLEU</span>(번역 품질 지표)이다.</p>
-        <p>BLEU는 기계 번역과 사람 번역 사이에 겹치는 단어 묶음이 많을수록 높아진다. 같은 벤치마크에서 비교할 때만 수치의 크고 작음이 의미를 가진다.</p>
+        <div class="with-figure" style="--figure-side-width:260px">
+          <div>
+            <p>어텐션만 쓴 모델은 기존 번역 모델보다 정말 나을까? 논문은 WMT 2014 영어-독일어와 영어-프랑스어 번역 <span class="term" data-definition="벤치마크(benchmark): 여러 모델의 성능을 같은 조건에서 비교하려고 정해 둔 표준 데이터와 평가 방법.">벤치마크</span>(benchmark)에서 모델을 평가한다. 지표는 <span class="term" data-definition="BLEU(번역 품질 지표): 기계가 만든 번역과 사람이 만든 참조 번역에서 겹치는 단어 묶음의 비율로 번역 품질을 재는 지표. 0에서 100 사이의 값이며 클수록 좋음.">BLEU</span>(번역 품질 지표)이다.</p>
+            <p>BLEU는 기계 번역과 사람 번역 사이에 겹치는 단어 묶음이 많을수록 높아진다. 같은 벤치마크에서 비교할 때만 수치의 크고 작음이 의미를 가진다.</p>
+            <p>그림처럼 정답지와 답안을 나란히 놓고 겹치는 단어마다 체크하여 세듯, BLEU는 참조 번역과 겹치는 단어 묶음을 센다.</p>
+          </div>
+          <figure class="figure side"><img src="assets/fig-grading.svg" alt="정답지와 답안을 나란히 놓고 겹치는 단어마다 체크해 6개 중 5개를 센다"></figure>
+        </div>
+        <div class="svg-diagram fit animate-in" style="--diagram-max:720px"><svg viewBox="0 0 579 128" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="참조 번역과 기계 번역에서 겹치는 단어는 6개 중 5개, 겹치는 2단어 묶음은 5개 중 3개">
+<text x="16" y="27" text-anchor="start" font-size="13" font-weight="700">참조 번역</text>
+<rect class="node-rect" x="112.0" y="8" width="49.2" height="28" rx="6"/>
+<text x="136.6" y="27" class="mono" text-anchor="middle" font-size="14">the</text>
+<rect class="node-rect" x="167.2" y="8" width="49.2" height="28" rx="6"/>
+<text x="191.8" y="27" class="mono" text-anchor="middle" font-size="14">cat</text>
+<rect class="node-rect" x="222.4" y="8" width="40.8" height="28" rx="6"/>
+<text x="242.8" y="27" class="mono" text-anchor="middle" font-size="14">is</text>
+<rect class="node-rect" x="269.2" y="8" width="40.8" height="28" rx="6"/>
+<text x="289.6" y="27" class="mono" text-anchor="middle" font-size="14">on</text>
+<rect class="node-rect" x="316.0" y="8" width="49.2" height="28" rx="6"/>
+<text x="340.6" y="27" class="mono" text-anchor="middle" font-size="14">the</text>
+<rect class="node-rect" x="371.2" y="8" width="49.2" height="28" rx="6"/>
+<text x="395.8" y="27" class="mono" text-anchor="middle" font-size="14">mat</text>
+<text x="16" y="71" text-anchor="start" font-size="13" font-weight="700">기계 번역</text>
+<rect class="node-rect accent" x="112.0" y="52" width="49.2" height="28" rx="6"/>
+<text x="136.6" y="71" class="mono" text-anchor="middle" font-size="14">the</text>
+<rect class="node-rect accent" x="167.2" y="52" width="49.2" height="28" rx="6"/>
+<text x="191.8" y="71" class="mono" text-anchor="middle" font-size="14">cat</text>
+<rect class="node-rect" x="222.4" y="52" width="49.2" height="28" rx="6"/>
+<text x="247" y="71" class="mono" text-anchor="middle" font-size="14">sat</text>
+<rect class="node-rect accent" x="277.6" y="52" width="40.8" height="28" rx="6"/>
+<text x="298" y="71" class="mono" text-anchor="middle" font-size="14">on</text>
+<rect class="node-rect accent" x="324.4" y="52" width="49.2" height="28" rx="6"/>
+<text x="349" y="71" class="mono" text-anchor="middle" font-size="14">the</text>
+<rect class="node-rect accent" x="379.6" y="52" width="49.2" height="28" rx="6"/>
+<text x="404.2" y="71" class="mono" text-anchor="middle" font-size="14">mat</text>
+<text x="16" y="111" text-anchor="start" font-size="13" font-weight="700">2단어 묶음</text>
+<line class="edge-line accent" x1="136.6" y1="102" x2="191.8" y2="102"/>
+<circle class="dot-accent" cx="136.6" cy="102" r="3"/><circle class="dot-accent" cx="191.8" cy="102" r="3"/>
+<line class="edge-line dashed" x1="191.8" y1="112" x2="247.0" y2="112"/>
+<circle class="dot" cx="191.8" cy="112" r="3"/><circle class="dot" cx="247.0" cy="112" r="3"/>
+<line class="edge-line dashed" x1="247.0" y1="102" x2="298.0" y2="102"/>
+<circle class="dot" cx="247.0" cy="102" r="3"/><circle class="dot" cx="298.0" cy="102" r="3"/>
+<line class="edge-line accent" x1="298.0" y1="112" x2="349.0" y2="112"/>
+<circle class="dot-accent" cx="298.0" cy="112" r="3"/><circle class="dot-accent" cx="349.0" cy="112" r="3"/>
+<line class="edge-line accent" x1="349.0" y1="102" x2="404.2" y2="102"/>
+<circle class="dot-accent" cx="349.0" cy="102" r="3"/><circle class="dot-accent" cx="404.2" cy="102" r="3"/>
+<text x="458.8" y="71" class="accent-text" text-anchor="start" font-size="13">1단어 일치 5/6</text>
+<text x="458.8" y="112" class="accent-text" text-anchor="start" font-size="13">2단어 일치 3/5</text>
+</svg></div>
+        <p>그림은 참조 번역과 기계 번역에서 겹치는 단어(색칠한 칸)와 겹치는 2단어 묶음(색 선)을 나타낸 것이다. 단어는 6개 중 5개, 2단어 묶음은 5개 중 3개가 겹친다. BLEU는 이런 비율을 1단어부터 4단어 묶음까지 구해 합친 값이다.</p>
       </div>
       <div class="summary"><span class="summary-label">요약</span><p>BLEU는 참조 번역과 겹치는 단어 묶음이 많을수록 높고 같은 벤치마크 안에서만 비교한다.</p></div>
     </div>
@@ -41,7 +89,7 @@
         </ul>
       </aside>
       <div class="notes">
-        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span><span class="sec-num">6.1</span>기계 번역</h3>
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>기계 번역<span class="paper-ref">논문 6.1절</span></h3>
         <p>그림은 두 번역 과제에서 <span class="term" data-definition="기준 모델(baseline): 새 방법의 성능을 판단하려고 비교 대상으로 삼는 기존 모델.">기준 모델</span>(baseline)과 트랜스포머의 BLEU를 나타낸 것이다. 위의 버튼으로 과제를 바꾸어 보시오.</p>
         <div class="result-comparison animate-in" data-unit="" data-max="45">
           <div class="result-header">
@@ -82,8 +130,8 @@
     <!-- 페이지 3: 해석 -->
     <div class="screen cornell">
       <aside class="cue">
-        <div class="callout callout-warning animate-in">
-          <div class="callout-icon">&#9888;</div>
+        <div class="callout callout-info animate-in">
+          <div class="callout-icon">&#9432;</div>
           <div class="callout-content">
             <strong class="callout-title">더 알아보기</strong>
             <p>번역 과제 두 개와 구문 분석 과제 하나로 일반화를 보인 연구이다. 모델 크기와 훈련 비용이 서로 다른 모델끼리 비교하므로 BLEU 차이를 모델 구조만의 효과로 읽으면 안 된다.</p>
@@ -94,21 +142,21 @@
         <h3 class="screen-heading">결과 해석</h3>
         <div class="icon-rows stagger-children animate-in">
           <div class="icon-row">
-            <div class="icon-circle" style="background: var(--color-actor-2)">DE</div>
+            <div class="icon-circle" style="background: var(--color-accent); color:#fff">DE</div>
             <div>
               <strong>영어-독일어: 큰 모델 28.4</strong>
-              <p>초록에 따르면 앙상블을 포함한 기존 최고 결과보다 2 BLEU 넘게 높다. 기본 모델도 27.3으로 단일 기준 모델보다 높다.</p>
+              <p>초록에 따르면 앙상블(ensemble)을 포함한 기존 최고 결과보다 2 BLEU 넘게 높다. 기본 모델도 27.3으로 단일 기준 모델보다 높다.</p>
             </div>
           </div>
           <div class="icon-row">
-            <div class="icon-circle" style="background: var(--color-actor-1)">FR</div>
+            <div class="icon-circle" style="background: var(--color-accent); color:#fff">FR</div>
             <div>
               <strong>영어-프랑스어: 큰 모델 41.8</strong>
               <p>단일 모델 기준 최고 성능이며 훈련에 쓴 시간은 GPU 8개로 3.5일이다.</p>
             </div>
           </div>
           <div class="icon-row">
-            <div class="icon-circle" style="background: var(--color-actor-4)">!?</div>
+            <div class="icon-circle" style="background: #1F2328; color:#fff">!?</div>
             <div>
               <strong>비판적으로 읽기</strong>
               <p>영어-프랑스어에서 기본 모델은 38.1로 합성곱 번역 모델 40.46보다 낮다. 우위는 큰 모델에서 나타난다.</p>
@@ -129,12 +177,14 @@
         </ul>
       </aside>
       <div class="notes">
-        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span><span class="sec-num">6.2</span>모델 변형: 헤드 수</h3>
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>모델 변형: 헤드 수<span class="paper-ref">논문 6.2절</span></h3>
         <p>논문은 <span class="term" data-definition="제거 실험(ablation study): 모델의 구성 요소를 하나씩 바꾸거나 빼고 성능 변화를 측정하여 그 요소의 기여를 확인하는 실험.">제거 실험</span>(ablation study)으로 헤드 수를 바꾸며 개발용 데이터 newstest2013의 영어-독일어 BLEU를 쟀다. 탭을 눌러 결과를 비교하시오.</p>
         <div class="ablation-demo animate-in">
           <div class="ablation-tabs">
             <button class="ablation-tab active" onclick="showLayer('abl-h8', this)">헤드 8개 (기본)</button>
             <button class="ablation-tab" onclick="showLayer('abl-h1', this)">헤드 1개</button>
+            <button class="ablation-tab" onclick="showLayer('abl-h4', this)">헤드 4개</button>
+            <button class="ablation-tab" onclick="showLayer('abl-h16', this)">헤드 16개</button>
             <button class="ablation-tab" onclick="showLayer('abl-h32', this)">헤드 32개</button>
           </div>
           <div class="ablation-viewport">
@@ -148,16 +198,26 @@
               <div class="ablation-delta">기준 대비 0.9 BLEU 낮음</div>
               <p class="ablation-description">헤드를 하나로 줄이면 성능이 떨어진다. 여러 관점으로 나누어 보는 구조가 도움이 된다.</p>
             </div>
+            <div class="ablation-layer" id="abl-h4" style="display:none">
+              <div class="ablation-metric">25.5 BLEU</div>
+              <div class="ablation-delta">기준 대비 0.3 BLEU 낮음</div>
+              <p class="ablation-description">헤드가 4개여도 8개와 차이가 크지 않다. 헤드 하나의 차원은 128이다.</p>
+            </div>
+            <div class="ablation-layer" id="abl-h16" style="display:none">
+              <div class="ablation-metric">25.8 BLEU</div>
+              <div class="ablation-delta neutral">기준과 같음</div>
+              <p class="ablation-description">헤드를 16개로 늘려도 8개와 BLEU가 같다. 따라서 8개만 최선이라고 볼 수 없다.</p>
+            </div>
             <div class="ablation-layer" id="abl-h32" style="display:none">
               <div class="ablation-metric">25.4 BLEU</div>
               <div class="ablation-delta">기준 대비 0.4 BLEU 낮음</div>
-              <p class="ablation-description">헤드가 너무 많아도 성능이 오히려 조금 낮아진다. 각 헤드의 차원이 너무 작아지기 때문으로 해석된다.</p>
+              <p class="ablation-description">헤드가 너무 많아도 성능이 조금 낮아진다. 헤드 하나의 차원(512/32=16)이 작아져 담을 수 있는 정보가 줄어든 것으로 해석할 수 있다.</p>
             </div>
           </div>
         </div>
         <p>이 표는 개발용 데이터의 값이어서 앞의 시험용 데이터 수치와 바로 견줄 수 없다. 수치 차이가 1 BLEU 안팎이므로 난수 시드에 따른 변동 범위를 함께 따져야 한다.</p>
       </div>
-      <div class="summary"><span class="summary-label">요약</span><p>헤드 8개가 1개나 32개보다 높지만 차이가 1 BLEU 안팎이므로 신중하게 해석해야 한다.</p></div>
+      <div class="summary"><span class="summary-label">요약</span><p>헤드 1개와 32개는 8개보다 낮지만 16개는 25.8로 같아 8개만 최고라 할 수 없다.</p></div>
     </div>
 
     <!-- 페이지 5: 핵심 정리와 확인 문제 -->
@@ -170,7 +230,7 @@
             <ol>
               <li>큰 트랜스포머는 영어-독일어 28.4 BLEU, 영어-프랑스어 41.8 BLEU를 기록하였다.</li>
               <li>영어-프랑스어에서 기본 모델은 합성곱 번역 모델보다 낮아 우위가 모델 크기에 일부 의존한다.</li>
-              <li>헤드 수 제거 실험은 헤드 1개가 8개보다 낮고, 32개도 8개보다 조금 낮음을 보인다.</li>
+              <li>헤드 수 제거 실험은 헤드 1개가 8개보다 낮고, 32개도 8개보다 조금 낮음을 보인다(표 3에는 4개 25.5, 16개 25.8도 있다).</li>
               <li>수치 비교 문항은 같은 데이터와 조건에서 잰 값인지부터 확인하라.</li>
             </ol>
           </div>
@@ -196,7 +256,7 @@
 
           <div class="quiz-question-block"
                data-correct="option-e"
-               data-explanation-right="⑤ | 헤드 수 실험은 개발용 데이터 한 가지 설정에서 쟀으므로 모든 과제에서 8개가 최선이라는 결론은 뒷받침되지 않는다."
+               data-explanation-right="⑤ | 헤드 수 실험은 개발용 데이터 한 가지 설정에서 쟀고 16개도 25.8로 같으므로 모든 과제에서 8개가 최선이라는 결론은 뒷받침되지 않는다."
                data-explanation-wrong="| 정답은 ⑤이다. 헤드 수 실험은 개발용 데이터의 영어-독일어에서만 쟀으므로 모든 과제에서 8개가 최선이라는 결론은 나오지 않는다. ②는 32개의 25.4가 8개의 25.8보다 낮으므로 옳다.">
             <h3 class="quiz-question"><span class="q-num">2</span>헤드 수 제거 실험(헤드 1개 24.9, 8개 25.8, 32개 25.4)의 결론으로 옳지 <u>않은</u> 것은?<span class="q-points">[3점]</span></h3>
             <div class="quiz-options">

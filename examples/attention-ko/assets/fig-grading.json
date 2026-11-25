@@ -1,0 +1,17 @@
+{
+  "model": "Efficient-Large-Model/Sana_Sprint_0.6B_1024px_diffusers",
+  "steps": 2,
+  "size": 1024,
+  "style": "minimal simple line icon (ill3/gen.py)",
+  "parts": [
+    "answer-11",
+    "pen-7"
+  ],
+  "composed": "BLEU: 정답지와 답안 비교",
+  "prompts": {
+    "book": "an open book seen from above",
+    "write": "a hand holding a pencil writing on an open notebook",
+    "answer": "a sheet of paper with a few handwritten lines and a check mark",
+    "pen": "a hand holding a pen putting check marks on a sheet of paper"
+  }
+}

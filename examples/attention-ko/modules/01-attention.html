@@ -2,7 +2,7 @@
   <div class="module-content">
 
     <div class="module-header">
-      <span class="module-number">3.2</span>
+      <span class="module-number">2</span>
       <h2 class="module-title">어텐션</h2>
       <p class="module-subtitle">스케일드 내적 어텐션과 멀티헤드 어텐션의 계산 과정을 따라간다</p>
     </div>
@@ -24,7 +24,7 @@
         </div>
       </aside>
       <div class="notes">
-        <h3 class="screen-heading"><span class="sec-num">3.2.1</span>스케일드 내적 어텐션</h3>
+        <h3 class="screen-heading">스케일드 내적 어텐션<span class="paper-ref">논문 3.2.1절</span></h3>
         <p>각 위치는 다른 위치의 정보를 어떻게 가져올까? 트랜스포머의 핵심은 <span class="term" data-definition="스케일드 내적 어텐션(scaled dot-product attention): 쿼리와 키의 내적을 키 차원의 제곱근으로 나눈 뒤 소프트맥스를 적용하고, 그 비중으로 값을 섞는 어텐션.">스케일드 내적 어텐션</span>(scaled dot-product attention)이다. 각 위치가 쿼리를 던지고, 모든 위치의 키와 비교하여 얻은 비중으로 값을 섞는다.</p>
         <div class="svg-diagram animate-in">
           <svg viewBox="0 0 800 136" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="쿼리와 키의 내적, 크기 조정, 소프트맥스, 값과의 곱을 거쳐 출력이 만들어지는 흐름">
@@ -33,7 +33,7 @@
             <line class="edge-line" x1="144" y1="44" x2="166" y2="44"/>
             <polygon class="edge-arrow" points="166,49 176,44 166,39"/>
             <rect class="node-rect" x="176" y="8" width="128" height="72" rx="12"/>
-            <foreignObject x="184" y="12" width="112" height="64"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span>크기 조정: d<sub>k</sub>의 제곱근으로 나누기</span></div></foreignObject>
+            <foreignObject x="184" y="12" width="112" height="64"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span>크기 조정: <i class="mi">d</i><sub>k</sub>의 제곱근으로 나누기</span></div></foreignObject>
             <line class="edge-line" x1="304" y1="44" x2="326" y2="44"/>
             <polygon class="edge-arrow" points="326,49 336,44 326,39"/>
             <rect class="node-rect" x="336" y="8" width="128" height="72" rx="12"/>
@@ -46,8 +46,39 @@
             <polygon class="edge-arrow accent" points="646,49 656,44 646,39"/>
             <rect class="node-rect accent" x="656" y="8" width="128" height="72" rx="12"/>
             <foreignObject x="664" y="12" width="112" height="64"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4; font-weight:700"><span>출력</span></div></foreignObject>
-            <foreignObject x="16" y="96" width="768" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4; color:var(--color-text-secondary)"><span>네 단계 모두 행렬 곱셈으로 한꺼번에 계산하므로 순서 의존이 없다</span></div></foreignObject>
+            <foreignObject x="16" y="96" width="768" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4; color:var(--color-text-secondary)"><span>모든 위치의 쿼리를 행렬 연산 한 번으로 한꺼번에 계산한다</span></div></foreignObject>
           </svg>
+        </div>
+        <p>그림은 길이 $n$인 문장에서 각 행렬의 크기를 나타낸 것이다. 점수 행렬 $S$와 비중 행렬 $W$는 $n \times n$이고, $W$의 한 행(색칠한 줄)은 한 쿼리가 모든 위치에 주는 비중으로 합이 1이다.</p>
+        <div class="svg-diagram fit animate-in" style="--diagram-max:640px">
+<svg viewBox="0 0 606 132" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Q와 K 전치의 곱은 n×n 점수 행렬이고, 행마다 소프트맥스를 적용한 비중 행렬에 V를 곱하면 출력이 된다">
+<rect class="node-rect sq" x="16" y="8.0" width="36" height="72"/>
+<text x="34" y="102" text-anchor="middle" font-size="14" font-weight="700" font-style="italic">Q</text>
+<text x="34" y="120" text-anchor="middle" font-size="12" class="muted"><tspan font-style="italic">n</tspan> × <tspan font-style="italic">d</tspan><tspan font-size="9" dy="3" font-style="italic">k</tspan></text>
+<text x="74" y="50" text-anchor="middle" font-size="18">×</text>
+<rect class="node-rect sq" x="88" y="26.0" width="72" height="36"/>
+<text x="124" y="102" text-anchor="middle" font-size="14" font-weight="700" font-style="italic">K<tspan font-size="10" dy="-6">⊤</tspan></text>
+<text x="124" y="120" text-anchor="middle" font-size="12" class="muted"><tspan font-style="italic">d</tspan><tspan font-size="9" dy="3" font-style="italic">k</tspan> × <tspan font-style="italic">n</tspan></text>
+<text x="182" y="50" text-anchor="middle" font-size="18">=</text>
+<rect class="node-rect sq" x="196" y="8.0" width="72" height="72"/>
+<text x="232" y="102" text-anchor="middle" font-size="14" font-weight="700" font-style="italic">S</text>
+<text x="232" y="120" text-anchor="middle" font-size="12" class="muted"><tspan font-style="italic">n</tspan> × <tspan font-style="italic">n</tspan></text>
+<line class="edge-line" x1="280" y1="44.0" x2="360" y2="44.0"/><polygon class="edge-arrow" points="360,49.0 370,44.0 360,39.0"/>
+<text x="325" y="34" text-anchor="middle" font-size="12" class="muted">행마다</text>
+<text x="325" y="64" class="mono" text-anchor="middle" font-size="12">softmax</text>
+<rect class="node-rect sq" x="374" y="8.0" width="72" height="72"/>
+<rect class="row-accent" x="374" y="32.0" width="72" height="12"/>
+<text x="410" y="102" text-anchor="middle" font-size="14" font-weight="700" font-style="italic">W</text>
+<text x="410" y="120" text-anchor="middle" font-size="12" class="muted"><tspan font-style="italic">n</tspan> × <tspan font-style="italic">n</tspan></text>
+<text x="468" y="50" text-anchor="middle" font-size="18">×</text>
+<rect class="node-rect sq" x="482" y="8.0" width="36" height="72"/>
+<text x="500" y="102" text-anchor="middle" font-size="14" font-weight="700" font-style="italic">V</text>
+<text x="500" y="120" text-anchor="middle" font-size="12" class="muted"><tspan font-style="italic">n</tspan> × <tspan font-style="italic">d</tspan><tspan font-size="9" dy="3" font-style="italic">v</tspan></text>
+<text x="540" y="50" text-anchor="middle" font-size="18">=</text>
+<rect class="node-rect sq" x="554" y="8.0" width="36" height="72"/>
+<text x="572" y="102" text-anchor="middle" font-size="14" font-weight="700">출력</text>
+<text x="572" y="120" text-anchor="middle" font-size="12" class="muted"><tspan font-style="italic">n</tspan> × <tspan font-style="italic">d</tspan><tspan font-size="9" dy="3" font-style="italic">v</tspan></text>
+</svg>
         </div>
       </div>
       <div class="summary"><span class="summary-label">요약</span><p>스케일드 내적 어텐션은 내적, 크기 조정, 소프트맥스, 값 섞기의 네 단계로 출력을 만든다.</p></div>
@@ -70,7 +101,7 @@
         <div class="math-derivation animate-in" id="math-deriv-attn">
           <div class="math-step" data-step="0">
             <div class="math-equation">
-              $$\mathrm{Attention}(Q, K, V) = \mathrm{softmax}\!\left(\frac{QK^{\top}}{\sqrt{d_k}}\right)V$$
+              $$\mathit{Attention}(Q, K, V) = \mathit{softmax}\!\left(\frac{QK^{\top}}{\sqrt{d_k}}\right)V\tag{1}$$
             </div>
             <div class="math-explanation">
               <p>어텐션의 출력은 쿼리와 키로 만든 비중을 값에 곱한 결과이다. 여기서 $Q$는 쿼리 <span class="term" data-definition="행렬(matrix): 숫자를 행과 열로 배열한 직사각형 표. 쿼리 행렬은 쿼리 벡터를 한 줄에 하나씩 쌓은 것임.">행렬</span>(matrix), $K$는 키 행렬, $V$는 값 행렬, $d_k$는 키 벡터의 <span class="term" data-definition="차원(dimension): 벡터를 이루는 숫자의 개수. 키 벡터의 차원이 64이면 숫자 64개로 이루어진 벡터임.">차원</span>(dimension)이다.</p>
@@ -86,15 +117,15 @@
           </div>
           <div class="math-step" data-step="2" style="display:none">
             <div class="math-equation">
-              $$\mathbf{q}\cdot\mathbf{k} = \sum_{m=1}^{d_k} q_m k_m, \qquad \mathrm{Var}(\mathbf{q}\cdot\mathbf{k}) = d_k$$
+              $$\boldsymbol{q}\cdot\boldsymbol{k} = \sum_{m=1}^{d_k} q_m k_m, \qquad \mathit{Var}(\boldsymbol{q}\cdot\boldsymbol{k}) = d_k$$
             </div>
             <div class="math-explanation">
-              <p>$\mathbf{q}$와 $\mathbf{k}$의 각 성분이 평균 0, <span class="term" data-definition="분산(variance): 값이 평균에서 얼마나 흩어져 있는지를 나타내는 수치. 분산의 제곱근이 표준편차임.">분산</span>(variance) 1인 독립 확률 변수라고 가정하면 내적의 분산은 $d_k$가 된다. 차원이 클수록 점수의 흩어짐이 커진다.</p>
+              <p>$\boldsymbol{q}$와 $\boldsymbol{k}$의 각 성분이 평균 0, <span class="term" data-definition="분산(variance): 값이 평균에서 얼마나 흩어져 있는지를 나타내는 수치. 분산의 제곱근이 표준편차임.">분산</span>(variance) 1인 독립 확률 변수라고 가정하면 내적의 분산은 $d_k$가 된다. 차원이 클수록 점수의 흩어짐이 커진다.</p>
             </div>
           </div>
           <div class="math-step" data-step="3" style="display:none">
             <div class="math-equation">
-              $$\frac{S}{\sqrt{d_k}} \;\Rightarrow\; \mathrm{Var}\!\left(\frac{\mathbf{q}\cdot\mathbf{k}}{\sqrt{d_k}}\right) = \frac{d_k}{d_k} = 1$$
+              $$\frac{S}{\sqrt{d_k}} \;\Rightarrow\; \mathit{Var}\!\left(\frac{\boldsymbol{q}\cdot\boldsymbol{k}}{\sqrt{d_k}}\right) = \frac{d_k}{d_k} = 1$$
             </div>
             <div class="math-explanation">
               <p>점수를 $\sqrt{d_k}$로 나누면 분산이 다시 1이 된다. 점수가 너무 커지면 소프트맥스가 한 위치로 쏠려 기울기가 매우 작아지므로, 이 조정으로 학습이 안정된다.</p>
@@ -102,7 +133,7 @@
           </div>
           <div class="math-step" data-step="4" style="display:none">
             <div class="math-equation">
-              $$W = \mathrm{softmax}\!\left(\frac{S}{\sqrt{d_k}}\right), \qquad \mathrm{Attention}(Q,K,V) = WV$$
+              $$W = \mathit{softmax}\!\left(\frac{S}{\sqrt{d_k}}\right), \qquad \mathit{Attention}(Q,K,V) = WV$$
             </div>
             <div class="math-explanation">
               <p>소프트맥스를 행마다 적용하면 각 쿼리의 비중 행이 만들어지고, 한 행의 합은 1이다. 이 비중 행렬 $W$를 값 행렬 $V$에 곱하면 값을 비중대로 섞은 출력이 나온다.</p>
@@ -130,7 +161,45 @@
       </aside>
       <div class="notes">
         <h3 class="screen-heading"><span class="corner-tag">개념 체크</span>크기 조정의 이유</h3>
-        <p>각 성분이 평균 0, 분산 1인 독립 확률 변수이면 내적의 분산은 $d_k$이다. 점수를 $\sqrt{d_k}$로 나누면 분산이 다시 1이 된다.</p>
+        <div class="with-figure" style="--figure-side-width:300px">
+          <div>
+            <p>각 성분이 평균 0, 분산 1인 독립 확률 변수이면 내적의 분산은 $d_k$이다. 점수를 $\sqrt{d_k}$로 나누면 분산이 다시 1이 된다.</p>
+            <p>그림은 $d_k=64$일 때 예시 점수를 나누지 않은 경우와 $\sqrt{d_k}=8$로 나눈 경우의 소프트맥스 비중을 나타낸 것이다. 나누지 않으면 비중이 첫째 위치에 0.998로 쏠린다.</p>
+          </div>
+          <figure class="figure side">
+<svg viewBox="0 0 304 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="d_k=64에서 나누지 않으면 비중이 한 위치에 0.998로 쏠리고, 8로 나누면 0.56, 0.25, 0.13, 0.06으로 퍼진다">
+<text x="72" y="14" text-anchor="middle" font-size="12" font-weight="700">나누지 않음</text>
+<line class="ink" x1="8" y1="128" x2="136" y2="128"/>
+<rect class="ink-fill" x="16" y="44.1" width="22" height="83.9"/>
+<text x="27" y="40.1399" text-anchor="middle" font-size="11">0.998</text>
+<text x="27" y="142" text-anchor="middle" font-size="11" class="muted">1</text>
+<rect class="ink-fill" x="46" y="126.5" width="22" height="1.5"/>
+<text x="57" y="122.5" text-anchor="middle" font-size="11">0</text>
+<text x="57" y="142" text-anchor="middle" font-size="11" class="muted">2</text>
+<rect class="ink-fill" x="76" y="126.5" width="22" height="1.5"/>
+<text x="87" y="122.5" text-anchor="middle" font-size="11">0</text>
+<text x="87" y="142" text-anchor="middle" font-size="11" class="muted">3</text>
+<rect class="ink-fill" x="106" y="126.5" width="22" height="1.5"/>
+<text x="117" y="122.5" text-anchor="middle" font-size="11">0</text>
+<text x="117" y="142" text-anchor="middle" font-size="11" class="muted">4</text>
+<text x="232" y="14" text-anchor="middle" font-size="12" font-weight="700">√<tspan font-style="italic">d</tspan><tspan font-size="9" dy="3" font-style="italic">k</tspan><tspan font-style="normal" dy="-3"> = 8로 나눔</tspan></text>
+<line class="ink" x1="168" y1="128" x2="296" y2="128"/>
+<rect class="accent-fill" x="176" y="80.9" width="22" height="47.1"/>
+<text x="187" y="76.8953" text-anchor="middle" font-size="11">0.56</text>
+<text x="187" y="142" text-anchor="middle" font-size="11" class="muted">1</text>
+<rect class="accent-fill" x="206" y="106.8" width="22" height="21.2"/>
+<text x="217" y="102.835" text-anchor="middle" font-size="11">0.25</text>
+<text x="217" y="142" text-anchor="middle" font-size="11" class="muted">2</text>
+<rect class="accent-fill" x="236" y="117.5" width="22" height="10.5"/>
+<text x="247" y="113.49" text-anchor="middle" font-size="11">0.13</text>
+<text x="247" y="142" text-anchor="middle" font-size="11" class="muted">3</text>
+<rect class="accent-fill" x="266" y="122.8" width="22" height="5.2"/>
+<text x="277" y="118.781" text-anchor="middle" font-size="11">0.06</text>
+<text x="277" y="142" text-anchor="middle" font-size="11" class="muted">4</text>
+<text x="152" y="156" text-anchor="middle" font-size="11" class="muted">위치</text>
+</svg>
+          </figure>
+        </div>
         <div class="quiz-container animate-in" id="quiz-m1-check">
           <div class="quiz-question-block"
                data-correct="option-c"
@@ -209,35 +278,105 @@
         </div>
       </aside>
       <div class="notes">
-        <h3 class="screen-heading"><span class="sec-num">3.2.2</span>멀티헤드 어텐션</h3>
+        <h3 class="screen-heading">멀티헤드 어텐션<span class="paper-ref">논문 3.2.2절</span></h3>
         <p><span class="term" data-definition="멀티헤드 어텐션(multi-head attention): 어텐션을 여러 개의 헤드로 나누어 병렬로 수행한 뒤 결과를 이어 붙이는 방식. 헤드마다 서로 다른 관점에서 위치를 참고함.">멀티헤드 어텐션</span>(multi-head attention)은 어텐션을 한 번만 계산하지 않고 $h$개의 헤드로 나누어 계산한다. 각 헤드는 학습된 서로 다른 선형 변환으로 쿼리, 키, 값을 낮은 차원으로 옮긴 뒤 어텐션을 수행한다.</p>
         <div class="math-equation">
-          $$\begin{gathered}\mathrm{MultiHead}(Q,K,V) = \mathrm{Concat}(\mathrm{head}_1, \ldots, \mathrm{head}_h)\,W^O \\ \mathrm{head}_i = \mathrm{Attention}(QW_i^Q,\, KW_i^K,\, VW_i^V)\end{gathered}$$
+          $$\begin{gathered}\mathit{MultiHead}(Q,K,V) = \mathit{Concat}(\mathit{head}_1, \ldots, \mathit{head}_h)\,W^O \\ \mathit{head}_i = \mathit{Attention}(QW_i^Q,\, KW_i^K,\, VW_i^V)\end{gathered}$$
         </div>
-        <p>여기서 $W_i^Q$, $W_i^K$, $W_i^V$는 헤드 $i$의 투영 행렬이고 $W^O$는 이어 붙인 결과를 되돌리는 행렬이다. 모델 차원이 $d_{\text{model}}=512$이고 헤드가 $h=8$개이면 각 헤드의 차원은 $d_k = d_v = 512/8 = 64$이다.</p>
-        <div class="step-cards stagger-children animate-in">
-          <div class="step-card">
-            <div class="step-num">1</div>
-            <div class="step-body">
-              <strong>투영</strong>
-              <p>헤드마다 다른 행렬로 쿼리, 키, 값을 차원 64로 옮긴다.</p>
-            </div>
-          </div>
-          <div class="step-card">
-            <div class="step-num">2</div>
-            <div class="step-body">
-              <strong>병렬 어텐션</strong>
-              <p>헤드 8개가 각자 스케일드 내적 어텐션을 동시에 계산한다.</p>
-            </div>
-          </div>
-          <div class="step-card">
-            <div class="step-num">3</div>
-            <div class="step-body">
-              <strong>이어 붙이기</strong>
-              <p>헤드 8개의 출력을 이어 붙이면 차원 512가 되고, $W^O$를 곱해 최종 출력을 만든다.</p>
-            </div>
-          </div>
+        <p>여기서 $W_i^Q$, $W_i^K$, $W_i^V$는 헤드 $i$의 투영 행렬이고 $W^O$는 이어 붙인 결과를 되돌리는 행렬이다. 모델 차원이 $d_{\mathit{model}}=512$이고 헤드가 $h=8$개이면 각 헤드의 차원은 $d_k = d_v = 512/8 = 64$이다.</p>
+        <div class="svg-diagram animate-in">
+<svg viewBox="0 0 800 216" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="차원 512를 헤드 8개가 차원 64로 투영하고, 각자 어텐션을 계산한 뒤 이어 붙여 512로 되돌린다">
+<path class="edge-line thin" d="M76,108 H120 M120,38 V178"/>
+<text x="64" y="14" text-anchor="middle" font-size="13" font-weight="700">① 투영</text>
+<text x="300" y="14" text-anchor="middle" font-size="13" font-weight="700">② 병렬 어텐션</text>
+<text x="560" y="14" text-anchor="middle" font-size="13" font-weight="700">③ 이어 붙이기</text>
+<text x="720" y="14" text-anchor="middle" font-size="13" font-weight="700">출력</text>
+<rect class="node-rect sq" x="52" y="28" width="24" height="160"/>
+<text x="64" y="208" text-anchor="middle" font-size="12" class="muted">512</text>
+<path class="edge-line thin accent" d="M120,38 H196"/>
+<rect class="node-rect accent sq" x="196" y="30" width="40" height="16"/>
+<line class="edge-line thin accent" x1="236" y1="38" x2="260" y2="38"/>
+<rect class="node-rect accent sq" x="260" y="30" width="80" height="16"/>
+<text x="300" y="42" text-anchor="middle" font-size="12">헤드 1</text>
+<line class="edge-line thin accent" x1="340" y1="38" x2="364" y2="38"/>
+<rect class="node-rect accent sq" x="364" y="30" width="40" height="16"/>
+<line class="edge-line thin accent" x1="404" y1="38" x2="548" y2="38"/>
+<rect class="node-rect accent sq" x="548" y="28" width="24" height="20"/>
+<path class="edge-line thin" d="M120,58 H196"/>
+<rect class="node-rect sq" x="196" y="50" width="40" height="16"/>
+<line class="edge-line thin" x1="236" y1="58" x2="260" y2="58"/>
+<rect class="node-rect sq" x="260" y="50" width="80" height="16"/>
+<text x="300" y="62" text-anchor="middle" font-size="12">헤드 2</text>
+<line class="edge-line thin" x1="340" y1="58" x2="364" y2="58"/>
+<rect class="node-rect sq" x="364" y="50" width="40" height="16"/>
+<line class="edge-line thin" x1="404" y1="58" x2="548" y2="58"/>
+<rect class="node-rect sq" x="548" y="48" width="24" height="20"/>
+<path class="edge-line thin" d="M120,78 H196"/>
+<rect class="node-rect sq" x="196" y="70" width="40" height="16"/>
+<line class="edge-line thin" x1="236" y1="78" x2="260" y2="78"/>
+<rect class="node-rect sq" x="260" y="70" width="80" height="16"/>
+<text x="300" y="82" text-anchor="middle" font-size="12">헤드 3</text>
+<line class="edge-line thin" x1="340" y1="78" x2="364" y2="78"/>
+<rect class="node-rect sq" x="364" y="70" width="40" height="16"/>
+<line class="edge-line thin" x1="404" y1="78" x2="548" y2="78"/>
+<rect class="node-rect sq" x="548" y="68" width="24" height="20"/>
+<path class="edge-line thin" d="M120,98 H196"/>
+<rect class="node-rect sq" x="196" y="90" width="40" height="16"/>
+<line class="edge-line thin" x1="236" y1="98" x2="260" y2="98"/>
+<rect class="node-rect sq" x="260" y="90" width="80" height="16"/>
+<text x="300" y="102" text-anchor="middle" font-size="12">헤드 4</text>
+<line class="edge-line thin" x1="340" y1="98" x2="364" y2="98"/>
+<rect class="node-rect sq" x="364" y="90" width="40" height="16"/>
+<line class="edge-line thin" x1="404" y1="98" x2="548" y2="98"/>
+<rect class="node-rect sq" x="548" y="88" width="24" height="20"/>
+<path class="edge-line thin" d="M120,118 H196"/>
+<rect class="node-rect sq" x="196" y="110" width="40" height="16"/>
+<line class="edge-line thin" x1="236" y1="118" x2="260" y2="118"/>
+<rect class="node-rect sq" x="260" y="110" width="80" height="16"/>
+<text x="300" y="122" text-anchor="middle" font-size="12">헤드 5</text>
+<line class="edge-line thin" x1="340" y1="118" x2="364" y2="118"/>
+<rect class="node-rect sq" x="364" y="110" width="40" height="16"/>
+<line class="edge-line thin" x1="404" y1="118" x2="548" y2="118"/>
+<rect class="node-rect sq" x="548" y="108" width="24" height="20"/>
+<path class="edge-line thin" d="M120,138 H196"/>
+<rect class="node-rect sq" x="196" y="130" width="40" height="16"/>
+<line class="edge-line thin" x1="236" y1="138" x2="260" y2="138"/>
+<rect class="node-rect sq" x="260" y="130" width="80" height="16"/>
+<text x="300" y="142" text-anchor="middle" font-size="12">헤드 6</text>
+<line class="edge-line thin" x1="340" y1="138" x2="364" y2="138"/>
+<rect class="node-rect sq" x="364" y="130" width="40" height="16"/>
+<line class="edge-line thin" x1="404" y1="138" x2="548" y2="138"/>
+<rect class="node-rect sq" x="548" y="128" width="24" height="20"/>
+<path class="edge-line thin" d="M120,158 H196"/>
+<rect class="node-rect sq" x="196" y="150" width="40" height="16"/>
+<line class="edge-line thin" x1="236" y1="158" x2="260" y2="158"/>
+<rect class="node-rect sq" x="260" y="150" width="80" height="16"/>
+<text x="300" y="162" text-anchor="middle" font-size="12">헤드 7</text>
+<line class="edge-line thin" x1="340" y1="158" x2="364" y2="158"/>
+<rect class="node-rect sq" x="364" y="150" width="40" height="16"/>
+<line class="edge-line thin" x1="404" y1="158" x2="548" y2="158"/>
+<rect class="node-rect sq" x="548" y="148" width="24" height="20"/>
+<path class="edge-line thin" d="M120,178 H196"/>
+<rect class="node-rect sq" x="196" y="170" width="40" height="16"/>
+<line class="edge-line thin" x1="236" y1="178" x2="260" y2="178"/>
+<rect class="node-rect sq" x="260" y="170" width="80" height="16"/>
+<text x="300" y="182" text-anchor="middle" font-size="12">헤드 8</text>
+<line class="edge-line thin" x1="340" y1="178" x2="364" y2="178"/>
+<rect class="node-rect sq" x="364" y="170" width="40" height="16"/>
+<line class="edge-line thin" x1="404" y1="178" x2="548" y2="178"/>
+<rect class="node-rect sq" x="548" y="168" width="24" height="20"/>
+<text x="216" y="208" text-anchor="middle" font-size="12" class="muted">64 × 8</text>
+<text x="384" y="208" text-anchor="middle" font-size="12" class="muted">64 × 8</text>
+<text x="560" y="208" text-anchor="middle" font-size="12" class="muted">512</text>
+<text x="720" y="208" text-anchor="middle" font-size="12" class="muted">512</text>
+<line class="edge-line" x1="572" y1="108" x2="610" y2="108"/>
+<rect class="node-rect" x="610" y="90" width="56" height="36" rx="6"/>
+<text x="638" y="113" text-anchor="middle" font-size="14" font-weight="700" font-style="italic">W<tspan font-size="9" dy="-6">O</tspan></text>
+<line class="edge-line accent" x1="666" y1="108" x2="698" y2="108"/><polygon class="edge-arrow accent" points="698,113 708,108 698,103"/>
+<rect class="node-rect accent sq" x="708" y="28" width="24" height="160"/>
+</svg>
         </div>
+        <p>그림의 ①에서 헤드마다 다른 행렬로 쿼리, 키, 값을 차원 64로 옮기고, ②에서 헤드 8개가 각자 스케일드 내적 어텐션을 동시에 계산한다. ③에서 헤드 8개의 출력을 이어 붙이면 차원 512가 되고 $W^O$를 곱해 최종 출력이 된다(색칠한 줄은 헤드 1).</p>
       </div>
       <div class="summary"><span class="summary-label">요약</span><p>멀티헤드 어텐션은 차원 512를 헤드 8개로 나누어 차원 64의 어텐션을 병렬로 계산한다.</p></div>
     </div>
@@ -252,8 +391,8 @@
             <ol>
               <li>어텐션은 쿼리와 키의 내적으로 비중을 만들고 그 비중으로 값을 섞는다.</li>
               <li>내적을 $\sqrt{d_k}$로 나누면 분산이 1로 유지되어 소프트맥스가 한쪽으로 쏠리지 않는다.</li>
-              <li>멀티헤드 어텐션은 $d_{\text{model}}$을 $h$개 헤드로 나누어 서로 다른 관점을 병렬로 학습한다.</li>
-              <li>나누는 값을 묻는 문항은 분산이 아니라 그 제곱근인지 확인하라.</li>
+              <li>멀티헤드 어텐션은 $d_{\mathit{model}}$을 $h$개 헤드로 나누어 서로 다른 관점을 병렬로 학습한다.</li>
+              <li>나누는 값은 분산이 아니라 분산의 제곱근이다.</li>
             </ol>
           </div>
         </div>
@@ -314,11 +453,11 @@
                data-correct="option-c"
                data-explanation-right="③ | ㄱ은 나눗셈의 목적을 옳게 설명하고 ㄷ은 512를 8로 나눈 64를 옳게 제시하므로 ㄱ, ㄷ이 옳다. ㄴ은 헤드마다 서로 다른 투영 행렬을 쓰므로 옳지 않다."
                data-explanation-wrong="| 정답은 ③이다. ㄱ과 ㄷ은 논문의 설명과 같다. ㄴ은 헤드마다 서로 다른 투영 행렬을 쓰므로 옳지 않다. ①은 옳은 ㄷ을 빠뜨렸으므로 옳지 않다.">
-            <h3 class="quiz-question"><span class="q-num">3</span>멀티헤드 어텐션에 대한 설명으로 옳은 것만을 <span class="nobr">&lt;보기&gt;에서</span> 있는 대로 고른 것은?<span class="q-points">[3점]</span></h3>
+            <h3 class="quiz-question"><span class="q-num">3</span>어텐션에 대한 설명으로 옳은 것만을 <span class="nobr">&lt;보기&gt;에서</span> 있는 대로 고른 것은?<span class="q-points">[3점]</span></h3>
             <div class="bogi">
               <p>ㄱ. 내적을 $\sqrt{d_k}$로 나누어 소프트맥스 입력이 지나치게 커지는 것을 막는다.</p>
               <p>ㄴ. 모든 헤드가 같은 투영 행렬을 공유한다.</p>
-              <p>ㄷ. $d_{\text{model}}=512$, $h=8$이면 각 헤드의 차원은 64이다.</p>
+              <p>ㄷ. $d_{\mathit{model}}=512$, $h=8$이면 각 헤드의 차원은 64이다.</p>
             </div>
             <div class="quiz-options row">
               <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① ㄱ</span></button>
@@ -334,7 +473,7 @@
           <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m1-2')">다시 풀기</button>
         </div>
       </div>
-      <div class="summary"><span class="summary-label">요약</span><p>멀티헤드 어텐션은 헤드마다 서로 다른 투영 행렬을 쓰고, 헤드 하나의 차원은 $d_{\text{model}}/h$이다.</p></div>
+      <div class="summary"><span class="summary-label">요약</span><p>멀티헤드 어텐션은 헤드마다 서로 다른 투영 행렬을 쓰고, 헤드 하나의 차원은 $d_{\mathit{model}}/h$이다.</p></div>
     </div>
 
   </div>

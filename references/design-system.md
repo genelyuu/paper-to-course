@@ -5,6 +5,7 @@ paper-to-course 시스템의 CSS 디자인 토큰 전체 목록입니다. `style
 ## 목차
 1. [디자인 아이덴티티](#디자인-아이덴티티)
 2. [색상 팔레트](#색상-팔레트)
+   - [색상 규약](#색상-규약)
 3. [타이포그래피](#타이포그래피)
 4. [한글 타이포그래피](#한글-타이포그래피)
 5. [간격과 레이아웃](#간격과-레이아웃)
@@ -84,6 +85,31 @@ paper-to-course 시스템의 CSS 디자인 토큰 전체 목록입니다. `style
 
 ---
 
+## 색상 규약
+
+색을 어디에 쓰고 어디에 쓰지 않는지의 기준은 이 절이 정한다. 값은 `styles.css`의 `:root`와 그 뒤 덮어쓰기에서 가져온 실제 값이다. 다른 문서(`interactive-elements.md`, `illustration.md`)는 이 절을 가리킨다.
+
+| 역할 | 토큰·값 | 쓰는 곳 | 쓰지 않는 곳 |
+|---|---|---|---|
+| 교과 색 | `--color-accent` #1F6FB2(기본), `-hover` #185A92, `-light` #E8F1FA, `-muted` #6FA3D3. 강의마다 한 세트만 고른다([교과 색 프리셋](#교과-색-프리셋)) | 강조 하나(핵심 대상, 활성 상태, 모듈 번호 블록, 코너 이름표, 그림의 강조), 링크·버튼 | 한 화면의 여러 대상을 구분하는 용도, 장식, 본문 글자색 |
+| 먹색 | `#1F2328` (그림 선·그림 글자: `.ink`, `.ink-fill`, 그림 속 `text`) | 개념 그림·문항 삽화·도식의 선과 글자 | 본문 글자(본문은 `--color-text`) |
+| 글자 | `--color-text` #222426, `--color-text-secondary` #555B62, `--color-text-muted` #868D95 | 본문, 보조 설명, 흐린 표지(`.paper-ref`, 캡션) | `--color-text-muted`를 본문 단락에 쓰지 않는다(명암비 부족) |
+| 배경·면 | `--color-bg` #FFFFFF, `--color-surface` #FFFFFF, `--color-bg-subtle` #F4F6F8, `--color-surface-subtle` #F7F8FA | 지면 바탕, 카드, 요약 줄·날개 같은 차가운 회색 면 | 베이지·크림 같은 따뜻한 면 |
+| 테두리 | `--color-border` #D3D8DE, `--color-border-light` #E6E9ED | 카드·표·상자 테두리, 구분선 | 강조(테두리 색으로 강조하지 않는다) |
+| 그림 회색 | `.guide` → `--color-border`(1px), `.guide-axis` #8C959F, `.guide-fill` #EEF0F2 | 모눈, 축, 보조 면 | 대상 자체(대상은 먹색이나 교과 색) |
+| 상태 색 | `--color-success` #2D8B55(+`-light` #E8F5EE), `--color-error` #C93B3B(+`-light` #FDE8E8) | 정답·오답 피드백(퀴즈 선택지, 피드백 상자), 결과 막대의 증감 | 그 밖의 강조·장식. 그림에는 쓰지 않는다 |
+| 콜아웃 | `.callout-accent` = 교과 색, `.callout-info` = `--color-info` #2A7B9B(+`-light`), `.callout-warning` = `--color-error` | `callout` 종류 표시(배경 지식은 `callout-info`) | 새 콜아웃 색을 만드는 일 |
+| 코드 칸 | 바탕 `--color-bg-code` #1E1E2E. Catppuccin: `.code-keyword` #CBA6F7, `.code-string` #A6E3A1, `.code-function` #89B4FA, `.code-comment` #6C7086, `.code-number` #FAB387, `.code-property` #F9E2AF, `.code-operator` #94E2D5, `.code-tag` #F38BA8. 줄 번호 #6C7086, 라벨 #9399B2, 강조 줄 #CBA6F7 inset(4px) | 의사코드·코드 블록 안에서만. `main.js`의 `colorizePseudocode`가 자동으로 칠한다 | 코드 칸 밖. 새 색을 만들지 않고, 줄마다 손으로 `style`로 칠하지 않는다 |
+
+**규칙**
+- 유채색은 교과 색 하나만 쓴다. 예외는 코드 칸과 상태 색(정답·오답)뿐이다. `--color-actor-*`·`--color-info`는 옛 요소 호환용이며 새 그림에 쓰지 않는다.
+- 베이지·크림·따뜻한 회색 톤을 쓰지 않는다. 중립색은 차가운 회색이다.
+- 그림은 먹색 + 교과 색 + 회색만 쓴다. `check-pages.py`가 그림 하나에 유채색이 둘 이상이면 검출한다.
+- 강조는 한 가지 수단으로만 한다(색이면 색, 굵기면 굵기). 색 + 굵게 + 밑줄을 겹치지 않는다.
+- 본문 글자와 배경의 명암비는 4.5:1 이상이다. 교과 색을 흰 글자 배경으로 쓸 때도 같다.
+
+---
+
 ## 타이포그래피
 
 ```css
@@ -130,7 +156,7 @@ paper-to-course 시스템의 CSS 디자인 토큰 전체 목록입니다. `style
 | 긴 토큰 처리 | `overflow-wrap: break-word` | `anywhere`는 flex/grid의 min-content 크기까지 줄여 레이아웃이 달라질 수 있어 `break-word`를 택했습니다. 긴 URL·영문 토큰은 여전히 넘치지 않고 줄바꿈됩니다. |
 | 행간 | 본문 1.75, 제목 1.35~1.45 | 한글 글리프는 em 박스를 거의 가득 채워 라틴(1.15~1.6)보다 더 넓은 행간이 필요합니다. |
 | 자간 | 제목 `-0.02em`, 본문 `-0.005em` | Pretendard는 한글 제목에서 살짝 좁은 자간이 안정적입니다. 대문자 라벨의 `0.1em` 자간은 한글에서 글자가 흩어져 보이므로 `:lang(ko)`에서 `0.01~0.03em`으로 줄입니다(토큰 `--tracking-label*`). |
-| 이탤릭 금지 | `em`/`i` → `font-style: normal` + 굵기 600 + 강조색 | 한글에는 이탤릭 글리프가 없어 가짜 기울임(synthetic oblique)이 어색합니다. `font-synthesis: none`으로 합성도 막습니다. KaTeX의 이탤릭은 유지합니다. |
+| 이탤릭 금지 | `em`/`i` → `font-style: normal` + 굵기 600 + 강조색 | 한글에는 이탤릭 글리프가 없어 가짜 기울임(synthetic oblique)이 어색합니다. `font-synthesis: none`으로 합성도 막습니다. KaTeX의 이탤릭은 유지합니다. 라벨 속 수학 기호는 `<i class="mi">q</i>`로 씁니다(`.mi`는 KaTeX 수학 글꼴 + 이탤릭). 일반 `<i>`는 위 규칙에 따라 똑바른 글씨가 됩니다. |
 | 드러냄표 | `.ko-emphasis` (`text-emphasis: dot`) | 한국어 전통 강조법. 선택 사항 유틸리티입니다. |
 | 라틴/한글 혼용 | 제목·본문 모두 Pretendard 하나 | 한글과 라틴이 같은 서체라 굵기·높이가 맞습니다. 라틴 디스플레이 서체를 섞으면 제목 안에서 서체가 갈라져 보입니다. |
 | KaTeX | `.katex { word-break: normal }` + 좌우 `0.12em` 여백 | 상위의 keep-all·자간이 수식 내부 조판에 영향을 주지 않게 하고, 수식과 한글 사이에 숨 쉴 틈을 줍니다. |
@@ -226,9 +252,9 @@ paper-to-course 시스템의 CSS 디자인 토큰 전체 목록입니다. `style
 ```css
 :root {
   /* MATH — for equation blocks and derivations */
-  --color-math-bg:        #F8F6F1;       /* warm cream */
-  --color-math-border:    #D4C5A9;       /* warm gold */
-  --color-math-text:      #3D3428;       /* dark brown */
+  --color-math-bg:        #F7F8FA;       /* cool gray surface */
+  --color-math-border:    #D3D8DE;       /* cool gray border */
+  --color-math-text:      #222426;       /* body text */
 
   /* RESEARCH — for lineage/context elements */
   --color-research-bg:    #F0F4F8;       /* cool blue-gray */
@@ -247,22 +273,24 @@ paper-to-course 시스템의 CSS 디자인 토큰 전체 목록입니다. `style
 
 모든 다이어그램(순서도, 개념도, 계보 트리, 실험 구성)은 아래 규칙을 따르는 인라인 SVG로 만듭니다.
 
-- 컨테이너: `.svg-diagram` 클래스 — 반응형, 최대 폭 800px, 가운데 정렬
-- 노드: `.node-rect`(기본) 또는 `.node-rect.accent`(강조)
-- 간선: `.edge-line`(기본) 또는 `.edge-line.accent`
+- 컨테이너: `<div class="svg-diagram">`로 `<svg>`를 감싼다 — 반응형, 최대 폭 800px, 가운데 정렬
+- 노드: `.node-rect`(기본) 또는 `.node-rect.accent`(강조). 모서리를 거의 직각으로 둘 때(행렬·칩)는 `.node-rect.sq`(`rx: 2px`)
+- 간선: `.edge-line`(기본) 또는 `.edge-line.accent`. 직각 `<path>`로만 그린다([도식 간선은 직각으로](#도식-간선은-직각으로))
 - 텍스트: `var(--font-body)`를 상속하고, 코드는 `.mono` 클래스(`var(--font-mono)`) 사용
 - 색상: CSS 변수 사용 (`var(--color-accent)`, `var(--color-border)` 등)
 - ViewBox: `viewBox="0 0 WIDTH HEIGHT"`와 `width="100%"`로 반응형 처리
 - 노드 라벨: `<foreignObject>` + `.node-label` + `<span>` 하나(가운데 정렬·자동 줄바꿈). 노드 밖의 짧은 표지만 `<text>`
 
 ```html
-<svg class="svg-diagram" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
-  <rect class="node-rect accent" x="300" y="20" width="200" height="60" />
-  <text x="400" y="55" text-anchor="middle" font-weight="700">이 논문</text>
-  <line class="edge-line accent" x1="400" y1="80" x2="400" y2="120" />
-  <polygon class="edge-arrow accent" points="395,120 405,120 400,130" />
-  <!-- 나머지 요소 -->
-</svg>
+<div class="svg-diagram">
+  <svg viewBox="0 0 800 160" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="그림 내용을 한 문장으로">
+    <rect class="node-rect accent" x="300" y="20" width="200" height="60" />
+    <foreignObject x="308" y="24" width="184" height="52"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label"><span>이 논문</span></div></foreignObject>
+    <path class="edge-line accent" d="M400,80 V112" />
+    <polygon class="edge-arrow accent" points="395,112 405,112 400,122" />
+    <!-- 나머지 요소 -->
+  </svg>
+</div>
 ```
 
 ### 그림 정렬 규칙
@@ -290,4 +318,19 @@ paper-to-course 시스템의 CSS 디자인 토큰 전체 목록입니다. `style
 - SVG `<text>`는 자동 줄바꿈이 없고, 한글은 글자당 폭이 넓습니다. 노드 폭은 **한글 1자 ≈ 1em**(라틴은 약 0.55em)으로 계산하세요. 예: 14px 글꼴의 한글 8자 라벨은 약 112px에 좌우 여백을 더한 폭이 필요합니다.
 - 글꼴은 `font-family` 속성 대신 CSS로 지정합니다. `styles.css`의 `.svg-diagram text`가 이미 `var(--font-body)`를 적용하므로 Pretendard 폴백이 자동으로 적용됩니다. 별도로 지정해야 하면 `style="font-family: var(--font-body)"`를 쓰세요.
 - **라벨 방식(하나로 통일):** 상자 안 라벨은 줄 수와 관계없이 `<foreignObject>` 안의 `.node-label > span`으로 씁니다. `word-break: keep-all`로 어절 단위로 줄이 바뀌고, 상자의 세로 가운데에 놓입니다. `<text>`는 상자 밖의 짧은 표지(축 이름, 간선 라벨)에만 씁니다.
-- SVG 텍스트에 `font-style="italic"`을 쓰지 않습니다. 한글에는 이탤릭이 없으므로 `font-weight="500"`이나 흐린 `fill`로 구분합니다.
+- **수학 기호는 이탤릭, 한글은 똑바로.** 수학 기호를 담은 `<text>`는 `font-style="italic"`을 쓴다(`.mi`·KaTeX 수학 글꼴과 맞춘다). 한글 라벨은 이탤릭을 쓰지 않고, 구분이 필요하면 `font-weight="500"`이나 흐린 `fill`을 쓴다. `foreignObject` 라벨 속 기호는 `<i class="mi">q</i>`, 아래첨자는 `<i class="mi">d</i><sub>k</sub>`이다.
+
+### 개념 그림 클래스와 페이지 넘김
+
+- `.figure`, `.svg-diagram` 안의 그림 클래스: `.ink`, `.ink.strong`, `.ink-fill`, `.accent`, `.accent-fill`, `.guide`, `.guide-axis`, `.guide-fill`, `.row-accent`, `.edge-line.thin`, `.edge-line.dashed`, `.dot`, `.dot-accent`, `text.mono|muted|accent-text`. 색 사용 기준은 [색상 규약](#색상-규약)을 따른다. 캡션은 `.figure-caption`, 너비 맞춤은 `.svg-diagram.fit`(`--diagram-max`: 그림 최대 폭, 기본 100%). 본문 옆 그림 폭은 `figure.figure.side`의 `--figure-side-width`(기본 200px). 라벨 속 수학 기호는 `.mi`, 각진 노드는 `.node-rect.sq`. 새 개념마다 이런 그림을 하나 두고, 본문 옆(`.with-figure` + `figure.figure.side`)에 놓아 페이지가 765px를 넘지 않게 한다.
+- 모듈 번호는 `1, 2, 3 …` 연속 정수이다. 논문 위치는 화면 제목 끝의 `.paper-ref`(작고 흐린 태그)로 적는다. `.sec-num`은 폐기됐다(CSS만 남김).
+- 페이지 넘김: `html { scroll-padding-top: var(--nav-height) }`, `.module { scroll-snap-align: start; scroll-margin-top: calc(-1 * var(--nav-height)) }`. 우하단 고정 `.pager`(‹ n / N ›와 안내 문구)는 `main.js`가 넣는다.
+
+### 도식 간선은 직각으로
+
+노드를 잇는 간선은 수평·수직 선분만 쓴다(`<path d="M x,y H … V … H …">`). 대각선 간선은 쓰지 않는다. 여러 노드로 갈라질 때는 세로 버스 한 줄에서 직각으로 분기한다. 화살촉은 마지막 수평 선분 끝에 둔다. 좌표평면의 벡터 화살표는 간선이 아니므로 방향 그대로 그린다. 노드 위치는 간선 때문에 옮기지 않는다.
+
+### 헤더 세로 정렬
+
+- 상단 내비게이션의 제목과 점은 본문 열과 같은 세로선에 놓는다. 제목의 왼쪽 끝은 단서 칸 왼쪽, 점의 오른쪽 끝은 노트 칸 오른쪽이다(1025px 이상, `styles.css` "헤더 세로 정렬").
+- 단원 도입의 번호 상자(64px)는 제목과 부제를 묶은 덩어리와 위아래 끝을 맞춘다. 제목 `line-height: 1.15`, 부제 위 여백 4px로 덩어리 높이가 64px 안팎이 되게 한다. 제목이나 부제를 두 줄로 쓰지 않는다.

@@ -6,13 +6,13 @@
 
 <a href="examples/attention-ko/"><img src="https://img.shields.io/badge/demo-Attention_Is_All_You_Need-1F6FB2?style=flat-square" alt="demo"></a>
 <img src="https://img.shields.io/badge/output-ko--KR-1B7A50?style=flat-square" alt="ko-KR">
-<img src="https://img.shields.io/badge/lint-15_rules-6B4FA8?style=flat-square" alt="15 lint rules">
+<img src="https://img.shields.io/badge/lint-16_rules-6B4FA8?style=flat-square" alt="16 lint rules">
 <img src="https://img.shields.io/badge/runtime-zero_dependency_HTML-5B6570?style=flat-square" alt="zero dependency">
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache_2.0-5B6570?style=flat-square" alt="Apache 2.0"></a>
 
 <br><br>
 
-<img src="docs/images/cover.png" alt="「Attention Is All You Need」에서 생성한 강의의 표지. 왼쪽에 제목과 초록, 오른쪽에 논문 절 번호로 된 차례" width="880">
+<img src="docs/images/cover.png" alt="「Attention Is All You Need」에서 생성한 강의의 표지. 왼쪽에 제목과 초록, 오른쪽에 모듈 차례" width="880">
 
 <sub>입력: arXiv 1706.03762 · 출력: <a href="examples/attention-ko/"><code>examples/attention-ko/index.html</code></a> (단일 HTML, 서버 불필요)</sub>
 
@@ -32,8 +32,8 @@
 
 | 원칙 | 구현 |
 |---|---|
-| **Traceability**: 학습 내용이 원문 어디에서 왔는지 항상 보인다 | 모듈과 화면 제목에 논문 절 번호를 그대로 쓴다 (`3.2 어텐션` → `3.2.1 스케일드 내적 어텐션`) |
-| **Verifiability**: 생성 결과를 사람이 아니라 도구가 먼저 검사한다 | 한국어 린터 15개 규칙, 헤드리스 브라우저 기반 레이아웃 검사. 둘 다 CI에서 종료 코드로 판정 가능 |
+| **Traceability**: 학습 내용이 원문 어디에서 왔는지 항상 보인다 | 모듈은 `1, 2, 3` 연속 번호로 매기고, 화면 제목 끝에 논문 위치를 작은 태그로 남긴다 (`2 어텐션` → `스케일드 내적 어텐션` + `논문 3.2.1절`) |
+| **Verifiability**: 생성 결과를 사람이 아니라 도구가 먼저 검사한다 | 한국어 린터 16개 규칙, 헤드리스 브라우저 기반 레이아웃 검사. 둘 다 CI에서 종료 코드로 판정 가능 |
 | **Pedagogical grounding**: 형식은 임의로 정하지 않고 검증된 교육 매체에서 가져온다 | 국내 표준 학습서(EBS 수능특강 등)의 지면 구조, 실제 학습서 192쪽에서 측정한 문장 종결 분포 |
 
 LLM이 논문을 "요약"하는 단계는 이미 일상이 되었다. 다음 단계는 **요약이 아니라 교육 품질의 산출물을, 검증과 함께, 반복 가능하게** 만드는 것이다. 이 저장소는 그 단계를 한국어 사용자를 대상으로 구현한 레퍼런스다.
@@ -43,15 +43,19 @@ LLM이 논문을 "요약"하는 단계는 이미 일상이 되었다. 다음 단
 ## What it produces
 
 <p align="center">
-  <img src="docs/images/page-opener.png" alt="모듈 3.2 첫 페이지. 왼쪽 단서 칸에 학습 목표, 오른쪽에 3.2.1 본문과 흐름도, 하단에 요약" width="880">
+  <img src="docs/images/page-opener.png" alt="2단원 첫 페이지. 왼쪽 단서 칸에 학습 목표, 오른쪽에 본문, 흐름도, 행렬 크기 그림, 하단에 요약" width="880">
 </p>
 
 입력은 arXiv URL 또는 PDF, 출력은 브라우저에서 바로 여는 단일 `index.html`이다.
 
 - **Page model.** 화면 하나가 1페이지다. 코넬식 3분할(단서 · 노트 · 요약)을 쓰고, 1440×900 뷰포트에서 스크롤 없이 들어가는지 측정한다 (허용 높이 765px).
-- **Structure mirrors the paper.** 모듈 순서와 번호는 논문 목차를 따른다. 논문에 없는 선수 지식만 `0`번 모듈로 분리한다.
+- **Structure mirrors the paper.** 모듈 순서와 제목은 논문 목차를 따르고, 번호는 `1, 2, 3 …` 연속 정수로 매긴다. 논문 절 위치는 화면 제목 끝의 `.paper-ref` 태그로 표시한다. 논문에 없는 선수 지식은 별도 모듈로 분리한다.
+- **Keyboard paging.** ←→↑↓/PageUp/PageDown/Home/End는 쪽 이동, 스페이스바는 현재 쪽의 주 버튼(다음 단계 진행, 확인 문제는 선택 없이 정답·해설 공개), Shift+스페이스바는 이전 단계이다. 우하단 `‹ n / N ›` 표시로 현재 쪽을 보여 준다. 쪽은 표지, 모듈 첫 페이지, 각 화면 단위이다.
+- **Illustrations.** 개념마다 SVG 코드로 그린 도식을 두고, 따로 사물·장면 선화 삽화를 강의마다 3개 이상 넣는다. 삽화는 작은 로컬 모델(SANA-Sprint 0.6B)로 만든 단순한 사물에 화살표·라벨을 SVG로 덧그려, 그림만 보고도 개념의 흐름이 읽히게 한다. `check-pages.py`가 개수를 검사한다.
+- **색상 규약.** 색의 역할은 [`references/design-system.md#색상-규약`](references/design-system.md#색상-규약)을 따른다.
+- **A figure for every concept.** 새로 도입하는 개념·알고리즘·수식마다 본문 수치와 일치하는 코드 그림을 둔다.
 - **Assessment built in.** 개념 체크, 5지선다, `<보기>`형 [3점] 문항을 즉시 채점하고, 해설에는 정답 근거와 대표 오답의 분석을 함께 둔다.
-- **Interactive evidence.** 단계별 수식 유도(KaTeX), 의사코드 라인 해설, 지표 전환이 되는 결과 비교, 제거 실험 토글, 연구 계보 트리 등 18종의 요소.
+- **Interactive evidence.** 단계별 수식 유도(KaTeX), 의사코드 라인 해설, 지표 전환이 되는 결과 비교, 제거 실험 토글, 연구 계보 트리 등 20종의 요소.
 
 | 확인 문제 | 탐구 자료 |
 |:--:|:--:|
@@ -106,16 +110,15 @@ python3 references/check-pages.py <course-dir>
 | 등급 | 규칙 | 검출 대상 |
 |---|---|---|
 | ERROR | KO001–KO004 | `lang` 누락, 한자 · 중국어 잔존, 전각 문장부호, 깨진 `data-steps` JSON |
-| WARN | KO101–KO111 | 문체 혼용, 번역투, 영문 · 숫자 뒤 조사 불일치, 숫자 · 단위 띄어쓰기, 과도한 문단 길이, 칭찬형 해설, 정답 표지 중복, 서술문형 용어 정의 |
+| WARN | KO101–KO112 | 문체 혼용, 번역투, 영문 · 숫자 뒤 조사 불일치, 숫자 · 단위 띄어쓰기, 과도한 문단 길이, 칭찬형 해설, 정답 표지 중복, 서술문형 용어 정의, 똑바른 글꼴 수식 |
 
 **`check-pages.py`**: 헤드리스 Chrome으로 렌더링한 뒤 페이지별 실제 높이를 잰다. 퀴즈 해설을 **모두 펼친 최악 상태**를 기준으로 하므로, 사용자가 답을 확인한 뒤에야 넘치는 경우도 잡는다.
 
 ```text
 기준: 1440×900, 페이지 허용 높이 765px
-OK   module-1 p1 [코넬] 548px  3.2.1 스케일드 내적 어텐션
-OK   module-1 p6 [코넬] 716px  확인 문제 크기 조정과 계산 과정
+OK   module-1 p1 [코넬] 736px  스케일드 내적 어텐션 논문 3.2.1절
 ...
-요약: 페이지 21개, 넘침 0개, 코넬 아닌 화면 0개
+요약: 페이지 21개, 넘침 0개, 코넬 아닌 화면 0개, 그림 정렬 문제 0개
 ```
 
 <br>
@@ -132,7 +135,7 @@ OK   module-1 p6 [코넬] 716px  확인 문제 크기 조정과 계산 과정
 | 용어 정의 | 명사형 34 | 사전식 명사형 (KO111) | 소프트맥스(softmax): 실수 여러 개를 모두 양수이고 합이 1인 값으로 바꾸는 함수. |
 | 머리말 · 사용법 | 합니다체 137, 해요체 50 | 미적용 | — |
 
-<sub>정규식 기반 집계로 오차가 있으며 경향 파악 용도다. 표본, 수집 절차, 한계는 <a href="docs/research/korean-references.md"><code>docs/research/korean-references.md</code></a> §9.</sub>
+<sub>정규식 기반 집계로 오차가 있으며 경향 파악 용도다.</sub>
 
 레이아웃 역시 같은 방식으로 정했다. 4px 격자는 Carbon · Atlassian · USWDS의 간격 체계를, 지면 구성과 교과 색 프리셋은 수능특강의 단원 도입 · 날개 · 문항 형식을 조사해 반영했다 (§8).
 
@@ -145,12 +148,12 @@ OK   module-1 p6 [코넬] 716px  확인 문제 크기 조정과 계산 과정
 | | Upstream | This fork |
 |---|---|---|
 | Output language | zh-CN | ko-KR |
-| Structure | 교수법 기준 임의 모듈 | 논문 절 번호 기반 (traceable) |
+| Structure | 교수법 기준 임의 모듈 | 논문 목차 순서 + 연속 번호, 절 위치는 `.paper-ref` (traceable) |
 | Style rules | 없음 | 역할별 종결 규칙, 번역투 · 조사 규칙 |
 | Layout | 연속 스크롤, 카드 + 그림자 | 고정 높이 코넬식 페이지, 4px 격자 |
 | Assessment | 기본 퀴즈 | 5지선다 · `<보기>`형 · 배점, 오답 분석 해설 |
 | Terminology | 없음 | 기본 사전 243개 + 강의별 용어표 |
-| Verification | 없음 | 린터 15개 규칙 + 레이아웃 검사 (exit code) |
+| Verification | 없음 | 린터 16개 규칙 + 레이아웃 검사 (exit code) |
 | Bugs fixed | — | 초기화 순서 오류로 전체 인터랙션이 멈추던 문제, 해설 내 수식 미렌더링, 비백분율 지표의 `%` 표기 |
 
 <br>
@@ -162,14 +165,22 @@ SKILL.md                     스킬 정의: 파이프라인, 문체 규칙, 목�
 references/
   korean-style-guide.md      문체 · 조사 · 띄어쓰기 · 번역투 규칙과 린터 대응표
   glossary-ko.md             AI/ML 용어 번역 사전 (243 entries)
-  interactive-elements.md    인터랙티브 요소 18종 HTML 패턴
+  interactive-elements.md    인터랙티브 요소 20종 HTML 패턴
   lint-ko.py                 한국어 린터
   check-pages.py             페이지 레이아웃 검사
+  content-philosophy.md      콘텐츠 원칙
+  design-system.md           디자인 토큰, 색상 규약
+  gotchas.md                 생성 시 자주 나는 문제
+  module-brief-template.md   모듈 브리프 양식
+  _base.html, _footer.html   생성물 골격 템플릿
+  build.sh                   모듈을 index.html로 조립
+  illustration.md            삽화 규칙 (도식은 SVG 코드, 사물·장면 선화는 작은 로컬 모델, 강의당 3개 이상)
+  illustrate.py              로컬 모델 → 선화 SVG 파이프라인 (선택, 별도 가상환경)
   styles.css, main.js        생성물에 복사되는 런타임
 examples/attention-ko/       레퍼런스 출력
 docs/
-  PLAN.md, WORKLOG.md        설계 계획과 의사결정 기록 (행동 · 근거 · 결과)
-  research/                  조사 자료와 출처
+  images/                    README 스크린샷
+  lint-fixtures/             린터 검증용 good/bad 예시
 ```
 
 <br>

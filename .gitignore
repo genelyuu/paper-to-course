@@ -1,3 +1,21 @@
-.claude/
+# OS / editor
 .DS_Store
 *.swp
+
+# tooling
+.claude/
+__pycache__/
+*.pyc
+index.html.tmp
+.pg-*.html
+
+# 작업 기록·조사 자료·시행착오 산출물 (저장소에 올리지 않음)
+docs/PLAN.md
+docs/WORKLOG.md
+docs/logs/
+docs/research/
+onepage_output.*
+
+# 삽화 생성 중간 파일 (최종 assets/*.svg와 재현용 .json만 올린다)
+*.clean.png
+*.raw.svg

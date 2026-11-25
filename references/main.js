@@ -30,7 +30,7 @@
 
   /* ── I18N (UI strings; language from <html lang>, default ko) ── */
   const I18N = {
-    // ko: EBS 교재 문체 — 표지(정답/오답) + 한다체 해설, 지시는 '~하시오' (docs/PLAN.md §1)
+    // ko: EBS 교재 문체 — 표지(정답/오답) + 한다체 해설, 지시는 '~하시오'
     ko: {
       selectFirst: '먼저 답을 고르시오.',
       correct: '정답',
@@ -152,28 +152,145 @@
     });
   });
 
-  /* ── KEYBOARD NAVIGATION ───────────────────────────────────── */
-  function currentModuleIndex() {
-    const scrollMid = window.scrollY + window.innerHeight / 2;
-    for (let i = 0; i < modules.length; i++) {
-      const top    = modules[i].offsetTop;
-      const bottom = top + modules[i].offsetHeight;
-      if (scrollMid >= top && scrollMid < bottom) return i;
-    }
-    return 0;
-  }
+  /* ── PAGE NAVIGATION (방향키·페이지 넘김 버튼) ─────────────────
+     페이지 = 표지, 단원(도입 + 첫 화면), 그 밖의 .screen 하나. check-pages.py의 페이지 단위와 같다.
+     ←/↑/PageUp: 이전 페이지, →/↓/PageDown: 다음 페이지, Home/End: 처음·끝. */
+  function initPager() {
+    const pages = [];
+    const cover = $('.course-cover');
+    if (cover) pages.push(cover);
+    modules.forEach(mod => {
+      pages.push(mod);
+      $$('.screen', mod).forEach((s, i) => { if (i > 0) pages.push(s); });
+    });
+    if (!pages.length) return;
+    const navH = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-height')) || 48;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const topOf = el => el.getBoundingClientRect().top + window.scrollY - (modules.includes(el) || el === cover ? 0 : navH());
 
-  document.addEventListener('keydown', e => {
-    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
-    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
-      const next = modules[currentModuleIndex() + 1];
-      if (next) { next.scrollIntoView({ behavior: 'smooth' }); e.preventDefault(); }
+    // 부드러운 스크롤 중에는 목표 쪽수를 기억해 두어, 키를 빠르게/계속 눌러도 한 쪽씩 정확히 넘어가게 한다
+    let target = null, targetTimer = 0;
+    const clearTarget = () => { target = null; clearTimeout(targetTimer); update(); };
+    window.addEventListener('scrollend', clearTarget);
+
+    function currentIndex() {
+      if (target !== null) return target;
+      // 문서 맨 아래(마지막 쪽이 짧아 위쪽 기준에 닿지 못하는 경우)에서는 마지막 쪽으로 본다
+      if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2) return pages.length - 1;
+      const y = window.scrollY + 8;
+      let idx = 0;
+      // 표지·단원은 맨 위(top)가, 화면은 내비게이션 높이를 뺀 위치(top-navH)가 기준 — topOf와 같은 값
+      pages.forEach((p, i) => { if (topOf(p) <= y) idx = i; });
+      return idx;
     }
-    if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
-      const prev = modules[currentModuleIndex() - 1];
-      if (prev) { prev.scrollIntoView({ behavior: 'smooth' }); e.preventDefault(); }
+    function go(i) {
+      i = Math.max(0, Math.min(pages.length - 1, i));
+      target = i;
+      clearTimeout(targetTimer);
+      targetTimer = setTimeout(clearTarget, 600);   // scrollend를 지원하지 않는 브라우저 대비
+      window.scrollTo({ top: topOf(pages[i]), behavior: reduce ? 'auto' : 'smooth' });
+      update();
     }
-  });
+
+    const pager = document.createElement('nav');
+    pager.className = 'pager';
+    pager.setAttribute('aria-label', '페이지 넘김');
+    pager.innerHTML = '<span class="pager-hint">방향키: 페이지, 스페이스바: 다음 단계·정답</span>' +
+      '<button class="pager-btn" type="button" data-dir="-1" aria-label="이전 페이지">&lsaquo;</button>' +
+      '<span class="pager-pos" aria-live="polite"><b>1</b> / ' + pages.length + '</span>' +
+      '<button class="pager-btn" type="button" data-dir="1" aria-label="다음 페이지">&rsaquo;</button>';
+    document.body.appendChild(pager);
+    const [prevBtn, nextBtn] = $$('.pager-btn', pager);
+    const pos = $('.pager-pos b', pager);
+    prevBtn.addEventListener('click', () => go(currentIndex() - 1));
+    nextBtn.addEventListener('click', () => go(currentIndex() + 1));
+
+    function update() {
+      const i = currentIndex();
+      pos.textContent = i + 1;
+      prevBtn.disabled = i === 0;
+      nextBtn.disabled = i === pages.length - 1;
+      pager.classList.toggle('on-cover', !!cover && i === 0);   // 표지에서는 목차 패널과 겹치므로 숨김
+    }
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (ticking) return; ticking = true;
+      setTimeout(() => { ticking = false; update(); }, 50);   // rAF는 백그라운드 탭에서 멈추므로 타이머로
+    }, { passive: true });
+    window.addEventListener('resize', update);
+    update();
+
+    /* 페이지 안의 요소인가: 단원은 도입부 + 첫 .screen만 그 쪽에 속한다 */
+    function inPage(el, page) {
+      if (!page.contains(el)) return false;
+      if (!modules.includes(page)) return true;
+      return !$$('.screen', page).slice(1).some(s => s.contains(el));
+    }
+    const inCur = (sel, page) => $$(sel, page).filter(el => inPage(el, page));
+
+    /* 스페이스바: 현재 쪽의 "주 동작"(수식 다음 단계 → 의사코드 다음 줄 → 다음 전환 버튼·탭 → 정답 공개 → 다음 쪽).
+       Shift+Space는 반대로 이전 단계, 더 없으면 이전 쪽 */
+    function pageAction(back) {
+      const page = pages[currentIndex()];
+      if (back) {
+        for (const [sel, btn, idxKey] of [['.math-derivation', '.math-prev-btn', 'step'], ['.pseudocode-translation', '.pseudocode-prev-btn', 'line']]) {
+          for (const el of inCur(sel, page)) {
+            const b = $(btn, el);
+            if (b && Number(el.dataset[idxKey] || 0) > 0) { b.click(); return; }
+          }
+        }
+        for (const grp of inCur('.result-metric-toggle, .ablation-tabs, .layer-tabs', page)) {
+          const bs = $$('button', grp), i = bs.findIndex(b => b.classList.contains('active'));
+          if (i > 0) { bs[i - 1].click(); return; }
+        }
+        go(currentIndex() - 1);
+        return;
+      }
+      for (const el of inCur('.math-derivation', page)) {
+        const n = $$('.math-step', el).length, b = $('.math-next-btn', el);
+        if (b && Number(el.dataset.step || 0) < n - 1) { b.click(); return; }
+      }
+      for (const el of inCur('.pseudocode-translation', page)) {
+        const n = $$('.pseudocode-line', el).length, b = $('.pseudocode-next-btn', el);
+        if (b && Number(el.dataset.line || -1) < n - 1) { b.click(); return; }
+      }
+      // 전환 버튼 묶음(결과 지표 전환, 제거 실험 탭): 활성 버튼 다음 것을 누른다. 마지막이면 넘어간다
+      for (const grp of inCur('.result-metric-toggle, .ablation-tabs, .layer-tabs', page)) {
+        const bs = $$('button', grp), i = bs.findIndex(b => b.classList.contains('active'));
+        if (i >= 0 && i < bs.length - 1) { bs[i + 1].click(); return; }
+      }
+      for (const el of inCur('.quiz-container', page)) {
+        const done = el.dataset.revealed || $$('.quiz-option', el).every(o => o.disabled);
+        if (el.id && !done) { window.revealQuiz(el.id); return; }
+      }
+      go(currentIndex() + 1);
+    }
+
+    // keydown 리스너는 이것 하나뿐. 수정키·입력 위젯·가로 스크롤 영역에서는 브라우저 기본 동작에 맡긴다
+    document.addEventListener('keydown', e => {
+      if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+      const t = e.target;
+      if (t.closest && t.closest('input,textarea,select,[contenteditable],[role=slider],[role=listbox],audio,video')) return;
+      if (e.key === ' ') { e.preventDefault(); pageAction(e.shiftKey); return; }
+      if (e.shiftKey) return;
+      const step = { ArrowRight: 1, ArrowDown: 1, PageDown: 1, ArrowLeft: -1, ArrowUp: -1, PageUp: -1 }[e.key];
+      if (step) {
+        // 가로로 실제 스크롤되는 영역(코드 블록 등) 안에서는 좌우 키를 그대로 둔다
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+          const sc = t.closest && t.closest('pre,.pseudocode-block,.math-block');
+          if (sc && sc.scrollWidth > sc.clientWidth) return;
+        }
+        e.preventDefault(); go(currentIndex() + step); return;
+      }
+      if (e.key === 'Home') { e.preventDefault(); go(0); }
+      if (e.key === 'End') { e.preventDefault(); go(pages.length - 1); }
+    });
+    // 버튼에 포커스가 있어도 스페이스바가 keyup에서 버튼을 또 누르지 않게 막는다
+    document.addEventListener('keyup', e => {
+      if (e.key === ' ' && !(e.target.closest && e.target.closest('input,textarea,select,[contenteditable]'))) e.preventDefault();
+    });
+  }
+  initPager();
 
   /* ── SIDEBAR NAVIGATION ────────────────────────────────────── */
   const sidebarItems = $$('.sidebar-item');
@@ -331,6 +448,7 @@
     $$('.quiz-question-block', container).forEach(q => {
       const selected  = $('.quiz-option.selected', q);
       const feedback  = $('.quiz-feedback', q);
+      if (!feedback) return;
       const correct   = q.dataset.correct;
       const rightExp  = q.dataset.explanationRight  || '';
       const wrongExp  = q.dataset.explanationWrong  || '';
@@ -348,12 +466,32 @@
         feedback.className = 'quiz-feedback show success';
       } else {
         selected.classList.add('incorrect');
-        const correctBtn = $(`.quiz-option[data-value="${correct}"]`, q);
+        const correctBtn = $(`.quiz-option[data-value="${CSS.escape(correct || '')}"]`, q);
         if (correctBtn) correctBtn.classList.add('correct');
         setFeedbackHTML(feedback, '<strong>' + i18n('incorrect') + '</strong> ' + wrongExp);
         feedback.className = 'quiz-feedback show error';
       }
     });
+    if ($$('.quiz-question-block', container).every(q => $('.quiz-option.selected', q))) container.dataset.revealed = '1';
+  };
+
+  /* 스페이스바용: 고르지 않아도 정답을 바로 공개한다(정답이 여러 개면 모두 표시) */
+  window.revealQuiz = function (containerId) {
+    const container = $('#' + containerId);
+    if (!container) return;
+    $$('.quiz-question-block', container).forEach(q => {
+      const feedback = $('.quiz-feedback', q);
+      const answers  = (q.dataset.correct || '').split(/[,\s]+/).filter(Boolean);
+      $$('.quiz-option', q).forEach(o => {
+        o.classList.remove('selected', 'correct', 'incorrect');
+        if (answers.includes(o.dataset.value)) o.classList.add('selected', 'correct');
+        o.disabled = true;
+      });
+      if (!feedback) return;
+      setFeedbackHTML(feedback, '<strong>' + i18n('correct') + '</strong> ' + (q.dataset.explanationRight || ''));
+      feedback.className = 'quiz-feedback show success';
+    });
+    container.dataset.revealed = '1';
   };
 
   window.resetQuiz = function (containerId) {
@@ -364,6 +502,7 @@
       o.disabled = false;
     });
     $$('.quiz-feedback', container).forEach(f => { f.className = 'quiz-feedback'; f.textContent = ''; });
+    container.removeAttribute('data-revealed');
   };
 
   /* ── DRAG-AND-DROP ENGINE ──────────────────────────────────── */
@@ -693,6 +832,7 @@
     steps.forEach((s, i) => { s.style.display = i === 0 ? 'block' : 'none'; });
 
     function updateProgress() {
+      containerEl.dataset.step = current;   // 스페이스바 단축키가 읽는 현재 단계(0부터)
       if (progressEl) progressEl.textContent = i18n('step', current + 1, steps.length);
     }
 
@@ -737,14 +877,49 @@
   $$('.math-derivation').forEach(el => initMathDerivation(el));
 
   /* ── PSEUDOCODE WALKTHROUGH ────────────────────────────────── */
+  /* ── 의사코드 색칠: IDE 토큰 색(Catppuccin, .code-* 클래스)을 자동으로 입힌다 ──
+     이미 <span class="code-…">로 직접 칠한 줄은 건드리지 않는다.
+     키워드(대문자 제어어) · 함수(대문자 이름 + 괄호) · 주석(// 뒤) · 숫자 · 연산자 · 문자열 */
+  const PSEUDO_KEYWORDS = /^(INPUT|OUTPUT|RETURN|FOR|EACH|OF|IN|TO|DO|END|IF|THEN|ELSE|ELIF|WHILE|REPEAT|UNTIL|AND|OR|NOT|USING|LET|SET|BREAK|CONTINUE|FUNCTION|PROCEDURE)$/;
+  function colorizePseudocode(line) {
+    if (line.dataset.colored) return;   // 멱등
+    line.dataset.colored = '1';
+    // 직접 칠했거나 수식($…$) 등 자식 요소가 섞인 줄은 건드리지 않는다
+    if (!Array.from(line.childNodes).every(n => n.nodeType === 3)) return;
+    const text = line.textContent;
+    if (text.indexOf('$') >= 0) return;
+    const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    // 주석(//…)과 문자열을 하나의 순서 있는 alternation으로 처리 — 문자열 안의 //, 주석 안의 따옴표를 오인하지 않는다.
+    // 단어 안의 아포스트로피(don't)는 문자열 시작이 아니다(앞이 글자·숫자가 아닐 때만 ' 문자열)
+    const re = /(\/\/.*$)|("[^"]*")|((?<![A-Za-z0-9_가-힣])'[^']*')|([A-Za-z_][A-Za-z0-9_]*)(\s*\()?|(\d+(?:\.\d+)?)|(<=|>=|!=|==|[=+\-*\/<>←])/g;
+    let out = '', last = 0, m;
+    while ((m = re.exec(text))) {
+      out += esc(text.slice(last, m.index));
+      if (m[1]) out += '<span class="code-comment">' + esc(m[1]) + '</span>';
+      else if (m[2] || m[3]) out += '<span class="code-string">' + esc(m[2] || m[3]) + '</span>';
+      else if (m[4]) {
+        if (PSEUDO_KEYWORDS.test(m[4])) out += '<span class="code-keyword">' + m[4] + '</span>' + (m[5] || '');
+        else if (m[5]) out += '<span class="code-function">' + m[4] + '</span>' + m[5];
+        else out += m[4];
+      }
+      else if (m[6]) out += '<span class="code-number">' + m[6] + '</span>';
+      else if (m[7]) out += '<span class="code-operator">' + esc(m[7]) + '</span>';
+      last = re.lastIndex;
+    }
+    out += esc(text.slice(last));
+    line.innerHTML = out;
+  }
+
   function initPseudocodeWalkthrough(containerEl) {
     if (!containerEl) return;
     const lines      = $$('.pseudocode-line', containerEl);
+    lines.forEach(colorizePseudocode);
     const explLines  = $$('.pe', containerEl);
     const progressEl = $('.pseudocode-progress', containerEl);
     let current = -1;
 
     function updateProgress() {
+      containerEl.dataset.line = current;   // 스페이스바 단축키가 읽는 현재 줄(-1이면 시작 전)
       if (progressEl) progressEl.textContent = (current + 1) + ' / ' + lines.length;
     }
 
@@ -784,10 +959,10 @@
     const blockEl = $('.pseudocode-block', containerEl);
     const explEl  = $('.pseudocode-explanation', containerEl);
     function alignRows() {
+      if (!blockEl || !explEl) return;
       const pairs = [[$('.translation-label', blockEl), $('.translation-label', explEl)]];
       lines.forEach((l, i) => pairs.push([l, explLines[i]]));
       pairs.forEach(([a, b]) => { if (a) a.style.minHeight = ''; if (b) b.style.minHeight = ''; });
-      if (!blockEl || !explEl) return;
       const sideBySide = Math.abs(blockEl.getBoundingClientRect().top - explEl.getBoundingClientRect().top) < 2;
       if (!sideBySide) return;
       pairs.forEach(([a, b]) => {

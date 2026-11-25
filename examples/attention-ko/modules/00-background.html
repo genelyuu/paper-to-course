@@ -2,7 +2,7 @@
   <div class="module-content">
 
     <div class="module-header">
-      <span class="module-number">1–2</span>
+      <span class="module-number">1</span>
       <h2 class="module-title">서론과 배경</h2>
       <p class="module-subtitle">트랜스포머 논문을 읽기 전에 필요한 네 가지 개념을 정리한다</p>
     </div>
@@ -24,17 +24,73 @@
         </div>
       </aside>
       <div class="notes">
-        <h3 class="screen-heading"><span class="sec-num">1</span>이 논문이 푸는 문제</h3>
-        <p>순환 신경망 없이 어텐션만으로 번역 모델을 만들 수 있을까? 이 논문은 문장을 다른 언어의 문장으로 바꾸는 <span class="term" data-definition="시퀀스 변환(sequence transduction): 입력 시퀀스를 다른 시퀀스로 바꾸는 과제. 기계 번역이 대표적인 예임.">시퀀스 변환</span>(sequence transduction) 문제를 다룬다. 저자들은 기존 모델의 구조를 걷어 내고 어텐션만으로 모델을 세웠다.</p>
-        <div class="flow-steps animate-in">
-          <div class="flow-step"><div class="flow-step-num">1</div><p>입력 문장(영어)</p></div>
-          <div class="flow-arrow">&rarr;</div>
-          <div class="flow-step"><div class="flow-step-num">2</div><p>트랜스포머</p></div>
-          <div class="flow-arrow">&rarr;</div>
-          <div class="flow-step"><div class="flow-step-num">3</div><p>출력 문장(독일어)</p></div>
+        <h3 class="screen-heading">이 논문을 쓴 이유와 새로운 점<span class="paper-ref">논문 1절</span></h3>
+        <p>기존 번역 모델은 <span class="term" data-definition="순환 신경망(recurrent neural network, RNN): 토큰을 순서대로 하나씩 읽으면서 이전 단계의 은닉 상태를 다음 단계로 넘기는 신경망.">순환 신경망</span>으로 단어를 하나씩 차례로 읽었다. 앞 단계가 끝나야 다음 단계를 계산할 수 있어 학습을 나누어 동시에 처리하기 어렵고, 멀리 떨어진 단어를 이으려면 여러 단계를 거쳐야 했다. 이 논문은 이 순서 의존을 없애려고 쓰였다.</p>
+        <p>그림은 두 방식이 입력 문장 $x_1, \ldots, x_4$를 처리하는 과정을 나타낸 것이다.</p>
+        <div class="svg-diagram animate-in" style="margin:var(--space-4) auto">
+          <svg viewBox="0 0 800 216" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="이전 방식은 은닉 상태를 h1부터 h4까지 차례로 계산하고, 제안 방식은 셀프 어텐션으로 모든 위치를 한 번에 계산한다">
+          <foreignObject x="16" y="0" width="376" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4; font-weight:700"><span>이전 방식: 순환 신경망</span></div></foreignObject>
+          <rect class="node-rect sq" x="16" y="148" width="70" height="32"/>
+          <foreignObject x="16" y="148" width="70" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span><i class="mi">x</i><sub>1</sub></span></div></foreignObject>
+          <rect class="node-rect sq" x="16" y="80" width="70" height="32"/>
+          <foreignObject x="16" y="80" width="70" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span><i class="mi">h</i><sub>1</sub></span></div></foreignObject>
+          <line class="edge-line" x1="51.0" y1="148" x2="51.0" y2="122"/><polygon class="edge-arrow" points="46.0,122 51.0,112 56.0,122"/>
+          <line class="edge-line accent" x1="86" y1="96.0" x2="108" y2="96.0"/><polygon class="edge-arrow accent" points="108,91.0 118,96.0 108,101.0"/>
+          
+          <rect class="node-rect sq" x="118" y="148" width="70" height="32"/>
+          <foreignObject x="118" y="148" width="70" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span><i class="mi">x</i><sub>2</sub></span></div></foreignObject>
+          <rect class="node-rect sq" x="118" y="80" width="70" height="32"/>
+          <foreignObject x="118" y="80" width="70" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span><i class="mi">h</i><sub>2</sub></span></div></foreignObject>
+          <line class="edge-line" x1="153.0" y1="148" x2="153.0" y2="122"/><polygon class="edge-arrow" points="148.0,122 153.0,112 158.0,122"/>
+          <line class="edge-line accent" x1="188" y1="96.0" x2="210" y2="96.0"/><polygon class="edge-arrow accent" points="210,91.0 220,96.0 210,101.0"/>
+          
+          <rect class="node-rect sq" x="220" y="148" width="70" height="32"/>
+          <foreignObject x="220" y="148" width="70" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span><i class="mi">x</i><sub>3</sub></span></div></foreignObject>
+          <rect class="node-rect sq" x="220" y="80" width="70" height="32"/>
+          <foreignObject x="220" y="80" width="70" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span><i class="mi">h</i><sub>3</sub></span></div></foreignObject>
+          <line class="edge-line" x1="255.0" y1="148" x2="255.0" y2="122"/><polygon class="edge-arrow" points="250.0,122 255.0,112 260.0,122"/>
+          <line class="edge-line accent" x1="290" y1="96.0" x2="312" y2="96.0"/><polygon class="edge-arrow accent" points="312,91.0 322,96.0 312,101.0"/>
+          
+          <rect class="node-rect sq" x="322" y="148" width="70" height="32"/>
+          <foreignObject x="322" y="148" width="70" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span><i class="mi">x</i><sub>4</sub></span></div></foreignObject>
+          <rect class="node-rect sq" x="322" y="80" width="70" height="32"/>
+          <foreignObject x="322" y="80" width="70" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span><i class="mi">h</i><sub>4</sub></span></div></foreignObject>
+          <line class="edge-line" x1="357.0" y1="148" x2="357.0" y2="122"/><polygon class="edge-arrow" points="352.0,122 357.0,112 362.0,122"/>
+          <foreignObject x="16" y="40" width="376" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; word-break:keep-all; line-height:1.4; color:var(--color-text-secondary)"><span>앞 상태가 끝나야 다음 상태를 계산한다</span></div></foreignObject>
+          <foreignObject x="16" y="188" width="376" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; word-break:keep-all; line-height:1.4; font-weight:700"><span>순차 단계 <i class="mi">n</i>번, 먼 단어까지 <i class="mi">n</i>단계</span></div></foreignObject>
+          <line class="guide" x1="400" y1="8" x2="400" y2="212"/>
+          <foreignObject x="408" y="0" width="376" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4; font-weight:700; color:var(--color-accent)"><span>제안 방식: 셀프 어텐션만</span></div></foreignObject>
+          <rect class="node-rect accent sq" x="408" y="80" width="376" height="32"/>
+          <foreignObject x="408" y="80" width="376" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4; font-weight:700"><span>모든 위치를 한 번에 비교</span></div></foreignObject>
+          <rect class="node-rect sq" x="408" y="148" width="70" height="32"/>
+          <foreignObject x="408" y="148" width="70" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span><i class="mi">x</i><sub>1</sub></span></div></foreignObject>
+          <line class="edge-line accent" x1="443.0" y1="148" x2="443.0" y2="122"/><polygon class="edge-arrow accent" points="438.0,122 443.0,112 448.0,122"/>
+          <rect class="node-rect sq" x="510" y="148" width="70" height="32"/>
+          <foreignObject x="510" y="148" width="70" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span><i class="mi">x</i><sub>2</sub></span></div></foreignObject>
+          <line class="edge-line accent" x1="545.0" y1="148" x2="545.0" y2="122"/><polygon class="edge-arrow accent" points="540.0,122 545.0,112 550.0,122"/>
+          <rect class="node-rect sq" x="612" y="148" width="70" height="32"/>
+          <foreignObject x="612" y="148" width="70" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span><i class="mi">x</i><sub>3</sub></span></div></foreignObject>
+          <line class="edge-line accent" x1="647.0" y1="148" x2="647.0" y2="122"/><polygon class="edge-arrow accent" points="642.0,122 647.0,112 652.0,122"/>
+          <rect class="node-rect sq" x="714" y="148" width="70" height="32"/>
+          <foreignObject x="714" y="148" width="70" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span><i class="mi">x</i><sub>4</sub></span></div></foreignObject>
+          <line class="edge-line accent" x1="749.0" y1="148" x2="749.0" y2="122"/><polygon class="edge-arrow accent" points="744.0,122 749.0,112 754.0,122"/>
+          <foreignObject x="408" y="40" width="376" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; word-break:keep-all; line-height:1.4; color:var(--color-text-secondary)"><span>모든 위치를 동시에 계산한다</span></div></foreignObject>
+          <foreignObject x="408" y="188" width="376" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; word-break:keep-all; line-height:1.4; font-weight:700; color:var(--color-accent)"><span>순차 단계 1번, 먼 단어까지 1단계</span></div></foreignObject>
+          </svg>
+        </div>
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">&#10024;</div>
+          <div class="callout-content">
+            <strong class="callout-title">이 논문의 새로운 점</strong>
+            <ol>
+              <li><strong>어텐션만으로 구성:</strong> 순환과 합성곱을 모두 빼고 어텐션만으로 인코더와 디코더를 만든 첫 번역 모델이다.</li>
+              <li><strong>병렬 학습:</strong> 모든 위치를 한 단계로 이어 학습을 동시에 처리하므로 기본 모델은 GPU 8개로 12시간 만에 학습된다.</li>
+              <li><strong>최고 성능:</strong> WMT 2014 영어-독일어 번역에서 BLEU 28.4로 앙상블(ensemble)을 포함한 기존 최고 기록을 넘었다.</li>
+            </ol>
+          </div>
         </div>
       </div>
-      <div class="summary"><span class="summary-label">요약</span><p>이 논문은 시퀀스 변환 문제를 어텐션만으로 구성한 모델로 푼다.</p></div>
+      <div class="summary"><span class="summary-label">요약</span><p>이 논문은 순환 신경망의 순서 의존을 없애려고 어텐션만으로 번역 모델을 만들었다.</p></div>
     </div>
 
     <!-- 페이지 2: 벡터와 내적 -->
@@ -48,14 +104,37 @@
       </aside>
       <div class="notes">
         <h3 class="screen-heading">벡터와 내적</h3>
-        <p>문장 속 단어는 숫자 여러 개로 이루어진 <span class="term" data-definition="벡터(vector): 숫자를 일렬로 나열한 것. 크기와 방향을 함께 나타냄.">벡터</span>(vector)로 표현된다. 두 벡터가 같은 방향을 가리킬수록 <span class="term" data-definition="내적(dot product): 두 벡터의 같은 위치의 성분끼리 곱하여 모두 더한 값. 두 벡터가 비슷한 방향일수록 커짐.">내적</span>(dot product)이 크다.</p>
+        <div class="with-figure" style="--figure-side-width:300px">
+          <div>
+            <p>문장 속 단어는 숫자 여러 개로 이루어진 <span class="term" data-definition="벡터(vector): 숫자를 일렬로 나열한 것. 크기와 방향을 함께 나타냄.">벡터</span>(vector)로 표현된다. 두 벡터가 같은 방향을 가리킬수록 <span class="term" data-definition="내적(dot product): 두 벡터의 같은 위치의 성분끼리 곱하여 모두 더한 값. 두 벡터가 비슷한 방향일수록 커짐.">내적</span>(dot product)이 크다.</p>
+            <p>그림은 쿼리 $\boldsymbol{q}=(2,1)$과 세 키 벡터를 좌표평면에 나타낸 것이다. 괄호 안의 수는 $\boldsymbol{q}$와의 내적이다. 같은 방향에 가까운 $\boldsymbol{k}_1$의 내적이 가장 크고, 반대 방향인 $\boldsymbol{k}_3$의 내적은 음수이다.</p>
+          </div>
+          <figure class="figure side">
+<svg viewBox="0 0 300 196" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="쿼리 q=(2,1)과 키 k1=(1,0), k2=(0,1), k3=(-1,0). 괄호 안은 q와의 내적 2, 1, -2">
+<defs><marker id="f1-ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ink-fill"/></marker><marker id="f1-acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="accent-fill"/></marker></defs>
+<path class="guide" d="M40,48 V168 M152,48 V168 M208,48 V168 M20,84 H228"/>
+<line class="guide-axis" x1="16" y1="140" x2="232" y2="140"/><line class="guide-axis" x1="96" y1="168" x2="96" y2="48"/>
+<text x="86" y="158" text-anchor="middle" font-size="13" font-style="italic">O</text>
+<line class="ink" x1="96" y1="140" x2="152" y2="140" marker-end="url(#f1-ink)"/>
+<line class="ink" x1="96" y1="140" x2="96" y2="84" marker-end="url(#f1-ink)"/>
+<line class="ink" x1="96" y1="140" x2="40" y2="140" marker-end="url(#f1-ink)"/>
+<line class="ink accent strong" x1="96" y1="140" x2="208" y2="84" marker-end="url(#f1-acc)"/>
+<text x="212" y="74" text-anchor="middle" font-size="14" font-style="italic" class="accent-text"><tspan font-weight="700">q</tspan><tspan font-style="normal"> (2, 1)</tspan></text>
+<text x="152" y="162" text-anchor="middle" font-size="14" font-style="italic">k<tspan font-size="11" dy="4">1</tspan><tspan font-style="normal"> (2)</tspan></text>
+<text x="104" y="76" text-anchor="start" font-size="14" font-style="italic">k<tspan font-size="11" dy="4">2</tspan><tspan font-style="normal"> (1)</tspan></text>
+<text x="40" y="128" text-anchor="middle" font-size="14" font-style="italic">k<tspan font-size="11" dy="4">3</tspan><tspan font-style="normal"> (−2)</tspan></text>
+<text x="228" y="160" text-anchor="middle" font-size="13" font-style="italic">x</text>
+<text x="106" y="56" text-anchor="start" font-size="13" font-style="italic">y</text>
+</svg>
+          </figure>
+        </div>
         <div class="math-derivation animate-in" id="math-deriv-dot">
           <div class="math-step" data-step="0">
             <div class="math-equation">
-              $$\mathbf{q}\cdot\mathbf{k} = q_1 k_1 + q_2 k_2$$
+              $$\boldsymbol{q}\cdot\boldsymbol{k} = q_1 k_1 + q_2 k_2$$
             </div>
             <div class="math-explanation">
-              <p>두 벡터 $\mathbf{q}$와 $\mathbf{k}$의 내적은 같은 위치의 성분끼리 곱하여 더한 값이다. 내적이 클수록 두 벡터가 비슷하다고 본다.</p>
+              <p>두 벡터 $\boldsymbol{q}$와 $\boldsymbol{k}$의 내적은 같은 위치의 성분끼리 곱하여 더한 값이다. 내적이 클수록 두 벡터가 비슷하다고 본다.</p>
             </div>
           </div>
           <div class="math-step" data-step="1" style="display:none">
@@ -88,11 +167,34 @@
       </aside>
       <div class="notes">
         <h3 class="screen-heading"><span class="corner-tag">개념 체크</span>소프트맥스</h3>
+        <div class="with-figure" style="--figure-side-width:220px">
+          <div>
         <p><span class="term" data-definition="소프트맥스(softmax): 실수 여러 개를 모두 양수이고 합이 1인 값으로 바꾸는 함수. 큰 값에 더 큰 비중을 줌.">소프트맥스</span>(softmax)는 점수 여러 개를 합이 1인 비중으로 바꾸는 함수이다. 앞에서 구한 내적 2, 1, $-2$에 적용하면 비중은 약 0.72, 0.27, 0.01이 된다.</p>
         <div class="math-equation">
-          $$\mathrm{softmax}(x_i) = \frac{e^{x_i}}{\sum_j e^{x_j}}$$
+          $$\mathit{softmax}(x_i) = \frac{e^{x_i}}{\sum_j e^{x_j}}$$
         </div>
         <p>여기서 $x_i$는 $i$번째 점수이다. 점수 차이가 클수록 비중이 한쪽으로 쏠린다는 점이 뒤에서 중요해진다.</p>
+          </div>
+          <figure class="figure side">
+<svg viewBox="0 0 220 116" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="점수 2, 1, -2를 소프트맥스로 바꾼 비중 막대">
+<text x="8" y="14" text-anchor="start" font-size="12" font-weight="700">점수</text>
+<text x="64" y="14" text-anchor="start" font-size="12" font-weight="700">비중 (합 1)</text>
+<text x="24" y="41" text-anchor="middle" font-size="13">2</text>
+<rect class="guide-fill" x="64" y="28" width="112" height="18"/>
+<rect class="accent-fill" x="64" y="28" width="80.8" height="18"/>
+<text x="182" y="41" class="accent-text" text-anchor="start" font-size="12">0.72</text>
+<text x="24" y="71" text-anchor="middle" font-size="13">1</text>
+<rect class="guide-fill" x="64" y="58" width="112" height="18"/>
+<rect class="ink-fill" x="64" y="58" width="29.7" height="18"/>
+<text x="182" y="71" text-anchor="start" font-size="12">0.27</text>
+<text x="24" y="101" text-anchor="middle" font-size="13">−2</text>
+<rect class="guide-fill" x="64" y="88" width="112" height="18"/>
+<rect class="ink-fill" x="64" y="88" width="1.5" height="18"/>
+<text x="182" y="101" text-anchor="start" font-size="12">0.01</text>
+</svg>
+            <figcaption class="figure-caption">점수 2, 1, −2의 소프트맥스 비중</figcaption>
+          </figure>
+        </div>
         <div class="quiz-container animate-in" id="quiz-m0-check">
           <div class="quiz-question-block"
                data-correct="option-b"
@@ -133,7 +235,13 @@
       </aside>
       <div class="notes">
         <h3 class="screen-heading">인코더-디코더와 순환 신경망</h3>
-        <p><span class="term" data-definition="인코더(encoder): 입력 문장을 벡터 표현으로 바꾸는 부분.">인코더</span>(encoder)는 입력 문장을 벡터로 요약하고, <span class="term" data-definition="디코더(decoder): 인코더가 만든 표현을 바탕으로 출력 문장을 한 토큰씩 만드는 부분.">디코더</span>(decoder)는 그 벡터에서 출력 문장을 만든다. 논문 이전에는 <span class="term" data-definition="순환 신경망(recurrent neural network, RNN): 토큰을 순서대로 하나씩 읽으면서 이전 단계의 은닉 상태를 다음 단계로 넘기는 신경망.">순환 신경망</span>(recurrent neural network, RNN)이 이 두 부분을 맡는 것이 표준이었다.</p>
+        <div class="with-figure" style="--figure-side-width:300px">
+          <div>
+            <p><span class="term" data-definition="인코더(encoder): 입력 문장을 벡터 표현으로 바꾸는 부분.">인코더</span>(encoder)는 입력 문장을 벡터로 요약하고, <span class="term" data-definition="디코더(decoder): 인코더가 만든 표현을 바탕으로 출력 문장을 한 토큰씩 만드는 부분.">디코더</span>(decoder)는 그 벡터에서 출력 문장을 만든다. 논문 이전에는 <span class="term" data-definition="순환 신경망(recurrent neural network, RNN): 토큰을 순서대로 하나씩 읽으면서 이전 단계의 은닉 상태를 다음 단계로 넘기는 신경망.">순환 신경망</span>(recurrent neural network, RNN)이 이 두 부분을 맡는 것이 표준이었다.</p>
+            <p>그림처럼 번역은 원문을 읽어 뜻을 정리하는 일(①)과 그 뜻으로 새 문장을 쓰는 일(②)로 나뉜다. 인코더가 ①을, 디코더가 ②를 맡는다.</p>
+          </div>
+          <figure class="figure side"><img src="assets/fig-translator.svg" alt="펼친 책을 읽어 문장의 뜻(벡터)으로 정리하고, 그 뜻으로 공책에 다른 언어로 쓰는 과정"></figure>
+        </div>
         <div class="svg-diagram animate-in">
           <svg viewBox="0 0 800 128" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="순환 신경망은 토큰을 순서대로 하나씩 처리한다">
             <rect class="node-rect" x="16" y="8" width="156" height="64" rx="12"/>
@@ -153,15 +261,15 @@
             <foreignObject x="16" y="88" width="768" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4; color:var(--color-text-secondary)"><span>앞 단계가 끝나야 다음 단계를 계산할 수 있으므로 병렬화가 어렵다</span></div></foreignObject>
           </svg>
         </div>
-        <div class="callout callout-warning animate-in">
-          <div class="callout-icon">&#9888;</div>
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">&#128269;</div>
           <div class="callout-content">
             <strong class="callout-title">더 알아보기</strong>
             <p>순환 신경망은 앞 단계의 계산이 끝나야 다음 단계를 시작할 수 있어서 한 문장 안에서 계산을 나누어 동시에 처리하기 어렵다. 이 논문은 이 제약을 없애는 것을 목표로 삼는다.</p>
           </div>
         </div>
       </div>
-      <div class="summary"><span class="summary-label">요약</span><p>순환 신경망 기반 인코더-디코더는 토큰을 순서대로 처리하므로 병렬화가 어렵다.</p></div>
+      <div class="summary"><span class="summary-label">요약</span><p>순환 신경망 기반 인코더-디코더는 토큰(token)을 순서대로 처리하므로 병렬화가 어렵다.</p></div>
     </div>
 
     <!-- 페이지 5: 어텐션과 쿼리, 키, 값 -->
@@ -176,7 +284,13 @@
       </aside>
       <div class="notes">
         <h3 class="screen-heading">어텐션과 쿼리, 키, 값</h3>
-        <p><span class="term" data-definition="어텐션(attention): 출력의 각 위치가 입력의 어느 위치를 얼마나 참고할지 비중을 계산하여 정보를 가져오는 방식.">어텐션</span>(attention)은 필요한 정보를 가진 위치에 더 큰 비중을 두고 읽는 방식이다. 도서관에서 책을 찾는 과정에 비유하면 세 요소를 구분할 수 있다.</p>
+        <div class="with-figure" style="--figure-side-width:150px">
+          <div>
+            <p><span class="term" data-definition="어텐션(attention): 출력의 각 위치가 입력의 어느 위치를 얼마나 참고할지 비중을 계산하여 정보를 가져오는 방식.">어텐션</span>(attention)은 필요한 정보를 가진 위치에 더 큰 비중을 두고 읽는 방식이다. 도서관에서 책을 찾는 과정에 비유하면 세 요소를 구분할 수 있다.</p>
+            <p>그림처럼 색인 카드에서 찾는 주제와 맞는 카드를 고르고, 그 카드가 가리키는 책을 꺼내 읽는다.</p>
+          </div>
+          <figure class="figure side"><img src="assets/fig-library.svg" alt="도서관 색인 카드 서랍을 열고 카드를 확인하는 사람"></figure>
+        </div>
         <div class="step-cards stagger-children animate-in">
           <div class="step-card">
             <div class="step-num">Q</div>
@@ -229,12 +343,12 @@
             <foreignObject x="312" y="84.0" width="160" height="64"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span>어텐션: 쿼리, 키, 값</span></div></foreignObject>
             <rect class="node-rect accent" x="576" y="68.0" width="208" height="96" rx="12"/>
             <foreignObject x="584" y="72.0" width="192" height="88"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4; font-weight:700"><span>논문 내용: 어텐션만으로 구성한 트랜스포머</span></div></foreignObject>
-            <line class="edge-line" x1="184" y1="36" x2="295" y2="95"/>
-            <polygon class="edge-arrow" points="293,100 304,100 298,91"/>
+            <path class="edge-line" d="M184,36 H244 V100 H294"/>
+            <polygon class="edge-arrow" points="294,105 304,100 294,95"/>
             <line class="edge-line" x1="184" y1="116" x2="294" y2="116"/>
             <polygon class="edge-arrow" points="294,121 304,116 294,111"/>
-            <line class="edge-line" x1="184" y1="196" x2="566" y2="149"/>
-            <polygon class="edge-arrow" points="567,154 576,148 565,144"/>
+            <path class="edge-line" d="M184,196 H528 V148 H566"/>
+            <polygon class="edge-arrow" points="566,153 576,148 566,143"/>
             <line class="edge-line accent" x1="480" y1="116" x2="566" y2="116"/>
             <polygon class="edge-arrow accent" points="566,121 576,116 566,111"/>
           </svg>
@@ -247,19 +361,22 @@
     <!-- 페이지 7: 연구 계보 -->
     <div class="screen cornell">
       <aside class="cue">
-        <span class="cue-label">핵심 질문</span>
-        <ul>
-          <li>트랜스포머는 어떤 연구를 이어받았는가?</li>
-          <li>합성곱 번역은 어떤 점에서 경쟁 접근인가?</li>
-        </ul>
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">&#10024;</div>
+          <div class="callout-content">
+            <strong class="callout-title">새로운 점</strong>
+            <p>앞선 연구는 어텐션을 순환 신경망이나 합성곱 모델에 <em>덧붙였다</em>. 트랜스포머는 순환과 합성곱을 모두 걷어 내고 <strong>어텐션만 남겼다</strong>.</p>
+          </div>
+        </div>
       </aside>
       <div class="notes">
-        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span><span class="sec-num">2</span>연구 계보</h3>
-        <p>트랜스포머는 시퀀스 변환 모델과 어텐션의 흐름 위에 놓인다. 노드를 눌러 설명을 확인하시오.</p>
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>연구 계보<span class="paper-ref">논문 2절</span></h3>
+        <p>트랜스포머는 시퀀스 변환(sequence transduction) 모델과 어텐션의 흐름 위에 놓인다. 각 갈래의 오른쪽은 이어받은 것과 달라진 것이다. 노드를 누르면 연구 설명이 나온다.</p>
         <div class="lineage-tree animate-in">
           <div class="lineage-node lineage-root" data-detail="트랜스포머(Transformer): 순환과 합성곱 없이 어텐션만으로 인코더와 디코더를 구성한 모델이다.">
             <span class="lineage-label">트랜스포머</span>
             <span class="lineage-detail">본 논문 (2017)</span>
+            <span class="novelty-badge">어텐션만으로 구성</span>
           </div>
           <div class="lineage-branch">
             <div class="lineage-edge-label">어텐션 도입</div>
@@ -267,6 +384,7 @@
               <span class="lineage-label">어텐션 번역</span>
               <span class="lineage-detail">Bahdanau et al., 2014</span>
             </div>
+            <p class="lineage-note">어텐션을 순환 신경망의 <em>보조 장치</em>로 썼다. → 트랜스포머는 <strong class="novelty">어텐션을 모델의 본체</strong>로 삼았다.</p>
           </div>
           <div class="lineage-branch">
             <div class="lineage-edge-label">구조 계승</div>
@@ -274,6 +392,7 @@
               <span class="lineage-label">인코더-디코더</span>
               <span class="lineage-detail">Sutskever et al., 2014</span>
             </div>
+            <p class="lineage-note">인코더-디코더 틀은 그대로 이어받았다. → 그 안의 순환 신경망을 <strong class="novelty">셀프 어텐션 층으로 바꿨다</strong>.</p>
           </div>
           <div class="lineage-branch">
             <div class="lineage-edge-label">경쟁 접근</div>
@@ -281,10 +400,11 @@
               <span class="lineage-label">합성곱 번역</span>
               <span class="lineage-detail">Gehring et al., 2017</span>
             </div>
+            <p class="lineage-note">합성곱으로 병렬화했지만 먼 위치를 잇는 연산 수가 거리에 비례해 늘었다. → 트랜스포머는 <strong class="novelty">거리와 관계없이 한 단계</strong>로 잇는다.</p>
           </div>
         </div>
       </div>
-      <div class="summary"><span class="summary-label">요약</span><p>트랜스포머는 어텐션 번역과 인코더-디코더 구조를 이어받고 합성곱 번역과 경쟁한다.</p></div>
+      <div class="summary"><span class="summary-label">요약</span><p>트랜스포머는 앞선 연구의 어텐션과 인코더-디코더 틀을 이어받되, 순환과 합성곱 없이 어텐션만으로 구성한 점이 새롭다.</p></div>
     </div>
 
     <!-- 페이지 8: 핵심 정리 + 확인 문제 -->
@@ -309,8 +429,8 @@
         <div class="quiz-container animate-in" id="quiz-m0">
           <div class="quiz-question-block"
                data-correct="option-c"
-               data-explanation-right="③ | 순환 신경망은 앞 단계의 은닉 상태가 있어야 다음 단계를 계산하므로 한 문장 안에서 병렬로 처리하기 어렵다."
-               data-explanation-wrong="| 정답은 ③이다. 순환 신경망은 앞 단계의 은닉 상태가 있어야 다음 단계를 계산하므로 병렬화가 어렵다. ②는 디코더가 출력 문장을 한 토큰씩 만들므로 옳지 않다.">
+               data-explanation-right="③ | 순환 신경망은 앞 단계의 은닉 상태(hidden state)가 있어야 다음 단계를 계산하므로 한 문장 안에서 병렬로 처리하기 어렵다."
+               data-explanation-wrong="| 정답은 ③이다. 순환 신경망은 앞 단계의 은닉 상태가 있어야 다음 단계를 계산하므로 병렬화가 어렵다. ②는 디코더가 출력 문장을 한 토큰씩 만드므로 옳지 않다.">
             <h3 class="quiz-question"><span class="q-num">1</span>다음 중 순환 신경망 기반 인코더-디코더 모델의 한계로 옳은 것은?</h3>
             <div class="quiz-options">
               <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 입력 문장의 길이를 반드시 고정해야 한다.</span></button>
@@ -349,24 +469,47 @@
       <aside class="cue">
         <span class="cue-label">핵심 질문</span>
         <ul>
-          <li>관련도는 무엇과 무엇의 비교로 정해지는가?</li>
-          <li>값은 출력에서 어떤 역할을 하는가?</li>
+          <li>그림에서 두 벡터의 내적은 어떻게 구하는가?</li>
+          <li>내적이 큰 키는 비중이 어떻게 되는가?</li>
         </ul>
       </aside>
       <div class="notes">
-        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>쿼리, 키, 값</h3>
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>내적과 비중</h3>
         <div class="quiz-container animate-in" id="quiz-m0-2">
           <div class="quiz-question-block"
-               data-correct="option-b"
-               data-explanation-right="② | 값은 비중에 따라 섞여 출력이 되는 정보이고, 위치의 관련도를 정하는 것은 키와 쿼리의 비교이므로 ②가 옳지 않다."
-               data-explanation-wrong="| 정답은 ②이다. 관련도는 쿼리와 키의 비교로 정해지고, 값은 그 비중에 따라 섞이는 정보이므로 ②가 옳지 않다. ⑤는 쿼리와 키의 점수를 소프트맥스로 정규화해 비중을 만들므로 옳다.">
-            <h3 class="quiz-question"><span class="q-num">3</span>쿼리, 키, 값에 대한 설명으로 옳지 <u>않은</u> 것은?</h3>
-            <div class="quiz-options">
-              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 쿼리는 지금 찾는 정보를 나타낸다.</span></button>
-              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 값은 쿼리와 비교되어 관련도를 정한다.</span></button>
-              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 키는 각 위치의 이름표 역할을 한다.</span></button>
-              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 출력은 값을 비중에 따라 섞은 것이다.</span></button>
-              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 비중은 소프트맥스로 정규화된다.</span></button>
+               data-correct="option-d"
+               data-explanation-right="④ | $\boldsymbol{q}\cdot\boldsymbol{k}_1 = 3$이 $\boldsymbol{q}\cdot\boldsymbol{k}_2 = -1$보다 크므로 소프트맥스를 적용하면 $\boldsymbol{k}_1$에 더 큰 비중이 간다."
+               data-explanation-wrong="| 정답은 ④이다. $\boldsymbol{q}=(2,1)$, $\boldsymbol{k}_1=(1,1)$, $\boldsymbol{k}_2=(-1,1)$이므로 내적은 각각 3과 $-1$이고, 소프트맥스는 큰 점수에 큰 비중을 준다. ②는 $(2)(-1)+(1)(1)=-1$이므로 옳다.">
+            <h3 class="quiz-question"><span class="q-num">3</span>그림은 좌표평면 위에 쿼리 벡터 $\boldsymbol{q}$와 키 벡터 $\boldsymbol{k}_1$, $\boldsymbol{k}_2$를 나타낸 것이다. 모눈 한 칸의 길이는 1이다. 이에 대한 설명으로 옳지 <u>않은</u> 것은?</h3>
+            <div class="q-body">
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① $\boldsymbol{q}\cdot\boldsymbol{k}_1$의 값은 3이다.</span></button>
+                <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② $\boldsymbol{q}\cdot\boldsymbol{k}_2$의 값은 음수이다.</span></button>
+                <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ $\boldsymbol{q}$와 방향이 더 비슷한 키는 $\boldsymbol{k}_1$이다.</span></button>
+                <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 소프트맥스를 적용하면 $\boldsymbol{k}_2$에 더 큰 비중이 간다.</span></button>
+                <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 두 키에 대한 비중의 합은 1이다.</span></button>
+              </div>
+              <figure class="q-figure" aria-label="좌표평면 위의 쿼리 벡터 q와 키 벡터 k1, k2">
+              <svg viewBox="0 0 216 136" xmlns="http://www.w3.org/2000/svg" role="img">
+                <defs>
+                  <marker id="ah-ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ink-fill"/></marker>
+                  <marker id="ah-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="accent-fill"/></marker>
+                </defs>
+                <!-- 격자: 한 칸 = 1, 원점 O = (100,104), 칸 = 40 -->
+                <path class="guide" d="M20,24 V120 M60,24 V120 M140,24 V120 M180,24 V120 M12,64 H204 M12,24 H204"/>
+                <line class="ink" x1="12" y1="104" x2="204" y2="104" marker-end="url(#ah-ink)"/>
+                <line class="ink" x1="100" y1="128" x2="100" y2="12" marker-end="url(#ah-ink)"/>
+                <text style="font-size:13px" x="104" y="120" font-style="italic">O</text>
+                <text style="font-size:13px" x="196" y="122" font-style="italic">x</text>
+                <text style="font-size:13px" x="106" y="16" font-style="italic">y</text>
+                <line class="ink accent" x1="100" y1="104" x2="180" y2="64" stroke-width="2" marker-end="url(#ah-accent)"/>
+                <line class="ink" x1="100" y1="104" x2="140" y2="64" marker-end="url(#ah-ink)"/>
+                <line class="ink" x1="100" y1="104" x2="60" y2="64" marker-end="url(#ah-ink)"/>
+                <text style="font-size:13px" x="184" y="60" class="accent-text" font-weight="700" font-style="italic">q</text>
+                <text style="font-size:13px" x="136" y="56" font-weight="700" font-style="italic">k<tspan style="font-size:11px" dy="3">1</tspan></text>
+                <text style="font-size:13px" x="48" y="56" font-weight="700" font-style="italic">k<tspan style="font-size:11px" dy="3">2</tspan></text>
+              </svg>
+            </figure>
             </div>
             <div class="quiz-feedback"></div>
           </div>
@@ -375,7 +518,7 @@
           <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m0-2')">다시 풀기</button>
         </div>
       </div>
-      <div class="summary"><span class="summary-label">요약</span><p>관련도는 쿼리와 키의 비교로 정해지고 값은 그 비중에 따라 섞이는 정보이다.</p></div>
+      <div class="summary"><span class="summary-label">요약</span><p>쿼리와 내적이 큰 키일수록 소프트맥스 비중이 크다.</p></div>
     </div>
 
   </div>

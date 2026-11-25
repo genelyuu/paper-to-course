@@ -11,11 +11,13 @@
 min-height(100vh)를 풀고 내용의 실제 높이를 잰다.
 확인 문제는 모든 해설(정답·오답 중 긴 쪽)을 펼친 최악의 상태로 잰다.
 그림 정렬도 검사한다: 결과 막대 트랙의 시작 x·폭, SVG 요소의 viewBox 이탈과 노드 라벨 구조,
-의사코드 코드 줄과 설명 줄의 세로 위치.
+의사코드 코드 줄과 설명 줄의 세로 위치, 문항 삽화의 형식(SVG만)과 색(교과 색 하나).
 
-종료 코드: 넘치는 페이지가 있으면 1, 아니면 0. 표준 라이브러리와 Chrome만 쓴다.
+종료 코드: 넘치는 페이지나 그림 정렬 문제가 있으면 1, 아니면 0. 표준 라이브러리와 Chrome만 쓴다.
 """
-import argparse, json, os, re, shutil, subprocess, sys, tempfile
+import argparse, html as htmllib, json, os, re, shutil, subprocess, sys, tempfile
+
+MIN_IMAGES = 3   # 강의 전체 삽화(assets/의 사물·장면 선화, figure img) 최소 개수
 
 CHROME_CANDIDATES = [
     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
@@ -39,6 +41,12 @@ window.addEventListener('load', function () {
       var r = b.dataset.explanationRight || '', w = b.dataset.explanationWrong || '';
       f.innerHTML = '<strong>오답</strong> ' + (w.length > r.length ? w : r);
       f.className = 'quiz-feedback show error';
+      // 실제 화면처럼 해설 속 $…$ 수식도 렌더링해서 높이를 잰다
+      if (typeof window.renderMathInElement === 'function') {
+        try {
+          window.renderMathInElement(f, { delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}], throwOnError: false });
+        } catch (e) {}
+      }
     });
     var nav = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-height')) || 48;
     var limit = window.innerHeight - nav;
@@ -76,6 +84,27 @@ window.addEventListener('load', function () {
         if (d.children.length !== 1 || d.childNodes.length !== 1) fig.push('SVG #' + (si + 1) + ': 노드 라벨을 <span> 하나로 감싸지 않았다 "' + d.textContent.trim().slice(0, 20) + '"');
       });
     });
+    // 문항 삽화: SVG만 허용, 색은 검정·회색 + 교과 색 하나
+    document.querySelectorAll('.q-figure, .figure').forEach(function (f, fi) {
+      var name = (f.classList.contains('q-figure') ? '문항 삽화 #' : '그림 #') + (fi + 1);
+      f.querySelectorAll('img').forEach(function (im) {
+        var src = im.getAttribute('src') || '';
+        if (!/\.svg(\?|#|$)/i.test(src)) fig.push(name + ': SVG가 아닌 이미지 ' + src + ' (래스터는 벡터화해서 넣는다)');
+        if (!im.complete || im.naturalWidth === 0) fig.push(name + ': 이미지를 불러오지 못했다 ' + src);
+      });
+      var hues = new Set();
+      f.querySelectorAll('svg *').forEach(function (e) {
+        var cs = getComputedStyle(e);
+        [cs.stroke, cs.fill].forEach(function (c) {
+          var m = /rgba?\((\d+), (\d+), (\d+)(?:, ([\d.]+))?/.exec(c || '');
+          if (!m || (m[4] !== undefined && +m[4] === 0)) return;
+          var r = +m[1], g = +m[2], b = +m[3];
+          if (Math.max(r, g, b) - Math.min(r, g, b) < 24) return;   // 검정·회색·흰색
+          hues.add(r + ',' + g + ',' + b);
+        });
+      });
+      if (hues.size > 1) fig.push(name + ': 유채색이 ' + hues.size + '개다 (교과 색 하나만) ' + Array.from(hues).join(' | '));
+    });
     document.querySelectorAll('.pseudocode-translation').forEach(function (pc, pi) {
       var a = pc.querySelectorAll('.pseudocode-line'), b = pc.querySelectorAll('.pe');
       if (a.length !== b.length) fig.push('의사코드 #' + (pi + 1) + ': 코드 줄 ' + a.length + '개, 설명 줄 ' + b.length + '개');
@@ -86,7 +115,8 @@ window.addEventListener('load', function () {
     });
     var pre = document.createElement('pre');
     pre.id = '__fit_result';
-    pre.textContent = JSON.stringify({ limit: Math.round(limit), width: window.innerWidth, pages: pages, fig: fig });
+    var images = document.querySelectorAll('figure img[src^="assets/"]').length;   // 모델 삽화(사물·장면 선화)
+    pre.textContent = JSON.stringify({ limit: Math.round(limit), width: window.innerWidth, pages: pages, fig: fig, images: images });
     document.body.appendChild(pre);
   }, 300);
 });
@@ -122,18 +152,21 @@ def main():
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as f:
             f.write(html)
-        out = subprocess.run(
-            [find_chrome(a.chrome), "--headless=new", "--disable-gpu", "--hide-scrollbars",
-             f"--window-size={a.width},{a.height}", "--virtual-time-budget=10000",
-             "--dump-dom", "file://" + os.path.abspath(tmp)],
-            capture_output=True, text=True, timeout=120).stdout
+        try:
+            out = subprocess.run(
+                [find_chrome(a.chrome), "--headless=new", "--disable-gpu", "--hide-scrollbars",
+                 f"--window-size={a.width},{a.height}", "--virtual-time-budget=10000",
+                 "--dump-dom", "file://" + os.path.abspath(tmp)],
+                capture_output=True, text=True, timeout=120).stdout
+        except subprocess.TimeoutExpired:
+            sys.exit("Chrome이 120초 안에 끝나지 않았다(측정 실패).")
     finally:
         os.remove(tmp)
 
     m = re.search(r'<pre id="__fit_result">(.*?)</pre>', out, re.S)
     if not m:
         sys.exit("측정 결과를 읽지 못했다(페이지 로드 실패).")
-    data = json.loads(m.group(1).replace("&quot;", '"').replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">"))
+    data = json.loads(htmllib.unescape(m.group(1)))
     limit = data["limit"]
     over = 0
     print(f"기준: {a.width}×{a.height}, 페이지 허용 높이 {limit}px")
@@ -150,8 +183,11 @@ def main():
         print("\n그림 정렬:")
         for f in fig:
             print("FIG  " + f)
-    print(f"\n요약: 페이지 {len(data['pages'])}개, 넘침 {over}개, 코넬 아닌 화면 {plain}개, 그림 정렬 문제 {len(fig)}개")
-    sys.exit(1 if over or fig else 0)
+    images = data.get("images", 0)
+    if images < MIN_IMAGES:
+        print(f"\nIMG  삽화(assets/ 선화)가 {images}개다 (최소 {MIN_IMAGES}개, references/illustrate.py로 만든다)")
+    print(f"\n요약: 페이지 {len(data['pages'])}개, 넘침 {over}개, 코넬 아닌 화면 {plain}개, 그림 정렬 문제 {len(fig)}개, 삽화 {images}개")
+    sys.exit(1 if over or fig or images < MIN_IMAGES else 0)
 
 
 if __name__ == "__main__":
