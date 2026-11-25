@@ -245,22 +245,22 @@
         <h3 class="screen-heading">인코더-디코더와 순환 신경망</h3>
         <p><span class="term" data-definition="인코더(encoder): 입력 문장을 벡터 표현으로 바꾸는 부분.">인코더</span>(encoder)는 입력 문장을 벡터로 요약하고, <span class="term" data-definition="디코더(decoder): 인코더가 만든 표현을 바탕으로 출력 문장을 한 토큰씩 만드는 부분.">디코더</span>(decoder)는 그 벡터에서 출력 문장을 만든다. 논문 이전에는 <span class="term" data-definition="순환 신경망(recurrent neural network, RNN): 토큰을 순서대로 하나씩 읽으면서 이전 단계의 은닉 상태를 다음 단계로 넘기는 신경망.">순환 신경망</span>(recurrent neural network, RNN)이 이 두 부분을 맡는 것이 표준이었다.</p>
         <div class="svg-diagram animate-in">
-          <svg viewBox="0 0 800 230" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="순환 신경망은 토큰을 순서대로 하나씩 처리한다">
-            <rect class="node-rect" x="30" y="70" width="130" height="70" rx="12"/>
-            <foreignObject x="34" y="78" width="122" height="54"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4">첫째 토큰 처리</div></foreignObject>
-            <line class="edge-line" x1="160" y1="105" x2="215" y2="105"/>
-            <polygon class="edge-arrow" points="213,100 223,105 213,110"/>
-            <rect class="node-rect" x="225" y="70" width="130" height="70" rx="12"/>
-            <foreignObject x="229" y="78" width="122" height="54"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4">둘째 토큰 처리</div></foreignObject>
-            <line class="edge-line" x1="355" y1="105" x2="410" y2="105"/>
-            <polygon class="edge-arrow" points="408,100 418,105 408,110"/>
-            <rect class="node-rect" x="420" y="70" width="130" height="70" rx="12"/>
-            <foreignObject x="424" y="78" width="122" height="54"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4">셋째 토큰 처리</div></foreignObject>
-            <line class="edge-line" x1="550" y1="105" x2="605" y2="105"/>
-            <polygon class="edge-arrow" points="603,100 613,105 603,110"/>
-            <rect class="node-rect accent" x="615" y="70" width="155" height="70" rx="12"/>
-            <foreignObject x="619" y="78" width="147" height="54"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4; font-weight:700">문장 전체를 담은 벡터</div></foreignObject>
-            <foreignObject x="30" y="160" width="740" height="50"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.5">앞 단계가 끝나야 다음 단계를 계산할 수 있으므로 병렬화가 어렵다</div></foreignObject>
+          <svg viewBox="0 0 800 128" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="순환 신경망은 토큰을 순서대로 하나씩 처리한다">
+            <rect class="node-rect" x="16" y="8" width="156" height="64" rx="12"/>
+            <foreignObject x="24" y="12" width="140" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span>첫째 토큰 처리</span></div></foreignObject>
+            <line class="edge-line" x1="172" y1="40" x2="210" y2="40"/>
+            <polygon class="edge-arrow" points="210,45 220,40 210,35"/>
+            <rect class="node-rect" x="220" y="8" width="156" height="64" rx="12"/>
+            <foreignObject x="228" y="12" width="140" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span>둘째 토큰 처리</span></div></foreignObject>
+            <line class="edge-line" x1="376" y1="40" x2="414" y2="40"/>
+            <polygon class="edge-arrow" points="414,45 424,40 414,35"/>
+            <rect class="node-rect" x="424" y="8" width="156" height="64" rx="12"/>
+            <foreignObject x="432" y="12" width="140" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span>셋째 토큰 처리</span></div></foreignObject>
+            <line class="edge-line accent" x1="580" y1="40" x2="618" y2="40"/>
+            <polygon class="edge-arrow accent" points="618,45 628,40 618,35"/>
+            <rect class="node-rect accent" x="628" y="8" width="156" height="64" rx="12"/>
+            <foreignObject x="636" y="12" width="140" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4; font-weight:700"><span>문장 전체를 담은 벡터</span></div></foreignObject>
+            <foreignObject x="16" y="88" width="768" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4; color:var(--color-text-secondary)"><span>앞 단계가 끝나야 다음 단계를 계산할 수 있으므로 병렬화가 어렵다</span></div></foreignObject>
           </svg>
         </div>
         <div class="callout callout-warning animate-in">
@@ -328,22 +328,25 @@
         <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>지식 지도</h3>
         <p>그림은 선수 개념이 트랜스포머의 어텐션으로 이어지는 관계를 나타낸 것이다.</p>
         <div class="svg-diagram animate-in">
-          <svg viewBox="0 0 800 300" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="벡터, 내적, 소프트맥스가 어텐션으로 이어지고 순환 신경망의 한계가 트랜스포머로 이어지는 지식 지도">
-            <rect class="node-rect" x="20" y="20" width="150" height="56" rx="12"/>
-            <foreignObject x="24" y="26" width="142" height="44"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4">벡터와 내적</div></foreignObject>
-            <rect class="node-rect" x="20" y="120" width="150" height="56" rx="12"/>
-            <foreignObject x="24" y="126" width="142" height="44"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4">소프트맥스</div></foreignObject>
-            <rect class="node-rect" x="20" y="220" width="150" height="56" rx="12"/>
-            <foreignObject x="24" y="226" width="142" height="44"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4">순환 신경망의 한계</div></foreignObject>
-            <line class="edge-line" x1="170" y1="48" x2="330" y2="120"/>
-            <line class="edge-line" x1="170" y1="148" x2="330" y2="148"/>
-            <line class="edge-line" x1="170" y1="248" x2="560" y2="190"/>
-            <rect class="node-rect" x="330" y="110" width="170" height="76" rx="12"/>
-            <foreignObject x="334" y="116" width="162" height="64"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4">어텐션: 쿼리, 키, 값</div></foreignObject>
-            <line class="edge-line accent" x1="500" y1="148" x2="580" y2="148"/>
-            <polygon class="edge-arrow accent" points="578,143 588,148 578,153"/>
-            <rect class="node-rect accent" x="590" y="100" width="190" height="96" rx="12"/>
-            <foreignObject x="594" y="108" width="182" height="80"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4; font-weight:700">논문 내용: 어텐션만으로 구성한 트랜스포머</div></foreignObject>
+          <svg viewBox="0 0 800 232" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="벡터, 내적, 소프트맥스가 어텐션으로 이어지고 순환 신경망의 한계가 트랜스포머로 이어지는 지식 지도">
+            <rect class="node-rect" x="16" y="8" width="168" height="56" rx="12"/>
+            <foreignObject x="24" y="12" width="152" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span>벡터와 내적</span></div></foreignObject>
+            <rect class="node-rect" x="16" y="88" width="168" height="56" rx="12"/>
+            <foreignObject x="24" y="92" width="152" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span>소프트맥스</span></div></foreignObject>
+            <rect class="node-rect" x="16" y="168" width="168" height="56" rx="12"/>
+            <foreignObject x="24" y="172" width="152" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span>순환 신경망의 한계</span></div></foreignObject>
+            <rect class="node-rect" x="304" y="80.0" width="176" height="72" rx="12"/>
+            <foreignObject x="312" y="84.0" width="160" height="64"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span>어텐션: 쿼리, 키, 값</span></div></foreignObject>
+            <rect class="node-rect accent" x="576" y="68.0" width="208" height="96" rx="12"/>
+            <foreignObject x="584" y="72.0" width="192" height="88"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4; font-weight:700"><span>논문 내용: 어텐션만으로 구성한 트랜스포머</span></div></foreignObject>
+            <line class="edge-line" x1="184" y1="36" x2="295" y2="95"/>
+            <polygon class="edge-arrow" points="293,100 304,100 298,91"/>
+            <line class="edge-line" x1="184" y1="116" x2="294" y2="116"/>
+            <polygon class="edge-arrow" points="294,121 304,116 294,111"/>
+            <line class="edge-line" x1="184" y1="196" x2="566" y2="149"/>
+            <polygon class="edge-arrow" points="567,154 576,148 565,144"/>
+            <line class="edge-line accent" x1="480" y1="116" x2="566" y2="116"/>
+            <polygon class="edge-arrow accent" points="566,121 576,116 566,111"/>
           </svg>
         </div>
         <p>왼쪽의 세 상자는 배경 지식이고, 오른쪽 강조 상자는 논문의 주장이다.</p>
@@ -516,26 +519,26 @@
         <h3 class="screen-heading"><span class="sec-num">3.2.1</span>스케일드 내적 어텐션</h3>
         <p>각 위치는 다른 위치의 정보를 어떻게 가져올까? 트랜스포머의 핵심은 <span class="term" data-definition="스케일드 내적 어텐션(scaled dot-product attention): 쿼리와 키의 내적을 키 차원의 제곱근으로 나눈 뒤 소프트맥스를 적용하고, 그 비중으로 값을 섞는 어텐션.">스케일드 내적 어텐션</span>(scaled dot-product attention)이다. 각 위치가 쿼리를 던지고, 모든 위치의 키와 비교하여 얻은 비중으로 값을 섞는다.</p>
         <div class="svg-diagram animate-in">
-          <svg viewBox="0 0 800 200" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="쿼리와 키의 내적, 크기 조정, 소프트맥스, 값과의 곱을 거쳐 출력이 만들어지는 흐름">
-            <rect class="node-rect" x="10" y="50" width="135" height="80" rx="12"/>
-            <foreignObject x="14" y="56" width="127" height="68"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4">쿼리와 키의 내적</div></foreignObject>
-            <line class="edge-line" x1="145" y1="90" x2="170" y2="90"/>
-            <polygon class="edge-arrow" points="168,85 178,90 168,95"/>
-            <rect class="node-rect" x="180" y="50" width="135" height="80" rx="12"/>
-            <foreignObject x="184" y="56" width="127" height="68"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4">크기 조정: d<sub>k</sub>의 제곱근으로 나누기</div></foreignObject>
-            <line class="edge-line" x1="315" y1="90" x2="340" y2="90"/>
-            <polygon class="edge-arrow" points="338,85 348,90 338,95"/>
-            <rect class="node-rect" x="350" y="50" width="135" height="80" rx="12"/>
-            <foreignObject x="354" y="56" width="127" height="68"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4">소프트맥스로 비중 만들기</div></foreignObject>
-            <line class="edge-line" x1="485" y1="90" x2="510" y2="90"/>
-            <polygon class="edge-arrow" points="508,85 518,90 508,95"/>
-            <rect class="node-rect" x="520" y="50" width="135" height="80" rx="12"/>
-            <foreignObject x="524" y="56" width="127" height="68"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4">비중으로 값 섞기</div></foreignObject>
-            <line class="edge-line accent" x1="655" y1="90" x2="680" y2="90"/>
-            <polygon class="edge-arrow accent" points="678,85 688,90 678,95"/>
-            <rect class="node-rect accent" x="690" y="50" width="100" height="80" rx="12"/>
-            <foreignObject x="694" y="56" width="92" height="68"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4; font-weight:700">출력</div></foreignObject>
-            <foreignObject x="10" y="150" width="780" height="40"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.5">네 단계 모두 행렬 곱셈으로 한꺼번에 계산하므로 순서 의존이 없다</div></foreignObject>
+          <svg viewBox="0 0 800 136" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="쿼리와 키의 내적, 크기 조정, 소프트맥스, 값과의 곱을 거쳐 출력이 만들어지는 흐름">
+            <rect class="node-rect" x="16" y="8" width="128" height="72" rx="12"/>
+            <foreignObject x="24" y="12" width="112" height="64"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span>쿼리와 키의 내적</span></div></foreignObject>
+            <line class="edge-line" x1="144" y1="44" x2="166" y2="44"/>
+            <polygon class="edge-arrow" points="166,49 176,44 166,39"/>
+            <rect class="node-rect" x="176" y="8" width="128" height="72" rx="12"/>
+            <foreignObject x="184" y="12" width="112" height="64"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span>크기 조정: d<sub>k</sub>의 제곱근으로 나누기</span></div></foreignObject>
+            <line class="edge-line" x1="304" y1="44" x2="326" y2="44"/>
+            <polygon class="edge-arrow" points="326,49 336,44 326,39"/>
+            <rect class="node-rect" x="336" y="8" width="128" height="72" rx="12"/>
+            <foreignObject x="344" y="12" width="112" height="64"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span>소프트맥스로 비중 만들기</span></div></foreignObject>
+            <line class="edge-line" x1="464" y1="44" x2="486" y2="44"/>
+            <polygon class="edge-arrow" points="486,49 496,44 486,39"/>
+            <rect class="node-rect" x="496" y="8" width="128" height="72" rx="12"/>
+            <foreignObject x="504" y="12" width="112" height="64"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span>비중으로 값 섞기</span></div></foreignObject>
+            <line class="edge-line accent" x1="624" y1="44" x2="646" y2="44"/>
+            <polygon class="edge-arrow accent" points="646,49 656,44 646,39"/>
+            <rect class="node-rect accent" x="656" y="8" width="128" height="72" rx="12"/>
+            <foreignObject x="664" y="12" width="112" height="64"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4; font-weight:700"><span>출력</span></div></foreignObject>
+            <foreignObject x="16" y="96" width="768" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4; color:var(--color-text-secondary)"><span>네 단계 모두 행렬 곱셈으로 한꺼번에 계산하므로 순서 의존이 없다</span></div></foreignObject>
           </svg>
         </div>
       </div>

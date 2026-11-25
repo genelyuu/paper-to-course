@@ -508,46 +508,30 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 
 개념 지도, 실험 프레임워크, 알고리즘 흐름, 비교 행렬에 씁니다.
 
-**HTML:**
+**HTML:** 가로 흐름 4단계 예. 노드 폭·간격이 모두 같고, 마지막 간선만 강조색이다.
 ```html
 <div class="svg-diagram animate-in">
-  <svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg">
-    <!-- 예시: 실험 프레임워크 -->
-    <rect class="node-rect accent" x="50" y="120" width="160" height="60" rx="12"/>
-    <text x="130" y="150" text-anchor="middle" font-weight="700" font-size="13">원본 프롬프트 q</text>
-
-    <line class="edge-line" x1="210" y1="150" x2="290" y2="150"/>
-    <polygon class="edge-arrow" points="285,145 295,150 285,155"/>
-
-    <rect class="node-rect" x="290" y="120" width="160" height="60" rx="12"/>
-    <text x="370" y="145" text-anchor="middle" font-weight="600" font-size="13">노이즈 추가</text>
-    <text x="370" y="163" text-anchor="middle" font-size="11" fill="#9E9790">Lorem Ipsum</text>
-
-    <line class="edge-line" x1="450" y1="150" x2="530" y2="150"/>
-    <polygon class="edge-arrow" points="525,145 535,150 525,155"/>
-
-    <rect class="node-rect accent" x="530" y="120" width="160" height="60" rx="12"/>
-    <text x="610" y="145" text-anchor="middle" font-weight="700" font-size="13">모델 샘플링</text>
-    <text x="610" y="163" text-anchor="middle" font-size="11" fill="#9E9790">π(o|q')</text>
+  <svg viewBox="0 0 800 128" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="그림 내용을 한 문장으로">
+    <rect class="node-rect" x="16" y="8" width="156" height="64" rx="12"/>
+    <foreignObject x="24" y="12" width="140" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span>원본 프롬프트 <i>q</i></span></div></foreignObject>
+    <line class="edge-line" x1="172" y1="40" x2="210" y2="40"/>
+    <polygon class="edge-arrow" points="210,45 220,40 210,35"/>
+    <!-- 다음 노드 x = 16 + i × (156 + 48) -->
+    …
+    <foreignObject x="16" y="88" width="768" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; color:var(--color-text-secondary)"><span>그림 아래 설명 한 줄</span></div></foreignObject>
   </svg>
 </div>
 ```
 
-**Rules:**
-- 반응형으로 만들기 위해 `viewBox`를 쓰고 SVG에 `width="100%"`를 지정합니다.
-- 색상은 인라인 `style` 속성에서 CSS 변수를 참조합니다.
-- 노드 텍스트는 짧게(1~2줄) 씁니다.
-- **한글 라벨은 박스를 더 넓게 잡습니다.** 한글은 글자 하나가 대략 1em 너비이므로 `font-size="13"`이면 글자당 약 13px로 계산해 박스 너비를 정합니다(위 예시의 "원본 프롬프트 q"는 약 9자라 약 120px가 필요합니다). `text-anchor="middle"`은 줄바꿈이 없습니다.
-- **줄 수별 규칙:** 한 줄 라벨은 `<text>`를 씁니다. 두 줄이면 `<tspan x="…" dy="1.3em">`으로 나눌 수 있으나 어절 경계에서만 끊고 어절 중간에서는 끊지 않습니다. 세 줄 이상이거나 문단 길이의 텍스트는 아래처럼 `<foreignObject>` 안의 HTML에 `word-break: keep-all`을 적용합니다.
-- SVG 텍스트에 `font-style="italic"`을 쓰지 않습니다. 한글에는 이탤릭이 없으므로 `font-weight="500"`이나 흐린 `fill`로 구분합니다.
-
-```html
-<foreignObject x="290" y="120" width="160" height="60">
-  <div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:13px; word-break:keep-all">
-    프롬프트 앞에 무작위 노이즈 추가
-  </div>
-</foreignObject>
-```
+**Rules (그림 정렬):**
+- **노드 라벨은 `foreignObject` + `.node-label` + `<span>` 하나**로 쓴다. `foreignObject`는 사각형에서 가로 8, 세로 4만큼 안쪽으로 잡는다. CSS가 span을 사각형의 가로·세로 가운데에 놓고, span 안의 글자와 `<sub>`는 한 줄 흐름을 유지한다. span 없이 쓰면 `<sub>` 앞뒤가 따로 떨어진다(`check-pages.py`가 검출).
+- **같은 단계의 노드는 같은 폭·같은 간격**으로 둔다. 가로 흐름은 `폭 = (768 − (n−1)×간격) / n`, 시작 x는 16이다. 노드의 마지막 x가 viewBox를 넘으면 안 된다(검출).
+- **viewBox는 내용에 맞춘다.** 위아래 여백은 8 단위만 두고, 높이는 마지막 요소 아래 8에서 끝낸다. 빈 띠를 남기지 않는다.
+- **모든 간선은 노드의 테두리에서 시작해 다른 노드의 테두리에서 끝나고, 끝에 화살촉이 있다.** 허공에서 끝나는 선을 두지 않는다. 화살촉은 길이 10, 반폭 5이고, 선은 화살촉 밑변에서 멈춘다.
+- 강조(`accent`)는 논문의 결론 노드와 그리로 들어가는 간선 하나에만 쓴다.
+- 반응형으로 만들기 위해 `viewBox`와 `width="100%"`를 쓴다. 색상은 CSS 변수를 쓴다.
+- **한글 라벨은 박스를 더 넓게 잡는다.** 한글은 글자당 약 1em이다(14px면 글자당 약 14px).
+- SVG 텍스트에 이탤릭을 쓰지 않는다. 한글에는 이탤릭이 없다.
 
 ---
 

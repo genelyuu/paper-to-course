@@ -10,6 +10,8 @@
 허용 높이 = 창 높이 - 상단 내비게이션 높이(--nav-height).
 min-height(100vh)를 풀고 내용의 실제 높이를 잰다.
 확인 문제는 모든 해설(정답·오답 중 긴 쪽)을 펼친 최악의 상태로 잰다.
+그림 정렬도 검사한다: 결과 막대 트랙의 시작 x·폭, SVG 요소의 viewBox 이탈과 노드 라벨 구조,
+의사코드 코드 줄과 설명 줄의 세로 위치.
 
 종료 코드: 넘치는 페이지가 있으면 1, 아니면 0. 표준 라이브러리와 Chrome만 쓴다.
 """
@@ -57,9 +59,34 @@ window.addEventListener('load', function () {
         });
       });
     });
+    // 그림 정렬 검사
+    var fig = [];
+    document.querySelectorAll('.result-bars').forEach(function (bars, bi) {
+      var xs = Array.prototype.map.call(bars.querySelectorAll('.result-bar-track'), function (t) { var r = t.getBoundingClientRect(); return Math.round(r.left) + '/' + Math.round(r.width); });
+      if (new Set(xs).size > 1) fig.push('결과 막대 #' + (bi + 1) + ': 트랙 시작 x/폭이 다르다 ' + xs.join(', '));
+    });
+    document.querySelectorAll('.svg-diagram svg').forEach(function (svg, si) {
+      var vb = (svg.getAttribute('viewBox') || '').split(/\s+/).map(Number); if (vb.length !== 4) return;
+      svg.querySelectorAll('rect, foreignObject, line').forEach(function (e) {
+        var b = e.getBBox();
+        if (b.x < vb[0] - 0.5 || b.y < vb[1] - 0.5 || b.x + b.width > vb[0] + vb[2] + 0.5 || b.y + b.height > vb[1] + vb[3] + 0.5)
+          fig.push('SVG #' + (si + 1) + ': ' + e.tagName + '가 viewBox 밖으로 나간다 (' + [b.x, b.y, b.width, b.height].map(Math.round).join(',') + ')');
+      });
+      svg.querySelectorAll('foreignObject > div').forEach(function (d) {
+        if (d.children.length !== 1 || d.childNodes.length !== 1) fig.push('SVG #' + (si + 1) + ': 노드 라벨을 <span> 하나로 감싸지 않았다 "' + d.textContent.trim().slice(0, 20) + '"');
+      });
+    });
+    document.querySelectorAll('.pseudocode-translation').forEach(function (pc, pi) {
+      var a = pc.querySelectorAll('.pseudocode-line'), b = pc.querySelectorAll('.pe');
+      if (a.length !== b.length) fig.push('의사코드 #' + (pi + 1) + ': 코드 줄 ' + a.length + '개, 설명 줄 ' + b.length + '개');
+      for (var i = 0; i < Math.min(a.length, b.length); i++) {
+        var d = Math.abs(a[i].getBoundingClientRect().top - b[i].getBoundingClientRect().top);
+        if (d > 1) { fig.push('의사코드 #' + (pi + 1) + ': ' + (i + 1) + '번째 줄이 설명과 ' + Math.round(d) + 'px 어긋난다'); break; }
+      }
+    });
     var pre = document.createElement('pre');
     pre.id = '__fit_result';
-    pre.textContent = JSON.stringify({ limit: Math.round(limit), width: window.innerWidth, pages: pages });
+    pre.textContent = JSON.stringify({ limit: Math.round(limit), width: window.innerWidth, pages: pages, fig: fig });
     document.body.appendChild(pre);
   }, 300);
 });
@@ -118,8 +145,13 @@ def main():
         extra = "" if ok else f"  (+{p['height'] - limit}px)"
         print(f"{flag} {p['module']} p{p['page']} [{kind}] {p['height']}px  {p['title']}{extra}")
     plain = sum(not p["cornell"] for p in data["pages"])
-    print(f"\n요약: 페이지 {len(data['pages'])}개, 넘침 {over}개, 코넬 아닌 화면 {plain}개")
-    sys.exit(1 if over else 0)
+    fig = data.get("fig", [])
+    if fig:
+        print("\n그림 정렬:")
+        for f in fig:
+            print("FIG  " + f)
+    print(f"\n요약: 페이지 {len(data['pages'])}개, 넘침 {over}개, 코넬 아닌 화면 {plain}개, 그림 정렬 문제 {len(fig)}개")
+    sys.exit(1 if over or fig else 0)
 
 
 if __name__ == "__main__":

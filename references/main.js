@@ -780,6 +780,26 @@
     if (prevBtn)  prevBtn.addEventListener('click',  prev);
     if (resetBtn) resetBtn.addEventListener('click', reset);
 
+    // 코드 줄 i와 설명 줄 i의 높이를 맞춰 두 열의 행이 같은 y에서 시작하게 한다(2단일 때만)
+    const blockEl = $('.pseudocode-block', containerEl);
+    const explEl  = $('.pseudocode-explanation', containerEl);
+    function alignRows() {
+      const pairs = [[$('.translation-label', blockEl), $('.translation-label', explEl)]];
+      lines.forEach((l, i) => pairs.push([l, explLines[i]]));
+      pairs.forEach(([a, b]) => { if (a) a.style.minHeight = ''; if (b) b.style.minHeight = ''; });
+      if (!blockEl || !explEl) return;
+      const sideBySide = Math.abs(blockEl.getBoundingClientRect().top - explEl.getBoundingClientRect().top) < 2;
+      if (!sideBySide) return;
+      pairs.forEach(([a, b]) => {
+        if (!a || !b) return;
+        const h = Math.max(a.getBoundingClientRect().height, b.getBoundingClientRect().height);
+        a.style.minHeight = b.style.minHeight = h + 'px';
+      });
+    }
+    alignRows();
+    window.addEventListener('resize', alignRows);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(alignRows);
+
     updateProgress();
   }
 

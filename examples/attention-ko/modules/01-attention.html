@@ -27,26 +27,26 @@
         <h3 class="screen-heading"><span class="sec-num">3.2.1</span>스케일드 내적 어텐션</h3>
         <p>각 위치는 다른 위치의 정보를 어떻게 가져올까? 트랜스포머의 핵심은 <span class="term" data-definition="스케일드 내적 어텐션(scaled dot-product attention): 쿼리와 키의 내적을 키 차원의 제곱근으로 나눈 뒤 소프트맥스를 적용하고, 그 비중으로 값을 섞는 어텐션.">스케일드 내적 어텐션</span>(scaled dot-product attention)이다. 각 위치가 쿼리를 던지고, 모든 위치의 키와 비교하여 얻은 비중으로 값을 섞는다.</p>
         <div class="svg-diagram animate-in">
-          <svg viewBox="0 0 800 200" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="쿼리와 키의 내적, 크기 조정, 소프트맥스, 값과의 곱을 거쳐 출력이 만들어지는 흐름">
-            <rect class="node-rect" x="10" y="50" width="135" height="80" rx="12"/>
-            <foreignObject x="14" y="56" width="127" height="68"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4">쿼리와 키의 내적</div></foreignObject>
-            <line class="edge-line" x1="145" y1="90" x2="170" y2="90"/>
-            <polygon class="edge-arrow" points="168,85 178,90 168,95"/>
-            <rect class="node-rect" x="180" y="50" width="135" height="80" rx="12"/>
-            <foreignObject x="184" y="56" width="127" height="68"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4">크기 조정: d<sub>k</sub>의 제곱근으로 나누기</div></foreignObject>
-            <line class="edge-line" x1="315" y1="90" x2="340" y2="90"/>
-            <polygon class="edge-arrow" points="338,85 348,90 338,95"/>
-            <rect class="node-rect" x="350" y="50" width="135" height="80" rx="12"/>
-            <foreignObject x="354" y="56" width="127" height="68"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4">소프트맥스로 비중 만들기</div></foreignObject>
-            <line class="edge-line" x1="485" y1="90" x2="510" y2="90"/>
-            <polygon class="edge-arrow" points="508,85 518,90 508,95"/>
-            <rect class="node-rect" x="520" y="50" width="135" height="80" rx="12"/>
-            <foreignObject x="524" y="56" width="127" height="68"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4">비중으로 값 섞기</div></foreignObject>
-            <line class="edge-line accent" x1="655" y1="90" x2="680" y2="90"/>
-            <polygon class="edge-arrow accent" points="678,85 688,90 678,95"/>
-            <rect class="node-rect accent" x="690" y="50" width="100" height="80" rx="12"/>
-            <foreignObject x="694" y="56" width="92" height="68"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4; font-weight:700">출력</div></foreignObject>
-            <foreignObject x="10" y="150" width="780" height="40"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.5">네 단계 모두 행렬 곱셈으로 한꺼번에 계산하므로 순서 의존이 없다</div></foreignObject>
+          <svg viewBox="0 0 800 136" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="쿼리와 키의 내적, 크기 조정, 소프트맥스, 값과의 곱을 거쳐 출력이 만들어지는 흐름">
+            <rect class="node-rect" x="16" y="8" width="128" height="72" rx="12"/>
+            <foreignObject x="24" y="12" width="112" height="64"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span>쿼리와 키의 내적</span></div></foreignObject>
+            <line class="edge-line" x1="144" y1="44" x2="166" y2="44"/>
+            <polygon class="edge-arrow" points="166,49 176,44 166,39"/>
+            <rect class="node-rect" x="176" y="8" width="128" height="72" rx="12"/>
+            <foreignObject x="184" y="12" width="112" height="64"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span>크기 조정: d<sub>k</sub>의 제곱근으로 나누기</span></div></foreignObject>
+            <line class="edge-line" x1="304" y1="44" x2="326" y2="44"/>
+            <polygon class="edge-arrow" points="326,49 336,44 326,39"/>
+            <rect class="node-rect" x="336" y="8" width="128" height="72" rx="12"/>
+            <foreignObject x="344" y="12" width="112" height="64"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span>소프트맥스로 비중 만들기</span></div></foreignObject>
+            <line class="edge-line" x1="464" y1="44" x2="486" y2="44"/>
+            <polygon class="edge-arrow" points="486,49 496,44 486,39"/>
+            <rect class="node-rect" x="496" y="8" width="128" height="72" rx="12"/>
+            <foreignObject x="504" y="12" width="112" height="64"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span>비중으로 값 섞기</span></div></foreignObject>
+            <line class="edge-line accent" x1="624" y1="44" x2="646" y2="44"/>
+            <polygon class="edge-arrow accent" points="646,49 656,44 646,39"/>
+            <rect class="node-rect accent" x="656" y="8" width="128" height="72" rx="12"/>
+            <foreignObject x="664" y="12" width="112" height="64"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4; font-weight:700"><span>출력</span></div></foreignObject>
+            <foreignObject x="16" y="96" width="768" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4; color:var(--color-text-secondary)"><span>네 단계 모두 행렬 곱셈으로 한꺼번에 계산하므로 순서 의존이 없다</span></div></foreignObject>
           </svg>
         </div>
       </div>
