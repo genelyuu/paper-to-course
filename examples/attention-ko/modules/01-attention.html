@@ -7,265 +7,333 @@
       <p class="module-subtitle">스케일드 내적 어텐션과 멀티헤드 어텐션의 계산 과정을 따라간다</p>
     </div>
 
-    <!-- 화면 1: 학습 목표와 직관 -->
-    <div class="screen">
-      <div class="callout callout-info animate-in">
-        <div class="callout-icon">&#127919;</div>
-        <div class="callout-content">
-          <strong class="callout-title">학습 목표</strong>
-          <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
-          <ol>
-            <li>스케일드 내적 어텐션의 계산 단계를 순서대로 설명할 수 있다.</li>
-            <li>내적을 $\sqrt{d_k}$로 나누는 이유를 분산으로 설명할 수 있다.</li>
-            <li>멀티헤드 어텐션에서 헤드 수와 헤드 차원의 관계를 구할 수 있다.</li>
-          </ol>
+    <!-- 페이지 1: 학습 목표와 직관 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-icon">&#127919;</div>
+          <div class="callout-content">
+            <strong class="callout-title">학습 목표</strong>
+            <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
+            <ol>
+              <li>스케일드 내적 어텐션의 계산 단계를 순서대로 설명할 수 있다.</li>
+              <li>내적을 $\sqrt{d_k}$로 나누는 이유를 분산으로 설명할 수 있다.</li>
+              <li>멀티헤드 어텐션에서 헤드 수와 헤드 차원의 관계를 구할 수 있다.</li>
+            </ol>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">어텐션 한 번의 계산</h3>
+        <p>트랜스포머의 핵심은 <span class="term" data-definition="스케일드 내적 어텐션(scaled dot-product attention): 쿼리와 키의 내적을 키 차원의 제곱근으로 나눈 뒤 소프트맥스를 적용하고, 그 비중으로 값을 섞는 어텐션이다.">스케일드 내적 어텐션</span>(scaled dot-product attention)이다. 각 위치가 쿼리를 던지고, 모든 위치의 키와 비교하여 얻은 비중으로 값을 섞는다.</p>
+        <div class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 200" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="쿼리와 키의 내적, 크기 조정, 소프트맥스, 값과의 곱을 거쳐 출력이 만들어지는 흐름">
+            <rect class="node-rect" x="10" y="50" width="135" height="80" rx="12"/>
+            <foreignObject x="14" y="56" width="127" height="68"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4">쿼리와 키의 내적</div></foreignObject>
+            <line class="edge-line" x1="145" y1="90" x2="170" y2="90"/>
+            <polygon class="edge-arrow" points="168,85 178,90 168,95"/>
+            <rect class="node-rect" x="180" y="50" width="135" height="80" rx="12"/>
+            <foreignObject x="184" y="56" width="127" height="68"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4">크기 조정: d<sub>k</sub>의 제곱근으로 나누기</div></foreignObject>
+            <line class="edge-line" x1="315" y1="90" x2="340" y2="90"/>
+            <polygon class="edge-arrow" points="338,85 348,90 338,95"/>
+            <rect class="node-rect" x="350" y="50" width="135" height="80" rx="12"/>
+            <foreignObject x="354" y="56" width="127" height="68"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4">소프트맥스로 비중 만들기</div></foreignObject>
+            <line class="edge-line" x1="485" y1="90" x2="510" y2="90"/>
+            <polygon class="edge-arrow" points="508,85 518,90 508,95"/>
+            <rect class="node-rect" x="520" y="50" width="135" height="80" rx="12"/>
+            <foreignObject x="524" y="56" width="127" height="68"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4">비중으로 값 섞기</div></foreignObject>
+            <line class="edge-line accent" x1="655" y1="90" x2="680" y2="90"/>
+            <polygon class="edge-arrow accent" points="678,85 688,90 678,95"/>
+            <rect class="node-rect accent" x="690" y="50" width="100" height="80" rx="12"/>
+            <foreignObject x="694" y="56" width="92" height="68"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4; font-weight:700">출력</div></foreignObject>
+            <foreignObject x="10" y="150" width="780" height="40"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.5">네 단계 모두 행렬 곱셈으로 한꺼번에 계산하므로 순서 의존이 없다</div></foreignObject>
+          </svg>
         </div>
       </div>
-      <h3 class="screen-heading">논문 내용: 어텐션 한 번의 계산</h3>
-      <p>트랜스포머의 핵심은 <span class="term" data-definition="스케일드 내적 어텐션(scaled dot-product attention): 쿼리와 키의 내적을 키 차원의 제곱근으로 나눈 뒤 소프트맥스를 적용하고, 그 비중으로 값을 섞는 어텐션이다.">스케일드 내적 어텐션</span>(scaled dot-product attention)이다. 각 위치가 쿼리를 던지고, 모든 위치의 키와 비교하여 얻은 비중으로 값을 섞는다.</p>
-      <div class="svg-diagram animate-in">
-        <svg viewBox="0 0 800 200" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="쿼리와 키의 내적, 크기 조정, 소프트맥스, 값과의 곱을 거쳐 출력이 만들어지는 흐름">
-          <rect class="node-rect" x="10" y="50" width="135" height="80" rx="12"/>
-          <foreignObject x="14" y="56" width="127" height="68"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4">쿼리와 키의 내적</div></foreignObject>
-          <line class="edge-line" x1="145" y1="90" x2="170" y2="90"/>
-          <polygon class="edge-arrow" points="168,85 178,90 168,95"/>
-          <rect class="node-rect" x="180" y="50" width="135" height="80" rx="12"/>
-          <foreignObject x="184" y="56" width="127" height="68"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4">크기 조정: d<sub>k</sub>의 제곱근으로 나누기</div></foreignObject>
-          <line class="edge-line" x1="315" y1="90" x2="340" y2="90"/>
-          <polygon class="edge-arrow" points="338,85 348,90 338,95"/>
-          <rect class="node-rect" x="350" y="50" width="135" height="80" rx="12"/>
-          <foreignObject x="354" y="56" width="127" height="68"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4">소프트맥스로 비중 만들기</div></foreignObject>
-          <line class="edge-line" x1="485" y1="90" x2="510" y2="90"/>
-          <polygon class="edge-arrow" points="508,85 518,90 508,95"/>
-          <rect class="node-rect" x="520" y="50" width="135" height="80" rx="12"/>
-          <foreignObject x="524" y="56" width="127" height="68"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4">비중으로 값 섞기</div></foreignObject>
-          <line class="edge-line accent" x1="655" y1="90" x2="680" y2="90"/>
-          <polygon class="edge-arrow accent" points="678,85 688,90 678,95"/>
-          <rect class="node-rect accent" x="690" y="50" width="100" height="80" rx="12"/>
-          <foreignObject x="694" y="56" width="92" height="68"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.4; font-weight:700">출력</div></foreignObject>
-          <foreignObject x="10" y="150" width="780" height="40"><div xmlns="http://www.w3.org/1999/xhtml" style="text-align:center; font-size:14px; word-break:keep-all; line-height:1.5">네 단계 모두 행렬 곱셈으로 한꺼번에 계산하므로 순서 의존이 없다</div></foreignObject>
-        </svg>
-      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>스케일드 내적 어텐션은 내적, 크기 조정, 소프트맥스, 값 섞기의 네 단계로 출력을 만든다.</p></div>
     </div>
 
-    <!-- 화면 2: 수식 유도 -->
-    <div class="screen">
-      <h3 class="screen-heading">탐구 자료: 수식 유도 단계별 풀이</h3>
-      <p>어텐션 식을 한 단계씩 쌓아 올린다. 버튼을 눌러 다음 단계를 보시오.</p>
-      <div class="math-derivation animate-in" id="math-deriv-attn">
-        <div class="math-step" data-step="0">
-          <div class="math-equation">
-            $$\mathrm{Attention}(Q, K, V) = \mathrm{softmax}\!\left(\frac{QK^{\top}}{\sqrt{d_k}}\right)V$$
+    <!-- 페이지 2: 수식 유도 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">용어</span>
+        <dl>
+          <dt>$Q$, $K$, $V$</dt><dd>쿼리, 키, 값 행렬</dd>
+          <dt>$d_k$</dt><dd>키 벡터의 차원</dd>
+          <dt>$S$</dt><dd>점수 행렬</dd>
+          <dt>$W$</dt><dd>비중 행렬</dd>
+        </dl>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>수식 유도 단계별 풀이</h3>
+        <p>어텐션 식을 한 단계씩 쌓아 올린다. 버튼을 눌러 다음 단계를 보시오.</p>
+        <div class="math-derivation animate-in" id="math-deriv-attn">
+          <div class="math-step" data-step="0">
+            <div class="math-equation">
+              $$\mathrm{Attention}(Q, K, V) = \mathrm{softmax}\!\left(\frac{QK^{\top}}{\sqrt{d_k}}\right)V$$
+            </div>
+            <div class="math-explanation">
+              <p>어텐션의 출력은 쿼리와 키로 만든 비중을 값에 곱한 결과이다. 여기서 $Q$는 쿼리 <span class="term" data-definition="행렬(matrix): 숫자를 행과 열로 배열한 직사각형 표이다. 쿼리 행렬은 쿼리 벡터를 한 줄에 하나씩 쌓은 것이다.">행렬</span>(matrix), $K$는 키 행렬, $V$는 값 행렬, $d_k$는 키 벡터의 <span class="term" data-definition="차원(dimension): 벡터를 이루는 숫자의 개수이다. 키 벡터의 차원이 64이면 숫자 64개로 이루어진 벡터이다.">차원</span>(dimension)이다.</p>
+            </div>
           </div>
-          <div class="math-explanation">
-            <p>어텐션의 출력은 쿼리와 키로 만든 비중을 값에 곱한 결과이다. 여기서 $Q$는 쿼리 <span class="term" data-definition="행렬(matrix): 숫자를 행과 열로 배열한 직사각형 표이다. 쿼리 행렬은 쿼리 벡터를 한 줄에 하나씩 쌓은 것이다.">행렬</span>(matrix), $K$는 키 행렬, $V$는 값 행렬, $d_k$는 키 벡터의 <span class="term" data-definition="차원(dimension): 벡터를 이루는 숫자의 개수이다. 키 벡터의 차원이 64이면 숫자 64개로 이루어진 벡터이다.">차원</span>(dimension)이다.</p>
+          <div class="math-step" data-step="1" style="display:none">
+            <div class="math-equation">
+              $$S = QK^{\top}$$
+            </div>
+            <div class="math-explanation">
+              <p>키 행렬을 <span class="term" data-definition="전치(transpose): 행렬의 행과 열을 서로 바꾼 것이다. 위 첨자 기호로 나타낸다.">전치</span>(transpose)하여 곱하면 모든 쿼리와 모든 키의 내적이 한 번에 나온다. 점수 행렬 $S$의 $i$행 $j$열은 $i$번째 쿼리와 $j$번째 키의 내적이다.</p>
+            </div>
           </div>
-        </div>
-        <div class="math-step" data-step="1" style="display:none">
-          <div class="math-equation">
-            $$S = QK^{\top}$$
+          <div class="math-step" data-step="2" style="display:none">
+            <div class="math-equation">
+              $$\mathbf{q}\cdot\mathbf{k} = \sum_{m=1}^{d_k} q_m k_m, \qquad \mathrm{Var}(\mathbf{q}\cdot\mathbf{k}) = d_k$$
+            </div>
+            <div class="math-explanation">
+              <p>$\mathbf{q}$와 $\mathbf{k}$의 각 성분이 평균 0, <span class="term" data-definition="분산(variance): 값이 평균에서 얼마나 흩어져 있는지를 나타내는 수치이다. 분산의 제곱근이 표준편차이다.">분산</span>(variance) 1인 독립 확률 변수라고 가정하면 내적의 분산은 $d_k$가 된다. 차원이 클수록 점수의 흩어짐이 커진다.</p>
+            </div>
           </div>
-          <div class="math-explanation">
-            <p>키 행렬을 <span class="term" data-definition="전치(transpose): 행렬의 행과 열을 서로 바꾼 것이다. 위 첨자 기호로 나타낸다.">전치</span>(transpose)하여 곱하면 모든 쿼리와 모든 키의 내적이 한 번에 나온다. 점수 행렬 $S$의 $i$행 $j$열은 $i$번째 쿼리와 $j$번째 키의 내적이다.</p>
+          <div class="math-step" data-step="3" style="display:none">
+            <div class="math-equation">
+              $$\frac{S}{\sqrt{d_k}} \;\Rightarrow\; \mathrm{Var}\!\left(\frac{\mathbf{q}\cdot\mathbf{k}}{\sqrt{d_k}}\right) = \frac{d_k}{d_k} = 1$$
+            </div>
+            <div class="math-explanation">
+              <p>점수를 $\sqrt{d_k}$로 나누면 분산이 다시 1이 된다. 점수가 너무 커지면 소프트맥스가 한 위치로 쏠려 기울기가 매우 작아지므로, 이 조정으로 학습이 안정된다.</p>
+            </div>
           </div>
-        </div>
-        <div class="math-step" data-step="2" style="display:none">
-          <div class="math-equation">
-            $$\mathbf{q}\cdot\mathbf{k} = \sum_{m=1}^{d_k} q_m k_m, \qquad \mathrm{Var}(\mathbf{q}\cdot\mathbf{k}) = d_k$$
+          <div class="math-step" data-step="4" style="display:none">
+            <div class="math-equation">
+              $$W = \mathrm{softmax}\!\left(\frac{S}{\sqrt{d_k}}\right), \qquad \mathrm{Attention}(Q,K,V) = WV$$
+            </div>
+            <div class="math-explanation">
+              <p>소프트맥스를 행마다 적용하면 각 쿼리의 비중 행이 만들어지고, 한 행의 합은 1이다. 이 비중 행렬 $W$를 값 행렬 $V$에 곱하면 값을 비중대로 섞은 출력이 나온다.</p>
+            </div>
           </div>
-          <div class="math-explanation">
-            <p>$\mathbf{q}$와 $\mathbf{k}$의 각 성분이 평균 0, <span class="term" data-definition="분산(variance): 값이 평균에서 얼마나 흩어져 있는지를 나타내는 수치이다. 분산의 제곱근이 표준편차이다.">분산</span>(variance) 1인 독립 확률 변수라고 가정하면 내적의 분산은 $d_k$가 된다. 차원이 클수록 점수의 흩어짐이 커진다.</p>
+          <div class="math-controls">
+            <button class="btn math-prev-btn">이전 단계</button>
+            <button class="btn math-next-btn">다음 단계</button>
+            <button class="btn math-reset-btn">처음부터</button>
+            <span class="math-progress"></span>
           </div>
-        </div>
-        <div class="math-step" data-step="3" style="display:none">
-          <div class="math-equation">
-            $$\frac{S}{\sqrt{d_k}} \;\Rightarrow\; \mathrm{Var}\!\left(\frac{\mathbf{q}\cdot\mathbf{k}}{\sqrt{d_k}}\right) = \frac{d_k}{d_k} = 1$$
-          </div>
-          <div class="math-explanation">
-            <p>점수를 $\sqrt{d_k}$로 나누면 분산이 다시 1이 된다. 점수가 너무 커지면 소프트맥스가 한 위치로 쏠려 기울기가 매우 작아지므로, 이 조정으로 학습이 안정된다.</p>
-          </div>
-        </div>
-        <div class="math-step" data-step="4" style="display:none">
-          <div class="math-equation">
-            $$W = \mathrm{softmax}\!\left(\frac{S}{\sqrt{d_k}}\right), \qquad \mathrm{Attention}(Q,K,V) = WV$$
-          </div>
-          <div class="math-explanation">
-            <p>소프트맥스를 행마다 적용하면 각 쿼리의 비중 행이 만들어지고, 한 행의 합은 1이다. 이 비중 행렬 $W$를 값 행렬 $V$에 곱하면 값을 비중대로 섞은 출력이 나온다.</p>
-          </div>
-        </div>
-        <div class="math-controls">
-          <button class="btn math-prev-btn">이전 단계</button>
-          <button class="btn math-next-btn">다음 단계</button>
-          <button class="btn math-reset-btn">처음부터</button>
-          <span class="math-progress"></span>
         </div>
       </div>
-      <div class="quiz-container animate-in" id="quiz-m1-check">
-        <div class="quiz-question-block"
-             data-correct="option-c"
-             data-explanation-right="③ | 점수가 지나치게 크면 소프트맥스가 한 위치로 쏠려 기울기가 매우 작아지므로 학습이 어려워진다."
-             data-explanation-wrong="| 정답은 ③이다. 내적의 분산이 키 차원에 비례해 커지면 소프트맥스가 한 위치로 쏠리고 기울기가 매우 작아진다.">
-          <h3 class="quiz-question">개념 체크. 다음 중 내적을 나누지 않고 키 차원 $d_k$를 크게 할 때 나타날 결과로 가장 타당한 것은?</h3>
-          <div class="quiz-options">
-            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 비중이 모든 위치에 고르게 퍼진다.</span></button>
-            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 소프트맥스의 출력 합이 1보다 커진다.</span></button>
-            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 소프트맥스가 한 위치로 쏠려 기울기가 매우 작아진다.</span></button>
-          </div>
-          <div class="quiz-feedback"></div>
-        </div>
-        <button class="quiz-check-btn" onclick="checkQuiz('quiz-m1-check')">정답 확인</button>
-        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m1-check')">다시 풀기</button>
-      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>어텐션은 점수 행렬을 $\sqrt{d_k}$로 나누고 소프트맥스를 적용한 비중으로 값을 섞는다.</p></div>
     </div>
 
-    <!-- 화면 3: 의사코드 -->
-    <div class="screen">
-      <h3 class="screen-heading">탐구 자료: 의사코드 단계별 풀이</h3>
-      <p>같은 계산을 줄 단위로 따라가 본다. 각 줄이 앞의 유도 단계와 어떻게 대응하는지 확인하시오.</p>
-      <div class="pseudocode-translation animate-in" id="pseudo-attn">
-        <div class="pseudocode-block">
-          <span class="translation-label">알고리즘</span>
-          <span class="pseudocode-line">INPUT: 행렬 Q, K, V, 키 차원 d_k  // 입력</span>
-          <span class="pseudocode-line">S = MATMUL(Q, TRANSPOSE(K))  // 점수 계산</span>
-          <span class="pseudocode-line">S = S / SQRT(d_k)  // 크기 조정</span>
-          <span class="pseudocode-line">FOR EACH 행 r OF S DO  // 쿼리마다 반복</span>
-          <span class="pseudocode-line">  W[r] = SOFTMAX(S[r])  // 비중 만들기</span>
-          <span class="pseudocode-line">END FOR  // 반복 끝</span>
-          <span class="pseudocode-line">OUTPUT: MATMUL(W, V)  // 값 섞기</span>
-        </div>
-        <div class="pseudocode-explanation">
-          <span class="translation-label">설명</span>
-          <div class="pseudocode-explanation-lines">
-            <p class="pe">입력은 쿼리, 키, 값 행렬과 키 차원이다.</p>
-            <p class="pe">모든 쿼리와 모든 키의 내적을 한꺼번에 구한다. 반복문 없이 행렬 곱 한 번으로 끝난다.</p>
-            <p class="pe">내적의 분산을 1로 되돌리려고 키 차원의 제곱근으로 나눈다.</p>
-            <p class="pe">각 쿼리의 점수 행을 하나씩 처리한다.</p>
-            <p class="pe">점수 행에 소프트맥스를 적용하여 합이 1인 비중을 만든다.</p>
-            <p class="pe">반복을 마친다.</p>
-            <p class="pe">비중 행렬을 값 행렬에 곱하여 출력을 얻는다. 비중이 큰 위치의 값이 더 많이 섞인다.</p>
+    <!-- 페이지 3: 개념 체크 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>내적의 분산은 차원과 어떤 관계인가?</li>
+          <li>점수가 너무 크면 학습에 어떤 문제가 생기는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">개념 체크</span>크기 조정의 이유</h3>
+        <p>각 성분이 평균 0, 분산 1인 독립 확률 변수이면 내적의 분산은 $d_k$이다. 점수를 $\sqrt{d_k}$로 나누면 분산이 다시 1이 된다.</p>
+        <div class="quiz-container animate-in" id="quiz-m1-check">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="③ | 점수가 지나치게 크면 소프트맥스가 한 위치로 쏠려 기울기가 매우 작아지므로 학습이 어려워진다."
+               data-explanation-wrong="| 정답은 ③이다. 내적의 분산이 키 차원에 비례해 커지면 소프트맥스가 한 위치로 쏠리고 기울기가 매우 작아진다.">
+            <h3 class="quiz-question"><span class="q-num">1</span>다음 중 내적을 나누지 않고 키 차원 $d_k$를 크게 할 때 나타날 결과로 가장 타당한 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 비중이 모든 위치에 고르게 퍼진다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 소프트맥스의 출력 합이 1보다 커진다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 소프트맥스가 한 위치로 쏠려 기울기가 매우 작아진다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
           </div>
-        </div>
-        <div class="pseudocode-controls">
-          <button class="btn pseudocode-prev-btn">이전 줄</button>
-          <button class="btn pseudocode-next-btn">다음 줄</button>
-          <button class="btn pseudocode-reset-btn">처음부터</button>
-          <span class="pseudocode-progress"></span>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m1-check')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m1-check')">다시 풀기</button>
         </div>
       </div>
+      <div class="summary"><span class="summary-label">요약</span><p>내적을 $\sqrt{d_k}$로 나누면 분산이 1로 돌아와 소프트맥스가 한 위치로 쏠리지 않는다.</p></div>
     </div>
 
-    <!-- 화면 4: 멀티헤드 -->
-    <div class="screen">
-      <h3 class="screen-heading">논문 내용: 멀티헤드 어텐션</h3>
-      <p><span class="term" data-definition="멀티헤드 어텐션(multi-head attention): 어텐션을 여러 개의 헤드로 나누어 병렬로 수행한 뒤 결과를 이어 붙이는 방식이다. 헤드마다 서로 다른 관점에서 위치를 참고한다.">멀티헤드 어텐션</span>(multi-head attention)은 어텐션을 한 번만 계산하지 않고 $h$개의 헤드로 나누어 계산한다. 각 헤드는 학습된 서로 다른 선형 변환으로 쿼리, 키, 값을 낮은 차원으로 옮긴 뒤 어텐션을 수행한다.</p>
-      <div class="math-equation">
-        $$\mathrm{MultiHead}(Q,K,V) = \mathrm{Concat}(\mathrm{head}_1, \ldots, \mathrm{head}_h)\,W^O, \qquad \mathrm{head}_i = \mathrm{Attention}(QW_i^Q,\, KW_i^K,\, VW_i^V)$$
-      </div>
-      <p>여기서 $W_i^Q$, $W_i^K$, $W_i^V$는 헤드 $i$의 투영 행렬이고 $W^O$는 이어 붙인 결과를 되돌리는 행렬이다. 모델 차원이 $d_{\text{model}}=512$이고 헤드가 $h=8$개이면 각 헤드의 차원은 $d_k = d_v = 512/8 = 64$이다.</p>
-      <div class="step-cards stagger-children animate-in">
-        <div class="step-card">
-          <div class="step-num">1</div>
-          <div class="step-body">
-            <strong>투영</strong>
-            <p>헤드마다 다른 행렬로 쿼리, 키, 값을 차원 64로 옮긴다.</p>
+    <!-- 페이지 4: 의사코드 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>점수 행렬은 어떻게 한 번에 구하는가?</li>
+          <li>소프트맥스는 어느 단위로 적용하는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>의사코드 단계별 풀이</h3>
+        <p>같은 계산을 줄 단위로 따라가 본다. 각 줄이 앞의 유도 단계와 어떻게 대응하는지 확인하시오.</p>
+        <div class="pseudocode-translation animate-in" id="pseudo-attn">
+          <div class="pseudocode-block">
+            <span class="translation-label">알고리즘</span>
+            <span class="pseudocode-line">INPUT: Q, K, V, d_k  // 입력</span>
+            <span class="pseudocode-line">S = MATMUL(Q, TRANSPOSE(K))  // 점수</span>
+            <span class="pseudocode-line">S = S / SQRT(d_k)  // 크기 조정</span>
+            <span class="pseudocode-line">FOR EACH 행 r OF S DO  // 쿼리마다 반복</span>
+            <span class="pseudocode-line">  W[r] = SOFTMAX(S[r])  // 비중 만들기</span>
+            <span class="pseudocode-line">END FOR  // 반복 끝</span>
+            <span class="pseudocode-line">OUTPUT: MATMUL(W, V)  // 값 섞기</span>
+          </div>
+          <div class="pseudocode-explanation">
+            <span class="translation-label">설명</span>
+            <div class="pseudocode-explanation-lines">
+              <p class="pe">입력은 쿼리, 키, 값 행렬과 키 차원이다.</p>
+              <p class="pe">모든 쿼리와 모든 키의 내적을 한꺼번에 구한다. 반복문 없이 행렬 곱 한 번으로 끝난다.</p>
+              <p class="pe">내적의 분산을 1로 되돌리려고 키 차원의 제곱근으로 나눈다.</p>
+              <p class="pe">각 쿼리의 점수 행을 하나씩 처리한다.</p>
+              <p class="pe">점수 행에 소프트맥스를 적용하여 합이 1인 비중을 만든다.</p>
+              <p class="pe">반복을 마친다.</p>
+              <p class="pe">비중 행렬을 값 행렬에 곱하여 출력을 얻는다. 비중이 큰 위치의 값이 더 많이 섞인다.</p>
+            </div>
+          </div>
+          <div class="pseudocode-controls">
+            <button class="btn pseudocode-prev-btn">이전 줄</button>
+            <button class="btn pseudocode-next-btn">다음 줄</button>
+            <button class="btn pseudocode-reset-btn">처음부터</button>
+            <span class="pseudocode-progress"></span>
           </div>
         </div>
-        <div class="step-card">
-          <div class="step-num">2</div>
-          <div class="step-body">
-            <strong>병렬 어텐션</strong>
-            <p>헤드 8개가 각자 스케일드 내적 어텐션을 동시에 계산한다.</p>
-          </div>
-        </div>
-        <div class="step-card">
-          <div class="step-num">3</div>
-          <div class="step-body">
-            <strong>이어 붙이기</strong>
-            <p>헤드 8개의 출력을 이어 붙이면 차원 512가 되고, $W^O$를 곱해 최종 출력을 만든다.</p>
-          </div>
-        </div>
       </div>
-      <div class="callout callout-info animate-in">
-        <div class="callout-icon">&#128161;</div>
-        <div class="callout-content">
-          <strong class="callout-title">보충 설명</strong>
-          <p>논문은 어텐션을 세 곳에 쓴다. 인코더의 <span class="term" data-definition="셀프 어텐션(self-attention): 같은 시퀀스 안의 토큰끼리 서로 참고하는 어텐션이다. 쿼리, 키, 값이 모두 같은 시퀀스에서 나온다.">셀프 어텐션</span>(self-attention), 디코더의 셀프 어텐션, 디코더가 인코더 출력을 참고하는 인코더-디코더 어텐션이다.</p>
-        </div>
-      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>의사코드는 행렬 곱, 크기 조정, 행별 소프트맥스, 값과의 곱 순서로 어텐션을 계산한다.</p></div>
     </div>
 
-    <!-- 핵심 정리 -->
-    <div class="screen">
-      <div class="callout callout-accent animate-in">
-        <div class="callout-icon">&#128161;</div>
-        <div class="callout-content">
-          <strong class="callout-title">핵심 정리</strong>
-          <ol>
-            <li>어텐션은 쿼리와 키의 내적으로 비중을 만들고 그 비중으로 값을 섞는다.</li>
-            <li>내적을 $\sqrt{d_k}$로 나누면 분산이 1로 유지되어 소프트맥스가 한쪽으로 쏠리지 않는다.</li>
-            <li>멀티헤드 어텐션은 $d_{\text{model}}$을 $h$개 헤드로 나누어 서로 다른 관점을 병렬로 학습한다.</li>
-          </ol>
+    <!-- 페이지 5: 멀티헤드 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-icon">&#128161;</div>
+          <div class="callout-content">
+            <strong class="callout-title">보충 설명</strong>
+            <p>논문은 어텐션을 세 곳에 쓴다. 인코더의 <span class="term" data-definition="셀프 어텐션(self-attention): 같은 시퀀스 안의 토큰끼리 서로 참고하는 어텐션이다. 쿼리, 키, 값이 모두 같은 시퀀스에서 나온다.">셀프 어텐션</span>(self-attention), 디코더의 셀프 어텐션, 디코더가 인코더 출력을 참고하는 인코더-디코더 어텐션이다.</p>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">멀티헤드 어텐션</h3>
+        <p><span class="term" data-definition="멀티헤드 어텐션(multi-head attention): 어텐션을 여러 개의 헤드로 나누어 병렬로 수행한 뒤 결과를 이어 붙이는 방식이다. 헤드마다 서로 다른 관점에서 위치를 참고한다.">멀티헤드 어텐션</span>(multi-head attention)은 어텐션을 한 번만 계산하지 않고 $h$개의 헤드로 나누어 계산한다. 각 헤드는 학습된 서로 다른 선형 변환으로 쿼리, 키, 값을 낮은 차원으로 옮긴 뒤 어텐션을 수행한다.</p>
+        <div class="math-equation">
+          $$\begin{gathered}\mathrm{MultiHead}(Q,K,V) = \mathrm{Concat}(\mathrm{head}_1, \ldots, \mathrm{head}_h)\,W^O \\ \mathrm{head}_i = \mathrm{Attention}(QW_i^Q,\, KW_i^K,\, VW_i^V)\end{gathered}$$
+        </div>
+        <p>여기서 $W_i^Q$, $W_i^K$, $W_i^V$는 헤드 $i$의 투영 행렬이고 $W^O$는 이어 붙인 결과를 되돌리는 행렬이다. 모델 차원이 $d_{\text{model}}=512$이고 헤드가 $h=8$개이면 각 헤드의 차원은 $d_k = d_v = 512/8 = 64$이다.</p>
+        <div class="step-cards stagger-children animate-in">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <strong>투영</strong>
+              <p>헤드마다 다른 행렬로 쿼리, 키, 값을 차원 64로 옮긴다.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <strong>병렬 어텐션</strong>
+              <p>헤드 8개가 각자 스케일드 내적 어텐션을 동시에 계산한다.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <strong>이어 붙이기</strong>
+              <p>헤드 8개의 출력을 이어 붙이면 차원 512가 되고, $W^O$를 곱해 최종 출력을 만든다.</p>
+            </div>
+          </div>
         </div>
       </div>
+      <div class="summary"><span class="summary-label">요약</span><p>멀티헤드 어텐션은 차원 512를 헤드 8개로 나누어 차원 64의 어텐션을 병렬로 계산한다.</p></div>
     </div>
 
-    <!-- 확인 문제 -->
-    <div class="screen">
-      <h3 class="screen-heading">확인 문제</h3>
-      <div class="quiz-container animate-in" id="quiz-m1">
-        <div class="quiz-question-block"
-             data-correct="option-c"
-             data-explanation-right="③ | 키 차원이 64이면 내적의 분산이 64이고 표준편차가 8이므로 8로 나누어 분산을 1로 되돌린다."
-             data-explanation-wrong="| 정답은 ③이다. 키 차원이 64이면 내적의 분산이 64이고 표준편차가 8이므로 제곱근 8로 나눈다.">
-          <h3 class="quiz-question">1. 키 차원이 $d_k = 64$일 때 내적 점수를 나누는 값은?</h3>
-          <div class="quiz-options">
-            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 4</span></button>
-            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 6</span></button>
-            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 8</span></button>
-            <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 16</span></button>
-            <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 64</span></button>
+    <!-- 페이지 6: 핵심 정리와 확인 문제 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">&#128161;</div>
+          <div class="callout-content">
+            <strong class="callout-title">핵심 정리</strong>
+            <ol>
+              <li>어텐션은 쿼리와 키의 내적으로 비중을 만들고 그 비중으로 값을 섞는다.</li>
+              <li>내적을 $\sqrt{d_k}$로 나누면 분산이 1로 유지되어 소프트맥스가 한쪽으로 쏠리지 않는다.</li>
+              <li>멀티헤드 어텐션은 $d_{\text{model}}$을 $h$개 헤드로 나누어 서로 다른 관점을 병렬로 학습한다.</li>
+            </ol>
           </div>
-          <div class="quiz-feedback"></div>
         </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>크기 조정과 멀티헤드</h3>
+        <div class="quiz-container animate-in" id="quiz-m1">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="③ | 키 차원이 64이면 내적의 분산이 64이고 표준편차가 8이므로 8로 나누어 분산을 1로 되돌린다."
+               data-explanation-wrong="| 정답은 ③이다. 키 차원이 64이면 내적의 분산이 64이고 표준편차가 8이므로 제곱근 8로 나눈다.">
+            <h3 class="quiz-question"><span class="q-num">1</span>키 차원이 $d_k = 64$일 때 내적 점수를 나누는 값은?</h3>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 4</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 6</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 8</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 16</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 64</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
 
-        <div class="quiz-question-block"
-             data-correct="option-c"
-             data-explanation-right="③ | ㄱ은 나눗셈의 목적을 옳게 설명하고 ㄷ은 512를 8로 나눈 64를 옳게 제시하므로 ㄱ, ㄷ이 옳다. ㄴ은 헤드마다 서로 다른 투영 행렬을 쓰므로 옳지 않다."
-             data-explanation-wrong="| 정답은 ③이다. ㄱ과 ㄷ은 논문의 설명과 같다. ㄴ은 헤드마다 서로 다른 투영 행렬을 쓰므로 옳지 않다.">
-          <h3 class="quiz-question">2. 멀티헤드 어텐션에 대한 설명으로 옳은 것만을 &lt;보기&gt;에서 있는 대로 고른 것은?</h3>
-          <div class="bogi">
-            <p>ㄱ. 내적을 $\sqrt{d_k}$로 나누어 소프트맥스 입력이 지나치게 커지는 것을 막는다.</p>
-            <p>ㄴ. 모든 헤드가 같은 투영 행렬을 공유한다.</p>
-            <p>ㄷ. $d_{\text{model}}=512$, $h=8$이면 각 헤드의 차원은 64이다.</p>
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="③ | ㄱ은 나눗셈의 목적을 옳게 설명하고 ㄷ은 512를 8로 나눈 64를 옳게 제시하므로 ㄱ, ㄷ이 옳다. ㄴ은 헤드마다 서로 다른 투영 행렬을 쓰므로 옳지 않다."
+               data-explanation-wrong="| 정답은 ③이다. ㄱ과 ㄷ은 논문의 설명과 같다. ㄴ은 헤드마다 서로 다른 투영 행렬을 쓰므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">2</span>멀티헤드 어텐션에 대한 설명으로 옳은 것만을 <span class="nobr">&lt;보기&gt;에서</span> 있는 대로 고른 것은?<span class="q-points">[3점]</span></h3>
+            <div class="bogi">
+              <p>ㄱ. 내적을 $\sqrt{d_k}$로 나누어 소프트맥스 입력이 지나치게 커지는 것을 막는다.</p>
+              <p>ㄴ. 모든 헤드가 같은 투영 행렬을 공유한다.</p>
+              <p>ㄷ. $d_{\text{model}}=512$, $h=8$이면 각 헤드의 차원은 64이다.</p>
+            </div>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① ㄱ</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② ㄴ</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ ㄱ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ ㄴ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ ㄱ, ㄴ, ㄷ</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
           </div>
-          <div class="quiz-options">
-            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① ㄱ</span></button>
-            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② ㄴ</span></button>
-            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ ㄱ, ㄷ</span></button>
-            <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ ㄴ, ㄷ</span></button>
-            <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ ㄱ, ㄴ, ㄷ</span></button>
-          </div>
-          <div class="quiz-feedback"></div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m1')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m1')">다시 풀기</button>
         </div>
-
-        <div class="quiz-question-block"
-             data-correct="option-d"
-             data-explanation-right="④ | 비중은 행마다 소프트맥스로 만들어지므로 한 행의 합이 1이다. 합이 쿼리 수라는 서술은 옳지 않다."
-             data-explanation-wrong="| 정답은 ④이다. 비중 행렬의 각 행은 소프트맥스의 출력이므로 합이 1이다. 그러므로 ④는 옳지 않다.">
-          <h3 class="quiz-question">3. 스케일드 내적 어텐션의 계산 과정에 대한 설명으로 옳지 <u>않은</u> 것은?</h3>
-          <div class="quiz-options">
-            <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 점수 행렬은 행렬 곱 하나로 한꺼번에 구한다.</span></button>
-            <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 소프트맥스는 점수 행마다 적용한다.</span></button>
-            <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 출력은 비중 행렬과 값 행렬의 곱이다.</span></button>
-            <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 비중 행렬의 각 행의 합은 쿼리의 개수와 같다.</span></button>
-            <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 점수를 나누는 값은 키 차원의 제곱근이다.</span></button>
-          </div>
-          <div class="quiz-feedback"></div>
-        </div>
-
-        <button class="quiz-check-btn" onclick="checkQuiz('quiz-m1')">정답 확인</button>
-        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m1')">다시 풀기</button>
       </div>
+      <div class="summary"><span class="summary-label">요약</span><p>키 차원이 64이면 점수를 8로 나누고, 헤드마다 서로 다른 투영 행렬을 쓴다.</p></div>
+    </div>
+
+    <!-- 페이지 7: 확인 문제 (계속) -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>비중 행렬의 한 행의 합은 얼마인가?</li>
+          <li>출력은 어떤 두 행렬의 곱인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>계산 과정 점검</h3>
+        <div class="quiz-container animate-in" id="quiz-m1-2">
+          <div class="quiz-question-block"
+               data-correct="option-d"
+               data-explanation-right="④ | 비중은 행마다 소프트맥스로 만들어지므로 한 행의 합이 1이다. 합이 쿼리 수라는 서술은 옳지 않다."
+               data-explanation-wrong="| 정답은 ④이다. 비중 행렬의 각 행은 소프트맥스의 출력이므로 합이 1이다. 그러므로 ④는 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">3</span>스케일드 내적 어텐션의 계산 과정에 대한 설명으로 옳지 <u>않은</u> 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 점수 행렬은 행렬 곱 하나로 한꺼번에 구한다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 소프트맥스는 점수 행마다 적용한다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 출력은 비중 행렬과 값 행렬의 곱이다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 비중 행렬의 각 행의 합은 쿼리의 개수와 같다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 점수를 나누는 값은 키 차원의 제곱근이다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m1-2')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m1-2')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>비중 행렬의 각 행은 소프트맥스의 출력이므로 합이 1이다.</p></div>
     </div>
 
   </div>

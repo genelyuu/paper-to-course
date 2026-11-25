@@ -219,11 +219,11 @@ course-name/
 - `references/_footer.html` → `course-name/_footer.html`
 - `references/build.sh` → `course-name/build.sh`
 
-`references/lint-ko.py`는 복사하지 않습니다. Phase 5에서 스킬 디렉터리의 파일을 그대로 실행합니다.
+`references/lint-ko.py`와 `references/check-pages.py`는 복사하지 않습니다. Phase 5에서 스킬 디렉터리의 파일을 그대로 실행합니다.
 
 **Step 2 (공통): `_base.html` 맞춤.** `references/_base.html`을 읽고 다음을 치환해 `course-name/_base.html`로 씁니다.
 - `COURSE_TITLE` → 한국어 강의 제목
-- `ACCENT_*` → 고른 강조색 값(주석의 팔레트 중 하나)
+- `ACCENT_*` → 논문 분야에 맞는 교과 색 프리셋 값(과학탐구 파랑 기본, 수학 초록, 사회탐구 보라, 영어 주황. `references/design-system.md`의 "교과 색 프리셋" 표)
 - `NAV_DOTS` → 모듈마다 `<button class="nav-dot" data-target="module-N" data-tooltip="…" aria-label="…">` 하나
 - `SIDEBAR_ITEMS` → 모듈마다 `<a class="sidebar-item" data-module="N" href="#module-N">` 하나(자식 `sidebar-item-num`, `sidebar-item-label`, `sidebar-item-indicator`)
 - 두 목록의 순서와 개수는 모듈과 같아야 합니다. 정확한 마크업은 `references/interactive-elements.md`의 "모듈 골격과 내비게이션" 절을 따릅니다.
@@ -240,7 +240,9 @@ course-name/
 **Step 3: 모듈 작성.** 두 경로가 있습니다.
 
 #### 순차 경로 (단순한 논문)
-`references/content-philosophy.md`, `references/gotchas.md`, `references/korean-style-guide.md`, `references/glossary-ko.md`, `course-name/briefs/terms.md`를 읽은 뒤 모듈을 하나씩 씁니다. 각 모듈은 `course-name/modules/0N-slug.html`이며 `<section class="module" id="module-N">` 블록만 담습니다. 모듈 골격(`.module-content`, `.module-header`, `.screen`, `.screen-heading`)은 `references/interactive-elements.md`의 "모듈 골격과 내비게이션" 절을 따릅니다.
+`references/content-philosophy.md`, `references/gotchas.md`, `references/korean-style-guide.md`, `references/glossary-ko.md`, `course-name/briefs/terms.md`를 읽은 뒤 모듈을 하나씩 씁니다. 각 모듈은 `course-name/modules/0N-slug.html`이며 `<section class="module" id="module-N">` 블록만 담습니다. 모듈 골격(`.module-content`, `.module-header`, `.screen.cornell`, `.screen-heading`)은 `references/interactive-elements.md`의 "모듈 골격과 내비게이션" 절을 따릅니다.
+
+**모든 화면은 코넬식 페이지(`.screen.cornell`)이며 한 화면에 들어가야 합니다.** 왼쪽 `.cue`(핵심 질문 2~4개, 한다체 의문형), 오른쪽 `.notes`(제목과 내용), 아래 `.summary`(한 문장 요약)로 구성합니다. 1440×900에서 스크롤 없이 보여야 하므로(첫 페이지는 `.module-header` 포함) 넘치면 내용을 페이지로 나눕니다. 퀴즈는 페이지당 4문항까지이고 문항 번호는 `<span class="q-num">`로 씁니다. 자세한 규칙은 "코넬식 페이지와 지면 요소" 절을 봅니다.
 
 메뉴보다 적은 모듈을 만들 때는 번호를 0부터 연속으로 매깁니다(`module-0`, `module-1`, …, 파일 `00-`, `01-`, …).
 
@@ -281,10 +283,18 @@ python3 -I <skill-dir>/references/lint-ko.py course-name/ --strict
 
 **ERROR 0개, WARN 0개여야 합니다.** 하나라도 있으면 해당 모듈을 고치고 `build.sh`와 린터를 다시 실행합니다. 예외는 `references/korean-style-guide.md` §3.3에 적힌 알려진 린터 한계(예: 약어 뒤 서술격 `이다`를 주격 `이`로 오판하는 KO104)뿐입니다. 이런 WARN이 남으면 파일·줄과 이유를 사용자에게 보고합니다. 연구 대화의 해요체는 린터가 이미 제외합니다.
 
+이어서 쪽 맞춤을 검사합니다. 헤드리스 Chrome이 1440×900에서 페이지마다 높이를 잽니다.
+
+```bash
+python3 <skill-dir>/references/check-pages.py course-name/
+```
+
+요약이 `넘침 0개, 코넬 아닌 화면 0개`여야 합니다(넘치면 종료 코드 1). 넘치는 페이지는 내용을 나눠 다시 빌드합니다.
+
 그다음 브라우저로 `index.html`을 열고, 만든 내용을 사용자에게 한국어로 안내하며 피드백을 요청합니다.
 
 **검토 체크리스트:**
-- [ ] 표지에 논문 제목, 저자, 초록, 메타 배지, "학습 시작하기" 버튼이 있다
+- [ ] 표지에 한국어 제목과 영어 원제(별도 줄), 저자, 메타(이모지 없음), 초록, "학습 시작하기" 버튼, 교과 색 차례가 있다
 - [ ] 모듈 0(배경 지식과 선수 학습)이 있고, 논문 내용보다 먼저 선수 개념을 가르친다
 - [ ] 사이드바에 모든 모듈 이름이 있고, 스크롤하면 현재 모듈이 강조된다
 - [ ] 모바일(1024px 이하)에서 사이드바가 토글 버튼으로 접힌다
@@ -298,6 +308,9 @@ python3 -I <skill-dir>/references/lint-ko.py course-name/ --strict
 - [ ] SVG 다이어그램이 반응형이다
 - [ ] 모듈 사이 연결이 자연스럽다
 - [ ] `lint-ko.py --strict` ERROR 0개, WARN 0개(알려진 린터 한계는 보고)
+- [ ] `check-pages.py`가 넘침 0개, 코넬 아닌 화면 0개를 보고한다
+- [ ] 모든 화면이 `.screen.cornell`이고 `.cue`(핵심 질문), `.notes`, `.summary`(한 문장)를 갖췄다
+- [ ] 퀴즈 페이지당 4문항 이하, 문항 번호는 `q-num`이다
 - [ ] **EBS 문체 일관성**: 본문 한다체, 학습 목표 `~할 수 있다.`, 발문 `옳은 것은?` + ①②③④, 해설에 칭찬 없음, 지시 `~하시오`
 - [ ] 모듈마다 `학습 목표` → 본문(`개념 체크`/`탐구 자료`) → `핵심 정리` → `확인 문제` 구성이 있다
 - [ ] **용어 일관성**: 모든 모듈이 `terms.md`의 번역어를 쓰고, 첫 등장 병기 `한글(English)` 형식이 맞다
@@ -309,18 +322,18 @@ python3 -I <skill-dir>/references/lint-ko.py course-name/ --strict
 
 ## 디자인 정체성
 
-시각 디자인은 **아름다운 연구 노트**처럼 느껴져야 합니다. 따뜻하고 친근하며, 학술적이지만 차갑지 않게. 전체 토큰 체계는 `references/design-system.md`를 봅니다.
+시각 디자인은 **수능특강 같은 교재 지면에 코넬식 노트**를 얹은 모습이어야 합니다. 흰 바탕에 교과 색 하나로 또렷하고 정돈되게. 전체 토큰 체계는 `references/design-system.md`를 봅니다.
 
 **양보할 수 없는 원칙:**
-- **따뜻한 팔레트**: 오프화이트 배경, 따뜻한 회색. 차가운 흰색 금지
-- **과감한 강조색**: 확신 있는 강조색 하나(버밀리언, 틸, 앰버). 보라색 그라데이션 금지
+- **지면 팔레트**: 순백(#FFFFFF) 바탕, 차가운 회색 면(#F4F6F8), 평평하고 옅은 그림자
+- **교과 색 하나**: 논문 분야에 맞춰 프리셋에서 고른다(과학탐구 파랑이 기본, 수학 초록, 사회탐구 보라, 영어 주황). 그라데이션 금지
 - **개성 있는 타이포그래피**:
   - 본문(한글+라틴): **Pretendard Variable** (jsDelivr, v1.3.9)
-  - 제목의 영문·숫자: **Bricolage Grotesque**. 한글 글리프는 Pretendard로 자동 폴백
+  - 제목도 **Pretendard** 하나로 쓴다(라틴 디스플레이 서체를 섞지 않는다). 고정폭 서체는 코드에만 쓴다
   - 코드·수식 보조: **JetBrains Mono** (한글 주석은 D2Coding/Pretendard로 폴백)
 - **한글 타이포그래피**: `word-break: keep-all` + `overflow-wrap: break-word`, 본문 행간 약 1.7, 제목 자간을 살짝 좁게, 한글 이탤릭 금지(`em`은 굵기 600 + 강조색), 대문자 라벨용 넓은 자간은 한글에 쓰지 않음
-- **넉넉한 여백**: 모듈에 숨 쉴 공간을 둡니다. 화면당 짧은 문단 3~4개까지
-- **배경 교차**: 짝수·홀수 모듈이 따뜻한 두 톤을 번갈아 씁니다
+- **4px 격자**: 모든 간격·크기는 4px 배수(선 두께 1·2px만 예외). 화면당 짧은 문단 3~4개까지
+- **한 페이지 = 한 화면**: 코넬식 페이지가 1440×900에 스크롤 없이 들어간다
 - **어두운 코드 블록**: #1E1E2E 바탕에 Catppuccin 구문 강조, IDE 스타일
 - **SVG 다이어그램**: 디자인 시스템 색상, viewBox로 반응형
 
@@ -333,8 +346,9 @@ python3 -I <skill-dir>/references/lint-ko.py course-name/ --strict
 - **`references/korean-style-guide.md`**: EBS 교재 문체, 조사, 띄어쓰기, 번역투, 문항·해설 형식의 전체 규칙. Phase 3.5와 Phase 4에서 읽고, 병렬 경로의 모든 모듈 에이전트에 전달합니다.
 - **`references/glossary-ko.md`**: 분야별 한국어 표준 용어집과 쟁점 용어 처리 방침. Phase 3에서 용어표(`terms.md`)를 만들 때, 그리고 순차 경로에서 새 용어를 쓰기 전에 읽습니다.
 - **`references/lint-ko.py`**: 한국어 강의 린터(한자 잔존, `lang`, 전각 괄호, 번역투, EBS 문체 검사). Phase 5에서 실행합니다.
+- **`references/check-pages.py`**: 쪽 맞춤 검사기(헤드리스 Chrome으로 페이지 높이 측정, 코넬 아닌 화면 보고). Phase 5에서 `lint-ko.py`와 함께 실행합니다.
 - **`references/content-philosophy.md`**: 교수 원칙, 퀴즈 설계, 툴팁 규칙. Phase 3.5와 Phase 4에서 읽습니다.
 - **`references/gotchas.md`**: 자주 실패하는 지점 체크리스트. Phase 4와 Phase 5에서 읽습니다.
 - **`references/module-brief-template.md`**: Phase 3.5 모듈 브리프 템플릿. 복잡한 논문일 때만 읽습니다.
-- **`references/design-system.md`**: CSS 토큰, 색상, 한글 타이포그래피, SVG 규칙. Phase 4에서 읽습니다.
+- **`references/design-system.md`**: CSS 토큰, 색상과 교과 색 프리셋, 4px 간격 격자, 지면 레이아웃, 한글 타이포그래피, SVG 규칙. Phase 4에서 읽습니다.
 - **`references/interactive-elements.md`**: 모듈 골격, 내비게이션 마크업, 모든 인터랙티브 요소의 HTML 패턴. Phase 4의 Step 2(`_base.html`)부터 읽습니다.

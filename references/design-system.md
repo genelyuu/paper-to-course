@@ -8,6 +8,8 @@ paper-to-course 시스템의 CSS 디자인 토큰 전체 목록입니다. `style
 3. [타이포그래피](#타이포그래피)
 4. [한글 타이포그래피](#한글-타이포그래피)
 5. [간격과 레이아웃](#간격과-레이아웃)
+   - [간격: 4px 격자](#간격-4px-격자)
+   - [지면 레이아웃 (수능특강 + 코넬)](#지면-레이아웃-수능특강--코넬)
 6. [그림자와 깊이](#그림자와-깊이)
 7. [수식·연구 색상](#수식연구-색상)
 8. [SVG 다이어그램 시스템](#svg-다이어그램-시스템)
@@ -17,9 +19,12 @@ paper-to-course 시스템의 CSS 디자인 토큰 전체 목록입니다. `style
 ## 디자인 아이덴티티
 
 - 한글+라틴 본문: **Pretendard Variable** (jsDelivr, `v1.3.9` 고정, dynamic-subset으로 필요한 글리프만 로드)
-- 라틴 디스플레이(제목의 영문·숫자): **Bricolage Grotesque** (Google Fonts). 한글 글리프는 자동으로 Pretendard로 폴백됩니다.
-- 코드: **JetBrains Mono** → D2Coding / Nanum Gothic Coding → Pretendard (한글 주석용 폴백)
-- 따뜻한 오프화이트 배경과 주홍색(vermillion) 강조색 — 색 체계는 그대로 유지합니다.
+- 제목도 같은 **Pretendard** 하나로 씁니다. 라틴 디스플레이 서체를 섞으면 "트랜스포머(Attention…)"처럼 한 줄 안에서 서체가 갈라져 보이기 때문입니다.
+- 코드: **JetBrains Mono** → D2Coding / Nanum Gothic Coding → Pretendard (한글 주석용 폴백). 고정폭은 코드(의사코드·코드 블록·줄 번호)에만 쓰고, 라벨·수치·사이드바 번호는 Pretendard에 `tabular-nums`로 씁니다.
+- 그림자 대신 선: `--shadow-sm`·`--shadow-md`는 1px 테두리 링이고, 떠 있는 요소(툴팁 등)만 `--shadow-lg`·`--shadow-xl`을 씁니다. 스크롤 등장 애니메이션과 떠오르는 호버는 쓰지 않습니다.
+- 베이지·따뜻한 회색은 쓰지 않습니다. 중립색은 모두 차가운 회색(#F4F6F8, #D3D8DE, #555B62 등)입니다.
+- 교재 지면 같은 순백 바탕(#FFFFFF)과 차가운 회색 면, 교과 색 강조색 하나. 기본 강조색은 과학탐구 파랑이며 "교과 색 프리셋"에서 고른다.
+- 지면 구성은 수능특강 + 코넬식 노트이다("지면 레이아웃" 절).
 
 ---
 
@@ -27,23 +32,23 @@ paper-to-course 시스템의 CSS 디자인 토큰 전체 목록입니다. `style
 
 ```css
 :root {
-  /* BACKGROUNDS */
-  --color-bg:             #FAF7F2;       /* warm off-white */
-  --color-bg-warm:        #F5F0E8;       /* alternating modules */
+  /* BACKGROUNDS — 교재 지면: 흰 바탕 + 차가운 회색 면 */
+  --color-bg:             #FFFFFF;
+  --color-bg-subtle:        #F4F6F8;       /* 면(요약 줄, 날개) */
   --color-bg-code:        #1E1E2E;       /* code blocks */
-  --color-text:           #2C2A28;
-  --color-text-secondary: #6B6560;
-  --color-text-muted:     #9E9790;
-  --color-border:         #E5DFD6;
-  --color-border-light:   #EEEBE5;
+  --color-text:           #222426;
+  --color-text-secondary: #555B62;
+  --color-text-muted:     #868D95;
+  --color-border:         #D3D8DE;
+  --color-border-light:   #E6E9ED;
   --color-surface:        #FFFFFF;
-  --color-surface-warm:   #FDF9F3;
+  --color-surface-subtle:   #F7F8FA;
 
-  /* ACCENT (pick ONE — vermillion default) */
-  --color-accent:         #D94F30;
-  --color-accent-hover:   #C4432A;
-  --color-accent-light:   #FDEEE9;
-  --color-accent-muted:   #E8836C;
+  /* ACCENT — 교과 색. 기본값은 과학탐구 파랑 */
+  --color-accent:         #1F6FB2;
+  --color-accent-hover:   #185A92;
+  --color-accent-light:   #E8F1FA;
+  --color-accent-muted:   #6FA3D3;
 
   /* SEMANTIC */
   --color-success:        #2D8B55;
@@ -54,13 +59,28 @@ paper-to-course 시스템의 CSS 디자인 토큰 전체 목록입니다. `style
   --color-info-light:     #E4F2F7;
 
   /* ACTORS (research participants, methods, concepts) */
-  --color-actor-1:        #D94F30;
-  --color-actor-2:        #2A7B9B;
-  --color-actor-3:        #7B6DAA;
-  --color-actor-4:        #D4A843;
-  --color-actor-5:        #2D8B55;
+  --color-actor-1:        #C2410C;
+  --color-actor-2:        #0F766E;
+  --color-actor-3:        #6B4FA8;
+  --color-actor-4:        #A16207;
+  --color-actor-5:        #1B7A50;
 }
 ```
+
+그림자는 평평하고 옅다(아래 "그림자와 깊이"). 강조색은 흰 글자 배경(`.module-number`, `.corner-tag`, `.callout-title`)에 쓰이므로 흰 글자 대비가 충분해야 한다.
+
+### 교과 색 프리셋
+
+수능특강은 교과마다 표지 색이 다르다(국어 노랑, 수학 초록, 영어 주황, 한국사 갈색, 과학탐구 파랑, 사회탐구 보라. 출처: namu.wiki/w/수능특강). 논문 분야에 맞는 프리셋 하나를 골라 `_base.html`의 네 변수에 넣는다. 아래 값은 흰 글자 대비를 측정한 것이다.
+
+| 프리셋 | 분야 | accent | hover | light | muted | 흰 글자 대비 |
+|---|---|---|---|---|---|---|
+| 과학탐구 파랑 (기본값) | ML, 물리, 생명 등 자연과학 | #1F6FB2 | #185A92 | #E8F1FA | #6FA3D3 | 5.28:1 |
+| 수학 초록 | 이론, 최적화, 통계 | #1B7A50 | #145F3E | #E6F4EC | #6BB592 | 5.32:1 |
+| 사회탐구 보라 | 경제, 사회과학, HCI | #6B4FA8 | #563F88 | #F0ECF8 | #A08ECB | 6.35:1 |
+| 영어 주황 | 언어학, 언어 중심 NLP 논문 | #B85C0F | #964A0B | #FCEFE3 | #E0A06A | 4.59:1 |
+
+국어 노랑은 흰 글자 대비가 부족해 프리셋에서 뺐다. 프리셋 밖의 색을 쓰려면 흰 글자 대비 4.5:1 이상을 확인한다.
 
 ---
 
@@ -68,8 +88,8 @@ paper-to-course 시스템의 CSS 디자인 토큰 전체 목록입니다. `style
 
 ```css
 :root {
-  /* 라틴은 첫 폰트, 한글은 Pretendard로 자연스럽게 폴백 */
-  --font-display: 'Bricolage Grotesque', 'Pretendard Variable', Pretendard, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', Georgia, sans-serif;
+  /* 제목과 본문 모두 Pretendard 하나 */
+  --font-display: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
   --font-body:    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
   --font-mono:    'JetBrains Mono', 'D2Coding', 'Nanum Gothic Coding', 'Pretendard Variable', Pretendard, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Fira Code', Consolas, monospace;
 
@@ -112,7 +132,7 @@ paper-to-course 시스템의 CSS 디자인 토큰 전체 목록입니다. `style
 | 자간 | 제목 `-0.02em`, 본문 `-0.005em` | Pretendard는 한글 제목에서 살짝 좁은 자간이 안정적입니다. 대문자 라벨의 `0.1em` 자간은 한글에서 글자가 흩어져 보이므로 `:lang(ko)`에서 `0.01~0.03em`으로 줄입니다(토큰 `--tracking-label*`). |
 | 이탤릭 금지 | `em`/`i` → `font-style: normal` + 굵기 600 + 강조색 | 한글에는 이탤릭 글리프가 없어 가짜 기울임(synthetic oblique)이 어색합니다. `font-synthesis: none`으로 합성도 막습니다. KaTeX의 이탤릭은 유지합니다. |
 | 드러냄표 | `.ko-emphasis` (`text-emphasis: dot`) | 한국어 전통 강조법. 선택 사항 유틸리티입니다. |
-| 라틴/한글 혼용 | 폰트 스택에서 라틴 폰트 → Pretendard | 영문·숫자는 Bricolage, 한글은 Pretendard로 글리프 단위 폴백됩니다. 본문은 Pretendard 하나로 두 문자 모두 일관된 굵기를 가집니다. |
+| 라틴/한글 혼용 | 제목·본문 모두 Pretendard 하나 | 한글과 라틴이 같은 서체라 굵기·높이가 맞습니다. 라틴 디스플레이 서체를 섞으면 제목 안에서 서체가 갈라져 보입니다. |
 | KaTeX | `.katex { word-break: normal }` + 좌우 `0.12em` 여백 | 상위의 keep-all·자간이 수식 내부 조판에 영향을 주지 않게 하고, 수식과 한글 사이에 숨 쉴 틈을 줍니다. |
 | 코드 | `overflow-wrap: anywhere`, `white-space: pre-wrap` | 코드의 긴 토큰은 끊어 줘야 하므로 본문 규칙과 분리합니다. |
 | 툴팁 | `keep-all` + 최대 폭 320px | 짧은 용어 설명이 어절 중간에서 끊기지 않게 합니다. |
@@ -130,13 +150,59 @@ paper-to-course 시스템의 CSS 디자인 토큰 전체 목록입니다. `style
 
   --content-width:      800px;
   --content-width-wide: 1000px;
-  --nav-height:         50px;
-  --radius-sm:   8px;
-  --radius-md:   12px;
-  --radius-lg:   16px;
+  --nav-height:         48px;
+  --page-height:        calc(100vh - var(--nav-height));
+  --page-width:         1040px;   /* 단서 칸 + 간격 + 노트 칸 */
+  --cue-width:          232px;
+  --cornell-gap:        32px;
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
   --radius-full: 9999px;
 }
 ```
+
+### 간격: 4px 격자
+
+모든 패딩, 마진, 크기 값은 4px의 배수이다(간격 토큰 4~96px, 모서리 반지름 4/8/12px, 내비게이션 48px). 예외는 선 두께 1px·2px와 2px 진행선뿐이다. 2px, 6px 같은 반단계는 쓰지 않는다.
+
+근거: 널리 쓰이는 디자인 시스템이 4px 또는 8px 단위를 기본으로 삼는다.
+- Carbon: 간격 단계 2, 4, 8, 12, 16, 24, 32, 40, 48, 64, 80, 96, 160px, "multiples of two, four, and eight" (carbondesignsystem.com/elements/spacing/overview/)
+- Atlassian: "base unit of 8 pixels"에 2/4/6px 반단계 (atlassian.design/foundations/spacing)
+- USWDS: "multiples of 8px"에 작은 크기 예외 (designsystem.digital.gov/design-tokens/spacing-units/)
+- GitHub Primer: 크기 토큰이 4px 단위 (primer.style/foundations/primitives/size)
+
+우리는 이 중 4px 배수만 채택하고 2px, 6px 반단계는 쓰지 않는다.
+
+### 지면 레이아웃 (수능특강 + 코넬)
+
+모든 화면은 `.screen.cornell` 한 페이지이며 1440×900 데스크톱 한 화면(브라우저 UI와 48px 내비게이션을 뺀 약 765px)에 스크롤 없이 들어간다. 1200px 미만에서는 한 단으로 접히고 높이 제한이 풀린다.
+
+```
+┌──────────────────────────────── 1440 ───────────────────────────────┐
+│ nav 48px                                                            │
+├─────────────────────────────────────────────────────────────────────┤
+│ ┌──┐                                                                │
+│ │01│ 모듈 제목 (.module-header: 64px 번호 블록, 아래 2px 교과 색 선)│
+│ └──┘                                                                │
+│ ══════════════════════════════════════════════════ (2px accent)     │
+│ ┌ .cue (232px) ┐ │ ┌ .notes ───────────────────────────────────┐    │
+│ │ 핵심 질문    │ │ │ [탐구 자료] 화면 제목  (.corner-tag)      │    │
+│ │ ○ 질문 1?    │ │ │                                           │    │
+│ │ ○ 질문 2?    │ │ │ 본문, 수식, 그림, 퀴즈 ...                │    │
+│ │ ○ 질문 3?    │ │ │                                           │    │
+│ └──────────────┘ │ └───────────────────────────────────────────┘    │
+│ ┌ .summary ────────────────────────────────────────────────────┐    │
+│ │ 요약  한 문장으로 이 페이지의 핵심을 정리한다.               │    │
+│ └──────────────────────────────────────────────────────────────┘    │
+│ (한 페이지 높이 ≤ 100vh - 48px)                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+- 위 그림은 모듈의 첫 페이지이다. 둘째 페이지부터는 `.module-header` 없이 `.cue | .notes / .summary`만 있다.
+- `.cue`는 오른쪽에 2px 교과 색 선이 있고 핵심 질문마다 속 빈 원 표지가 붙는다. `.summary`는 위에 2px 교과 색 선과 회색 면이 있다.
+- 퀴즈는 코넬 페이지 안에서 1200px 이상일 때 2단(시험지 2단)이 되고, 페이지당 최대 4문항이다.
+- 마크업과 쪽 맞춤 규칙은 `interactive-elements.md`의 "코넬식 페이지와 지면 요소"를 따른다. 측정은 `check-pages.py`가 한다.
 
 ---
 
@@ -144,12 +210,14 @@ paper-to-course 시스템의 CSS 디자인 토큰 전체 목록입니다. `style
 
 ```css
 :root {
-  --shadow-sm: 0 1px 2px rgba(44,42,40,0.05);
-  --shadow-md: 0 4px 12px rgba(44,42,40,0.08);
-  --shadow-lg: 0 8px 24px rgba(44,42,40,0.10);
-  --shadow-xl: 0 16px 48px rgba(44,42,40,0.12);
+  --shadow-sm: 0 1px 2px rgba(34,36,38,0.04);
+  --shadow-md: 0 2px 8px rgba(34,36,38,0.06);
+  --shadow-lg: 0 8px 24px rgba(34,36,38,0.08);
+  --shadow-xl: 0 16px 48px rgba(34,36,38,0.10);
 }
 ```
+
+그림자는 평평하고 옅게 쓴다. 교재 지면처럼 테두리와 면으로 구분하고 깊이감은 최소로 둔다.
 
 ---
 
@@ -169,7 +237,7 @@ paper-to-course 시스템의 CSS 디자인 토큰 전체 목록입니다. `style
   /* RESULTS — for experimental result displays */
   --color-result-pos:     #2D8B55;       /* green for improvements */
   --color-result-neg:     #C93B3B;       /* red for underperformance */
-  --color-result-neutral: #6B6560;       /* gray for baselines */
+  --color-result-neutral: #8A929B;       /* cool gray for baselines */
 }
 ```
 

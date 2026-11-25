@@ -7,6 +7,7 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 
 ## 목차
 0. [모듈 골격과 내비게이션 (Module Skeleton & Navigation)](#모듈-골격과-내비게이션-module-skeleton--navigation)
+0.5. [코넬식 페이지와 지면 요소](#코넬식-페이지와-지면-요소)
 1. [표지와 히어로 섹션 (Cover Page)](#표지와-히어로-섹션-cover-page)
 2. [수식 유도 단계별 풀이 (Math Derivation Walkthrough)](#수식-유도-단계별-풀이-math-derivation-walkthrough)
 3. [의사코드 단계별 풀이 (Pseudocode Walkthrough)](#의사코드-단계별-풀이-pseudocode-walkthrough)
@@ -50,7 +51,7 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 
 **연결 방식:** `main.js`는 `.module` 요소를 문서 순서대로 모아 `.nav-dot`, `.sidebar-item`과 **같은 순서(인덱스)로** 짝짓는다. 따라서 모듈 수, `.nav-dot` 수, `.sidebar-item` 수가 같아야 하고 순서도 같아야 한다. 점을 누르면 `data-target`의 id로, 사이드바 항목은 `href`의 id로 스크롤한다. 표지(`.course-cover`)는 `.module`이 아니므로 짝에 들어가지 않는다.
 
-**모듈 파일(`modules/0N-slug.html`) 골격:**
+**모듈 파일(`modules/0N-slug.html`) 골격:** 모든 `.screen`은 `.screen.cornell` 한 페이지이다. 단원 도입(`.module-header`)과 첫 코넬 화면이 함께 첫 페이지를 이룬다.
 ```html
 <section class="module" id="module-1">
   <div class="module-content">
@@ -61,45 +62,59 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
       <p class="module-subtitle">쿼리, 키, 값으로 토큰 사이의 관련도를 계산하는 과정을 익힌다</p>
     </div>
 
-    <!-- 첫 화면: 학습 목표 -->
-    <div class="screen">
-      <div class="callout callout-info animate-in">
-        <div class="callout-icon">&#127919;</div>
-        <div class="callout-content">
-          <strong class="callout-title">학습 목표</strong>
-          <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
-          <ol>
-            <li>쿼리와 키의 내적이 관련도를 나타내는 이유를 설명할 수 있다.</li>
-            <li>소프트맥스 가중합으로 출력이 만들어지는 과정을 설명할 수 있다.</li>
-          </ol>
-        </div>
+    <!-- 첫 페이지: 단원 도입 + 첫 코넬 화면. 학습 목표 상자는 .cue에 둘 수 있다 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>어텐션은 무엇을 계산하는가?</li>
+          <li>쿼리와 키의 내적은 왜 관련도를 나타내는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">화면 제목</h3>
+        <p>본문(한다체)...</p>
       </div>
-      <h3 class="screen-heading">화면 제목</h3>
-      <p>본문(한다체)...</p>
+      <div class="summary"><span class="summary-label">요약</span><p>쿼리와 키의 내적으로 관련도를 구하고, 이를 가중치로 값을 합한다.</p></div>
     </div>
 
-    <!-- 이어지는 화면들: 개념 설명, 개념 체크, 탐구 자료 -->
-    <div class="screen">
-      <h3 class="screen-heading">다음 화면 제목</h3>
-      ...
+    <!-- 이어지는 페이지들: 개념 설명, 개념 체크, 탐구 자료 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul><li>소프트맥스는 왜 필요한가?</li></ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>번역 성능 비교</h3>
+        ...
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>…한다.</p></div>
     </div>
 
-    <!-- 끝: 핵심 정리 → 확인 문제 -->
-    <div class="screen">
-      <div class="callout callout-accent animate-in">...핵심 정리...</div>
-      <h3 class="screen-heading">확인 문제</h3>
-      <div class="quiz-container" id="quiz-module1">...</div>
+    <!-- 끝: 핵심 정리(.cue 또는 .notes 안 callout) → 확인 문제(퀴즈 페이지) -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul><li>이 모듈의 내용을 문제에 적용할 수 있는가?</li></ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag outline">확인 문제</span>어텐션 연산</h3>
+        <div class="quiz-container" id="quiz-module1">...</div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>…한다.</p></div>
     </div>
 
   </div>
 </section>
 ```
+학습 목표 상자(`callout callout-info`)는 첫 페이지의 `.cue`에 넣어도 되고 `.notes` 맨 위에 넣어도 된다. 한 페이지에 들어가는지는 아래 "코넬식 페이지와 지면 요소"의 쪽 맞춤 규칙과 `check-pages.py`로 확인한다.
 
 **Rules:**
 - `<section class="module" id="module-N">`의 `N`은 0부터 연속한 번호이다. 메뉴의 모듈 수보다 적게 만들어도 번호를 건너뛰지 않고 `module-0`, `module-1`, …로 매기고 파일명도 `00-`, `01-`, …로 매긴다.
-- `.module-number`는 두 자리 숫자(`00`, `01`)이다. 장식 문자이며 CSS가 옅게 표시한다.
+- `.module-number`는 두 자리 숫자(`00`, `01`)이다. CSS가 교과 색 64px 사각 블록에 흰 숫자로 표시한다(옅은 장식이 아니다). `.module-header` 아래에는 2px 교과 색 선이 그려진다.
 - 모듈 제목은 `<h2 class="module-title">`, 화면 제목은 `<h3 class="screen-heading">`이다. 화면 안의 더 작은 제목은 `<h4>`를 쓴다.
-- 모듈 하나의 화면(`.screen`)은 3~6개이다. 배경 색 교차(짝수·홀수 모듈)는 CSS가 처리하므로 별도 클래스를 붙이지 않는다.
+- 모듈 하나의 화면(`.screen.cornell`)은 3~6개이며 각각 한 페이지이다. 코넬 형식이 아닌 `.screen`은 쓰지 않는다(`check-pages.py`가 보고한다).
+- 한 페이지는 데스크톱 한 화면(1440×900)에 스크롤 없이 들어가야 한다. 넘치면 내용을 줄이지 말고 페이지를 나눈다.
 - `.module-content` 밖에 보일러플레이트(`<html>`, `<head>`, `<script>`)를 두지 않는다.
 
 **배경 지식 표시:** 논문 이전의 배경만 다루는 화면(모듈 0의 모든 화면, 그 밖의 배경 전용 콜아웃)은 화면 맨 위에 `배경 지식` 콜아웃을 둔다. 전용 소형 라벨 클래스가 `styles.css`에 없으므로 `callout callout-info`를 쓴다. 이 콜아웃은 `보충 설명`·`더 알아보기`의 모듈당 2개 상한에 넣지 않는다.
@@ -131,6 +146,69 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 
 ---
 
+## 코넬식 페이지와 지면 요소
+
+수능특강 지면과 코넬식 노트를 합친 레이아웃이다. 클래스명과 구조는 `styles.css`(맨 끝 "TEXTBOOK PAGE LAYOUT")가 정의한다. 와이어프레임은 `design-system.md`의 "지면 레이아웃" 절을 본다.
+
+### 구조: `.screen.cornell`
+
+한 페이지는 세 영역이다.
+- `.cue`(왼쪽, 232px): `<span class="cue-label">핵심 질문</span>` + `<ul>`에 핵심 질문 2~4개. 질문은 한다체 의문형(`~는가?`, `~인가?`)으로 쓴다. 용어를 정리하는 페이지는 `<ul>` 대신 `<dl>`(`<dt>` 용어, `<dd>` 뜻)을 쓴다.
+- `.notes`(오른쪽): 화면 제목(`.screen-heading`)과 본문, 수식, 그림, 퀴즈 등 내용 전부.
+- `.summary`(아래 가로줄): `<span class="summary-label">요약</span><p>한 문장</p>`. 요약은 한다체 한 문장이다.
+
+```html
+<div class="screen cornell">
+  <aside class="cue">
+    <span class="cue-label">핵심 질문</span>
+    <ul><li>어텐션은 무엇을 계산하는가?</li></ul>
+  </aside>
+  <div class="notes">
+    <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>번역 성능 비교</h3>
+    ...
+  </div>
+  <div class="summary"><span class="summary-label">요약</span><p>…한다.</p></div>
+</div>
+```
+
+**Rules:**
+- 모든 화면이 `.screen.cornell`이다. `.cue`, `.notes`, `.summary` 세 영역을 모두 둔다.
+- 1200px 미만에서는 CSS가 한 단(`cue` → `notes` → `summary`)으로 접고 높이 제한을 푼다. 마크업은 따로 만들지 않는다.
+- 모듈의 첫 페이지는 `.module-header`와 첫 `.screen.cornell`을 합친 것이다. 학습 목표 콜아웃은 이 첫 페이지의 `.cue`에 둘 수 있다.
+- 코너 상자(콜아웃)를 `.cue` 안에 둘 수 있다. `.notes` 맨 위 콜아웃은 위쪽 여백이 없어진다.
+
+### 쪽 맞춤 규칙 (page-fit)
+
+- 한 페이지(`.screen.cornell`)는 한 화면이다. 1440×900 데스크톱에서 브라우저 UI와 48px 내비게이션을 뺀 약 765px 안에 스크롤 없이 들어가야 한다. 첫 페이지는 `.module-header`를 포함해 잰다.
+- 넘치면 글을 줄여 억지로 맞추지 말고 내용을 여러 페이지로 나눈다. 페이지마다 핵심 질문과 요약을 따로 둔다.
+- 높은 SVG는 높이를 제한한다(`viewBox`는 유지하고 `max-height`를 둔다). 표와 코드도 페이지 높이를 고려해 줄인다.
+- 퀴즈는 한 페이지에 최대 4문항이다(아래 "객관식 퀴즈").
+- 작성 후 `python3 references/check-pages.py <course-dir>`를 실행해 넘침 0개를 확인한다.
+
+### 코너 이름표: `.corner-tag`
+
+`.screen-heading` 안 맨 앞에 코너 이름(개념 체크, 탐구 자료, 확인 문제 등)을 칩으로 붙인다.
+```html
+<h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>번역 성능 비교</h3>
+<h3 class="screen-heading"><span class="corner-tag outline">개념 체크</span>소프트맥스</h3>
+```
+- `.corner-tag`: 교과 색 바탕에 흰 글자. `.corner-tag.outline`: 테두리만 있는 칩.
+- 코너 이름이 없는 화면 제목은 `.corner-tag` 없이 쓴다. CSS가 제목 앞에 교과 색 네모 표지를 붙인다.
+
+### 날개: `.wing`
+
+코넬이 아닌 화면에서 쓰는 여백 메모이다(코넬 화면은 `.cue`가 그 역할을 한다). 1200px 이상에서 왼쪽 여백으로 나가 떠 있고, 그보다 좁으면 본문 사이의 상자가 된다.
+```html
+<div class="wing"><span class="wing-title">참고</span>짧은 보충 한두 문장</div>
+```
+
+### 단원 도입과 표지 요소
+
+- `.module-number`: 64px 교과 색 블록에 흰 숫자. `.module-header`는 2px 교과 색 선으로 닫힌다.
+- `.course-cover`: 아래에 8px 교과 색 띠가 붙는다.
+
+---
+
 ## 표지와 히어로 섹션 (Cover Page)
 
 강의 표지는 모든 모듈 앞에 나오는 전체 화면 랜딩 페이지입니다. `.module`이 아니므로 내비게이션 점이 없고 스크롤 스냅에도 참여하지 않습니다.
@@ -141,30 +219,43 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 ```html
 <section class="course-cover">
   <div class="course-cover-inner">
-    <span class="course-cover-badge">인터랙티브 튜토리얼</span>
-    <h1 class="course-cover-title">프롬프트 공간 교란이 추론 탐색을 넓히는 방법(Nonsense Helps)</h1>
-    <p class="course-cover-subtitle">프롬프트에 무작위 노이즈를 더하면 LLM 학습에서 추론 탐색이 넓어지는 원리를 알아본다</p>
-    <p class="course-cover-authors">Yuntao Bai et al. · arXiv 2026</p>
-    <div class="course-cover-meta">
-      <span class="course-cover-meta-item">&#128218; 모듈 7개</span>
-      <span class="course-cover-meta-item">&#9201; 약 45분</span>
-      <span class="course-cover-meta-item">&#127891; 중급</span>
+    <div class="course-cover-main">
+      <span class="course-cover-badge">인터랙티브 튜토리얼</span>
+      <h1 class="course-cover-title">프롬프트 공간 교란이 추론 탐색을 넓히는 방법</h1>
+      <p class="course-cover-original" lang="en">Nonsense Helps</p>
+      <p class="course-cover-subtitle">프롬프트에 무작위 노이즈를 더하면 LLM 학습에서 추론 탐색이 넓어지는 원리를 알아본다</p>
+      <p class="course-cover-authors">Yuntao Bai et al.</p>
+      <div class="course-cover-meta">
+        <span class="course-cover-meta-item">arXiv 2026</span>
+        <span class="course-cover-meta-item">모듈 7개</span>
+        <span class="course-cover-meta-item">약 45분</span>
+        <span class="course-cover-meta-item">중급</span>
+      </div>
+      <div class="course-cover-abstract">
+        <span class="course-cover-abstract-label">초록</span>
+        <p>이 논문은 프롬프트 공간에 Lorem Ipsum 같은 무작위 노이즈를 더해 GRPO의 탐색을 촉진하는 LoPE 방법을 제안한다. 이 방법으로 제로 어드밴티지(Zero Advantage) 문제를 해결한다...</p>
+      </div>
+      <a href="#module-0" class="course-cover-cta">학습 시작하기</a>
     </div>
-    <div class="course-cover-abstract">
-      <span class="course-cover-abstract-label">초록</span>
-      <p>이 논문은 프롬프트 공간에 Lorem Ipsum 같은 무작위 노이즈를 더해 GRPO의 탐색을 촉진하는 LoPE 방법을 제안한다. 이 방법으로 제로 어드밴티지(Zero Advantage) 문제를 해결한다...</p>
-    </div>
-    <a href="#module-0" class="course-cover-cta">학습 시작하기 →</a>
+    <nav class="course-cover-toc" aria-label="차례">
+      <span class="course-cover-toc-label">차례</span>
+      <ol>
+        <li><a href="#module-0"><span class="toc-num">00</span>배경 지식과 선수 학습</a></li>
+        <li><a href="#module-1"><span class="toc-num">01</span>…</a></li>
+      </ol>
+    </nav>
   </div>
 </section>
 ```
 
 **Rules:**
 - 표지는 `.module` 섹션이 아닙니다. `scroll-snap-align`과 모듈 번호를 두지 않습니다.
-- "학습 시작하기" 버튼은 모듈 0(사전 지식 모듈)으로 스크롤합니다.
-- 논문 제목은 `한국어 제목(English Original Title)` 형식으로 씁니다. 괄호는 반각이고 괄호 앞에 공백을 두지 않습니다(KO103). 배지·메타·라벨 문구는 위 예시 그대로 씁니다("인터랙티브 튜토리얼", "초록").
+- 왼쪽(`.course-cover-main`)은 왼쪽 정렬 제목 영역, 오른쪽(`.course-cover-toc`)은 교과 색 면 위의 차례입니다. 차례는 사이드바의 모듈 제목·번호와 같게 쓰고, `href`는 `#module-N`입니다. 1024px 미만에서는 차례가 제목 아래로 내려갑니다.
+- "학습 시작하기" 버튼은 모듈 0(사전 지식 모듈)으로 스크롤합니다. 버튼 문구 뒤에 `→` 같은 화살표를 붙이지 않습니다.
+- 한국어 제목은 `.course-cover-title`에, 영어 원제는 바로 아래 `<p class="course-cover-original" lang="en">`에 씁니다. 제목 안에 원제를 괄호로 붙이지 않습니다(큰 글자에서 원제가 어색하게 줄바꿈되기 때문). 배지·라벨 문구는 위 예시 그대로 씁니다("인터랙티브 튜토리얼", "초록", "차례").
+- 저자 줄에는 저자만 쓰고, 발표처·연도는 메타 첫 항목(`arXiv 2026`)으로 옮깁니다. 가운뎃점(`·`)으로 잇지 않습니다.
 - 초록은 논문 전체 초록이 아니라 2~3문장으로 줄여 씁니다.
-- 메타 배지: 모듈 수, 예상 소요 시간(모듈당 대략 5~7분), 난이도를 넣습니다. 숫자와 단위는 붙여 씁니다(`모듈 7개`, `약 45분`).
+- 메타 항목: 발표처·연도, 모듈 수, 예상 소요 시간(모듈당 대략 5~7분), 난이도를 넣습니다. 이모지를 붙이지 않습니다. 숫자와 단위는 붙여 씁니다(`모듈 7개`, `약 45분`).
 - 난이도: 초급(사전 지식 불필요), 중급(해당 분야 기초 지식 필요), 고급(상당한 수학·분야 배경 필요)
 
 ---
@@ -472,7 +563,7 @@ codebase-to-course와 같은 패턴이며 논문 내용에 맞게 조정했습�
        data-correct="option-b"
        data-explanation-right="② | 그룹 안의 모든 응답이 같은 보상을 받으면 어드밴티지가 0이 되므로 모델은 해당 그룹에서 학습할 수 없다."
        data-explanation-wrong="| 정답은 ②이다. 그룹 안의 모든 응답이 같은 보상을 받으면 보상의 평균과 각 응답의 보상이 같아지므로 어드밴티지가 0이 된다.">
-    <h3 class="quiz-question">한 그룹의 모든 응답이 같은 보상을 받을 때 GRPO에 대한 설명으로 옳은 것은?</h3>
+    <h3 class="quiz-question"><span class="q-num">1</span>한 그룹의 모든 응답이 같은 보상을 받을 때 GRPO에 대한 설명으로 옳은 것은?</h3>
     <div class="quiz-options">
       <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
         <div class="quiz-option-radio"></div>
@@ -500,10 +591,15 @@ codebase-to-course와 같은 패턴이며 논문 내용에 맞게 조정했습�
 - 해설 형식은 `data-explanation-right="② | ~이므로 ~이다."`, `data-explanation-wrong="| 정답은 ②이다. ~이다."`이다. `정답`/`오답` 표지는 `main.js`가 붙이므로 쓰지 않는다(KO110).
 - 해설 속성 안에 `$…$` 수식을 쓸 수 있다. `main.js`가 피드백을 삽입한 뒤 KaTeX를 다시 렌더링한다. 숨은 가정 찾기의 해설도 같다.
 - 확인 문제는 모듈마다 3~5문항이며 하나 이상은 부정형(`옳지 않은 것은?`) 또는 보기형이다.
+- **문항 번호:** `.quiz-question` 맨 앞에 `<span class="q-num">1</span>`을 쓴다. 문항 번호 블록은 CSS가 그리므로 `1. `을 텍스트로 쓰지 않는다.
+- **배점:** 어려운 문항 끝에 `<span class="q-points">[3점]</span>`을 붙인다(수능 관례). 모든 문항에 붙이지 않는다.
+- **짧은 선택지:** 선택지가 매우 짧으면(기호, 숫자) `<div class="quiz-options row">`로 한 줄에 여러 개 배치한다.
+- **2단:** 코넬 페이지 안에서 1200px 이상이면 문항이 2단(시험지식)으로 배치된다. 정답 확인 버튼은 1열, 다시 풀기 버튼은 2열 아래에 놓인다.
+- **페이지당 최대 4문항:** 5문항 이상이면 `.quiz-container`를 여러 개로 나누어 각각 코넬 페이지에 둔다. 각 컨테이너는 고유한 id와 자기 `정답 확인`/`다시 풀기` 버튼(`checkQuiz('quiz-module3a')` 등)을 가진다.
 
-**보기형 문항(`<보기>` 상자):** 발문 바로 아래에 `.bogi` 상자를 넣는다. 상자 제목 `<보기>`는 CSS가 표시하므로 쓰지 않는다. 텍스트 속 `<보기>`는 `&lt;보기&gt;`로 이스케이프한다.
+**보기형 문항(`<보기>` 상자):** 발문 바로 아래에 `.bogi` 상자를 넣는다. 상자 제목 `<보기>`는 CSS가 표시하므로 쓰지 않는다. 텍스트 속 `<보기>`는 `&lt;보기&gt;`로 이스케이프하고, 줄바꿈으로 `<보기` / `>`가 갈라지지 않도록 `<span class="nobr">&lt;보기&gt;에서</span>`로 감싼다.
 ```html
-<h3 class="quiz-question">LoPE에 대한 설명으로 옳은 것만을 &lt;보기&gt;에서 있는 대로 고른 것은?</h3>
+<h3 class="quiz-question"><span class="q-num">1</span>LoPE에 대한 설명으로 옳은 것만을 <span class="nobr">&lt;보기&gt;에서</span> 있는 대로 고른 것은?</h3>
 <div class="bogi">
   <p>ㄱ. 프롬프트 앞에 의미 없는 텍스트를 붙여 응답 분포를 넓힌다.</p>
   <p>ㄴ. 보상 함수를 새로 학습해야 한다.</p>
@@ -625,6 +721,8 @@ codebase-to-course와 같은 패턴이며 개념과 정의, 방법과 논문 등
 ## 콜아웃 박스 (Callout Boxes)
 
 선택 코너(`보충 설명`, `더 알아보기`)는 모듈당 최대 2개까지 씁니다. 고정 코너인 `학습 목표`와 `핵심 정리`는 이 개수에 넣지 않습니다.
+
+콜아웃은 테두리 상자이며 `.callout-title`이 교과 색(또는 변형 색) 칩으로 그려진다. `.callout-icon`은 CSS가 숨기므로 이모지는 화면에 보이지 않는다. 아이콘 div는 있어도 없어도 되며, 새로 쓸 때는 생략해도 된다.
 
 ```html
 <div class="callout callout-accent animate-in">

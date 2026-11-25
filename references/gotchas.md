@@ -61,6 +61,20 @@
 - **원인:** 특정 언어 문법을 사용한다.
 - **해결:** 프로그래밍을 모르는 사람도 읽을 수 있는 언어 중립 형태로 쓴다. `입력`, `출력`, `각 항목에 대해`, `만약 ~이면` 형식을 쓴다.
 
+### 페이지 넘침
+- **증상:** 코넬 페이지가 1440×900 한 화면을 넘어 스크롤이 생긴다. `check-pages.py`가 `OVER`를 보고한다.
+- **원인:** 한 페이지에 글과 요소를 너무 많이 넣었다. 퀴즈가 4문항을 넘는다. 높이가 큰 SVG를 그대로 넣었다.
+- **해결:** 글을 줄여 맞추지 말고 내용을 여러 `.screen.cornell` 페이지로 나눈다(페이지마다 핵심 질문과 요약을 둔다). 퀴즈는 `.quiz-container`를 나누어 각각 고유 id와 자기 버튼을 둔다. SVG는 `viewBox`를 유지한 채 높이를 제한한다. 고친 뒤 `python3 <skill-dir>/references/check-pages.py <course-dir>`를 다시 실행한다.
+
+### 코넬 아닌 화면
+- **증상:** `check-pages.py`가 `코넬 아닌 화면`을 보고한다. 단서 칸과 요약이 없다.
+- **해결:** 모든 `.screen`을 `.screen.cornell`로 바꾸고 `.cue`, `.notes`, `.summary`를 갖춘다.
+
+### 문항 번호 이중 표기
+- **증상:** 문항 번호가 `1` 블록과 `1.` 텍스트로 두 번 보인다.
+- **원인:** `<span class="q-num">1</span>`을 쓰면서 `1. `도 텍스트로 썼다.
+- **해결:** 번호는 `q-num`만 쓰고 `1. ` 접두어는 쓰지 않는다. `[3점]`은 `<span class="q-points">`로 붙인다.
+
 ### 스크롤 스냅 mandatory
 - **증상:** 긴 모듈에서 사용자가 화면에 갇힌다.
 - **원인:** `scroll-snap-type: y mandatory` 사용.
@@ -181,6 +195,10 @@
 python3 -I <skill-dir>/references/lint-ko.py <course-dir> --strict
 ```
 
-결과는 ERROR 0, WARN 0이어야 한다. 예외는 `korean-style-guide.md` §3.3에 적힌 알려진 린터 한계(KO104 서술격 `이다` 오탐 등)뿐이며, 남긴 경우 사용자에게 보고한다.
+```
+python3 <skill-dir>/references/check-pages.py <course-dir>
+```
+
+쪽 맞춤은 넘침 0개, 코넬 아닌 화면 0개여야 한다. 린터 결과는 ERROR 0, WARN 0이어야 한다. 예외는 `korean-style-guide.md` §3.3에 적힌 알려진 린터 한계(KO104 서술격 `이다` 오탐 등)뿐이며, 남긴 경우 사용자에게 보고한다.
 
 규칙 목록: KO001 언어 / KO002 중국어 / KO003 전각 부호 / KO004 `data-steps` JSON / KO101 번역투 / KO102 문체(EBS 한다체) / KO103 괄호 간격 / KO104 조사 / KO105 숫자+단위 / KO106 긴 문단 / KO107 툴팁 형식 / KO108 피드백 칭찬 / KO109 `여러분` / KO110 해설 표지 중복.

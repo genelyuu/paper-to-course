@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <sub>위 화면은 <a href="examples/attention-ko/"><code>examples/attention-ko/</code></a>의 실제 결과물입니다. <code>index.html</code>을 브라우저로 열면 바로 볼 수 있습니다.</sub>
+  <sub>위 화면은 <a href="examples/attention-ko/"><code>examples/attention-ko/</code></a>의 실제 결과물입니다. 왼쪽은 제목과 초록, 오른쪽은 교과 색 면 위의 차례입니다. <code>index.html</code>을 브라우저로 열면 바로 볼 수 있습니다.</sub>
 </p>
 
 ---
@@ -33,11 +33,17 @@ https://arxiv.org/abs/1706.03762 쉽게 설명해 줘
 
 ## 강의는 이렇게 생겼습니다
 
-| 모듈마다 학습 목표로 시작합니다 | 문항은 교재 형식을 따릅니다 |
+화면 하나가 교재 한 페이지입니다. 1440×900 화면에서 **스크롤 없이 한눈에** 들어오도록 만들고, 검사 도구로 확인합니다.
+
+왼쪽 단서 칸에는 이 페이지가 답하는 질문, 오른쪽 노트 칸에는 본문, 아래 요약 칸에는 한 문장 정리를 둡니다. 코넬식 노트 구조입니다. 단서 칸은 수능특강의 날개 자리이기도 합니다.
+
+<p align="center">
+  <img src="docs/images/page-opener.png" alt="단원 도입과 학습 목표가 있는 첫 페이지" width="820">
+</p>
+
+| 확인 문제는 시험지처럼 2단입니다 | 탐구 자료는 직접 조작합니다 |
 |:--:|:--:|
-| <img src="docs/images/goal.png" alt="학습 목표 코너" width="400"> | <img src="docs/images/quiz.png" alt="보기 상자가 있는 확인 문제" width="400"> |
-| **수치는 직접 바꿔 가며 비교합니다** | |
-| <img src="docs/images/results.png" alt="BLEU 결과 비교 막대" width="400"> | |
+| <img src="docs/images/page-quiz.png" alt="번호 블록, 보기 상자, 3점 표시가 있는 2단 확인 문제" width="400"> | <img src="docs/images/page-results.png" alt="BLEU 결과 비교 막대가 있는 탐구 자료 페이지" width="400"> |
 
 한 강의에는 이런 요소가 들어갑니다.
 
@@ -58,9 +64,14 @@ https://arxiv.org/abs/1706.03762 쉽게 설명해 줘
 | 본문 문체 | 정해진 규칙 없음 | EBS 교재 한다체(`~이다`, `~한다`) |
 | 모듈 구성 | 정해진 규칙 없음 | 학습 목표 → 개념 체크 → 탐구 자료 → 핵심 정리 → 확인 문제 |
 | 문항과 해설 | 정해진 규칙 없음 | `다음 중 ~으로 옳은 것은?`, ①~⑤, `<보기>` / 해설은 `② \| ~이므로 ~이다.` |
-| 글꼴 | DM Sans, Bricolage Grotesque | Pretendard, 어절 단위 줄바꿈(`keep-all`) |
+| 글꼴 | DM Sans, Bricolage Grotesque, 라벨은 고정폭 | 제목·본문·라벨 모두 Pretendard 하나(고정폭은 코드에만), 어절 단위 줄바꿈(`keep-all`) |
+| 지면 | 베이지 바탕, 그림자 카드, 긴 스크롤 | 흰 교재 지면과 차가운 회색, 그림자 대신 선, 코넬식 한 페이지(1440×900에 스크롤 없이) |
+| 표지 | 가운데 정렬 히어로, 이모지 배지 | 교재 표지처럼 왼쪽 정렬 제목 + 교과 색 면의 차례 |
+| 움직임 | 섹션마다 떠오르는 등장 효과 | 없음. 버튼·단계 넘기기 등 조작에 대한 반응만 |
+| 색 | 강조색 자유 선택 | 수능특강 교과 색 프리셋(과학탐구 파랑, 수학 초록, 사회탐구 보라, 영어 주황) |
+| 간격 | 혼합 값 | 4px 격자(Carbon·Atlassian·USWDS 체계 참고) |
 | 용어 | 용어 사전 없음 | 용어 사전 243개 + 강의별 용어표로 번역어 고정 |
-| 검증 | 없음 | `lint-ko.py` 14개 규칙 |
+| 검증 | 없음 | `lint-ko.py` 14개 규칙, `check-pages.py` 한 페이지 검사 |
 
 원본 `main.js`의 버그도 함께 고쳤습니다.
 
@@ -75,7 +86,8 @@ https://arxiv.org/abs/1706.03762 쉽게 설명해 줘
 스킬은 강의를 다 만든 뒤 검증 도구를 돌립니다. 직접 돌릴 수도 있습니다.
 
 ```bash
-python3 references/lint-ko.py <강의 폴더> --strict
+python3 references/lint-ko.py <강의 폴더> --strict   # 한국어 문체·표기
+python3 references/check-pages.py <강의 폴더>        # 페이지마다 한 화면에 들어가는지
 ```
 
 | 등급 | 잡아내는 것 |
@@ -95,6 +107,7 @@ references/
   korean-style-guide.md       문체·조사·띄어쓰기·번역투 규칙
   glossary-ko.md              AI·ML 용어 번역 사전(243개)
   lint-ko.py                  한국어 출력 검증 도구(표준 라이브러리만 사용)
+  check-pages.py              한 페이지 검사 도구(헤드리스 Chrome으로 높이 측정)
   interactive-elements.md     인터랙티브 요소 18종의 HTML 패턴
   styles.css, main.js         강의에 그대로 복사되는 디자인과 동작
 examples/attention-ko/        예시 강의(모듈 3개)

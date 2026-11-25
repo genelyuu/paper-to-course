@@ -344,3 +344,43 @@ PLAN.md §1은 본문 `~합니다`체, UI와 퀴즈 피드백 `~해요`체로 �
 - Noto Sans KR/Noto Serif KR 라이선스의 직접 확인(OFL로 알려져 있음).
 - D2Coding의 jsDelivr 경로.
 - EBS·교육부 교과용도서 문체 조항 원문, 발문 형식 매뉴얼, "보충 설명" 코너 존재 여부(6절).
+- 수능특강 내지의 단 구성, 코너 상자 모양, 단원 도입면, 해설 지면 배치(8.1절).
+
+## 8. 지면 레이아웃: 수능특강, 코넬식 노트, 간격 체계
+
+### 8.1 수능특강 지면 (확인된 것과 확인하지 못한 것)
+
+확인된 사항:
+- **과목별 표지 색**: 국어 노랑, 수학 초록, 영어·제2외국어·한문 주황, 한국사 갈색, 과학탐구 파랑, 사회·직업탐구 보라 ([나무위키 수능특강](https://namu.wiki/w/%EC%88%98%EB%8A%A5%ED%8A%B9%EA%B0%95)).
+- **본문 보조 코너 이름**: "개념 체크", "날개", "과학 돋보기", "탐구자료 살펴보기" (같은 출처, 각주).
+- **문항 구분**: 과학탐구는 수능 2점·3점 테스트로 나눈다. 2점은 필수 개념을 간단한 문제 상황으로, 3점은 여러 개념을 복잡한 상황이나 탐구 활동에 적용한다(검색 결과 요약, 6절 출처와 같음).
+- **단원 시작**: 각 단원 앞에 주요 개념과 학습 목표를 둔다(개인 리뷰, 참고 수준: [in-book.co.kr 수학 1 리뷰](https://in-book.co.kr/2026-%EC%88%98%EB%8A%A5-%EB%8C%80%EB%B9%84-%ED%95%84%EC%88%98%ED%85%9C-ebs-%EC%88%98%EB%8A%A5%ED%8A%B9%EA%B0%95-%EC%88%98%ED%95%99%EC%98%81%EC%97%AD-%EC%88%98%ED%95%99-1-%EA%BC%BC%EA%BC%BC-%EB%A6%AC/)).
+- **정답과 해설은 별책**이다(나무위키).
+
+확인하지 못한 사항(미확인): 내지의 단 구성, 코너 상자 모양, 단원 도입면 디자인, 문항 번호 서체, 해설 지면 배치. EBSi 교재 상세 페이지는 자동 접근이 막혀 있었고(방화벽), 해설 PDF 링크는 404였다. 따라서 아래 적용 항목 중 이 부분은 국내 교재·수능 시험지의 일반 관행에 따른 것이다. 수능 시험지의 `[3점]` 표기와 2단 문항 배치는 관행으로 적용했다.
+
+적용: 교과 색을 강조색 프리셋으로(국어 노랑은 흰 글자 대비 부족으로 제외), 단원 번호 블록과 굵은 교과 색 선, 코너 이름 꼬리표(`.corner-tag`), 날개 메모(`.wing`), 문항 번호 블록(`.q-num`)과 `[3점]`(`.q-points`), 확인 문제 2단 배치.
+
+### 8.2 코넬식 노트
+
+- 1950년대 코넬대 Walter Pauk가 고안했다. 지면을 **왼쪽 단서 칸**(질문·핵심어), **오른쪽 노트 칸**, **아래 요약 칸**으로 나눈다. 한 안내서는 단서 칸 2.5인치, 노트 칸 6인치, 아래 요약 2인치를 제시한다. 요약은 그 페이지의 가장 중요한 내용을 1~2문장으로 쓴다. 복습할 때 노트 칸을 가리고 단서 칸의 질문에 답한다 ([Wikipedia: Cornell Notes](https://en.wikipedia.org/wiki/Cornell_Notes), [UWEC Cornell System Overview](https://www.uwec.edu/sites/default/files/documents/Cornell-System-Overview.pdf), [University of Cincinnati](https://www.uc.edu/campus-life/learning-commons/learning-resources/notetaking-resources/cornell-method-notes.html)).
+- 효과의 근거는 대부분 사례 수준이라는 지적이 있다(Wikipedia).
+- 적용: `.screen.cornell` = `.cue`(232px, 핵심 질문 2~4개) | `.notes` / `.summary`(한 문장). 원래 비율(2.5:6)보다 단서 칸을 조금 좁혔다. 웹 화면에서 노트 칸의 본문 줄 길이를 확보하기 위해서다. 수능특강의 "날개"와 역할이 겹치므로 같은 칸으로 본다.
+
+### 8.3 한 페이지 기준
+
+- 사용자 요구: 데스크톱 비율 안에서 한 페이지가 스크롤 없이 한눈에 들어와야 한다.
+- 기준 화면 1440×900(16:10)에서 브라우저 UI를 뺀 표시 영역은 헤드리스 Chrome 측정으로 813px이다. 여기서 내비게이션 48px를 빼면 페이지 허용 높이는 765px이다. `references/check-pages.py`가 이 값으로 페이지마다 높이를 잰다.
+
+### 8.4 간격 체계 (데스크톱 디자인 시스템)
+
+| 시스템 | 기준 | 간격 값(px) | 출처 |
+|---|---|---|---|
+| Carbon (IBM) | 2·4·8의 배수 | 2, 4, 8, 12, 16, 24, 32, 40, 48, 64, 80, 96, 160 | [carbondesignsystem.com](https://carbondesignsystem.com/elements/spacing/overview/) |
+| Atlassian | 기본 단위 8px | 0, 2, 4, 6, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80 | [atlassian.design](https://atlassian.design/foundations/spacing) |
+| USWDS | 8px 배수 + 작은 값 예외 | 1, 2, 4, 8, 12, 16, 20, 24, 32, 40, 48, 56, 64, … | [designsystem.digital.gov](https://designsystem.digital.gov/design-tokens/spacing-units/) |
+| GitHub Primer | 4px 단계 | 2, 4, 6, 8, 12, 16, 20, 24, 28, 32, … | [primer.style](https://primer.style/foundations/primitives/size) |
+
+Material 3 간격 페이지는 본문이 렌더링되지 않아 확인하지 못했다(미확인).
+
+적용: 사용자 지시대로 여백·크기는 **4px 배수만** 쓴다(2·6px 단계는 쓰지 않음). 선 두께 1·2px만 예외로 둔다. 둥근 모서리는 4·8·12px, 내비게이션 높이는 48px이다.
