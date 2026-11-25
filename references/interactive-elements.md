@@ -26,6 +26,7 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 13. [기여 및 개념 카드 (Contribution Cards)](#기여-및-개념-카드-contribution-cards)
 14. [논문 인용 카드 (Paper Citation Cards)](#논문-인용-카드-paper-citation-cards)
 15. [흐름도 (Flow Diagrams)](#흐름도-flow-diagrams)
+15.5. [데이터 표 (Data Table)](#데이터-표-data-table)
 16. [용어 툴팁 (Glossary Tooltips)](#용어-툴팁-glossary-tooltips)
 17. [번호 단계 카드 (Numbered Step Cards)](#번호-단계-카드-numbered-step-cards)
 18. [아이콘 라벨 행 (Icon-Label Rows)](#아이콘-라벨-행-icon-label-rows)
@@ -36,10 +37,10 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 
 ## 한국어 콘텐츠 작성 원칙 (요약)
 
-- **문체(EBS 교재 문체):** 본문·설명·콜아웃·카드·툴팁 정의는 한다체 평서형(`~이다 / ~한다 / ~된다`)으로 쓴다. `여러분`, 수사적 의문문, 감탄 표현은 쓰지 않는다. 문항의 해설과 피드백도 한다체이며 칭찬하지 않는다. 예외로 연구 대화(채팅)의 등장인물 대사는 해요체를 허용한다.
+- **문체(EBS 교재 문체):** 본문·설명·콜아웃·카드는 한다체 평서형(`~이다 / ~한다 / ~된다`)으로 쓴다. 용어 툴팁 정의(`data-definition`)만 사전식 명사형 종결(`~것.`, `~함.`, `~임.`, 명사)로 쓴다. `여러분`, 수사적 의문문, 감탄 표현은 쓰지 않는다. 문항의 해설과 피드백도 한다체이며 칭찬하지 않는다. 예외로 연구 대화(채팅)의 등장인물 대사는 해요체를 허용한다.
 - **문항 형식:** 발문은 `다음 중 ~에 대한 설명으로 옳은 것은?` 또는 `~으로 옳지 않은 것은?` 형태로 쓰고, 지시는 `~하시오`로 쓴다. 선택지 텍스트 앞에 `①②③④`를 붙인다(`data-value`, `data-correct` 값은 그대로 둔다). `main.js`가 피드백 앞에 `정답`/`오답` 표지를 자동으로 붙이므로, 해설 속성은 표지 없이 쓴다. 맞힌 경우 `data-explanation-right="② | ~이므로 ~이다."`, 틀린 경우 `data-explanation-wrong="| 정답은 ②이다. ~이므로 ~이다."` 형식이다(화면: **정답** ② | … / **오답** | 정답은 ②이다. …).
 - **코너 이름:** `학습 목표`(모듈 맨 앞), `개념 체크`(용어·정의 확인), `탐구 자료`(실험 결과·그래프·대화 자료), `보충 설명`(알아 두면 좋은 정보, `callout-info`), `핵심 정리`(핵심 통찰, `callout-accent`), `더 알아보기`(오해 바로잡기, 심화, `callout-warning`)를 콜아웃 제목에 쓴다. 모듈 끝의 문항 묶음은 `확인 문제`이다.
-- **학습 목표 패턴:** 각 모듈 맨 위에 `이 모듈을 학습하면 다음을 할 수 있다.` 다음에 `GRPO의 어드밴티지 계산 과정을 설명할 수 있다.`, `기준선과 제안 방법의 성능을 비교할 수 있다.`처럼 `~을 설명할 수 있다 / ~을 비교할 수 있다` 형태의 목표를 2~3개 쓴다.
+- **학습 목표 패턴:** 각 모듈 맨 위에 `이 모듈을 학습하면 다음을 할 수 있다.` 다음에 `GRPO의 어드밴티지 계산 과정을 설명할 수 있다.`, `기준 모델과 제안 방법의 성능을 비교할 수 있다.`처럼 `~을 설명할 수 있다 / ~을 비교할 수 있다` 형태의 목표를 2~3개 쓴다.
 - **용어 첫 등장:** `한글 용어(English Term)` 형식으로 쓰고, 이후에는 한글만 쓴다. 약어는 첫 등장 시 `한글 풀이(English Full Name, ACRONYM)`로 쓰고(`저랭크 적응(Low-Rank Adaptation, LoRA)`) 이후에는 약어만 쓴다. 한국어 실무에서 약어가 이름처럼 굳었으면(GRPO, BLEU, GPU) `ACRONYM(English Full Name, 한글 풀이)`도 허용한다. 트랜스포머, 어텐션처럼 관용 표기가 굳은 용어는 관용 표기를 따른다.
 - **반각 괄호:** 괄호는 항상 ASCII 반각 `( )`를 쓰고, 괄호 앞에는 공백을 두지 않는다. 전각 괄호(U+FF08, U+FF09)는 쓰지 않는다.
 - **조사 처리:** 영문·숫자·수식 뒤의 조사는 읽는 발음을 기준으로 고른다. 예: `LoRA를`, `GRPO는`, `PPO가`, `$x$는`(엑스는).
@@ -118,11 +119,11 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 - `<section class="module" id="module-N">`의 `N`은 0부터 연속한 번호이다. 메뉴의 모듈 수보다 적게 만들어도 번호를 건너뛰지 않고 `module-0`, `module-1`, …로 매기고 파일명도 `00-`, `01-`, …로 매긴다.
 - `.module-number`는 **모듈의 연속 번호**(`1`, `2`, `3` …)이다. 논문 절 번호(`3.2`, `1–2`)나 `0`을 쓰지 않는다. `.module-title`은 해당 논문 절 제목의 한국어 번역이다. 논문 위치는 화면 제목 끝의 `.paper-ref`에 적는다(예: `<h3 class="screen-heading">스케일드 내적 어텐션<span class="paper-ref">논문 3.2.1절</span></h3>`). CSS가 교과 색 64px 사각 블록에 흰 숫자로 표시한다(옅은 장식이 아니다). `.module-header` 아래에는 2px 교과 색 선이 그려진다.
 - 모듈 제목은 `<h2 class="module-title">`, 화면 제목은 `<h3 class="screen-heading">`이다. 화면 안의 더 작은 제목은 `<h4>`를 쓴다.
-- 모듈 하나의 화면(`.screen.cornell`)은 3~6개이며 각각 한 페이지이다. 코넬 형식이 아닌 `.screen`은 쓰지 않는다(`check-pages.py`가 보고한다).
+- 모듈 하나의 화면(`.screen.cornell`)은 본문 3~8개(확인 문제 쪽 제외)이며 각각 한 페이지이다. 코넬 형식이 아닌 `.screen`은 쓰지 않는다(`check-pages.py`가 보고한다).
 - 한 페이지는 데스크톱 한 화면(1440×900)에 스크롤 없이 들어가야 한다. 넘치면 내용을 줄이지 말고 페이지를 나눈다.
 - `.module-content` 밖에 보일러플레이트(`<html>`, `<head>`, `<script>`)를 두지 않는다.
 
-**배경 지식 표시:** 논문 이전의 배경만 다루는 화면(모듈 0, 곧 id 기준 첫 모듈이자 화면 번호 1인 모듈의 모든 화면, 그 밖의 배경 전용 콜아웃)은 화면 맨 위에 `배경 지식` 콜아웃을 둔다. 전용 소형 라벨 클래스가 `styles.css`에 없으므로 `callout callout-info`를 쓴다. 이 콜아웃은 `보충 설명`·`더 알아보기`의 모듈당 2개 상한에 넣지 않는다.
+**배경 지식 표시:** 논문 이전의 배경만 다루는 화면(모듈 0, 곧 id 기준 첫 모듈이자 화면 번호 1인 모듈의 둘째 쪽부터, 그 밖의 배경 전용 콜아웃)은 화면 맨 위에 `배경 지식` 콜아웃을 둔다. 예외로 모듈 0의 첫 쪽은 논문 1절 "왜 썼나·새로운 점" 쪽이므로 `.paper-ref`(논문 1절)를 달고 `배경 지식` 콜아웃을 두지 않는다. 모듈 0의 나머지 쪽이 배경 쪽이다(첫 쪽 구성은 아래 "첫 페이지: 왜 썼는가와 새로운 점"). 전용 소형 라벨 클래스가 `styles.css`에 없으므로 `callout callout-info`를 쓴다. 이 콜아웃은 `보충 설명`·`더 알아보기`의 모듈당 2개 상한에 넣지 않는다.
 ```html
 <div class="callout callout-info animate-in">
   <div class="callout-icon">&#128214;</div>
@@ -187,7 +188,7 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 - 한 페이지(`.screen.cornell`)는 한 화면이다. 1440×900 데스크톱에서 브라우저 UI와 48px 내비게이션을 뺀 약 765px 안에 스크롤 없이 들어가야 한다. 첫 페이지는 `.module-header`를 포함해 잰다.
 - 넘치면 글을 줄여 억지로 맞추지 말고 내용을 여러 페이지로 나눈다. 페이지마다 핵심 질문과 요약을 따로 둔다.
 - 높은 SVG는 높이를 제한한다(`viewBox`는 유지하고 `max-height`를 둔다). 표와 코드도 페이지 높이를 고려해 줄인다.
-- 퀴즈는 한 페이지에 최대 4문항이다(아래 "객관식 퀴즈").
+- 퀴즈는 한 페이지에 최대 2문항이다(선택지 5개씩과 펼쳐진 해설이 765px 안에 들어와야 한다. 아래 "객관식 퀴즈").
 - 작성 후 `python3 references/check-pages.py <course-dir>`를 실행해 넘침 0개를 확인한다.
 
 ### 코너 이름표: `.corner-tag`
@@ -198,6 +199,25 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 <h3 class="screen-heading"><span class="corner-tag outline">개념 체크</span>소프트맥스</h3>
 ```
 - `.corner-tag`: 교과 색 바탕에 흰 글자. `.corner-tag.outline`: 테두리만 있는 칩.
+- **개념 체크**는 개념 설명 쪽 끝에 두는 짧은 확인 문항 하나이다. `styles.css`에 전용 클래스가 없으므로 `.quiz-container` 하나에 문항 1개(선택지 3~4개, 배점 `.q-points` 없음)를 넣는 형태를 쓴다.
+```html
+<h3 class="screen-heading"><span class="corner-tag outline">개념 체크</span>소프트맥스</h3>
+<div class="quiz-container animate-in" id="check-module2a">
+  <div class="quiz-question-block" data-correct="option-b"
+       data-explanation-right="② | 소프트맥스는 출력의 합을 1로 맞추므로 확률처럼 해석할 수 있다."
+       data-explanation-wrong="| 정답은 ②이다. 소프트맥스 출력은 모두 양수이고 합이 1이다.">
+    <h3 class="quiz-question"><span class="q-num">1</span>소프트맥스 출력에 대한 설명으로 옳은 것은?</h3>
+    <div class="quiz-options">
+      <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 출력의 합이 입력의 합과 같다.</span></button>
+      <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 출력의 합이 항상 1이다.</span></button>
+      <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 출력에 음수가 섞일 수 있다.</span></button>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+  <button class="quiz-check-btn" onclick="checkQuiz('check-module2a')">정답 확인</button>
+  <button class="quiz-reset-btn" onclick="resetQuiz('check-module2a')">다시 풀기</button>
+</div>
+```
 - 코너 이름이 없는 화면 제목은 `.corner-tag` 없이 쓴다. CSS가 제목 앞에 교과 색 네모 표지를 붙인다.
 
 ### 날개: `.wing`
@@ -228,7 +248,7 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 
 `main.js`의 `initPager()`가 쪽을 모은다. 쪽은 표지, 모듈마다 단원 도입과 첫 화면, 그 뒤의 각 `.screen`이다. ←/↑/PageUp은 이전 쪽, →/↓/PageDown은 다음 쪽, Home/End는 처음/끝 쪽으로 간다. 우하단 고정 `.pager`(‹ n / N ›와 "방향키로도 넘길 수 있다" 안내)는 JS가 넣으므로 마크업을 쓰지 않는다. 방향키를 `preventDefault`하는 다른 `keydown` 핸들러를 추가하지 않는다.
 
-**Space 키.** Space는 현재 페이지의 주 버튼을 누른다. 수식 유도와 의사코드 풀이에서는 다음 단계로 간다. 확인 문제 페이지에서는 선택 없이 정답과 해설을 바로 공개한다. Shift+Space는 이전 단계이다. 더 할 일이 없으면(마지막 단계이거나 주 버튼이 없으면) 다음 페이지로 넘어간다. 따라서 한 페이지에는 주 인터랙티브 요소를 가능하면 하나만 둔다. 버튼은 마우스 사용자를 위해 그대로 둔다. Space를 `preventDefault`하는 다른 `keydown` 핸들러를 추가하지 않는다. `.module`에는 `scroll-snap-align: start`와 `scroll-margin-top`이 걸려 있다.
+**Space 키.** Space는 현재 페이지의 주 버튼을 누른다. 우선순위는 수식 유도의 다음 단계 → 의사코드의 다음 줄 → 대화의 다음 말풍선 → 전환 버튼·탭(`.result-metric-toggle`, `.ablation-tabs`, `.layer-tabs`)의 다음 항목 → 문제의 정답·해설 공개(선택 없이 바로) → 다음 페이지이다. Shift+Space는 단계·탭을 거꾸로 되돌리고, 되돌릴 것이 없으면 이전 페이지로 간다. 더 할 일이 없으면(마지막 단계이거나 주 버튼이 없으면) 다음 페이지로 넘어간다. 따라서 한 페이지에는 주 인터랙티브 요소를 가능하면 하나만 둔다. 버튼은 마우스 사용자를 위해 그대로 둔다. Space를 `preventDefault`하는 다른 `keydown` 핸들러를 추가하지 않는다. `.module`에는 `scroll-snap-align: start`와 `scroll-margin-top`이 걸려 있다.
 
 ---
 
@@ -405,12 +425,12 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
       <span class="result-value"></span>
     </div>
     <div class="result-bar" data-accuracy="72.1" data-pass1="58.7">
-      <span class="result-label">GRPO 기준선</span>
+      <span class="result-label">GRPO 기준 모델</span>
       <div class="result-bar-track"><div class="result-fill baseline" style="width:0%"></div></div>
       <span class="result-value"></span>
     </div>
     <div class="result-bar" data-accuracy="68.5" data-pass1="54.3">
-      <span class="result-label">PPO 기준선</span>
+      <span class="result-label">PPO 기준 모델</span>
       <div class="result-bar-track"><div class="result-fill baseline" style="width:0%"></div></div>
       <span class="result-value"></span>
     </div>
@@ -419,7 +439,7 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 ```
 
 **Rules:**
-- 제안 방법 막대는 `.result-fill.ours`(강조색), 기준선 막대는 `.result-fill.baseline`(회색)을 씁니다.
+- 제안 방법 막대는 `.result-fill.ours`(강조색), 기준 모델 막대는 `.result-fill.baseline`(회색)을 씁니다.
 - 기본값에서 데이터 값은 백분율이며 `%`를 붙여 표시하고 막대 너비(%)로 씁니다.
 - `.result-comparison`에 `data-unit`과 `data-max`를 줄 수 있습니다. `data-unit`의 기본값은 `%`이고, BLEU처럼 단위가 없는 지표는 `data-unit=""`로 씁니다. `data-max`는 막대 눈금의 최댓값이며 기본값은 100입니다(BLEU 25~45처럼 값의 차이가 작으면 `data-max="50"`으로 낮춰 막대 폭 차이를 키웁니다).
 - `data-metric` 이름은 `dataset`의 camelCase 규칙으로 `data-*` 속성에 대응합니다. `data-metric="enDe"`는 `data-en-de`로 읽히므로 하이픈이 필요한 이름을 피하고 `ende`처럼 소문자 단어 하나를 씁니다(`data-metric="ende"` ↔ `data-ende="28.4"`).
@@ -454,7 +474,7 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
   </div>
   <div class="lineage-branch">
     <div class="lineage-edge-label">관련</div>
-    <div class="lineage-node" data-detail="인간 피드백 기반 강화학습(Reinforcement Learning from Human Feedback)">
+    <div class="lineage-node" data-detail="인간 피드백 기반 강화 학습(Reinforcement Learning from Human Feedback)">
       <span class="lineage-label">RLHF</span>
       <span class="lineage-detail">Ouyang et al., 2022</span>
     </div>
@@ -489,6 +509,8 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 
 연구자나 방법들이 어떤 개념을 두고 "토론"하는 모습을 보여 주는 메신저 스타일 채팅입니다. codebase-to-course의 그룹 채팅과 같은 엔진을 씁니다.
 
+**색:** 화자 구분은 교과 색(`--color-accent`)과 먹색(`#1F2328`) 두 가지로만 한다. `--color-actor-*`와 이모지는 쓰지 않는다(`design-system.md` "색상 규약").
+
 **연결 방식:** `main.js`가 모든 `.chat-window`를 자동으로 초기화합니다. 컨트롤은 `.chat-next-btn`, `.chat-all-btn`, `.chat-reset-btn`, 진행 표시는 `.chat-progress`입니다.
 
 **HTML:**
@@ -496,16 +518,16 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 <div class="chat-window animate-in" id="chat-module2">
   <div class="chat-messages">
     <div class="chat-message" data-msg="0" data-sender="researcher-a" style="display:none">
-      <div class="chat-avatar" style="background: var(--color-actor-1)">학</div>
+      <div class="chat-avatar" style="background: var(--color-accent)">학</div>
       <div class="chat-bubble">
-        <span class="chat-sender" style="color: var(--color-actor-1)">학생 A</span>
+        <span class="chat-sender" style="color: var(--color-accent)">학생 A</span>
         <p>이거 그냥 데이터 증강(Data Augmentation) 아닌가요? 입력 앞에 무작위 텍스트를 붙이는 게 역번역(Back-translation)과 뭐가 다른가요?</p>
       </div>
     </div>
     <div class="chat-message" data-msg="1" data-sender="researcher-b" style="display:none">
-      <div class="chat-avatar" style="background: var(--color-actor-2)">교</div>
+      <div class="chat-avatar" style="background: #1F2328">교</div>
       <div class="chat-bubble">
-        <span class="chat-sender" style="color: var(--color-actor-2)">교사</span>
+        <span class="chat-sender" style="color: #1F2328">교사</span>
         <p>완전히 같지는 않아요. 데이터 증강은 학습 데이터의 분포를 바꾸지만, LoPE는 추론할 때의 프롬프트 공간을 바꿔요. 모델은 그대로고, 모델이 탐색하는 방식만 달라져요.</p>
       </div>
     </div>
@@ -539,7 +561,7 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
   <svg viewBox="0 0 800 128" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="그림 내용을 한 문장으로">
     <rect class="node-rect" x="16" y="8" width="156" height="64" rx="12"/>
     <foreignObject x="24" y="12" width="140" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span>원본 프롬프트 <i class="mi">q</i></span></div></foreignObject>
-    <line class="edge-line" x1="172" y1="40" x2="210" y2="40"/>
+    <path class="edge-line" d="M172,40 H210"/>
     <polygon class="edge-arrow" points="210,45 220,40 210,35"/>
     <!-- 다음 노드 x = 16 + i × (156 + 48) -->
     …
@@ -558,6 +580,7 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 - **한글 라벨은 박스를 더 넓게 잡는다.** 한글은 글자당 약 1em이다(14px면 글자당 약 14px).
 - **간선은 직각이다.** 대각선 `<line>`을 쓰지 않고 `<path class="edge-line" d="M400,80 V115 H200 V140"/>`처럼 수평·수직 선분과 화살촉 `<polygon>`으로 그린다. 같은 단계로 갈라질 때는 세로 버스 한 줄에서 분기한다.
 - **수학 기호는 이탤릭, 한글은 똑바로.** 라벨 속 기호는 `<i class="mi">q</i>`(일반 `<i>`는 똑바른 글씨가 된다), `<text>` 속 기호는 `font-style="italic"`. 한글 라벨에는 이탤릭을 쓰지 않는다.
+- `.node-rect`, `.node-rect.sq`, `.edge-line`, `.edge-arrow`(와 `.accent` 변형)는 `.svg-diagram` 안뿐 아니라 `.figure svg` 안에서도 같게 동작한다(본문 옆 `figure.figure.side`의 인라인 SVG 등).
 - 각진 노드는 `.node-rect.sq`, 너비 맞춤은 `.svg-diagram.fit` + `--diagram-max`, 본문 옆 그림 폭은 `--figure-side-width`이다. 색은 `design-system.md` "색상 규약"을 따른다.
 
 ---
@@ -587,7 +610,7 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 - 발문은 `그림은 ~을 나타낸 것이다.`로 그림을 먼저 소개한 뒤 묻는다. 그림 번호(그림 1)는 쓰지 않는다.
 - 색은 먹색 + 교과 색 + 회색만 쓴다(`design-system.md` "색상 규약").
 - 클래스: `ink`(먹선), `ink-fill`(먹 채움), `accent`·`accent-fill`(교과 색), `guide`(모눈·보조선, 회색 1px), `accent-text`(강조 라벨).
-- 폭은 기본 280px(`--q-figure-width`로 조절). 640px 이하에서는 선택지 아래로 내려간다.
+- 폭은 기본 280px이며 `.q-figure`(또는 상위 요소)에 `--q-figure-width`를 주어 조절한다(예: `style="--q-figure-width: 320px"`). 발문에 그림이 있어 `.q-body`를 쓰는 문항은 선택지가 자동으로 한 줄에 하나씩 배치된다(`.row` 불필요). 640px 이하에서는 그림이 선택지 아래로 내려간다.
 - 탐구 자료 본문의 그림은 `<figure class="figure">`(노트 칸 가운데, 최대 60%)를 쓴다.
 - `check-pages.py`가 래스터 이미지, 불러오지 못한 이미지, 교과 색 외 유채색을 검출한다.
 
@@ -638,7 +661,7 @@ codebase-to-course와 같은 패턴이며 논문 내용에 맞게 조정했습�
 - **배점:** 어려운 문항 끝에 `<span class="q-points">[3점]</span>`을 붙인다(수능 관례). 모든 문항에 붙이지 않는다.
 - **짧은 선택지:** 선택지가 매우 짧으면(기호, 숫자) `<div class="quiz-options row">`로 한 줄에 여러 개 배치한다.
 - **2단:** 코넬 페이지 안에서 1200px 이상이면 문항이 2단(시험지식)으로 배치된다. 정답 확인 버튼은 1열, 다시 풀기 버튼은 2열 아래에 놓인다.
-- **페이지당 최대 4문항:** 5문항 이상이면 `.quiz-container`를 여러 개로 나누어 각각 코넬 페이지에 둔다. 각 컨테이너는 고유한 id와 자기 `정답 확인`/`다시 풀기` 버튼(`checkQuiz('quiz-module3a')` 등)을 가진다.
+- **페이지당 최대 2문항:** 선택지 5개씩과 정답 확인 뒤 펼쳐지는 해설이 765px 안에 들어와야 한다. 3문항 이상이면 `.quiz-container`를 여러 개로 나누어 각각 코넬 페이지에 둔다. 각 컨테이너는 고유한 id와 자기 `정답 확인`/`다시 풀기` 버튼(`checkQuiz('quiz-module3a')` 등)을 가진다.
 
 **보기형 문항(`<보기>` 상자):** 발문 바로 아래에 `.bogi` 상자를 넣는다. 상자 제목 `<보기>`는 CSS가 표시하므로 쓰지 않는다. 텍스트 속 `<보기>`는 `&lt;보기&gt;`로 이스케이프하고, 줄바꿈으로 `<보기` / `>`가 갈라지지 않도록 `<span class="nobr">&lt;보기&gt;에서</span>`로 감싼다.
 ```html
@@ -742,17 +765,17 @@ codebase-to-course와 같은 패턴이며 개념과 정의, 방법과 논문 등
   <div class="ablation-viewport">
     <div class="ablation-layer" id="full" style="display:block">
       <div class="ablation-metric">78.3%</div>
-      <div class="ablation-delta positive">기준선 대비 +6.2%p</div>
+      <div class="ablation-delta positive">기준 모델 대비 +6.2%p</div>
       <p class="ablation-description">전체 방법: 무작위 접두어와 그룹 내 정규화 어드밴티지를 모두 사용한다.</p>
     </div>
     <div class="ablation-layer" id="no-prefix" style="display:none">
       <div class="ablation-metric">72.1%</div>
-      <div class="ablation-delta neutral">기준선과 같음</div>
+      <div class="ablation-delta neutral">기준 모델과 같음</div>
       <p class="ablation-description">무작위 접두어를 빼면 방법이 표준 GRPO와 같아진다.</p>
     </div>
     <div class="ablation-layer" id="no-norm" style="display:none">
       <div class="ablation-metric">74.8%</div>
-      <div class="ablation-delta positive">기준선 대비 +2.7%p</div>
+      <div class="ablation-delta positive">기준 모델 대비 +2.7%p</div>
       <p class="ablation-description">정규화를 빼도 향상은 있지만 효과가 줄어든다.</p>
     </div>
   </div>
@@ -848,20 +871,36 @@ codebase-to-course와 같은 패턴이며 개념과 정의, 방법과 논문 등
 
 ---
 
+## 데이터 표 (Data Table)
+
+논문의 표를 옮기거나 항목을 비교할 때 쓴다. 일반 `<table>` 대신 `.data-table`을 쓴다. 숫자 열은 `th`와 `td` 모두에 `.num`을 달아 오른쪽 정렬하고, 강조할 행은 `tr.hl`로 교과 색 하나만 쓴다. 캡션은 표 아래에 표시되며 `~을 나타낸 것이다.` 형식과 논문 표 번호를 쓴다. 한 페이지의 표는 8행 이하로 하고, 넘치면 페이지를 나눈다.
+```html
+<table class="data-table animate-in">
+  <caption>표는 번역 품질(BLEU)과 학습 비용을 모델별로 나타낸 것이다. (논문 표 II)</caption>
+  <thead><tr><th>모델</th><th class="num">BLEU</th><th class="num">학습 비용</th></tr></thead>
+  <tbody>
+    <tr><td>기준 모델</td><td class="num">25.2</td><td class="num">2.3</td></tr>
+    <tr class="hl"><td>제안 방법</td><td class="num">28.4</td><td class="num">0.9</td></tr>
+  </tbody>
+</table>
+```
+
+---
+
 ## 용어 툴팁 (Glossary Tooltips)
 
 모듈마다 모든 전문 용어를 첫 등장 시 표시합니다.
 
 ```html
 <p>LoPE는
-  <span class="term" data-definition="그룹 상대 정책 최적화(Group Relative Policy Optimization, GRPO): 같은 그룹 안의 여러 응답을 서로 비교해 모델을 갱신하는 강화학습 방법으로, 별도의 가치 네트워크를 학습할 필요가 없다.">GRPO</span>를 기본 학습 프레임워크로 삼고
-  <span class="term" data-definition="프롬프트 공간(Prompt Space): 모델이 입력으로 받는 텍스트가 이루는 공간이다. 프롬프트를 바꾸면 모델이 보는 입력이 달라진다.">프롬프트 공간</span>에 교란을 도입한다.
+  <span class="term" data-definition="그룹 상대 정책 최적화(Group Relative Policy Optimization, GRPO): 같은 그룹 안의 여러 응답을 서로 비교해 모델을 갱신하는 강화 학습 방법. 별도의 가치 네트워크가 필요 없음.">GRPO</span>를 기본 학습 프레임워크로 삼고
+  <span class="term" data-definition="프롬프트 공간(Prompt Space): 모델이 입력으로 받는 텍스트가 이루는 공간. 프롬프트를 바꾸면 모델이 보는 입력이 달라짐.">프롬프트 공간</span>에 교란을 도입한다.
 </p>
 ```
 
 **Rules:**
 - 모듈마다 모든 전문 용어를 첫 등장 시 표시합니다.
-- 정의는 일상어로 1~2문장 안에 씁니다. 정의 문장은 한다체 평서형으로 쓴다.
+- 정의는 일상어로 1~2문장 안에 씁니다. 정의는 사전식 명사형 종결(`~것.`, `~함.`, `~임.`, 명사)로 끝낸다. `~이다.`, `~한다.`, `~없다.`로 끝내지 않는다(KO111).
 - 이중 언어 형식 `한글 용어(English Term): 설명`을 씁니다. 괄호는 반각 `( )`이며 괄호 앞에 공백을 두지 않습니다. 예: `정책 경사(Policy Gradient): 보상을 높이는 방향으로 정책 파라미터를 직접 갱신하는 최적화 방법`
 - 같은 화면에서 같은 용어를 두 번 표시하지 않습니다.
 - `cursor: pointer`를 씁니다(`cursor: help`는 쓰지 않습니다).
@@ -893,17 +932,19 @@ codebase-to-course와 같은 패턴이며 개념과 정의, 방법과 논문 등
 
 ## 아이콘 라벨 행 (Icon-Label Rows)
 
+아이콘 칸에는 이모지 대신 짧은 글자나 단순한 기호 글자를 넣고, 배경은 교과 색 또는 먹색만 쓴다(`--color-actor-*` 금지).
+
 ```html
 <div class="icon-rows stagger-children animate-in">
   <div class="icon-row">
-    <div class="icon-circle" style="background: var(--color-actor-1)">&#129513;</div>
+    <div class="icon-circle" style="background: var(--color-accent)">M</div>
     <div>
       <strong>수학 추론 벤치마크</strong>
       <p>GSM8K, MATH, Minerva 등의 데이터셋</p>
     </div>
   </div>
   <div class="icon-row">
-    <div class="icon-circle" style="background: var(--color-actor-2)">&#129504;</div>
+    <div class="icon-circle" style="background: #1F2328">B</div>
     <div>
       <strong>모델 규모</strong>
       <p>파라미터 1.7B, 4B, 7B 규모의 모델</p>
@@ -915,7 +956,7 @@ codebase-to-course와 같은 패턴이며 개념과 정의, 방법과 논문 등
 
 ## 첫 페이지: 왜 썼는가와 새로운 점
 
-1단원 첫 페이지(단원 도입 + 첫 화면)는 한 장으로 논문의 동기와 기여를 전한다. 765px 안에 다음 세 가지를 순서대로 둔다.
+1단원(`module-0`, 화면 번호 1) 첫 페이지(단원 도입 + 첫 화면)는 한 장으로 논문의 동기와 기여를 전한다. 이 쪽은 논문 1절 "왜 썼나·새로운 점" 쪽이므로 화면 제목에 `.paper-ref`(논문 1절)를 달고 `배경 지식` 콜아웃은 두지 않는다. 모듈 0의 나머지 쪽이 배경 지식 쪽이다. 765px 안에 다음 세 가지를 순서대로 둔다.
 
 1. **문제 문단:** 이전 방식의 한계와 이 논문을 쓴 이유를 2~3문장으로.
 2. **비교 그림:** `.svg-diagram`을 둘로 나누어 왼쪽 "이전 방식", 오른쪽 "제안 방식"(교과 색). 같은 입력(예: $x_1, \ldots, x_4$)을 같은 위치에 두고 처리 경로만 다르게 그린다. 간선은 직각, 패널 아래에 차이를 한 줄로(예: "순차 단계 $n$번" 대 "1번").
@@ -945,4 +986,65 @@ codebase-to-course와 같은 패턴이며 개념과 정의, 방법과 논문 등
 
 ## 연구 계보: 이어받은 것과 달라진 것
 
-갈래마다 노드 뒤에 `<p class="lineage-note">이어받은 것. → <strong class="novelty">달라진 것</strong>.</p>`를 둔다. 루트 노드에는 `<span class="novelty-badge">한 줄 기여</span>`. 단서 칸에는 "새로운 점" 콜아웃으로 앞선 연구와의 차이를 한 문장으로 쓴다.
+갈래마다 노드 뒤에 `<p class="lineage-note">이어받은 것. → <strong class="novelty">달라진 것</strong>.</p>`를 둔다. 루트 노드에는 `<span class="novelty-badge">한 줄 기여</span>`. `.lineage-branch`는 가로 flex이므로 `edge-label`, 노드, `.lineage-note`가 한 줄에 놓이고, 더 이른 선행 연구는 그 갈래 안에 `.lineage-branch`를 중첩한다.
+```html
+<div class="lineage-tree animate-in">
+  <div class="lineage-node lineage-root" data-detail="어텐션 기반 번역 모델: 순환 없이 어텐션만으로 시퀀스를 변환하는 방법">
+    <span class="lineage-label">트랜스포머</span>
+    <span class="lineage-detail">본 논문 (2017)</span>
+    <span class="novelty-badge">순환 없이 어텐션만 사용</span>
+  </div>
+  <div class="lineage-branch">
+    <div class="lineage-edge-label">개선</div>
+    <div class="lineage-node" data-detail="어텐션 결합 RNN(Attention-based RNN): 순환 신경망의 출력에 어텐션을 더한 번역 모델">
+      <span class="lineage-label">어텐션 RNN</span>
+      <span class="lineage-detail">Bahdanau et al., 2014</span>
+    </div>
+    <p class="lineage-note">입력 위치별 가중합으로 문맥을 읽는 어텐션. → <strong class="novelty">순환을 없애고 병렬로 계산</strong>한다.</p>
+    <div class="lineage-branch">
+      <div class="lineage-edge-label">기반</div>
+      <div class="lineage-node" data-detail="순차열 변환(Seq2Seq): 인코더와 디코더 두 RNN으로 시퀀스를 다른 시퀀스로 바꾸는 모델">
+        <span class="lineage-label">Seq2Seq</span>
+        <span class="lineage-detail">Sutskever et al., 2014</span>
+      </div>
+      <p class="lineage-note">인코더-디코더 구조. → <strong class="novelty">고정 길이 벡터 병목</strong>을 없앤다.</p>
+    </div>
+  </div>
+</div>
+```
+ 단서 칸에는 "새로운 점" 콜아웃으로 앞선 연구와의 차이를 한 문장으로 쓴다.
+
+
+## 구조도와 차이 비교(보충 자료 조사 결과를 담는 패턴)
+
+**전체 구조도.** `.svg-diagram`에 구성 요소를 `.node-rect.sq`, 흐름을 직각 `path.edge-line`으로 그린다. 오프라인/온라인 구획은 `guide-fill` 배경 사각형 두 개와 왼쪽 위 작은 라벨(`text.muted`)로 나눈다. 상자 안 둘째 줄에 입력·출력 예를 `text.mono`로 단다(예: `질문 → 768차원 벡터`).
+
+```html
+<figure class="svg-diagram fit" style="--diagram-max:720px">
+  <svg viewBox="0 0 720 260" role="img" aria-label="RAG 구조도: 오프라인 indexing과 온라인 retrieval·generation">
+    <rect class="guide-fill" x="0" y="0" width="720" height="100" rx="4"/>
+    <text class="muted" x="10" y="16">오프라인: 색인 구축</text>
+    <rect class="guide-fill" x="0" y="120" width="720" height="140" rx="4"/>
+    <text class="muted" x="10" y="136">온라인: 질문 처리</text>
+    <!-- 상자·흐름: node-rect.sq + path.edge-line (M… H… V…) + edge-arrow -->
+  </svg>
+  <figcaption class="figure-caption">그림은 ~을 나타낸 것이다. 출처: 논문 그림 2, 공식 문서(링크)를 참고해 다시 그림.</figcaption>
+</figure>
+```
+
+**지도 표시.** 구조도를 다룬 뒤의 페이지에는 같은 구조도를 작게(`--diagram-max:280px`) 단서 칸에 두고, 지금 설명하는 상자만 `node-rect.sq.accent`로 칠한다.
+
+**차이 비교.** 같은 입력 하나를 형제 개념 각각에 넣은 결과를 세로 칸으로 나란히 그리고(칸 제목 = 개념 이름, 같은 높이의 단계 상자), 아래에 비교표와 `차이 한 줄`을 둔다.
+
+```html
+<table class="data-table">
+  <thead><tr><th>기준</th><th>Naive RAG</th><th>Advanced RAG</th><th>Modular RAG</th></tr></thead>
+  <tbody>
+    <tr><td>검색 전</td><td>없음</td><td>query rewriting</td><td>모듈로 교체·추가</td></tr>
+    <tr><td>검색 후</td><td>없음</td><td>reranking, 압축</td><td>모듈로 교체·추가</td></tr>
+    <tr><td>흐름</td><td>한 방향</td><td>한 방향</td><td>반복·분기 가능</td></tr>
+  </tbody>
+  <caption>표는 세 방식의 차이를 나타낸 것이다.</caption>
+</table>
+<p class="diff-line"><strong>차이 한 줄</strong> Naive는 검색 → 생성뿐, Advanced는 그 앞뒤를 다듬고, Modular는 단계 자체를 갈아 끼운다.</p>
+```

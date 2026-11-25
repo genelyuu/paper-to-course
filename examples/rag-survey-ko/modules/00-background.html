@@ -1,0 +1,342 @@
+<section class="module" id="module-0">
+  <div class="module-content">
+
+    <div class="module-header">
+      <span class="module-number">1</span>
+      <h2 class="module-title">서론과 배경</h2>
+      <p class="module-subtitle">RAG 서베이를 읽기 전에 필요한 지식의 종류, 임베딩, 검색 방식을 정리한다</p>
+    </div>
+
+    <!-- 페이지 1: 쓴 이유와 새로운 점 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">학습 목표</strong>
+            <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
+            <ol>
+              <li>LLM 단독 생성과 RAG의 차이를 지식이 저장된 곳으로 설명할 수 있다.</li>
+              <li>두 임베딩의 코사인 유사도를 구해 관련 문서를 고를 수 있다.</li>
+              <li>단어 일치 기반 검색과 임베딩 기반 검색의 장단점을 같은 query로 비교할 수 있다.</li>
+            </ol>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">이 논문을 쓴 이유와 새로운 점<span class="paper-ref">논문 1절</span></h3>
+        <p><span class="term" data-definition="대규모 언어 모델(Large Language Model, LLM): 방대한 글을 학습해 다음 토큰을 예측하는, 파라미터가 수십억 개 이상인 언어 모델.">대규모 언어 모델(Large Language Model, LLM)</span>은 학습 데이터에 없거나 최신 정보가 필요한 질문에서 <span class="term" data-definition="환각(Hallucination): 모델이 사실과 다르거나 근거 없는 내용을 그럴듯하게 만들어 내는 현상.">환각(Hallucination)</span>을 일으킨다. <span class="term" data-definition="검색 증강 생성(Retrieval-Augmented Generation, RAG): 질문과 관련된 문서를 외부 지식 베이스에서 찾아 질문과 함께 언어 모델에 넣고 답을 만드는 방법.">검색 증강 생성(Retrieval-Augmented Generation, RAG)</span>은 외부 문서를 찾아 질문과 함께 넣어 이 한계를 줄인다. 이 논문은 빠르게 늘어난 RAG 연구를 한 체계로 정리한 서베이이다.</p>
+        <p>그림은 두 방식이 같은 <span class="term" data-definition="query(검색 질의): 사용자가 던진 질문을 검색 시스템에 넣는 입력 문장.">query(검색 질의)</span>를 처리하는 과정을 나타낸 것이다.</p>
+        <div class="svg-diagram animate-in" style="margin:var(--space-3) auto"><svg viewBox="0 0 800 204" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="이전 방식은 query를 LLM에 바로 넣어 답하고, RAG는 외부 문서를 검색해 query와 함께 LLM에 넣어 근거 있는 답을 만든다"><foreignObject x="16" y="0" width="368" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4; font-weight:700"><span>이전 방식: LLM 단독 생성</span></div></foreignObject><rect class="node-rect sq" x="16" y="48" width="96" height="48" rx="2"/><foreignObject x="20" y="52" width="88" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span>query</span></div></foreignObject><path class="edge-line" d="M112,72 H142"/><polygon class="edge-arrow" points="142,67 152,72 142,77"/><rect class="node-rect sq" x="152" y="48" width="96" height="48" rx="2"/><foreignObject x="156" y="52" width="88" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span>LLM</span></div></foreignObject><path class="edge-line" d="M248,72 H278"/><polygon class="edge-arrow" points="278,67 288,72 278,77"/><rect class="node-rect sq" x="288" y="48" width="96" height="48" rx="2"/><foreignObject x="292" y="52" width="88" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span>답</span></div></foreignObject><foreignObject x="16" y="112" width="368" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4; color:var(--color-text-secondary)"><span>학습 때 파라미터에 새긴 지식만으로 답함</span></div></foreignObject><foreignObject x="16" y="168" width="368" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4; font-weight:700"><span>모르는 최신 사실도 그럴듯하게 지어냄(환각)</span></div></foreignObject><line class="guide" x1="400" y1="8" x2="400" y2="196"/><foreignObject x="416" y="0" width="368" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4; font-weight:700; color:var(--color-accent)"><span>제안 방식: 검색 증강 생성(RAG)</span></div></foreignObject><rect class="node-rect sq" x="416" y="48" width="64" height="48" rx="2"/><foreignObject x="420" y="52" width="56" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span>query</span></div></foreignObject><rect class="node-rect sq" x="512" y="48" width="64" height="48" rx="2"/><foreignObject x="516" y="52" width="56" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span>검색</span></div></foreignObject><rect class="node-rect sq" x="608" y="48" width="64" height="48" rx="2"/><foreignObject x="612" y="52" width="56" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span>LLM</span></div></foreignObject><rect class="node-rect sq accent" x="704" y="48" width="64" height="48" rx="2"/><foreignObject x="708" y="52" width="56" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span>답</span></div></foreignObject><path class="edge-line" d="M480,72 H502"/><polygon class="edge-arrow" points="502,67 512,72 502,77"/><path class="edge-line" d="M576,72 H598"/><polygon class="edge-arrow" points="598,67 608,72 598,77"/><path class="edge-line accent" d="M672,72 H694"/><polygon class="edge-arrow accent" points="694,67 704,72 694,77"/><rect class="node-rect sq" x="496" y="120" width="96" height="40" rx="2"/><foreignObject x="500" y="124" width="88" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span>외부 문서</span></div></foreignObject><path class="edge-line" d="M544,120 V106"/><polygon class="edge-arrow" points="539,106 544,96 549,106"/><foreignObject x="608" y="120" width="176" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4; color:var(--color-text-secondary)"><span>근거 문서를 함께 보여 줌</span></div></foreignObject><foreignObject x="416" y="168" width="368" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4; font-weight:700; color:var(--color-accent)"><span>근거가 있는 답, 문서만 바꾸면 지식 갱신</span></div></foreignObject></svg></div>
+        <div class="callout callout-accent animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">새로운 점</strong>
+            <ol>
+              <li><strong>세 패러다임:</strong> RAG 연구를 나이브, 어드밴스드, 모듈형 RAG의 세 단계 발전으로 정리한다(2절, 그림 3).</li>
+              <li><strong>세 핵심 기술:</strong> 검색, 생성, 증강을 각각 한 절(3~5절)로 나누어 기술별로 분석한다.</li>
+              <li><strong>평가 체계:</strong> 26개 과제와 약 50개 데이터셋, 평가 대상·지표·벤치마크·도구를 한데 묶는다(1절, 6절).</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>이 서베이는 LLM의 환각과 낡은 지식을 외부 검색으로 보완하는 RAG 연구를 세 패러다임, 세 기술, 평가 체계로 정리한다.</p></div>
+    </div>
+
+    <!-- 페이지 2: parametric vs non-parametric 같은 질문 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>같은 질문에 닫힌 책과 열린 책은 어떻게 답하는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">배경 지식</strong>
+            <p>이 화면은 논문의 주장이 아니라 논문을 읽기 위해 먼저 알아 둘 배경이다.</p>
+          </div>
+        </div>
+        <h3 class="screen-heading">parametric knowledge와 non-parametric knowledge</h3>
+        <p>LLM이 학습하는 동안 가중치에 새긴 지식을 <span class="term" data-definition="parametric knowledge: 모델이 학습 중에 파라미터 값으로 저장한 지식. 학습이 끝나면 고정됨.">parametric knowledge(모델 가중치에 저장된 지식)</span>라 한다. 모델 밖의 문서처럼 필요할 때 찾아 읽는 지식은 <span class="term" data-definition="non-parametric knowledge: 모델 파라미터 밖의 문서·데이터베이스에 저장해 두고 필요할 때 찾아 쓰는 지식.">non-parametric knowledge(외부 문서에 있는 지식)</span>이다.</p>
+        <p>그림은 같은 질문에 닫힌 책과 열린 책으로 답하는 과정을 나타낸 것이다. 논문은 RAG를 모델에게 맞춤 교과서를 주는 일에, <span class="term" data-definition="fine-tuning: 사전 학습한 모델을 특정 과제의 데이터로 추가 학습해 파라미터를 바꾸는 일.">fine-tuning(미세 조정)</span>을 학생이 지식을 머릿속에 새기는 일에 빗댄다(2.4절). 값은 예시이다.</p>
+        <div class="svg-diagram animate-in" style="margin:var(--space-3) auto"><svg viewBox="0 0 800 240" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="같은 질문을 모델 가중치만으로 답하면 근거 없이 지어낼 수 있고, 검색한 문서를 함께 읽으면 근거와 함께 답한다"><rect class="node-rect sq" x="180" y="2" width="440" height="34" rx="2"/><text x="400" y="24" font-size="14" text-anchor="middle" font-weight="700">같은 질문: "신입 사원의 연차는 며칠인가?"</text><line class="guide" x1="400" y1="46" x2="400" y2="236"/><text x="16" y="60" font-size="13" text-anchor="start" font-weight="700">닫힌 책(closed book): 모델 가중치만 사용</text><text x="416" y="60" font-size="13" text-anchor="start" font-weight="700" style="fill:var(--color-accent);">열린 책(open book): 문서를 찾아서 사용</text><rect class="node-rect sq" x="16" y="70" width="368" height="46" rx="2"/><text x="200.0" y="89.5" font-size="12.5" text-anchor="middle" font-weight="700">지식이 있는 곳: model weights</text><text x="200.0" y="104.5" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">학습 때 고정됨, 학습 이후 규정은 모름</text><rect class="node-rect sq" x="416" y="70" width="368" height="46" rx="2"/><text x="600.0" y="89.5" font-size="12.5" text-anchor="middle" font-weight="700">지식이 있는 곳: 외부 문서</text><text x="600.0" y="104.5" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">문서만 바꾸면 갱신됨, 문서 c17 = "제12조 …"</text><rect class="node-rect sq" x="16" y="128" width="368" height="46" rx="2"/><text x="200.0" y="154.5" font-size="12.5" text-anchor="middle" font-weight="700">LLM이 읽는 입력: 질문뿐</text><rect class="node-rect sq" x="416" y="128" width="368" height="46" rx="2"/><text x="600.0" y="154.5" font-size="12.5" text-anchor="middle" font-weight="700">LLM이 읽는 입력: 질문 + 검색한 문서</text><rect class="node-rect sq" x="16" y="186" width="368" height="46" rx="2"/><text x="200.0" y="205.5" font-size="12.5" text-anchor="middle" font-weight="700">답: "연차는 15일입니다."</text><text x="200.0" y="220.5" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">그럴듯하지만 근거 없음, 낡은 값일 수 있음</text><rect class="node-rect sq accent" x="416" y="186" width="368" height="46" rx="2"/><text x="600.0" y="205.5" font-size="12.5" text-anchor="middle" font-weight="700">답: "1년 미만은 매월 1일(제12조)"</text><text x="600.0" y="220.5" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">근거 문서를 함께 제시할 수 있음</text><path class="edge-line" d="M200.0,116 V120"/><polygon class="edge-arrow" points="196.0,120 200.0,128 204.0,120"/><path class="edge-line accent" d="M600.0,116 V120"/><polygon class="edge-arrow accent" points="596.0,120 600.0,128 604.0,120"/><path class="edge-line" d="M200.0,174 V178"/><polygon class="edge-arrow" points="196.0,178 200.0,186 204.0,178"/><path class="edge-line accent" d="M600.0,174 V178"/><polygon class="edge-arrow accent" points="596.0,178 600.0,186 604.0,178"/></svg></div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>닫힌 책은 가중치만으로 답해 근거가 없고, 열린 책은 검색한 문서를 읽고 근거와 함께 답한다.</p></div>
+    </div>
+
+    <!-- 페이지 3: 지식 비교표 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>LLM의 지식은 왜 시간이 지나면 낡는가?</li>
+          <li>모델 밖에 지식을 두면 무엇이 달라지는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">배경 지식</strong>
+            <p>이 화면은 논문의 주장이 아니라 논문을 읽기 위해 먼저 알아 둘 배경이다.</p>
+          </div>
+        </div>
+        <h3 class="screen-heading">parametric knowledge와 non-parametric knowledge의 비교</h3>
+        <div class="with-figure" style="--figure-side-width:150px">
+          <div>
+            <p>그림에서 본 두 방식의 차이를 기준별로 정리하면 다음과 같다. 학습이 끝나면 parametric knowledge는 고정되므로, 새 사실을 반영하려면 다시 학습해야 한다.</p>
+            <p>그림은 책을 펴 놓고 찾아 읽는 오픈북 시험을 나타낸 것이다. non-parametric knowledge를 쓰는 RAG는 외운 것이 아니라 펼친 책에서 근거를 찾아 답한다.</p>
+          </div>
+          <figure class="figure side"><img src="assets/fig-openbook.svg" alt="펼쳐 놓은 책: 답을 외우지 않고 찾아 읽는 오픈북 방식"></figure>
+        </div>
+        <table class="data-table animate-in">
+          <caption>표는 두 지식의 차이를 나타낸 것이다.</caption>
+          <thead><tr><th>기준</th><th>parametric knowledge</th><th>non-parametric knowledge</th></tr></thead>
+          <tbody>
+            <tr><td>저장 위치</td><td>모델 가중치</td><td>모델 밖 문서 모음</td></tr>
+            <tr><td>갱신 방법</td><td>다시 학습해야 함</td><td>문서만 바꾸면 됨</td></tr>
+            <tr><td>근거 제시</td><td>어렵다</td><td>문서를 함께 보여 줄 수 있다</td></tr>
+          </tbody>
+        </table>
+        <p class="diff-line"><strong>차이 한 줄</strong> parametric knowledge는 모델 안에 굳어 있어 외워서 답하고, non-parametric knowledge는 모델 밖에 있어 찾아서 답한다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>RAG는 가중치에 고정된 parametric knowledge에 모델 밖 문서라는 바꿀 수 있는 지식을 더한다.</p></div>
+    </div>
+
+    <!-- 페이지 3: 임베딩과 코사인 유사도 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>글의 뜻을 어떻게 숫자로 비교하는가?</li>
+          <li>내적 대신 코사인 유사도를 쓰는 까닭은 무엇인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">배경 지식</strong>
+            <p>이 화면은 논문의 주장이 아니라 논문을 읽기 위해 먼저 알아 둘 배경이다.</p>
+          </div>
+        </div>
+        <h3 class="screen-heading">임베딩과 코사인 유사도</h3>
+        <p><span class="term" data-definition="임베딩(Embedding): 단어·문장·문서의 뜻을 실수 벡터로 나타낸 것. 뜻이 비슷하면 방향이 비슷함.">임베딩(Embedding)</span>은 글의 뜻을 실수 벡터로 나타낸 것이다. 뜻이 비슷한 글은 비슷한 방향의 벡터가 되므로, 두 벡터 사이의 각이 작을수록 관련이 깊다고 본다. 그림은 query $\boldsymbol{q}=(2,1)$과 문서 $\boldsymbol{d}_1=(1,2)$, $\boldsymbol{d}_2=(3,1)$을 나타낸 것이다.</p>
+        <div class="with-figure">
+          <div class="math-derivation animate-in" id="math-cos">
+            <div class="math-step" data-step="0">
+              <div class="math-equation">$$\boldsymbol{q}\cdot\boldsymbol{d} = \sum_{i=1}^{n} q_i d_i$$</div>
+              <div class="math-explanation"><p>내적은 같은 자리의 성분끼리 곱해 모두 더한 값이다. 방향이 비슷할수록 커지지만, 벡터가 길기만 해도 커진다.</p></div>
+            </div>
+            <div class="math-step" data-step="1" style="display:none">
+              <div class="math-equation">$$\mathit{cos}(\boldsymbol{q},\boldsymbol{d}) = \frac{\boldsymbol{q}\cdot\boldsymbol{d}}{\lVert\boldsymbol{q}\rVert\,\lVert\boldsymbol{d}\rVert}$$</div>
+              <div class="math-explanation"><p>내적을 두 벡터의 길이로 나누면 길이의 영향이 사라지고 방향만 남는다. 이 값이 <span class="term" data-definition="코사인 유사도(Cosine Similarity): 두 벡터 사이 각의 코사인 값. −1에서 1 사이이며 방향이 같을수록 1에 가까움.">코사인 유사도(Cosine Similarity)</span>이며 $-1$에서 $1$ 사이에 놓인다.</p></div>
+            </div>
+            <div class="math-step" data-step="2" style="display:none">
+              <div class="math-equation">$$\begin{aligned} \mathit{cos}(\boldsymbol{q},\boldsymbol{d}_1) &= \frac{2\cdot 1 + 1\cdot 2}{\sqrt{5}\,\sqrt{5}} = 0.8 \\ \mathit{cos}(\boldsymbol{q},\boldsymbol{d}_2) &= \frac{2\cdot 3 + 1\cdot 1}{\sqrt{5}\,\sqrt{10}} \approx 0.99 \end{aligned}$$</div>
+              <div class="math-explanation"><p>그림의 세 벡터에 대입하면 $\boldsymbol{d}_2$의 유사도가 더 크다. 그림에서도 $\boldsymbol{d}_2$가 $\boldsymbol{q}$와 더 비슷한 방향을 가리킨다.</p></div>
+            </div>
+            <div class="math-step" data-step="3" style="display:none">
+              <div class="math-equation">$$\mathcal{R}_1(\boldsymbol{q}) = \mathop{\mathit{argmax}}_{\boldsymbol{d}\in\mathcal{D}}\ \mathit{cos}(\boldsymbol{q},\boldsymbol{d}) = \boldsymbol{d}_2$$</div>
+              <div class="math-explanation"><p>문서 모음 $\mathcal{D}$에서 유사도가 가장 큰 문서를 고른다. 큰 순서로 $k$개를 고르면 <span class="term" data-definition="top-k(상위 k개): 유사도 점수가 큰 순서로 k개의 문서를 골라 돌려주는 검색 방식.">top-$k$(상위 $k$개)</span> 검색이 된다.</p></div>
+            </div>
+            <div class="math-controls">
+              <button class="btn math-prev-btn">이전 단계</button>
+              <button class="btn math-next-btn">다음 단계</button>
+              <button class="btn math-reset-btn">처음부터</button>
+              <span class="math-progress"></span>
+            </div>
+          </div>
+          <figure class="figure side" style="--figure-side-width:184px"><svg viewBox="0 0 176 124" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="query q=(2,1), 문서 d1=(1,2), d2=(3,1)을 좌표평면에 나타냄"><defs><marker id="m0-ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L8,4 L0,8 z" class="ink-fill"/></marker><marker id="m0-ahA" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L8,4 L0,8 z" class="accent-fill"/></marker></defs><path class="guide" d="M64,16 V104M104,16 V104M144,16 V104M24,64 H152M24,24 H152"/><path class="guide-axis" d="M24,104 H160 M24,104 V8"/><line class="ink" x1="24" y1="104" x2="64" y2="24" marker-end="url(#m0-ah)"/><line class="ink" x1="24" y1="104" x2="144" y2="64" marker-end="url(#m0-ah)"/><line class="ink accent" stroke-width="2" x1="24" y1="104" x2="104" y2="64" marker-end="url(#m0-ahA)"/><text x="70" y="28" font-style="italic">d<tspan font-size="9" dy="3">1</tspan></text><text x="138" y="56" font-style="italic">d<tspan font-size="9" dy="3">2</tspan></text><text x="100" y="82" font-style="italic" class="accent-text">q</text><text x="12" y="116" font-style="italic">O</text></svg><figcaption class="figure-caption">모눈 한 칸 = 1</figcaption></figure>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>검색은 query와 문서의 임베딩 사이 코사인 유사도를 구해 값이 큰 문서부터 고르는 일이다.</p></div>
+    </div>
+
+    <!-- 페이지 4: sparse vs dense 같은 query -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>단어 일치로 찾는 검색은 무엇을 놓치는가?</li>
+          <li>뜻으로 찾는 검색은 무엇을 놓치는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">배경 지식</strong>
+            <p>이 화면은 논문의 주장이 아니라 논문을 읽기 위해 먼저 알아 둘 배경이다.</p>
+          </div>
+        </div>
+        <h3 class="screen-heading">sparse retrieval과 dense retrieval</h3>
+        <p><span class="term" data-definition="sparse retrieval: query 단어가 문서에 나오는 횟수와 드문 정도로 점수를 매기는 단어 일치 기반 검색.">sparse retrieval(단어 일치 기반 검색)</span>은 query의 단어가 문서에 얼마나 겹치는지로 점수를 매긴다. <span class="term" data-definition="dense retrieval: 신경망 인코더가 만든 짧은 실수 임베딩의 유사도로 문서를 찾는 검색.">dense retrieval(임베딩 벡터 기반 검색)</span>은 query와 문서를 임베딩으로 바꿔 뜻이 가까운 문서를 고른다.</p>
+        <p>그림은 같은 query와 같은 문서 셋에서 두 방식이 고른 문서를 나타낸 것이다. 점수는 예시 값이다.</p>
+        <div class="svg-diagram animate-in" style="margin:var(--space-3) auto"><svg viewBox="0 0 800 270" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="같은 query에 sparse retrieval은 단어가 겹친 D1과 D3를 고르고, dense retrieval은 뜻이 같은 D1과 D2를 고른다"><rect class="node-rect sq" x="16" y="2" width="768" height="32" rx="2"/><text x="400" y="23" font-size="14" text-anchor="middle" font-weight="700">같은 query: "노트북 배터리 오래 쓰는 법"</text><text x="16" y="56" font-size="12.5" text-anchor="start" font-weight="700">문서(예시)</text><text x="552.0" y="50" font-size="12.5" text-anchor="middle" font-weight="700">sparse retrieval</text><text x="552.0" y="64" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">BM25 점수</text><text x="712.0" y="50" font-size="12.5" text-anchor="middle" font-weight="700" style="fill:var(--color-accent);">dense retrieval</text><text x="712.0" y="64" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">cosine similarity</text><rect class="node-rect sq" x="16" y="74" width="448" height="46" rx="2"/><text x="28" y="94" font-size="13" text-anchor="start" font-weight="700">D1  노트북 배터리 수명을 늘리는 방법</text><text x="28" y="111" font-size="12" text-anchor="start" style="fill:var(--color-text-secondary);">겹친 단어: 노트북, 배터리</text><rect class="node-rect sq accent" x="480" y="74" width="144" height="46" rx="2"/><text x="552.0" y="103" font-size="15" text-anchor="middle" font-weight="700">8.1</text><rect class="node-rect sq accent" x="640" y="74" width="144" height="46" rx="2"/><text x="712.0" y="103" font-size="15" text-anchor="middle" font-weight="700">0.91</text><rect class="node-rect sq" x="16" y="128" width="448" height="46" rx="2"/><text x="28" y="148" font-size="13" text-anchor="start" font-weight="700">D2  랩톱 충전을 80%로 제한하면 오래 간다</text><text x="28" y="165" font-size="12" text-anchor="start" style="fill:var(--color-text-secondary);">겹친 단어 없음(랩톱 = 노트북)</text><rect class="node-rect sq" x="480" y="128" width="144" height="46" rx="2"/><text x="552.0" y="157" font-size="15" text-anchor="middle">0.0</text><rect class="node-rect sq accent" x="640" y="128" width="144" height="46" rx="2"/><text x="712.0" y="157" font-size="15" text-anchor="middle" font-weight="700">0.84</text><rect class="node-rect sq" x="16" y="182" width="448" height="46" rx="2"/><text x="28" y="202" font-size="13" text-anchor="start" font-weight="700">D3  배터리 폭발 사고 뉴스</text><text x="28" y="219" font-size="12" text-anchor="start" style="fill:var(--color-text-secondary);">겹친 단어: 배터리</text><rect class="node-rect sq accent" x="480" y="182" width="144" height="46" rx="2"/><text x="552.0" y="211" font-size="15" text-anchor="middle" font-weight="700">2.3</text><rect class="node-rect sq" x="640" y="182" width="144" height="46" rx="2"/><text x="712.0" y="211" font-size="15" text-anchor="middle">0.35</text><text x="552.0" y="246" font-size="13" text-anchor="middle" font-weight="700">top-2: D1, D3</text><text x="552.0" y="262" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">D2 놓침, 무관한 D3 포함</text><text x="712.0" y="246" font-size="13" text-anchor="middle" font-weight="700" style="fill:var(--color-accent);">top-2: D1, D2</text><text x="712.0" y="262" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">뜻이 같은 D2를 찾음</text><text x="16" y="246" font-size="12" text-anchor="start" style="fill:var(--color-text-secondary);">교과 색 칸 = 점수가 높아 top-2에 뽑힌 문서</text></svg></div>
+        <p>sparse retrieval의 대표 방법인 <span class="term" data-definition="BM25(Best Matching 25): 단어 빈도와 역문서 빈도, 문서 길이를 함께 고려하는 고전적인 sparse retrieval 점수 함수.">BM25(Best Matching 25)</span>는 "랩톱"처럼 바꿔 쓴 D2를 놓친다. dense retrieval은 뜻이 같은 D2까지 찾는다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>같은 query에서 sparse retrieval은 겹친 단어를 따라가 동의어 문서를 놓치고, dense retrieval은 뜻이 같은 문서를 찾는다.</p></div>
+    </div>
+
+    <!-- 페이지 5: 비교표 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>두 방식은 언제 서로를 보완하는가?</li>
+          <li>sparse 벡터와 dense 벡터는 어떻게 생겼는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">배경 지식</strong>
+            <p>이 화면은 논문의 주장이 아니라 논문을 읽기 위해 먼저 알아 둘 배경이다.</p>
+          </div>
+        </div>
+        <h3 class="screen-heading">두 검색의 비교</h3>
+        <p>그림은 같은 query를 두 방식으로 나타낸 벡터를 비교한 것이다.</p>
+        <div class="svg-diagram animate-in" style="margin:var(--space-3) auto"><svg viewBox="0 0 800 164" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="sparse 벡터는 길고 대부분 0이며 질의 단어 칸만 값이 있고, dense 벡터는 짧고 모든 칸에 실수 값이 있다"><foreignObject x="16" y="8" width="160" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4; font-weight:700"><span>sparse 벡터(BM25)</span></div></foreignObject><rect class="node-rect sq" x="192" y="8" width="40" height="40" rx="2"/><foreignObject x="196" y="12" width="32" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.2"><span>0</span></div></foreignObject><rect class="node-rect sq" x="240" y="8" width="40" height="40" rx="2"/><foreignObject x="244" y="12" width="32" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.2"><span>0</span></div></foreignObject><rect class="node-rect sq accent" x="288" y="8" width="40" height="40" rx="2"/><foreignObject x="292" y="12" width="32" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.2"><span>1.2</span></div></foreignObject><rect class="node-rect sq" x="336" y="8" width="40" height="40" rx="2"/><foreignObject x="340" y="12" width="32" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.2"><span>0</span></div></foreignObject><rect class="node-rect sq" x="384" y="8" width="40" height="40" rx="2"/><foreignObject x="388" y="12" width="32" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.2"><span>0</span></div></foreignObject><rect class="node-rect sq" x="432" y="8" width="40" height="40" rx="2"/><foreignObject x="436" y="12" width="32" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.2"><span>0</span></div></foreignObject><rect class="node-rect sq" x="480" y="8" width="40" height="40" rx="2"/><foreignObject x="484" y="12" width="32" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.2"><span>0</span></div></foreignObject><rect class="node-rect sq accent" x="528" y="8" width="40" height="40" rx="2"/><foreignObject x="532" y="12" width="32" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.2"><span>0.8</span></div></foreignObject><rect class="node-rect sq" x="576" y="8" width="40" height="40" rx="2"/><foreignObject x="580" y="12" width="32" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.2"><span>0</span></div></foreignObject><rect class="node-rect sq" x="624" y="8" width="40" height="40" rx="2"/><foreignObject x="628" y="12" width="32" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.2"><span>0</span></div></foreignObject><rect class="node-rect sq" x="672" y="8" width="40" height="40" rx="2"/><foreignObject x="676" y="12" width="32" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.2"><span>0</span></div></foreignObject><rect class="node-rect sq" x="720" y="8" width="40" height="40" rx="2"/><foreignObject x="724" y="12" width="32" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.2"><span>0</span></div></foreignObject><foreignObject x="192" y="52" width="568" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4; color:var(--color-text-secondary)"><span>어휘 크기만큼 길고, 질의 단어가 있는 칸만 0이 아님</span></div></foreignObject><foreignObject x="16" y="88" width="160" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4; font-weight:700"><span>dense 벡터(임베딩)</span></div></foreignObject><rect class="node-rect sq" x="192" y="88" width="88" height="40" rx="2"/><foreignObject x="196" y="92" width="80" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.2"><span>0.12</span></div></foreignObject><rect class="node-rect sq" x="288" y="88" width="88" height="40" rx="2"/><foreignObject x="292" y="92" width="80" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.2"><span>−0.53</span></div></foreignObject><rect class="node-rect sq" x="384" y="88" width="88" height="40" rx="2"/><foreignObject x="388" y="92" width="80" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.2"><span>0.08</span></div></foreignObject><rect class="node-rect sq" x="480" y="88" width="88" height="40" rx="2"/><foreignObject x="484" y="92" width="80" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.2"><span>0.91</span></div></foreignObject><rect class="node-rect sq" x="576" y="88" width="88" height="40" rx="2"/><foreignObject x="580" y="92" width="80" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.2"><span>−0.27</span></div></foreignObject><rect class="node-rect sq" x="672" y="88" width="88" height="40" rx="2"/><foreignObject x="676" y="92" width="80" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.2"><span>0.44</span></div></foreignObject><foreignObject x="192" y="132" width="568" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4; color:var(--color-text-secondary)"><span>짧은 실수 벡터에 뜻이 고루 퍼져 있음(값은 설명용 예시)</span></div></foreignObject></svg></div>
+        <table class="data-table animate-in">
+          <caption>표는 두 검색 방식의 차이를 나타낸 것이다.</caption>
+          <thead><tr><th>기준</th><th>sparse retrieval</th><th>dense retrieval</th></tr></thead>
+          <tbody>
+            <tr><td>점수 기준</td><td>단어가 겹친 정도</td><td>임베딩의 뜻 유사도</td></tr>
+            <tr><td>강한 경우</td><td>고유 명사, 약어, 오류 코드</td><td>바꿔 쓴 표현, 동의어</td></tr>
+            <tr><td>약한 경우</td><td>동의어를 놓침</td><td>학습 때 드문 고유 명사를 놓침</td></tr>
+          </tbody>
+        </table>
+        <p class="diff-line"><strong>차이 한 줄</strong> sparse retrieval은 같은 표기를 찾고, dense retrieval은 같은 뜻을 찾으므로 서로의 빈틈을 메운다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>sparse retrieval은 같은 표기에, dense retrieval은 같은 뜻에 강하므로 두 방식은 서로를 보완한다.</p></div>
+    </div>
+
+    <!-- 페이지 5: 지식 지도와 핵심 정리 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>배경 개념들은 RAG에서 어떻게 이어지는가?</li>
+        </ul>
+        <div class="callout callout-accent animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">핵심 정리</strong>
+            <ul>
+              <li>parametric knowledge는 고정되고, non-parametric knowledge는 바꿀 수 있다.</li>
+              <li>검색은 코사인 유사도가 큰 문서부터 고른다.</li>
+              <li>sparse retrieval과 dense retrieval은 서로를 보완한다.</li>
+              <li>유사도 문항은 벡터 길이가 아니라 방향부터 비교하라.</li>
+            </ul>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">배경 지식</strong>
+            <p>이 화면은 논문의 주장이 아니라 논문을 읽기 위해 먼저 알아 둘 배경이다.</p>
+          </div>
+        </div>
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>지식 지도</h3>
+        <p>그림은 이 단원의 배경 개념이 RAG로 모이는 관계를 나타낸 것이다. 왼쪽 갈래는 RAG가 보완할 한계이고, 가운데 갈래는 RAG의 검색 단계이다.</p>
+        <div class="svg-diagram animate-in" style="margin:var(--space-3) auto"><svg viewBox="0 0 800 264" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="LLM의 한계와 외부 문서, query 임베딩이 검색을 거쳐 RAG로 모이는 지식 지도"><rect class="node-rect" x="16" y="8" width="224" height="48" rx="8"/><foreignObject x="20" y="12" width="216" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span>LLM의 parametric knowledge</span></div></foreignObject><rect class="node-rect" x="288" y="8" width="224" height="48" rx="8"/><foreignObject x="292" y="12" width="216" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span>외부 문서 모음(non-parametric knowledge)</span></div></foreignObject><rect class="node-rect" x="560" y="8" width="224" height="48" rx="8"/><foreignObject x="564" y="12" width="216" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span>사용자 query</span></div></foreignObject><rect class="node-rect" x="16" y="104" width="224" height="48" rx="8"/><foreignObject x="20" y="108" width="216" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span>환각·낡은 지식·근거 불명</span></div></foreignObject><rect class="node-rect" x="288" y="104" width="224" height="48" rx="8"/><foreignObject x="292" y="108" width="216" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span>sparse·dense retrieval</span></div></foreignObject><rect class="node-rect" x="560" y="104" width="224" height="48" rx="8"/><foreignObject x="564" y="108" width="216" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span>임베딩·코사인 유사도</span></div></foreignObject><path class="edge-line" d="M128,56 V94"/><polygon class="edge-arrow" points="123,94 128,104 133,94"/><path class="edge-line" d="M400,56 V94"/><polygon class="edge-arrow" points="395,94 400,104 405,94"/><path class="edge-line" d="M672,56 V94"/><polygon class="edge-arrow" points="667,94 672,104 677,94"/><path class="edge-line" d="M560,128 H522"/><polygon class="edge-arrow" points="522,123 512,128 522,133"/><rect class="node-rect accent" x="16" y="200" width="768" height="56" rx="8"/><foreignObject x="20" y="204" width="760" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span>검색 증강 생성(RAG): 찾은 문서를 질의와 함께 LLM에 넣어 답을 만든다</span></div></foreignObject><path class="edge-line" d="M128,152 V190"/><polygon class="edge-arrow" points="123,190 128,200 133,190"/><path class="edge-line accent" d="M400,152 V190"/><polygon class="edge-arrow accent" points="395,190 400,200 405,190"/><foreignObject x="136" y="160" width="120" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4; color:var(--color-text-secondary)"><span>보완할 한계</span></div></foreignObject><foreignObject x="408" y="160" width="120" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4; color:var(--color-text-secondary)"><span>RAG의 검색 단계</span></div></foreignObject></svg></div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>RAG는 LLM의 한계를 query 임베딩과 외부 문서 검색으로 메운다.</p></div>
+    </div>
+
+    <!-- 페이지 6: 확인 문제 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>배경 개념을 문제 상황에 적용할 수 있는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag outline">확인 문제</span>지식과 유사도</h3>
+        <div class="quiz-container animate-in" id="quiz-module0a">
+          <div class="quiz-question-block" data-correct="option-b"
+               data-explanation-right="② | 세 문서의 내적은 모두 4로 같지만, 코사인 유사도는 B가 1, A와 C가 약 0.89이므로 B가 선택된다."
+               data-explanation-wrong="| 정답은 ②이다. 코사인 유사도는 방향만 비교하므로 $\boldsymbol{q}$와 같은 방향인 B가 1로 가장 크다. ⑤는 내적이 모두 4로 같다는 점만 본 것이므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">1</span>그림은 query 임베딩 $\boldsymbol{q}$와 문서 임베딩 A, B, C를 나타낸 것이다. 코사인 유사도로 상위 1개를 검색할 때 선택되는 문서는?</h3>
+            <div class="q-body">
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① A</span></button>
+                <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② B</span></button>
+                <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ C</span></button>
+                <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ A와 C</span></button>
+                <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 세 문서가 같다</span></button>
+              </div>
+              <figure class="q-figure" style="--q-figure-width:144px" aria-label="query q=(1,1)과 문서 A=(3,1), B=(2,2), C=(1,3)의 임베딩"><svg viewBox="0 0 136 128" xmlns="http://www.w3.org/2000/svg" role="img"><defs><marker id="m0-qh" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" class="ink-fill"/></marker><marker id="m0-qhA" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" class="accent-fill"/></marker></defs><path class="guide" d="M52,24 V112M80,24 V112M108,24 V112M24,84 H112M24,56 H112M24,28 H112"/><path class="ink" d="M24,112 H120 M24,112 V16"/><line class="ink" x1="24" y1="112" x2="108" y2="84" marker-end="url(#m0-qh)"/><text x="112" y="78">A</text><line class="ink" x1="24" y1="112" x2="80" y2="56" marker-end="url(#m0-qh)"/><text x="84" y="52">B</text><line class="ink" x1="24" y1="112" x2="52" y2="28" marker-end="url(#m0-qh)"/><text x="58" y="32">C</text><line class="ink accent" stroke-width="2" x1="24" y1="112" x2="52" y2="84" marker-end="url(#m0-qhA)"/><text x="58" y="98" font-style="italic" class="accent-text">q</text><text x="10" y="124" font-style="italic">O</text></svg></figure>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <div class="quiz-question-block" data-correct="option-c"
+               data-explanation-right="③ | parametric knowledge는 학습이 끝나면 고정되므로, 새 사실을 반영하려면 다시 학습해야 한다."
+               data-explanation-wrong="| 정답은 ③이다. parametric knowledge는 문서 교체만으로 바꿀 수 없고 다시 학습해야 바뀐다. ⑤는 non-parametric knowledge의 장점을 옳게 말한 것이다.">
+            <h3 class="quiz-question"><span class="q-num">2</span>다음은 parametric knowledge(P)와 non-parametric knowledge(N)에 대한 설명이다. 옳지 <u>않은</u> 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① P는 학습 중에 파라미터 값으로 저장된다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② P만으로는 답의 출처를 밝히기 어렵다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ P는 문서를 바꾸면 곧바로 갱신된다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ N은 모델 밖의 문서 모음에 있다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ N은 답의 근거 문서를 보여 줄 수 있다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module0a')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module0a')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>코사인 유사도는 벡터의 방향만 비교하고, parametric knowledge는 다시 학습해야 바뀐다.</p></div>
+    </div>
+
+    <!-- 페이지 7: 확인 문제 (계속) -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>두 검색 방식과 LLM 단독 생성의 한계를 구별할 수 있는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag outline">확인 문제</span>검색 방식과 환각</h3>
+        <div class="quiz-container animate-in" id="quiz-module0b">
+          <div class="quiz-question-block" data-correct="option-c"
+               data-explanation-right="③ | sparse는 같은 표기에, dense는 같은 뜻에 강하므로 ㄱ, ㄷ이 옳다."
+               data-explanation-wrong="| 정답은 ③이다. sparse 벡터는 길고 대부분 0이므로 ㄴ은 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">3</span>sparse·dense retrieval 설명으로 옳은 것만을 <span class="nobr">&lt;보기&gt;에서</span> 있는 대로 고른 것은?</h3>
+            <div class="bogi">
+              <p>ㄱ. sparse retrieval은 드문 고유 명사에 강하다.</p>
+              <p>ㄴ. sparse 벡터는 짧고 모든 칸에 실수 값이 있다.</p>
+              <p>ㄷ. dense retrieval은 바꿔 쓴 표현도 찾는다.</p>
+            </div>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① ㄱ</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② ㄴ</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ ㄱ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ ㄴ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ ㄱ, ㄴ, ㄷ</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <div class="quiz-question-block" data-correct="option-d"
+               data-explanation-right="④ | 학습 이후의 사건은 parametric knowledge에 없으므로, 외부 문서 없이 답하면 그럴듯한 내용을 지어낼 위험이 크다."
+               data-explanation-wrong="| 정답은 ④이다. 학습 이후의 사실은 파라미터에 없으므로 환각 위험이 크다.">
+            <h3 class="quiz-question"><span class="q-num">4</span>학습이 끝난 뒤의 사건을 LLM에 검색 없이 물을 때 나타날 결과로 가장 타당한 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 새 사건이 파라미터에 저절로 더해진다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 근거 문서의 위치를 정확히 밝힌다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 코사인 유사도로 답 문서를 고른다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 틀린 내용을 그럴듯하게 지어낼 수 있다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 외부 지식 베이스를 스스로 갱신한다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module0b')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module0b')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>sparse retrieval은 같은 표기에, dense retrieval은 같은 뜻에 강하고, LLM 단독 생성은 학습 이후의 사실에서 환각 위험이 크다.</p></div>
+    </div>
+
+  </div>
+</section>

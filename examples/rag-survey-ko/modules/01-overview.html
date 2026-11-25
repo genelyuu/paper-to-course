@@ -1,0 +1,347 @@
+<section class="module" id="module-1">
+  <div class="module-content">
+
+    <div class="module-header">
+      <span class="module-number">2</span>
+      <h2 class="module-title">RAG 개요</h2>
+      <p class="module-subtitle">RAG의 전체 구조와 세 가지 발전 단계, 다른 최적화 방법과의 차이를 살핀다</p>
+    </div>
+
+    <!-- 페이지 1: RAG 구조도 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">학습 목표</strong>
+            <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
+            <ol>
+              <li>RAG 구조도의 오프라인·온라인 흐름과 단계별 입력·출력을 설명할 수 있다.</li>
+              <li>세 가지 RAG 발전 단계의 차이를 같은 단계 축에서 비교할 수 있다.</li>
+              <li>RAG, 모델을 추가 학습하는 방법, 프롬프트를 다듬는 방법의 쓰임을 구별할 수 있다.</li>
+            </ol>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">RAG의 전체 구조<span class="paper-ref">논문 2절</span></h3>
+        <p>RAG 시스템은 문서를 미리 준비하는 오프라인 단계와 질문을 받아 답하는 온라인 단계로 나뉜다. 오프라인에서는 문서를 <span class="term" data-definition="청크(Chunk): 검색 단위가 되도록 문서를 잘라 낸 작은 조각.">청크(Chunk)</span>로 자르고 임베딩해 <span class="term" data-definition="벡터 데이터베이스(Vector Database): 임베딩 벡터를 저장하고 유사도로 빠르게 찾아 주는 데이터베이스.">벡터 데이터베이스(Vector Database)</span>에 넣으며, 이 준비 과정을 <span class="term" data-definition="indexing: 원문을 정제·분할하고 임베딩해 검색할 수 있게 저장하는 준비 단계.">indexing(색인 구축)</span>이라 한다.</p>
+        <p>온라인에서는 <span class="term" data-definition="retriever: query와 가까운 청크를 색인에서 찾아 돌려주는 구성 요소.">retriever(검색기)</span>가 청크를 찾고, <span class="term" data-definition="generator: 질문과 검색한 청크를 읽고 답을 만드는 LLM.">generator(생성기)</span>인 LLM이 답을 만든다. 그림은 이 흐름과 상자별 값(예시)을 나타낸 것이다. 교과 색 칸은 질문과 청크를 하나로 묶는 증강 단계이다.</p>
+<div class="svg-diagram animate-in" style="margin:var(--space-3) auto"><svg viewBox="0 0 800 276" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RAG 구조도: 오프라인에서 문서를 chunking, embedding해 vector database에 넣고, 온라인에서 query를 임베딩해 top-k 청크를 찾아 프롬프트에 조립하고 LLM이 답을 생성한다"><rect class="guide-fill" x="0" y="0" width="800" height="114" rx="4"/><text x="10" y="16" font-size="12" text-anchor="start" font-weight="700">오프라인: indexing (문서를 미리 준비, 문서가 바뀔 때만 다시)</text><rect class="node-rect sq" x="16" y="26" width="160" height="76" rx="2"/><text x="96.0" y="60.5" font-size="12.5" text-anchor="middle" font-weight="700">① 문서 모음</text><text x="96.0" y="75.5" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">사내 규정 PDF 120건</text><rect class="node-rect sq" x="212" y="26" width="160" height="76" rx="2"/><text x="292.0" y="53.5" font-size="12.5" text-anchor="middle" font-weight="700">② chunking</text><text x="292.0" y="68.5" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">512토큰씩 자름</text><text x="292.0" y="82.5" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">→ 청크 1,840개</text><rect class="node-rect sq" x="408" y="26" width="160" height="76" rx="2"/><text x="488.0" y="53.5" font-size="12.5" text-anchor="middle" font-weight="700">③ embedding model</text><text x="488.0" y="68.5" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">청크 → 768차원 벡터</text><text x="488.0" y="82.5" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">c17 → [0.12, −0.53, …]</text><rect class="node-rect sq" x="604" y="26" width="160" height="76" rx="2"/><text x="684.0" y="53.5" font-size="12.5" text-anchor="middle" font-weight="700">④ vector database</text><text x="684.0" y="68.5" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">벡터 1,840개 + 원문</text><text x="684.0" y="82.5" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">유사도로 빠르게 검색</text><path class="edge-line" d="M176,64 H204"/><polygon class="edge-arrow" points="204,60 212,64 204,68"/><path class="edge-line" d="M372,64 H400"/><polygon class="edge-arrow" points="400,60 408,64 400,68"/><path class="edge-line" d="M568,64 H596"/><polygon class="edge-arrow" points="596,60 604,64 596,68"/><rect class="guide-fill" x="0" y="124" width="800" height="152" rx="4"/><text x="10" y="140" font-size="12" text-anchor="start" font-weight="700">온라인: 질문이 들어올 때마다 실행</text><rect class="node-rect sq" x="9" y="152" width="112" height="112" rx="2"/><text x="65.0" y="197.5" font-size="12" text-anchor="middle" font-weight="700">⑤ 사용자 질문</text><text x="65.0" y="212.5" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">"신입 사원의</text><text x="65.0" y="226.5" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">연차는 며칠인가?"</text><rect class="node-rect sq" x="143" y="152" width="112" height="112" rx="2"/><text x="199.0" y="190.0" font-size="12" text-anchor="middle" font-weight="700">⑥ query</text><text x="199.0" y="205.0" font-size="12" text-anchor="middle">embedding</text><text x="199.0" y="220.0" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">같은 embedding</text><text x="199.0" y="234.0" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">model → 768차원</text><rect class="node-rect sq" x="277" y="152" width="112" height="112" rx="2"/><text x="333.0" y="183.0" font-size="12" text-anchor="middle" font-weight="700">⑦ retriever</text><text x="333.0" y="198.0" font-size="12" text-anchor="middle">top-k 검색</text><text x="333.0" y="213.0" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">k=3 → c17 0.89</text><text x="333.0" y="227.0" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">c18 0.84</text><text x="333.0" y="241.0" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">c52 0.41</text><rect class="node-rect sq accent" x="411" y="152" width="112" height="112" rx="2"/><text x="467.0" y="197.5" font-size="12" text-anchor="middle" font-weight="700">⑧ 프롬프트 조립</text><text x="467.0" y="212.5" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">질문 + 청크 3개</text><text x="467.0" y="226.5" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">≈ 620토큰</text><rect class="node-rect sq" x="545" y="152" width="112" height="112" rx="2"/><text x="601.0" y="190.0" font-size="12" text-anchor="middle" font-weight="700">⑨ LLM</text><text x="601.0" y="205.0" font-size="12" text-anchor="middle">generator</text><text x="601.0" y="220.0" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">프롬프트를 읽고</text><text x="601.0" y="234.0" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">답 문장을 생성</text><rect class="node-rect sq" x="679" y="152" width="112" height="112" rx="2"/><text x="735.0" y="190.5" font-size="12" text-anchor="middle" font-weight="700">⑩ 답</text><text x="735.0" y="205.5" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">1년 미만 월 1일,</text><text x="735.0" y="219.5" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">1년 이상 연 15일</text><text x="735.0" y="233.5" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">(제12조)</text><path class="edge-line" d="M121,208.0 H135"/><polygon class="edge-arrow" points="135,204.0 143,208.0 135,212.0"/><path class="edge-line" d="M255,208.0 H269"/><polygon class="edge-arrow" points="269,204.0 277,208.0 269,212.0"/><path class="edge-line accent" d="M389,208.0 H403"/><polygon class="edge-arrow accent" points="403,204.0 411,208.0 403,212.0"/><path class="edge-line accent" d="M523,208.0 H537"/><polygon class="edge-arrow accent" points="537,204.0 545,208.0 537,212.0"/><path class="edge-line" d="M657,208.0 H671"/><polygon class="edge-arrow" points="671,204.0 679,208.0 671,212.0"/><path class="edge-line" d="M684.0,102 V119 H333.0 V144"/><polygon class="edge-arrow" points="329.0,144 333.0,152 337.0,144"/><text x="692.0" y="117" font-size="12" text-anchor="start" style="fill:var(--color-text-secondary);">색인을 읽음</text><text x="199.0" y="264" font-size="12" text-anchor="middle"></text></svg></div>
+        <p style="font-size:var(--text-xs);color:var(--color-text-muted)">출처: 논문 그림 2, LangChain RAG 튜토리얼(Load-Split-Store, Retrieve-Generate)(https://docs.langchain.com/oss/python/langchain/rag)을 참고해 다시 그림.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>RAG는 문서를 청크로 잘라 vector database에 넣어 두고, 질문이 오면 가까운 청크를 찾아 프롬프트에 붙여 LLM이 답하게 한다.</p></div>
+    </div>
+
+    <!-- 페이지 2: 따라가기 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>질문 하나는 단계마다 무엇으로 바뀌는가?</li>
+          <li>indexing은 질문 전에 하는가, 후에 하는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">Naive RAG의 세 단계: 질문 하나 따라가기<span class="paper-ref">논문 2.1절</span></h3>
+        <p>가장 단순한 형태인 <span class="term" data-definition="Naive RAG: indexing, retrieval, generation을 한 번씩 차례로 거치는 가장 초기의 RAG 형태. Retrieve-Read 틀이라고도 함.">Naive RAG</span>는 앞의 구조도를 한 번씩 거친다. 스페이스바로 한 줄씩 넘기시오.</p>
+        <div class="pseudocode-translation animate-in" id="pseudo-naive">
+          <div class="pseudocode-block">
+            <span class="translation-label">알고리즘</span>
+            <span class="pseudocode-line">INPUT: D, q, k</span>
+            <span class="pseudocode-line">chunks = SPLIT(CLEAN(D))</span>
+            <span class="pseudocode-line">index = STORE(EMBED(chunks))</span>
+            <span class="pseudocode-line">v = EMBED(q)</span>
+            <span class="pseudocode-line">top = TOPK(index, v, k)</span>
+            <span class="pseudocode-line">prompt = CONCAT(q, top)</span>
+            <span class="pseudocode-line">OUTPUT: LLM(prompt)</span>
+          </div>
+          <div class="pseudocode-explanation">
+            <span class="translation-label">설명</span>
+            <div class="pseudocode-explanation-lines">
+              <p class="pe">D는 사내 규정 120건, q는 "신입 사원의 연차는 며칠인가?", k는 3이다(예시).</p>
+              <p class="pe">[indexing] 512토큰씩 자르면 청크 1,840개이다. c17은 "제12조 ① 입사 1년 미만은 매월 1일…"이다.</p>
+              <p class="pe">청크 1,840개를 768차원 벡터로 바꿔 vector database에 저장한다.</p>
+              <p class="pe">[retrieval] indexing 때와 같은 embedding model로 q를 768차원 벡터 v로 바꾼다.</p>
+              <p class="pe">v와 cosine similarity가 큰 순서로 c17(0.89), c18(0.84), c52(0.41)을 고른다.</p>
+              <p class="pe">[generation] q와 청크 3개를 한 프롬프트로 묶는다(약 620토큰).</p>
+              <p class="pe">LLM이 "1년 미만은 매월 1일, 이상은 연 15일(제12조)"이라고 답한다.</p>
+            </div>
+          </div>
+          <div class="pseudocode-controls">
+            <button class="btn pseudocode-prev-btn">이전 줄</button>
+            <button class="btn pseudocode-next-btn">다음 줄</button>
+            <button class="btn pseudocode-reset-btn">처음부터</button>
+            <span class="pseudocode-progress"></span>
+          </div>
+        </div>
+
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>Naive RAG는 문서를 청크로 잘라 저장하고, 질문과 가까운 청크 k개를 찾아 프롬프트에 넣어 답을 만든다.</p></div>
+    </div>
+
+    <!-- 페이지 2: Naive RAG의 한계 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>Naive RAG는 어느 단계에서 실패하는가?</li>
+          <li>검색이 정확해도 답이 나빠질 수 있는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>Naive RAG의 한계<span class="paper-ref">논문 2.1절</span></h3>
+        <p>그림은 논문이 꼽은 Naive RAG의 한계를 단계별로 나타낸 것이다. 검색 단계에서는 무관한 청크가 섞이고, 생성 단계에서는 검색 내용과 맞지 않거나 검색 내용을 되풀이하기만 하는 답이 나온다.</p>
+        <div class="svg-diagram animate-in" style="margin:var(--space-3) auto"><svg viewBox="0 0 800 248" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Naive RAG의 indexing, retrieval, generation 단계와 각 단계의 한계, 그리고 증강의 어려움"><rect class="node-rect" x="16" y="8" width="224" height="48" rx="8"/><foreignObject x="20" y="12" width="216" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span><b>indexing</b></span></div></foreignObject><path class="edge-line" d="M240,32 H278"/><polygon class="edge-arrow" points="278,27 288,32 278,37"/><rect class="node-rect" x="16" y="96" width="224" height="64" rx="8"/><foreignObject x="20" y="100" width="216" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span>청크가 문맥을 끊음</span></div></foreignObject><path class="edge-line dashed" d="M128,56 V86"/><polygon class="edge-arrow" points="123,86 128,96 133,86"/><rect class="node-rect" x="288" y="8" width="224" height="48" rx="8"/><foreignObject x="292" y="12" width="216" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span><b>retrieval</b></span></div></foreignObject><path class="edge-line" d="M512,32 H550"/><polygon class="edge-arrow" points="550,27 560,32 550,37"/><rect class="node-rect" x="288" y="96" width="224" height="64" rx="8"/><foreignObject x="292" y="100" width="216" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span>정밀도·재현율이 낮아 무관한 청크가 섞이고 필요한 청크를 놓침</span></div></foreignObject><path class="edge-line dashed" d="M400,56 V86"/><polygon class="edge-arrow" points="395,86 400,96 405,86"/><rect class="node-rect" x="560" y="8" width="224" height="48" rx="8"/><foreignObject x="564" y="12" width="216" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span><b>generation</b></span></div></foreignObject><rect class="node-rect" x="560" y="96" width="224" height="64" rx="8"/><foreignObject x="564" y="100" width="216" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span>환각·무관한 답, 검색 내용을 그대로 되풀이</span></div></foreignObject><path class="edge-line dashed" d="M672,56 V86"/><polygon class="edge-arrow" points="667,86 672,96 677,86"/><rect class="node-rect accent" x="16" y="192" width="768" height="48" rx="8"/><foreignObject x="20" y="196" width="760" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span>증강의 어려움: 여러 청크를 이으면 말투가 어긋나고 내용이 겹치며, 한 번의 검색으로는 복잡한 질문에 부족함</span></div></foreignObject></svg></div>
+        <p>세 문제는 단계마다 따로 생기지만 서로 이어진다. 검색이 무관한 청크를 가져오면 생성 단계가 그 청크를 근거로 환각을 만들 수 있으므로, 뒤의 두 패러다임은 주로 검색 품질부터 고친다고 해석할 수 있다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>Naive RAG는 검색의 정밀도·재현율, 생성의 faithfulness, 여러 청크를 잇는 증강에서 모두 한계를 보인다.</p></div>
+    </div>
+
+    <!-- 페이지 4: 세 패러다임 비교 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>Advanced RAG는 Naive RAG에 무엇을 더했는가?</li>
+          <li>Modular RAG는 무엇을 바꿀 수 있게 하는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">Naive, Advanced, Modular RAG 비교<span class="paper-ref">논문 2절</span></h3>
+        <p><span class="term" data-definition="Advanced RAG: Naive RAG의 사슬 구조를 유지하면서 검색 전·후 최적화를 더해 검색 품질을 높인 RAG.">Advanced RAG</span>는 사슬을 두고 앞뒤를 다듬고, <span class="term" data-definition="Modular RAG: 검색·메모리·라우팅 같은 기능 모듈을 더하거나 바꾸고, 모듈의 순서와 흐름까지 조정할 수 있게 한 RAG.">Modular RAG</span>는 단계 자체를 모듈로 갈아 끼운다. 그림은 세 방식을 같은 단계 축에 놓은 것이다.</p>
+<div class="svg-diagram animate-in" style="margin:var(--space-3) auto"><svg viewBox="0 0 800 288" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="같은 단계 축 위에서 Naive RAG는 검색과 생성만, Advanced RAG는 검색 전후 최적화를 더하고, Modular RAG는 단계마다 모듈을 교체하고 생성 결과로 다시 검색하는 반복 흐름을 가진다" style="max-width:700px;margin-left:auto;margin-right:auto"><text x="202.0" y="15" font-size="13" text-anchor="middle" font-weight="700">pre-retrieval</text><text x="202.0" y="29" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">검색 전</text><text x="370.0" y="15" font-size="13" text-anchor="middle" font-weight="700">retrieval</text><text x="370.0" y="29" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">검색</text><text x="538.0" y="15" font-size="13" text-anchor="middle" font-weight="700">post-retrieval</text><text x="538.0" y="29" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">검색 후</text><text x="706.0" y="15" font-size="13" text-anchor="middle" font-weight="700">generation</text><text x="706.0" y="29" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">생성</text><path class="guide" d="M8,36 H792"/><text x="8" y="71" font-size="13" text-anchor="start" font-weight="700">Naive RAG</text><text x="8" y="87" font-size="12" text-anchor="start" style="fill:var(--color-text-secondary);">고정된 한 방향 사슬</text><text x="8" y="139" font-size="13" text-anchor="start" font-weight="700">Advanced RAG</text><text x="8" y="155" font-size="12" text-anchor="start" style="fill:var(--color-text-secondary);">사슬 + 앞뒤 최적화</text><text x="8" y="207" font-size="13" text-anchor="start" font-weight="700">Modular RAG</text><text x="8" y="223" font-size="12" text-anchor="start" style="fill:var(--color-text-secondary);">모듈 교체·순서 변경</text><rect class="node-rect sq" fill-opacity="0.5" x="128" y="46" width="148" height="56" rx="2" style="stroke-dasharray:4 3"/><text x="202.0" y="77.5" font-size="12.5" text-anchor="middle">없음</text><path class="edge-line" d="M276,74.0 H288"/><polygon class="edge-arrow" points="288,70.0 296,74.0 288,78.0"/><rect class="node-rect sq" x="296" y="46" width="148" height="56" rx="2"/><text x="370.0" y="77.5" font-size="12" text-anchor="middle">top-k 검색</text><path class="edge-line" d="M444,74.0 H456"/><polygon class="edge-arrow" points="456,70.0 464,74.0 456,78.0"/><rect class="node-rect sq" fill-opacity="0.5" x="464" y="46" width="148" height="56" rx="2" style="stroke-dasharray:4 3"/><text x="538.0" y="77.5" font-size="12.5" text-anchor="middle">없음</text><path class="edge-line" d="M612,74.0 H624"/><polygon class="edge-arrow" points="624,70.0 632,74.0 624,78.0"/><rect class="node-rect sq" x="632" y="46" width="148" height="56" rx="2"/><text x="706.0" y="70.0" font-size="12" text-anchor="middle">질문 + 청크 →</text><text x="706.0" y="85.0" font-size="12" text-anchor="middle">LLM</text><rect class="node-rect sq accent" x="128" y="114" width="148" height="56" rx="2"/><text x="202.0" y="138.0" font-size="12" text-anchor="middle">query rewriting</text><text x="202.0" y="153.0" font-size="12" text-anchor="middle">indexing 최적화</text><path class="edge-line" d="M276,142.0 H288"/><polygon class="edge-arrow" points="288,138.0 296,142.0 288,146.0"/><rect class="node-rect sq" x="296" y="114" width="148" height="56" rx="2"/><text x="370.0" y="145.5" font-size="12" text-anchor="middle">top-k 검색</text><path class="edge-line" d="M444,142.0 H456"/><polygon class="edge-arrow" points="456,138.0 464,142.0 456,146.0"/><rect class="node-rect sq accent" x="464" y="114" width="148" height="56" rx="2"/><text x="538.0" y="138.0" font-size="12" text-anchor="middle">reranking</text><text x="538.0" y="153.0" font-size="12" text-anchor="middle">context compression</text><path class="edge-line" d="M612,142.0 H624"/><polygon class="edge-arrow" points="624,138.0 632,142.0 624,146.0"/><rect class="node-rect sq" x="632" y="114" width="148" height="56" rx="2"/><text x="706.0" y="138.0" font-size="12" text-anchor="middle">질문 + 청크 →</text><text x="706.0" y="153.0" font-size="12" text-anchor="middle">LLM</text><rect class="node-rect sq accent" x="128" y="182" width="148" height="56" rx="2" style="stroke-dasharray:4 3"/><text x="202.0" y="206.0" font-size="12" text-anchor="middle">Routing</text><text x="202.0" y="221.0" font-size="12" text-anchor="middle">Query rewriting</text><path class="edge-line" d="M276,210.0 H288"/><polygon class="edge-arrow" points="288,206.0 296,210.0 288,214.0"/><rect class="node-rect sq accent" x="296" y="182" width="148" height="56" rx="2" style="stroke-dasharray:4 3"/><text x="370.0" y="206.0" font-size="12" text-anchor="middle">Search · RAG-Fusion</text><text x="370.0" y="221.0" font-size="12" text-anchor="middle">Memory</text><path class="edge-line" d="M444,210.0 H456"/><polygon class="edge-arrow" points="456,206.0 464,210.0 456,214.0"/><rect class="node-rect sq accent" x="464" y="182" width="148" height="56" rx="2" style="stroke-dasharray:4 3"/><text x="538.0" y="206.0" font-size="12" text-anchor="middle">Reranking</text><text x="538.0" y="221.0" font-size="12" text-anchor="middle">Compression</text><path class="edge-line" d="M612,210.0 H624"/><polygon class="edge-arrow" points="624,206.0 632,210.0 624,214.0"/><rect class="node-rect sq accent" x="632" y="182" width="148" height="56" rx="2" style="stroke-dasharray:4 3"/><text x="706.0" y="206.0" font-size="12" text-anchor="middle">Predict</text><text x="706.0" y="221.0" font-size="12" text-anchor="middle">Task Adapter</text><path class="edge-line accent" d="M706.0,238 V260 H202.0 V246"/><polygon class="edge-arrow accent" points="198.0,246 202.0,238 206.0,246"/><text x="400" y="256" font-size="12" text-anchor="middle" style="fill:var(--color-text-secondary);">반복·분기: 생성 결과로 다시 검색 (예: ITER-RETGEN)</text><text x="8" y="280" font-size="12" text-anchor="start" style="fill:var(--color-text-secondary);">교과 색 칸 = 앞 행에 없던 단계, 점선 칸 = 교체·추가할 수 있는 모듈</text></svg></div>
+        <table class="data-table animate-in">
+          <caption>표는 세 방식의 차이를 나타낸 것이다. (논문 2.1~2.3절)</caption>
+          <thead><tr><th>기준</th><th>Naive RAG</th><th>Advanced RAG</th><th>Modular RAG</th></tr></thead>
+          <tbody>
+            <tr><td>검색 전</td><td>없음</td><td>indexing 최적화(슬라이딩 윈도, 메타데이터), query rewriting</td><td>모듈로 더하거나 교체</td></tr>
+            <tr><td>검색 후</td><td>없음</td><td>reranking, context compression</td><td>모듈로 더하거나 교체</td></tr>
+            <tr><td>흐름</td><td>한 방향 사슬</td><td>한 방향 사슬</td><td>순서 변경, 반복, 분기</td></tr>
+          </tbody>
+        </table>
+        <p class="diff-line"><strong>차이 한 줄</strong> Naive RAG는 검색 → 생성뿐, Advanced RAG는 앞뒤를 다듬고, Modular RAG는 단계와 순서를 바꾼다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>Advanced RAG는 사슬을 지키며 검색 앞뒤를 다듬고, Modular RAG는 모듈의 종류와 순서까지 바꾼다.</p></div>
+    </div>
+
+    <!-- 페이지 4: 모듈형 RAG -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>Modular RAG는 무엇을 바꿀 수 있게 하는가?</li>
+          <li>새 패턴은 Naive RAG의 순서를 어떻게 바꾸는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">Modular RAG의 패턴<span class="paper-ref">논문 2.3절</span></h3>
+        <p>Modular RAG는 기능 모듈을 더하거나 갈아 끼울 수 있게 한다. 논문은 새 모듈로 Search, RAG-Fusion, Memory, Routing, Predict, Task Adapter의 6가지를 든다.</p>
+        <p>그림은 모듈의 순서를 바꾼 대표 패턴을 나타낸 것이다. 교과 색 칸이 Naive RAG에 새로 끼우거나 바꾼 모듈이다.</p>
+        <div class="svg-diagram animate-in" style="margin:var(--space-3) auto"><svg viewBox="0 0 800 224" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Modular RAG의 패턴: Naive RAG의 Retrieve-Read에 Rewrite, Generate, 반복 Retrieve 모듈을 끼워 넣거나 바꾼다"><foreignObject x="16" y="8" width="200" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4; font-weight:700; text-align:left"><span>Naive RAG</span></div></foreignObject><rect class="node-rect sq" x="232" y="8" width="104" height="40" rx="2"/><foreignObject x="236" y="12" width="96" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span>Retrieve</span></div></foreignObject><path class="edge-line" d="M336,28 H358"/><polygon class="edge-arrow" points="358,23 368,28 358,33"/><rect class="node-rect sq" x="368" y="8" width="104" height="40" rx="2"/><foreignObject x="372" y="12" width="96" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span>Read</span></div></foreignObject><foreignObject x="16" y="64" width="200" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4; font-weight:700; text-align:left"><span>Rewrite-Retrieve-Read</span></div></foreignObject><rect class="node-rect sq accent" x="232" y="64" width="104" height="40" rx="2"/><foreignObject x="236" y="68" width="96" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span>Rewrite</span></div></foreignObject><path class="edge-line" d="M336,84 H358"/><polygon class="edge-arrow" points="358,79 368,84 358,89"/><rect class="node-rect sq" x="368" y="64" width="104" height="40" rx="2"/><foreignObject x="372" y="68" width="96" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span>Retrieve</span></div></foreignObject><path class="edge-line" d="M472,84 H494"/><polygon class="edge-arrow" points="494,79 504,84 494,89"/><rect class="node-rect sq" x="504" y="64" width="104" height="40" rx="2"/><foreignObject x="508" y="68" width="96" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span>Read</span></div></foreignObject><foreignObject x="16" y="120" width="200" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4; font-weight:700; text-align:left"><span>Generate-Read</span></div></foreignObject><rect class="node-rect sq accent" x="232" y="120" width="104" height="40" rx="2"/><foreignObject x="236" y="124" width="96" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span>Generate</span></div></foreignObject><path class="edge-line" d="M336,140 H358"/><polygon class="edge-arrow" points="358,135 368,140 358,145"/><rect class="node-rect sq" x="368" y="120" width="104" height="40" rx="2"/><foreignObject x="372" y="124" width="96" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span>Read</span></div></foreignObject><foreignObject x="16" y="176" width="200" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4; font-weight:700; text-align:left"><span>ITER-RETGEN·DSP</span></div></foreignObject><rect class="node-rect sq" x="232" y="176" width="104" height="40" rx="2"/><foreignObject x="236" y="180" width="96" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span>Retrieve</span></div></foreignObject><path class="edge-line" d="M336,196 H358"/><polygon class="edge-arrow" points="358,191 368,196 358,201"/><rect class="node-rect sq" x="368" y="176" width="104" height="40" rx="2"/><foreignObject x="372" y="180" width="96" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span>Read</span></div></foreignObject><path class="edge-line" d="M472,196 H494"/><polygon class="edge-arrow" points="494,191 504,196 494,201"/><rect class="node-rect sq accent" x="504" y="176" width="104" height="40" rx="2"/><foreignObject x="508" y="180" width="96" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span>Retrieve</span></div></foreignObject><path class="edge-line" d="M608,196 H630"/><polygon class="edge-arrow" points="630,191 640,196 630,201"/><rect class="node-rect sq" x="640" y="176" width="104" height="40" rx="2"/><foreignObject x="644" y="180" width="96" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span>Read</span></div></foreignObject></svg></div>
+        <p>Naive RAG의 Retrieve-Read도 모듈 두 개를 고정 순서로 이은 경우이므로, 앞의 두 패러다임은 Modular RAG의 특수한 경우로 해석할 수 있다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>Modular RAG는 모듈의 종류와 순서를 바꿔 Rewrite, Generate, 반복 Retrieve 같은 새 흐름을 만든다.</p></div>
+    </div>
+
+    <!-- 페이지 5: RAG 대 미세 조정 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>RAG와 fine-tuning은 어느 축에서 다른가?</li>
+          <li>둘 중 하나만 골라야 하는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>RAG, fine-tuning, 프롬프트 엔지니어링<span class="paper-ref">논문 2.4절</span></h3>
+        <p>논문은 모델 최적화 방법을 외부 지식 필요도와 모델 적응 필요도의 두 축으로 비교한다. 그림은 그 비교를 나타낸 것이다.</p>
+        <div class="with-figure">
+          <div class="step-cards animate-in">
+            <div class="step-card"><div class="step-num">1</div><div class="step-body"><strong>프롬프트 엔지니어링</strong><p>모델은 두고 지시와 예시만 다듬는다. 가장 싸다.</p></div></div>
+            <div class="step-card"><div class="step-num">2</div><div class="step-body"><strong>RAG</strong><p>문서만 바꿔 실시간으로 갱신하고 근거를 보여 준다. 검색 때문에 응답이 늦고 데이터 검색의 윤리 문제가 따른다.</p></div></div>
+            <div class="step-card"><div class="step-num">3</div><div class="step-body"><strong>fine-tuning</strong><p>말투와 형식까지 깊게 맞추지만 갱신하려면 다시 학습해야 하고 계산 비용이 크다.</p></div></div>
+            <div class="step-card"><div class="step-num">4</div><div class="step-body"><strong>논문이 인용한 비교</strong><p>기존·새 지식 모두에서 RAG가 비지도 fine-tuning보다 나았다는 연구를 든다.</p></div></div>
+          </div>
+          <figure class="figure side" style="--figure-side-width:340px"><svg viewBox="0 0 400 256" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="외부 지식 필요도와 모델 적응 필요도 두 축 위에 프롬프트 엔지니어링, fine-tuning, 세 RAG 단계, RAG와 fine-tuning의 결합을 놓은 그림"><path class="guide-axis" d="M56,224 H392 M56,224 V24"/><polygon class="ink-fill" points="392,220 400,224 392,228"/><polygon class="ink-fill" points="52,24 56,16 60,24"/><text x="392" y="248" text-anchor="end" font-size="13">외부 지식 필요도 →</text><text x="48" y="28" text-anchor="end" font-size="13" transform="rotate(-90 48 28)">모델 적응 필요도 →</text><circle class="ink-fill" cx="96" cy="200" r="6"/><text x="106" y="204" text-anchor="start" font-size="13">프롬프트 엔지니어링</text><circle class="ink-fill" cx="116" cy="60" r="6"/><text x="126" y="64" text-anchor="start" font-size="13">fine-tuning</text><circle class="ink-fill" cx="264" cy="196" r="6"/><text x="274" y="200" text-anchor="start" font-size="13">Naive RAG</text><circle class="ink-fill" cx="298" cy="164" r="6"/><text x="308" y="168" text-anchor="start" font-size="13">Advanced RAG</text><circle class="dot-accent" cx="332" cy="128" r="6"/><text x="322" y="132" text-anchor="end" font-size="13" class="accent-text">Modular RAG</text><circle class="ink-fill" cx="338" cy="52" r="6"/><text x="328" y="56" text-anchor="end" font-size="13">RAG + fine-tuning</text></svg><figcaption class="figure-caption">출처: 논문 그림 4를 단순화한 개념도(위치는 정성적)</figcaption></figure>
+        </div>
+        <p>논문은 두 방법이 서로 배타적이지 않으며 함께 쓰려면 여러 번 조정해야 할 수 있다고 본다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>RAG는 외부 지식을, fine-tuning은 모델 적응을 맡으며 둘은 함께 쓸 수 있다.</p></div>
+    </div>
+
+    <!-- 페이지 7: 세 방법 비교표 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>규정이 바뀌면 세 방법은 각각 무엇을 바꾸는가?</li>
+          <li>언제 RAG를 고르는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">세 방법의 비교<span class="paper-ref">논문 2.4절</span></h3>
+        <p>그림은 규정이 개정된 같은 상황에서 세 방법이 바꾸는 곳을 나타낸 것이다. 앞의 둘은 프롬프트를, fine-tuning은 모델 가중치를 바꾼다.</p>
+<div class="svg-diagram animate-in" style="margin:var(--space-3) auto"><svg viewBox="0 0 800 204" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="같은 질문에 프롬프트 엔지니어링은 지시와 예시를, RAG는 검색한 청크를 프롬프트에 넣고, fine-tuning은 모델 가중치를 바꾼다"><rect class="node-rect sq" x="128" y="2" width="664" height="30" rx="2"/><text x="460" y="22" font-size="13" text-anchor="middle" font-weight="700">같은 상황: 규정이 어제 개정됐고, 질문은 "신입 사원의 연차는 며칠인가?"</text><text x="232.0" y="52" font-size="13" text-anchor="middle" font-weight="700">프롬프트 엔지니어링</text><text x="460.0" y="52" font-size="13" text-anchor="middle" font-weight="700" style="fill:var(--color-accent);">RAG</text><text x="688.0" y="52" font-size="13" text-anchor="middle" font-weight="700">fine-tuning</text><text x="8" y="80" font-size="12.5" text-anchor="start" font-weight="700">프롬프트에</text><text x="8" y="95" font-size="12" text-anchor="start" style="fill:var(--color-text-secondary);">들어가는 것</text><text x="8" y="128" font-size="12.5" text-anchor="start" font-weight="700">LLM 가중치</text><text x="8" y="143" font-size="12" text-anchor="start" style="fill:var(--color-text-secondary);">(parametric)</text><text x="8" y="176" font-size="12.5" text-anchor="start" font-weight="700">규정이 또</text><text x="8" y="191" font-size="12" text-anchor="start" style="fill:var(--color-text-secondary);">바뀌면</text><rect class="node-rect sq" x="128" y="58" width="208" height="42" rx="2"/><text x="232.0" y="75.0" font-size="12.5" text-anchor="middle">질문 + 사람이 쓴</text><text x="232.0" y="90.0" font-size="12.5" text-anchor="middle">지시·예시</text><rect class="node-rect sq" x="356" y="58" width="208" height="42" rx="2"/><text x="460.0" y="75.0" font-size="12.5" text-anchor="middle">질문 + 검색한</text><text x="460.0" y="90.0" font-size="12.5" text-anchor="middle">청크 3개</text><rect class="node-rect sq" x="584" y="58" width="208" height="42" rx="2"/><text x="688.0" y="82.5" font-size="12.5" text-anchor="middle">질문만</text><rect class="node-rect sq" x="128" y="106" width="208" height="42" rx="2"/><text x="232.0" y="130.5" font-size="12.5" text-anchor="middle">그대로</text><rect class="node-rect sq" x="356" y="106" width="208" height="42" rx="2"/><text x="460.0" y="130.5" font-size="12.5" text-anchor="middle">그대로</text><rect class="node-rect sq accent" x="584" y="106" width="208" height="42" rx="2"/><text x="688.0" y="123.0" font-size="12.5" text-anchor="middle">규정으로 추가 학습해</text><text x="688.0" y="138.0" font-size="12.5" text-anchor="middle">가중치가 바뀜</text><rect class="node-rect sq" x="128" y="154" width="208" height="42" rx="2"/><text x="232.0" y="171.0" font-size="12.5" text-anchor="middle">프롬프트 문구를</text><text x="232.0" y="186.0" font-size="12.5" text-anchor="middle">고쳐 씀</text><rect class="node-rect sq" x="356" y="154" width="208" height="42" rx="2"/><text x="460.0" y="171.0" font-size="12.5" text-anchor="middle">문서 모음만</text><text x="460.0" y="186.0" font-size="12.5" text-anchor="middle">교체</text><rect class="node-rect sq" x="584" y="154" width="208" height="42" rx="2"/><text x="688.0" y="178.5" font-size="12.5" text-anchor="middle">다시 학습</text></svg></div>
+        <table class="data-table animate-in">
+          <caption>표는 세 방법의 쓰임을 나타낸 것이다. 비용 수준은 일반적인 경향이다.</caption>
+          <thead><tr><th>방법</th><th>언제 쓰나</th><th>지식 갱신</th><th>비용</th><th>약점</th></tr></thead>
+          <tbody>
+            <tr><td>프롬프트 엔지니어링</td><td>지시·말투를 빠르게 바꿀 때</td><td>프롬프트에 직접 써 넣음</td><td>가장 낮음</td><td>입력 길이 한도</td></tr>
+            <tr class="hl"><td>RAG</td><td>자주 바뀌는 지식에 근거가 필요할 때</td><td>문서만 교체</td><td>검색 구축·운영, 응답 지연</td><td>검색이 틀리면 답도 틀림</td></tr>
+            <tr><td>fine-tuning</td><td>말투·형식을 모델에 깊게 맞출 때</td><td>다시 학습</td><td>학습 계산 비용이 큼</td><td>근거 제시가 어려움</td></tr>
+          </tbody>
+        </table>
+        <p class="diff-line"><strong>차이 한 줄</strong> 프롬프트 엔지니어링은 지시를 바꾸고, RAG는 모델 밖 지식을 바꾸며, fine-tuning은 모델 안 가중치를 바꾼다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>지식이 자주 바뀌고 근거가 필요하면 RAG를, 모델의 말투와 형식을 깊게 맞추려면 fine-tuning을 쓴다.</p></div>
+    </div>
+
+    <!-- 페이지 6: 연구 계보 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>세 패러다임은 앞선 연구에서 무엇을 이어받았는가?</li>
+        </ul>
+        <div class="callout callout-accent animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">새로운 점</strong>
+            <p>이 서베이는 개별 방법을 제안하지 않고, 흩어진 RAG 연구를 세 패러다임과 세 기술의 좌표 위에 다시 놓는다.</p>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>연구 계보<span class="paper-ref">논문 1절, 2절</span></h3>
+        <div class="lineage-tree animate-in" style="margin:var(--space-2) 0; padding:var(--space-4) var(--space-6)">
+          <div class="lineage-node lineage-root" data-detail="이 서베이가 정리한 Modular RAG 틀">
+            <span class="lineage-label">Modular RAG 틀</span>
+            <span class="lineage-detail">Gao et al., 2023</span>
+            <span class="novelty-badge">흩어진 RAG 연구를 세 패러다임으로 체계화</span>
+          </div>
+          <div class="lineage-branch">
+            <div class="lineage-edge-label">출발점</div>
+            <div class="lineage-node" data-detail="검색기와 생성기를 결합한 RAG"><span class="lineage-label">RAG</span><span class="lineage-detail">Lewis et al., 2020</span></div>
+            <p class="lineage-note">dense retriever와 생성 모델을 잇는 Retrieve-Read 구조를 이어받음. → <strong class="novelty">LLM 시대의 추론 단계 RAG까지 같은 틀로 묶음</strong>.</p>
+          </div>
+          <div class="lineage-branch">
+            <div class="lineage-edge-label">검색기</div>
+            <div class="lineage-node" data-detail="dense passage retrieval"><span class="lineage-label">DPR</span><span class="lineage-detail">Karpukhin et al., 2020</span></div>
+            <p class="lineage-note">query와 문서를 따로 임베딩하는 dense retrieval을 이어받음. → <strong class="novelty">임베딩 fine-tuning 같은 retriever 개선을 한 절로 정리</strong>.</p>
+          </div>
+          <div class="lineage-branch">
+            <div class="lineage-edge-label">새 패턴</div>
+            <div class="lineage-node" data-detail="query rewriting 후 검색"><span class="lineage-label">Rewrite-Retrieve-Read</span><span class="lineage-detail">Ma et al., 2023</span></div>
+            <p class="lineage-note">Retrieve-Read 순서를 이어받음. → <strong class="novelty">앞에 재작성 모듈을 끼워 순서 자체를 바꿈</strong>.</p>
+          </div>
+          <div class="lineage-branch">
+            <div class="lineage-edge-label">적응형</div>
+            <div class="lineage-node" data-detail="reflection token으로 검색 시점 결정"><span class="lineage-label">Self-RAG</span><span class="lineage-detail">Asai et al., 2023</span></div>
+            <p class="lineage-note">검색 결과를 읽어 답하는 흐름을 이어받음. → <strong class="novelty">검색할지 말지를 모델이 스스로 정함</strong>.</p>
+          </div>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>세 패러다임은 RAG와 DPR의 Retrieve-Read 구조를 이어받고, rewriting과 adaptive retrieval로 순서와 시점을 바꿔 왔다.</p></div>
+    </div>
+
+    <!-- 페이지 7: 핵심 정리와 확인 문제 1 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-accent animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">핵심 정리</strong>
+            <ul>
+              <li>Naive RAG는 indexing, retrieval, generation을 한 번씩 거친다.</li>
+              <li>Advanced RAG는 검색 전·후를 최적화한다.</li>
+              <li>Modular RAG는 모듈의 종류와 순서를 바꾼다.</li>
+              <li>패러다임 문항은 사슬 구조를 지키는지, 순서를 바꾸는지부터 가려라.</li>
+            </ul>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag outline">확인 문제</span>세 패러다임</h3>
+        <div class="quiz-container animate-in" id="quiz-module1a">
+          <div class="quiz-question-block" data-correct="option-d"
+               data-explanation-right="④ | reranking은 검색한 청크를 다시 정렬하는 검색 후 최적화이므로 검색 전 최적화가 아니다."
+               data-explanation-wrong="| 정답은 ④이다. reranking은 검색이 끝난 뒤 청크 순서를 바꾸는 검색 후 최적화이다. ②의 query rewriting은 검색 전 최적화가 맞다.">
+            <h3 class="quiz-question"><span class="q-num">1</span>다음 중 Advanced RAG의 검색 전 최적화로 옳지 <u>않은</u> 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 청크에 메타데이터를 붙인다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② query를 rewriting한다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 슬라이딩 윈도로 분할한다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 검색한 청크를 reranking한다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ query를 여러 개로 확장한다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <div class="quiz-question-block" data-correct="option-b"
+               data-explanation-right="② | Generate-Read는 검색 대신 LLM이 만든 문맥을 읽으므로 Retrieve 모듈을 Generate 모듈로 바꾼 패턴이다."
+               data-explanation-wrong="| 정답은 ②이다. Generate-Read는 Retrieve 모듈 자리에 LLM Generate 모듈을 둔다. ①은 Rewrite-Retrieve-Read의 설명이다.">
+            <h3 class="quiz-question"><span class="q-num">2</span>다음 중 Modular RAG의 Generate-Read 패턴에 대한 설명으로 옳은 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 검색 전에 query를 rewriting한다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 검색 대신 LLM이 만든 문맥을 읽는다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 검색과 읽기를 여러 번 번갈아 한다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 검색 결과를 reranking한 뒤 읽는다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 지식 그래프만 검색한다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1a')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1a')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>reranking은 검색 후 최적화이고, Generate-Read는 Retrieve 모듈을 Generate 모듈로 바꾼 패턴이다.</p></div>
+    </div>
+
+    <!-- 페이지 8: 확인 문제 2 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>상황에 맞게 RAG와 fine-tuning을 고를 수 있는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag outline">확인 문제</span>RAG와 fine-tuning</h3>
+        <div class="quiz-container animate-in" id="quiz-module1b">
+          <div class="quiz-question-block" data-correct="option-c"
+               data-explanation-right="③ | 매일 바뀌는 사내 규정은 문서만 바꾸면 반영되고 근거 조항을 보여 줘야 하므로 RAG가 알맞다."
+               data-explanation-wrong="| 정답은 ③이다. 자주 바뀌고 근거가 필요한 지식은 RAG가 알맞다. ①은 매번 다시 학습해야 하므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">3</span>매일 바뀌는 사내 규정을 근거 조항과 함께 답해야 할 때 가장 알맞은 선택은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 매일 규정 전체로 fine-tuning한다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 프롬프트 문구만 다듬는다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 규정 문서를 indexing해 RAG로 답한다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 모델 크기만 키운다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 검색 없이 온도만 낮춘다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <div class="quiz-question-block" data-correct="option-e"
+               data-explanation-right="⑤ | ㄱ, ㄴ, ㄷ 모두 논문 2.4절의 비교와 맞다."
+               data-explanation-wrong="| 정답은 ⑤이다. ㄱ, ㄴ, ㄷ 모두 2.4절과 맞다. ③은 ㄴ을 빠뜨렸다.">
+            <h3 class="quiz-question"><span class="q-num">4</span>RAG와 fine-tuning에 대한 설명으로 옳은 것만을 <span class="nobr">&lt;보기&gt;에서</span> 있는 대로 고른 것은?</h3>
+            <div class="bogi">
+              <p>ㄱ. 두 방법은 함께 쓸 수 있다.</p>
+              <p>ㄴ. RAG는 검색 탓에 응답이 늦을 수 있다.</p>
+              <p>ㄷ. fine-tuning은 갱신하려면 재학습해야 한다.</p>
+            </div>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① ㄱ</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② ㄷ</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ ㄱ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ ㄴ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ ㄱ, ㄴ, ㄷ</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module1b')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module1b')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>자주 바뀌고 근거가 필요한 지식은 RAG가 맡고, fine-tuning과 함께 쓸 수도 있다.</p></div>
+    </div>
+
+  </div>
+</section>

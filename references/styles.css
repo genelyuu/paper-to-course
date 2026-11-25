@@ -2937,3 +2937,31 @@ html { scroll-padding-top: var(--nav-height); }
 .module-header .module-number { grid-row: 1 / span 2; align-self: center; }
 .module-header .module-title { line-height: 1.15; align-self: end; margin: 0; }
 .module-header .module-subtitle { line-height: 1.45; align-self: start; margin: 4px 0 0; }
+
+/* ── 스킬 검증(RAG 서베이)에서 나온 보완 ───────────────────── */
+/* 도식 클래스는 .figure 안 SVG에서도 같게 동작한다 */
+.figure svg .node-rect { fill: var(--color-surface); stroke: var(--color-border); stroke-width: 2; rx: var(--radius-md); }
+.figure svg .node-rect.accent { fill: var(--color-accent-light); stroke: var(--color-accent); }
+.figure svg .node-rect.sq { rx: 2px; }
+.figure svg .edge-line { stroke: var(--color-border); stroke-width: 2; fill: none; }
+.figure svg .edge-line.accent { stroke: var(--color-accent); }
+.figure svg .edge-arrow { fill: var(--color-border); }
+.figure svg .edge-arrow.accent { fill: var(--color-accent); }
+/* 그림이 있는 문항은 선택지를 한 줄에 하나씩(그림 옆에서 선택지가 좁아지지 않게) */
+.q-body .quiz-options, .q-body .quiz-options.row { display: grid; grid-template-columns: minmax(0, 1fr); }
+.q-body .quiz-options.row .quiz-option { white-space: normal; }
+/* <보기> 마지막 줄 아래 여백 없음 */
+.bogi p:last-child, .bogi > :last-child { margin-bottom: 0; }
+/* 오른쪽 아래 쪽 번호(‹ n/N ›)가 요약 띠 끝을 가리지 않게 */
+@media (min-width: 1025px) { .cornell > .summary { padding-right: calc(var(--space-6) + 120px); } }
+/* 표: 서베이 논문의 분류표·비교표. 숫자 열은 .num, 강조 행은 .hl */
+.data-table { width: 100%; border-collapse: collapse; margin: var(--space-4) 0; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.data-table caption { caption-side: bottom; padding-top: var(--space-2); font-size: var(--text-xs); color: var(--color-text-muted); text-align: left; }
+.data-table th, .data-table td { padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--color-border); text-align: left; vertical-align: top; }
+.data-table thead th { border-bottom: 2px solid #1F2328; font-weight: 700; color: #1F2328; white-space: nowrap; }
+.data-table td.num, .data-table th.num { text-align: right; }
+.data-table tr.hl td { background: var(--color-accent-light); }
+.data-table tr.hl td:first-child { box-shadow: inset 3px 0 0 var(--color-accent); }
+/* 차이 한 줄: 비교표 아래 요약 문장 */
+.diff-line { margin: var(--space-3) 0 0; padding: var(--space-2) var(--space-3); border-left: 3px solid var(--color-accent); background: var(--color-accent-light); font-size: var(--text-sm); }
+.diff-line strong { color: var(--color-accent); margin-right: var(--space-2); }

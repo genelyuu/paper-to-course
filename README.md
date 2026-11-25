@@ -20,7 +20,25 @@
 
 <br>
 
-## Why this matters
+## 한눈에 보기: 논문 1편 → 강의 1개
+
+`Attention Is All You Need`(arXiv 1706.03762)를 입력하면 다음 산출물이 생성된다.
+
+| 입력 | 처리 (자동) | 출력 |
+|---|---|---|
+| arXiv URL 또는 PDF<br>영문 논문 15쪽 | 정독 → 배경 조사 → 설계<br>→ 단원 생성 → 자동 검증 | `index.html` 단일 파일<br>3단원 · 21쪽 · 문항 10개 · 도식 12개 · 삽화 3개 |
+
+| 논문 원문 | 산출 강의에서의 형태 |
+|---|---|
+| §1 서론: "RNN은 순차 계산이라 병렬화가 어렵다" | 1단원 1쪽: **기존 방식 vs 제안 방식 비교도** + 신규성 3개 요약 |
+| §3.2.1 식 (1) $\mathit{softmax}(QK^\top/\sqrt{d_k})V$ | 2단원: 행렬 크기 도식 → **단계별 수식 유도**(스페이스바로 1단계씩) → 의사코드 행별 해설 |
+| 표 2 BLEU 28.4 / 41.8 | 3단원: **지표 전환형 결과 비교**, 채점 원리 삽화 |
+| 표 3 헤드 수 제거 실험 | 3단원: 헤드 수 1·4·8·16·32 **탭 전환** + 해석 |
+| 참고문헌의 선행 연구 | 1단원: **연구 계보 트리**(계승한 것 → 달라진 것, 신규성 표시) |
+
+<br>
+
+## 목적: Why this matters
 
 연구 성과는 논문으로 유통되지만, 논문은 **같은 분야 전문가가 읽는 것을 전제로 쓴 문서**다. 실무에서 논문을 만나는 엔지니어, 임상의, 애널리스트에게는 반복적인 비용(언어, 전제 지식, 검증)이 발생한다.
 
@@ -38,6 +56,18 @@
 
 LLM이 논문을 "요약"하는 단계는 이미 일상이 되었다. 다음 단계는 **요약이 아닌 고품질의 학습 산출물을, 검증과 함께, 반복 가능하게** 만드는 것이다. 본 저장소는 일련의 단계를 한국어 사용자를 대상으로 구현한 레퍼런스다.
 
+### 이점: 기존 방식과의 비교
+
+| 비교 항목 | 원문 직접 독해 | LLM 채팅 요약 | **본 스킬** |
+|---|---|---|---|
+| 언어 장벽 | 영어 원문 그대로 | 한국어, 용어 불통일 | 한국어 교재 문체 + **용어표로 번역어 고정**, 통용 영어 개념어는 원어 유지 |
+| 선수 지식 | 독자가 별도 조사 | 질문해야만 보충 | **배경 단원 자동 구성**(Attention 예: 벡터·내적, 소프트맥스, 인코더-디코더) |
+| 구조 이해 | 그림 1~2개 | 텍스트 위주 | **개념마다 도식**, 전체 구조도, 차이 비교표 |
+| 이해 확인 | 없음 | 없음 | **5지선다·`<보기>`형 문항**, 즉시 채점과 오답 분석 |
+| 원문 추적 | — | 출처 불명확 | 화면마다 **논문 절 번호 표시** |
+| 품질 보증 | — | 검증 불가 | **린터 16개 규칙 + 화면 높이 측정**, 실패 시 종료 코드 1 |
+| 재사용성 | — | 대화창에 산재 | **단일 HTML 파일**, 서버·설치 불필요 |
+
 <br>
 
 ## What it produces
@@ -50,7 +80,7 @@ LLM이 논문을 "요약"하는 단계는 이미 일상이 되었다. 다음 단
 
 - **Page model.** 화면 하나가 1페이지다. 코넬식 3분할(단서 · 노트 · 요약)을 쓰고, 1440×900 뷰포트에서 스크롤 없이 들어가는지 측정한다 (허용 높이 765px).
 - **Structure mirrors the paper.** 모듈 순서와 제목은 논문 목차를 따르고, 번호는 `1, 2, 3 …` 연속 정수로 매긴다. 논문 절 위치는 화면 제목 끝의 `.paper-ref` 태그로 표시한다. 논문에 없는 선수 지식은 별도 모듈로 분리한다.
-- **Keyboard paging.** ←→↑↓/PageUp/PageDown/Home/End는 쪽 이동, 스페이스바는 현재 쪽의 주 버튼(다음 단계 진행, 확인 문제는 선택 없이 정답·해설 공개), Shift+스페이스바는 이전 단계이다. 우하단 `‹ n / N ›` 표시로 현재 쪽을 보여 준다. 쪽은 표지, 모듈 첫 페이지, 각 화면 단위이다.
+- **Keyboard paging.** ←→↑↓/PageUp/PageDown/Home/End는 쪽 이동, 스페이스바는 현재 쪽의 주 버튼을 순서대로 실행하며(수식 다음 단계 → 의사코드 다음 줄 → 대화 다음 말풍선 → 전환 버튼·탭 → 확인 문제 정답·해설 공개 → 다음 쪽), Shift+스페이스바는 단계·탭을 되돌린 뒤 이전 쪽으로 간다. 우하단 `‹ n / N ›` 표시로 현재 쪽을 보여 준다. 쪽은 표지, 모듈 첫 페이지, 각 화면 단위이다.
 - **Illustrations.** 개념마다 SVG 코드로 그린 도식을 두고, 따로 사물·장면 선화 삽화를 강의마다 3개 이상 넣는다. 삽화는 작은 로컬 모델(SANA-Sprint 0.6B)로 만든 단순한 사물에 화살표·라벨을 SVG로 덧그려, 그림만 보고도 개념의 흐름이 읽히게 한다. `check-pages.py`가 개수를 검사한다.
 - **색상 규약.** 색의 역할은 [`references/design-system.md#색상-규약`](references/design-system.md#색상-규약)을 따른다.
 - **A figure for every concept.** 새로 도입하는 개념·알고리즘·수식마다 본문 수치와 일치하는 코드 그림을 둔다.
@@ -63,36 +93,39 @@ LLM이 논문을 "요약"하는 단계는 이미 일상이 되었다. 다음 단
 
 <br>
 
-## Quick start
+## 사용 절차
+
+**① 설치**: 스킬 디렉터리에 복제한다.
 
 ```bash
 git clone https://github.com/genelyuu/paper-to-course.git ~/.claude/skills/paper-to-course
 ```
 
-Claude Code 세션에서:
+**② 요청**: Claude Code 세션에서 논문을 지정한다.
 
 ```text
 https://arxiv.org/abs/1706.03762 강의로 만들어 줘
 ```
 
-생성된 디렉터리의 `index.html`을 확인한다. 런타임 의존성은 없다 (KaTeX, 웹 폰트만 CDN).
+**③ 자동 처리**: 다섯 단계가 순차 실행된다. 각 단계의 산출물은 Attention 예시 기준이다.
 
-<br>
+| 단계 | 처리 내용 | Attention 예시의 산출물 |
+|---|---|---|
+| 1. 정독 (Read) | 원문 3회 정독, 수식·결과표·데이터셋 추출 | 식 (1), 표 2(BLEU), 표 3(제거 실험) 목록 |
+| 2. 조사 (Ground) | 웹 검색으로 선수 개념·선행 연구·보충 도식 확보 | 선수 개념 4개, 계보(RNN → seq2seq → 어텐션 → Transformer) |
+| 3. 설계 (Plan) | 논문 절 → 단원 대응, 강의별 용어표 작성 | 3단원 구성안, `briefs/terms.md` |
+| 4. 생성 (Generate) | 단원별 HTML 작성(병렬 하위 에이전트 가능), 삽화 생성 | `modules/00~02`, `assets/fig-*.svg` |
+| 5. 검증 (Verify) | `lint-ko.py --strict` + `check-pages.py` 통과 시 완료 | 21쪽 전부 765px 이하, 경고 0건 |
 
-## Pipeline
+**④ 열람**: 생성된 디렉터리의 `index.html`을 브라우저로 연다. 런타임 의존성은 없다(KaTeX, 웹 폰트만 CDN).
 
-```text
-paper (PDF / arXiv)
-  │
-  ├─ 1. Read          원문 3회 정독, 수식 · 결과표 · 데이터셋 추출
-  ├─ 2. Ground        웹 검색으로 선수 개념과 선행 연구 보강
-  ├─ 3. Plan          논문 절 → 모듈 매핑, 강의별 용어표로 번역어 고정
-  ├─ 4. Generate      모듈별 HTML 작성 (모듈 수가 많으면 하위 에이전트 병렬 생성)
-  │                   build.sh → 단일 index.html
-  └─ 5. Verify        lint-ko.py --strict  +  check-pages.py   → exit 0 이어야 완료
-```
+| 조작 | 기능 |
+|---|---|
+| `←` `→` `PageUp` `PageDown` `Home` `End` | 쪽 이동 |
+| `Space` | 현재 쪽의 다음 동작(수식 다음 단계 → 의사코드 다음 행 → 대화 다음 발화 → 탭 전환 → 정답 공개 → 다음 쪽) |
+| `Shift` + `Space` | 직전 동작 취소, 이전 쪽 |
 
-병렬 생성에서 생기는 용어 불일치는 3단계의 용어표(`briefs/terms.md`)와 243개 항목의 기본 용어 사전(`references/glossary-ko.md`)으로 align한다.
+병렬 생성 시 발생하는 용어 불일치는 3단계의 용어표(`briefs/terms.md`)와 243개 항목의 기본 용어 사전(`references/glossary-ko.md`)으로 통일한다.
 
 <br>
 
@@ -158,30 +191,48 @@ OK   module-1 p1 [코넬] 736px  스케일드 내적 어텐션 논문 3.2.1절
 
 <br>
 
-## Repository layout
+## 디렉터리 구조
 
 ```text
-SKILL.md                     스킬 정의: 파이프라인, 문체 규칙, 목차 규칙
-references/
-  korean-style-guide.md      문체 · 조사 · 띄어쓰기 · 번역투 규칙과 린터 대응표
-  glossary-ko.md             AI/ML 용어 번역 사전 (243 entries)
-  interactive-elements.md    인터랙티브 요소 20종 HTML 패턴
-  lint-ko.py                 한국어 린터
-  check-pages.py             페이지 레이아웃 검사
-  content-philosophy.md      콘텐츠 원칙
-  design-system.md           디자인 토큰, 색상 규약
-  gotchas.md                 생성 시 자주 나는 문제
-  module-brief-template.md   모듈 브리프 양식
-  _base.html, _footer.html   생성물 골격 템플릿
-  build.sh                   모듈을 index.html로 조립
-  illustration.md            삽화 규칙 (도식은 SVG 코드, 사물·장면 선화는 작은 로컬 모델, 강의당 3개 이상)
-  illustrate.py              로컬 모델 → 선화 SVG 파이프라인 (선택, 별도 가상환경)
-  styles.css, main.js        생성물에 복사되는 런타임
-examples/attention-ko/       레퍼런스 출력
-docs/
-  images/                    README 스크린샷
-  lint-fixtures/             린터 검증용 good/bad 예시
+paper-to-course/
+├── SKILL.md                      ★ 스킬 정의: 5단계 절차, 문체·용어·작성 규칙, 점검 목록
+├── README.md
+├── references/                   스킬이 참조하는 규정·도구 (생성 시 읽거나 실행)
+│   ├── 규정 문서
+│   │   ├── korean-style-guide.md     문체·조사·띄어쓰기·번역투 규정, 린터 대응표
+│   │   ├── glossary-ko.md            AI/ML 용어 사전 (243개 항목)
+│   │   ├── design-system.md          디자인 토큰, 색상 규약, 지면 배치
+│   │   ├── interactive-elements.md   인터랙티브 요소 20종의 HTML 양식
+│   │   ├── illustration.md           도식·삽화 규정 (강의당 삽화 3개 이상)
+│   │   ├── content-philosophy.md     내용 구성 원칙
+│   │   ├── gotchas.md                생성 시 빈발 오류
+│   │   └── module-brief-template.md  단원 설계서 양식
+│   ├── 검증 도구
+│   │   ├── lint-ko.py                한국어 린터 (16개 규칙)
+│   │   └── check-pages.py            화면 높이·도식 정렬·삽화 수 측정
+│   ├── 생성 도구
+│   │   ├── build.sh                  단원 파일 → index.html 조립
+│   │   └── illustrate.py             로컬 모델 → 선화 SVG (선택, 별도 가상환경)
+│   └── 런타임 (산출물에 그대로 복사)
+│       ├── _base.html, _footer.html  HTML 골격
+│       └── styles.css, main.js       지면 양식, 쪽 넘김·채점·단계 진행
+├── examples/
+│   └── attention-ko/             ★ 참조 산출물 (Attention Is All You Need)
+│       ├── index.html                최종 산출물 (build.sh가 생성)
+│       ├── _cover.html               표지: 제목, 초록, 목차
+│       ├── modules/
+│       │   ├── 00-background.html    1단원 서론과 배경 (9쪽)
+│       │   ├── 01-attention.html     2단원 어텐션 (7쪽)
+│       │   └── 02-results.html       3단원 결과 (5쪽)
+│       ├── assets/fig-*.svg          삽화 3개 (+ 재현용 생성 조건 .json)
+│       ├── briefs/terms.md           강의별 용어표
+│       └── styles.css, main.js       references/에서 복사한 런타임
+└── docs/
+    ├── images/                   README 화면 캡처
+    └── lint-fixtures/            린터 검증용 정상·오류 예시
 ```
+
+생성된 강의는 `examples/attention-ko/`와 동일한 구조를 갖는다. 단원 하나가 `modules/` 아래 파일 하나에 대응하므로, 특정 단원만 수정한 뒤 `build.sh`로 재조립할 수 있다.
 
 <br>
 

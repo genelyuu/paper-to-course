@@ -227,7 +227,9 @@ paper-to-course 시스템의 CSS 디자인 토큰 전체 목록입니다. `style
 
 - 위 그림은 모듈의 첫 페이지이다. 둘째 페이지부터는 `.module-header` 없이 `.cue | .notes / .summary`만 있다.
 - `.cue`는 오른쪽에 2px 교과 색 선이 있고 핵심 질문마다 속 빈 원 표지가 붙는다. `.summary`는 위에 2px 교과 색 선과 회색 면이 있다.
-- 퀴즈는 코넬 페이지 안에서 1200px 이상일 때 2단(시험지 2단)이 되고, 페이지당 최대 4문항이다.
+- 퀴즈는 코넬 페이지 안에서 1200px 이상일 때 2단(시험지 2단)이 되고, 페이지당 최대 2문항이다(선택지 5개씩과 펼쳐진 해설이 765px 안에 들어와야 한다).
+- 765px는 1440×900 브라우저 창의 보이는 영역(약 813px)에서 48px 내비게이션을 뺀 값이며 `check-pages.py`가 이 값으로 잰다. `--page-height: calc(100vh - 48px)`는 런타임 최소 높이이므로 짧은 페이지에서는 `.summary`가 페이지 맨 아래에 놓인다(의도된 동작).
+- `.summary`는 오른쪽에 `.pager`가 겹치지 않도록 오른쪽 패딩을 둔다. `.bogi`의 마지막 자식은 아래 여백이 0이다.
 - 마크업과 쪽 맞춤 규칙은 `interactive-elements.md`의 "코넬식 페이지와 지면 요소"를 따른다. 측정은 `check-pages.py`가 한다.
 
 ---
@@ -322,7 +324,7 @@ paper-to-course 시스템의 CSS 디자인 토큰 전체 목록입니다. `style
 
 ### 개념 그림 클래스와 페이지 넘김
 
-- `.figure`, `.svg-diagram` 안의 그림 클래스: `.ink`, `.ink.strong`, `.ink-fill`, `.accent`, `.accent-fill`, `.guide`, `.guide-axis`, `.guide-fill`, `.row-accent`, `.edge-line.thin`, `.edge-line.dashed`, `.dot`, `.dot-accent`, `text.mono|muted|accent-text`. 색 사용 기준은 [색상 규약](#색상-규약)을 따른다. 캡션은 `.figure-caption`, 너비 맞춤은 `.svg-diagram.fit`(`--diagram-max`: 그림 최대 폭, 기본 100%). 본문 옆 그림 폭은 `figure.figure.side`의 `--figure-side-width`(기본 200px). 라벨 속 수학 기호는 `.mi`, 각진 노드는 `.node-rect.sq`. 새 개념마다 이런 그림을 하나 두고, 본문 옆(`.with-figure` + `figure.figure.side`)에 놓아 페이지가 765px를 넘지 않게 한다.
+- `.figure`, `.svg-diagram` 안의 그림 클래스: `.ink`, `.ink.strong`, `.ink-fill`, `.accent`, `.accent-fill`, `.guide`, `.guide-axis`, `.guide-fill`, `.row-accent`, `.edge-line.thin`, `.edge-line.dashed`, `.dot`, `.dot-accent`, `text.mono|muted|accent-text`. 색 사용 기준은 [색상 규약](#색상-규약)을 따른다. 캡션은 `.figure-caption`, 너비 맞춤은 `.svg-diagram.fit`(`--diagram-max`: 그림 최대 폭, 기본 100%). 본문 옆 그림 폭은 `figure.figure.side`의 `--figure-side-width`(기본 200px). 라벨 속 수학 기호는 `.mi`, 각진 노드는 `.node-rect.sq`. `.node-rect`, `.node-rect.sq`, `.edge-line`, `.edge-arrow`(와 `.accent` 변형)는 `.svg-diagram`과 `.figure svg` 둘 다에서 같게 동작한다. 문항 삽화 `.q-figure`의 폭은 `--q-figure-width`(기본 280px)로 조절하고, `.q-body`가 있는 문항은 선택지가 한 줄에 하나씩 배치된다. 새 개념마다 이런 그림을 하나 두고, 본문 옆(`.with-figure` + `figure.figure.side`)에 놓아 페이지가 765px를 넘지 않게 한다.
 - 모듈 번호는 `1, 2, 3 …` 연속 정수이다. 논문 위치는 화면 제목 끝의 `.paper-ref`(작고 흐린 태그)로 적는다. `.sec-num`은 폐기됐다(CSS만 남김).
 - 페이지 넘김: `html { scroll-padding-top: var(--nav-height) }`, `.module { scroll-snap-align: start; scroll-margin-top: calc(-1 * var(--nav-height)) }`. 우하단 고정 `.pager`(‹ n / N ›와 안내 문구)는 `main.js`가 넣는다.
 

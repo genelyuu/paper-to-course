@@ -31,11 +31,11 @@ TRANSLATIONESE = [
     (r"에\s*의[해하]서?|에\s*의한", "'~에 의해' 번역투(영어 수동태 'by')", "능동문으로 바꾸거나 '~이/가', '~(으)로'를 쓰세요"),
     (r"[을를]\s*(?:가지고\s*있|가지는)", "'~을 가지고 있다/가지는' 번역투(have)", "'~이 있다', '~한', '~을 갖는' 등으로 바꾸세요"),
     (r"에\s*있어서", "'~에 있어서' 번역투(in/at)", "'~에서', '~할 때', '~의 경우'로 바꾸세요"),
-    (r"되어\s*(?:지|진|집)", "이중 피동 '되어지다'", "'되다'만 쓰세요 (예: 사용되어집니다 -> 사용됩니다)"),
+    (r"되어\s*(?:지|진|집)", "이중 피동 '되어지다'", "'되다'만 쓰세요 (예: 사용되어진다 -> 사용된다)"),
     (r"에\s*대해서는?", "'~에 대해(서)' 번역투(about/on)", "'~을/를', '~의', '~에 관한'으로 바꿔 보세요"),
     (r"로부터", "'~로부터' 번역투(from)", "'~에서', '~에게서'로 바꾸세요"),
     (r"하는\s*것이\s*가능하", "'~하는 것이 가능하다' 번역투(it is possible to)", "'~할 수 있다'로 줄이세요"),
-    (r"할\s*수\s*있을\s*것이다", "'~할 수 있을 것이다' 불필요한 추측 표현", "'~할 수 있습니다'로 단정하세요"),
+    (r"할\s*수\s*있을\s*것이다", "'~할 수 있을 것이다' 불필요한 추측 표현", "'~할 수 있다'로 단정하세요"),
     (r"[가-힣]+적인\s+[가-힣]*적인", "'~적인 ~적인' 연속 사용", "하나는 풀어 쓰세요 (예: 효율적인 -> 효율이 높은)"),
     (r"[가-힣]+들의\s+[가-힣]+들", "이중 복수 '~들의 ~들'", "한쪽 '들'을 빼세요"),
     (r"그것(?:은|이)", "'그것은/그것이' 영어 대명사 직역(it)", "주어를 생략하거나 구체적인 명사로 바꾸세요"),
@@ -51,6 +51,7 @@ POLITE_RE = re.compile(r"(?:(?<![필중주수개긴소불])요|죠)(?=\s*[.!?])"
 PRAISE_RE = re.compile(r"잘\s*했|훌륭|멋져|멋지|대단|축하|(?<=[가-힣])!(?=\s|$)")
 MATH_RE = re.compile(r"\$\$.*?\$\$|\$(?=\S)[^$\n]*?(?<=\S)\$(?!\d)", re.S)
 YEOREOBUN_RE = re.compile(r"여러분")
+OPERATOR_RE = re.compile(r"\\(cos|sin|tan|max|min|arg|argmax|log|exp|lim|det)(?![A-Za-z])")
 CHAT_WORDS = ("chat", "dialogue", "message", "bubble")
 PROSE_TAGS = {"p", "li", "td", "th"}
 PROSE_CLASS_PARTS = ("callout", "card", "quiz-question")
@@ -274,6 +275,11 @@ class Linter(HTMLParser):
                 self.add(line + raw.count("\n", 0, m.start() + u.start()), "WARN", "KO112",
                          f"수식에 똑바른 글꼴 명령 '\\{u.group(1)}'이 있습니다 (수식은 모두 이탤릭체)",
                          "\\mathrm·\\text·\\operatorname → \\mathit, \\mathbf → \\boldsymbol")
+            o = OPERATOR_RE.search(m.group(0))
+            if o:
+                self.add(line + raw.count("\n", 0, m.start() + o.start()), "WARN", "KO112",
+                         f"수식에 이름 있는 연산자 '\\{o.group(1)}'이 있습니다 (KaTeX가 똑바른 글꼴로 그림, 수식은 모두 이탤릭체)",
+                         "\\cos·\\max·\\log 등 -> \\mathit{cos}·\\mathit{max}·\\mathit{log} (\\sum·\\prod·\\int 기호는 그대로)")
         if attr:
             return
         for rx, desc, fix in TRANSLATIONESE:

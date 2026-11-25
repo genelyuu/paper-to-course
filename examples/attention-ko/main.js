@@ -30,7 +30,7 @@
 
   /* ── I18N (UI strings; language from <html lang>, default ko) ── */
   const I18N = {
-    // ko: EBS 교재 문체 — 표지(정답/오답) + 한다체 해설, 지시는 '~하시오' (docs/PLAN.md §1)
+    // ko: EBS 교재 문체 — 표지(정답/오답) + 한다체 해설, 지시는 '~하시오'
     ko: {
       selectFirst: '먼저 답을 고르시오.',
       correct: '정답',
@@ -228,7 +228,7 @@
     }
     const inCur = (sel, page) => $$(sel, page).filter(el => inPage(el, page));
 
-    /* 스페이스바: 현재 쪽의 "주 동작"(수식 다음 단계 → 의사코드 다음 줄 → 다음 전환 버튼·탭 → 정답 공개 → 다음 쪽).
+    /* 스페이스바: 현재 쪽의 "주 동작"(수식 다음 단계 → 의사코드 다음 줄 → 대화 다음 말풍선 → 다음 전환 버튼·탭 → 정답 공개 → 다음 쪽).
        Shift+Space는 반대로 이전 단계, 더 없으면 이전 쪽 */
     function pageAction(back) {
       const page = pages[currentIndex()];
@@ -253,6 +253,12 @@
       for (const el of inCur('.pseudocode-translation', page)) {
         const n = $$('.pseudocode-line', el).length, b = $('.pseudocode-next-btn', el);
         if (b && Number(el.dataset.line || -1) < n - 1) { b.click(); return; }
+      }
+      // 대화창: 다음 말풍선
+      for (const el of inCur('.chat-window', page)) {
+        if (el.dataset.pending === '1') return;
+        const n = $$('.chat-message', el).length, b = $('.chat-next-btn', el);
+        if (b && Number(el.dataset.shown || 0) < n) { b.click(); return; }
       }
       // 전환 버튼 묶음(결과 지표 전환, 제거 실험 탭): 활성 버튼 다음 것을 누른다. 마지막이면 넘어간다
       for (const grp of inCur('.result-metric-toggle, .ablation-tabs, .layer-tabs', page)) {
@@ -626,7 +632,8 @@
     }
 
     function showNext() {
-      if (index >= messages.length) return;
+      if (index >= messages.length || containerEl.dataset.pending === '1') return;
+      containerEl.dataset.pending = '1';
       const msg    = messages[index];
       const sender = msg.dataset.sender;
 
@@ -643,6 +650,8 @@
         msg.style.display = 'flex';
         msg.style.animation = 'fadeSlideUp 0.3s var(--ease-out)';
         index++;
+        containerEl.dataset.pending = '';
+        containerEl.dataset.shown = index;
         updateProgress();
       }, 800);
     }
@@ -656,6 +665,7 @@
 
     function reset() {
       index = 0;
+      containerEl.dataset.shown = 0;
       messages.forEach(m => { m.style.display = 'none'; m.style.animation = ''; });
       if (typingEl) typingEl.style.display = 'none';
       updateProgress();

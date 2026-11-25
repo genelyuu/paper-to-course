@@ -63,8 +63,8 @@
 
 ### 페이지 넘침
 - **증상:** 코넬 페이지가 1440×900 한 화면을 넘어 스크롤이 생긴다. `check-pages.py`가 `OVER`를 보고한다.
-- **원인:** 한 페이지에 글과 요소를 너무 많이 넣었다. 퀴즈가 4문항을 넘는다. 높이가 큰 SVG를 그대로 넣었다.
-- **해결:** 글을 줄여 맞추지 말고 내용을 여러 `.screen.cornell` 페이지로 나눈다(페이지마다 핵심 질문과 요약을 둔다). 퀴즈는 `.quiz-container`를 나누어 각각 고유 id와 자기 버튼을 둔다. SVG는 `viewBox`를 유지한 채 높이를 제한한다. 고친 뒤 `python3 <skill-dir>/references/check-pages.py <course-dir>`를 다시 실행한다.
+- **원인:** 한 페이지에 글과 요소를 너무 많이 넣었다. 퀴즈가 2문항을 넘는다. 높이가 큰 SVG를 그대로 넣었다.
+- **해결:** 글을 줄여 맞추지 말고 내용을 여러 `.screen.cornell` 페이지로 나눈다(페이지마다 핵심 질문과 요약을 둔다). 퀴즈는 `.quiz-container`를 나누어 각각 고유 id와 자기 버튼을 둔다. SVG는 `viewBox`를 유지한 채 높이를 제한한다. 고친 뒤 `python3 -I <skill-dir>/references/check-pages.py <course-dir>`를 다시 실행한다. 기준 높이 765px는 1440×900 브라우저 창의 보이는 영역(약 813px)에서 48px 내비게이션을 뺀 값이며 `check-pages.py`가 이 값으로 잰다. `--page-height: calc(100vh - 48px)`는 런타임 최소 높이이므로 짧은 페이지에서는 요약이 페이지 맨 아래에 놓이는 것이 의도된 동작이다.
 
 ### 코넬 아닌 화면
 - **증상:** `check-pages.py`가 `코넬 아닌 화면`을 보고한다. 단서 칸과 요약이 없다.
@@ -205,12 +205,12 @@ python3 -I <skill-dir>/references/lint-ko.py <course-dir> --strict
 ```
 
 ```
-python3 <skill-dir>/references/check-pages.py <course-dir>
+python3 -I <skill-dir>/references/check-pages.py <course-dir>
 ```
 
 쪽 맞춤은 넘침 0개, 코넬 아닌 화면 0개여야 한다. 린터 결과는 ERROR 0, WARN 0이어야 한다. 예외는 `korean-style-guide.md` §3.3에 적힌 알려진 린터 한계(KO104 서술격 `이다` 오탐 등)뿐이며, 남긴 경우 사용자에게 보고한다.
 
-규칙 목록: KO001 언어 / KO002 중국어 / KO003 전각 부호 / KO004 `data-steps` JSON / KO101 번역투 / KO102 문체(EBS 한다체) / KO103 괄호 간격 / KO104 조사 / KO105 숫자+단위 / KO106 긴 문단 / KO107 툴팁 형식 / KO108 피드백 칭찬 / KO109 `여러분` / KO110 해설 표지 중복 / KO111 용어 뜻풀이 서술문 종결 / KO112 수식 똑바른 글꼴 명령.
+규칙 목록: KO001 언어 / KO002 중국어 / KO003 전각 부호 / KO004 `data-steps` JSON / KO101 번역투 / KO102 문체(EBS 한다체) / KO103 괄호 간격 / KO104 조사 / KO105 숫자+단위 / KO106 긴 문단 / KO107 툴팁 형식 / KO108 피드백 칭찬 / KO109 `여러분` / KO110 해설 표지 중복 / KO111 용어 뜻풀이 서술문 종결 / KO112 수식 똑바른 글꼴 명령·이름 있는 연산자(`\cos`, `\max` 등은 `\mathit{cos}`로).
 
 
 ## 그림 정렬이 어긋남
