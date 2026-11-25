@@ -62,9 +62,9 @@
 
   /* FONTS */
   /* Latin glyphs come from the first family; Hangul falls through to Pretendard */
-  --font-display: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
-  --font-body:    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
-  --font-mono:    'JetBrains Mono', 'D2Coding', 'Nanum Gothic Coding', 'Pretendard Variable', Pretendard, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Fira Code', Consolas, monospace;
+  --font-display: 'P2C Sans', 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+  --font-body:    'P2C Sans', 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+  --font-mono:    'JetBrains Mono', 'D2Coding', 'Nanum Gothic Coding', 'P2C Sans', 'Pretendard Variable', Pretendard, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Fira Code', Consolas, monospace;
 
   /* TYPE SCALE */
   --text-xs:   0.75rem;

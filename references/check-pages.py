@@ -89,8 +89,8 @@ window.addEventListener('load', function () {
       var name = (f.classList.contains('q-figure') ? '문항 삽화 #' : '그림 #') + (fi + 1);
       f.querySelectorAll('img').forEach(function (im) {
         var src = im.getAttribute('src') || '';
-        if (!/\.svg(\?|#|$)/i.test(src)) fig.push(name + ': SVG가 아닌 이미지 ' + src + ' (래스터는 벡터화해서 넣는다)');
-        if (!im.complete || im.naturalWidth === 0) fig.push(name + ': 이미지를 불러오지 못했다 ' + src);
+        if (!/\.svg(\?|#|$)/i.test(src) && !/^data:image\/svg\+xml[,;]/i.test(src)) fig.push(name + ': SVG가 아닌 이미지 ' + src.slice(0, 80) + ' (래스터는 벡터화해서 넣는다)');
+        if (!im.complete || im.naturalWidth === 0) fig.push(name + ': 이미지를 불러오지 못했다 ' + src.slice(0, 80));
       });
       var hues = new Set();
       f.querySelectorAll('svg *').forEach(function (e) {
@@ -115,7 +115,7 @@ window.addEventListener('load', function () {
     });
     var pre = document.createElement('pre');
     pre.id = '__fit_result';
-    var images = document.querySelectorAll('figure img[src^="assets/"]').length;   // 모델 삽화(사물·장면 선화)
+    var images = document.querySelectorAll('figure img[src^="assets/"], figure img[data-asset]').length;   // 모델 삽화(사물·장면 선화)
     pre.textContent = JSON.stringify({ limit: Math.round(limit), width: window.innerWidth, pages: pages, fig: fig, images: images });
     document.body.appendChild(pre);
   }, 300);

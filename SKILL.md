@@ -5,7 +5,7 @@ description: "학술 논문을 EBS 교재 문체의 한국어 인터랙티브 HT
 
 # Paper-to-Course
 
-학술 논문을 아름다운 인터랙티브 한국어 강의로 바꿉니다. 출력물은 **디렉터리**입니다. 미리 만들어 둔 `styles.css`, `main.js`, 모듈별 HTML, 이를 조립한 `index.html`이 들어 있고, 브라우저로 바로 열면 됩니다. 외부 의존성은 Google Fonts, jsDelivr(Pretendard), KaTeX CDN뿐입니다.
+학술 논문을 아름다운 인터랙티브 한국어 강의로 바꿉니다. 작업은 **디렉터리**에서 하지만, 공유하는 산출물은 빌드가 만든 **단독 `index.html` 한 개**입니다. CSS·JS·글꼴(Pretendard 부분 집합, JetBrains Mono)·KaTeX·삽화가 모두 파일 안에 들어 있어 네트워크·서버 없이 `file://`로 열립니다. 실행 엔진(`main.js`)과 스타일은 압축·난독화본으로 들어가고, HTML 주석과 템플릿 안내문은 지워집니다.
 
 ## 첫 실행 안내 (First-Run Welcome)
 
@@ -219,31 +219,35 @@ HTML을 쓰기 전에 모듈마다 브리프를 씁니다. 템플릿은 `referen
 
 ### Phase 4: 강의 빌드
 
-출력물은 단일 파일이 아니라 **디렉터리**입니다. CSS와 JS는 모두 미리 만들어 둔 참고 파일이며, 절대 새로 만들지 않습니다.
+작업 공간은 **디렉터리**이고, 공유용 산출물은 `build.sh`가 만드는 **단독 `index.html`**입니다(외부 요청 0건). CSS와 JS는 모두 미리 만들어 둔 참고 파일이며, 절대 새로 만들지 않습니다.
 
 **출력 구조:**
 ```
 course-name/
   styles.css       ← references/styles.css를 그대로 복사
   main.js          ← references/main.js를 그대로 복사
-  _base.html       ← 맞춤 셸(제목, 강조색, 내비게이션 점, 사이드바 항목, KaTeX)
+  _base.html       ← 맞춤 셸(제목, 강조색, 내비게이션 점, 사이드바 항목, 로컬 vendor 참조)
   _cover.html      ← 논문 메타데이터가 담긴 표지
   _footer.html     ← references/_footer.html을 그대로 복사
   build.sh         ← references/build.sh를 그대로 복사
+  build.py         ← references/build.py를 그대로 복사(인라인·난독화본 치환·주석 제거)
+  vendor/          ← references/vendor/를 통째로 복사(글꼴, KaTeX, main.min.js, styles.min.css)
   briefs/          ← terms.md(용어표, 항상), 모듈 브리프(복잡한 논문만)
   modules/
     00-background.html
     01-problem.html
     02-landscape.html
     ...
-  index.html       ← build.sh가 조립
+  index.html       ← build.sh가 조립한 단독 파일(공유는 이 파일 하나만)
 ```
 
-**Step 1 (공통): 준비.** 강의 디렉터리를 만들고 다음 네 파일을 `cp`로 복사합니다(Read로 읽어 다시 쓰지 않습니다). 스타일과 스크립트는 `cp references/styles.css references/main.js <course>/`로 복사하며 절대 다시 입력하지 않습니다.
+**Step 1 (공통): 준비.** 강의 디렉터리를 만들고 다음 파일과 `vendor/` 폴더를 `cp`로 복사합니다(Read로 읽어 다시 쓰지 않습니다). 스타일과 스크립트는 `cp references/styles.css references/main.js <course>/`로 복사하며 절대 다시 입력하지 않습니다.
 - `references/styles.css` → `course-name/styles.css`
 - `references/main.js` → `course-name/main.js`
 - `references/_footer.html` → `course-name/_footer.html`
 - `references/build.sh` → `course-name/build.sh`
+- `references/build.py` → `course-name/build.py`
+- `references/vendor/` → `course-name/vendor/` (`cp -R`)
 
 `references/lint-ko.py`와 `references/check-pages.py`는 복사하지 않습니다. Phase 5에서 스킬 디렉터리의 파일을 그대로 실행합니다.
 
@@ -253,7 +257,7 @@ course-name/
 - `NAV_DOTS` → 모듈마다 `<button class="nav-dot" data-target="module-N" data-tooltip="…" aria-label="…">` 하나
 - `SIDEBAR_ITEMS` → 모듈마다 `<a class="sidebar-item" data-module="N" href="#module-N">` 하나(자식 `sidebar-item-num`, `sidebar-item-label`, `sidebar-item-indicator`)
 - 두 목록의 순서와 개수는 모듈과 같아야 합니다. 정확한 마크업은 `references/interactive-elements.md`의 "모듈 골격과 내비게이션" 절을 따릅니다.
-- `<html lang="ko">`, Pretendard·폰트 링크, KaTeX 스크립트는 건드리지 않습니다.
+- `<html lang="ko">`, `vendor/` 글꼴·KaTeX 참조, `styles.css`·`main.js` 참조는 건드리지 않습니다. CDN 등 외부 URL을 `<link>`·`<script>`·`<img>`로 추가하지 않습니다(빌드가 오류로 멈춥니다).
 
 **Step 2.5: `_cover.html` 작성.** 표지 파일 `course-name/_cover.html`을 씁니다. 패턴은 `references/interactive-elements.md`의 "표지와 히어로 섹션 (Cover Page)" 절을 따르며, 이 파일은 Step 4 빌드 전에 있어야 합니다. 표지는 `<section class="course-cover">`이며 `.module`이 **아닙니다**(내비게이션 점·스크롤 스냅 없음). 표지에 들어갈 것:
 - 논문 제목(`한국어 제목(English Original Title)` 형식, 괄호 앞 공백 없음)
@@ -308,6 +312,7 @@ HTML 패턴은 `references/interactive-elements.md`, 시각 규칙은 `reference
 ```bash
 cd course-name && bash build.sh
 ```
+빌드는 `<link>`·`<script>`·`<img>`의 로컬 파일을 모두 `index.html` 안에 넣고(글꼴·그림은 data URI), `main.js`·`styles.css`는 `vendor/`의 압축·난독화본으로 바꿔 넣으며, HTML·SVG 주석을 지웁니다. `fontTools`(`pip install fonttools brotli`)가 있으면 본문 글꼴을 강의에 쓰인 글자만 남겨 파일이 약 1.2MB 줄어듭니다(없어도 빌드는 됩니다). 사용자에게는 `index.html` 하나만 공유하면 된다고 안내합니다. 브라우저에서 실행되는 코드는 난독화해도 원리상 완전히 숨길 수 없다는 점도 함께 알립니다.
 
 **핵심 규칙:**
 - `styles.css`, `main.js`는 **절대 새로 만들지 않습니다**. 항상 references에서 복사합니다.
@@ -317,7 +322,7 @@ cd course-name && bash build.sh
 - 채팅 컨테이너에는 `id` 속성이 필요합니다.
 - 흐름 애니메이션에는 `data-steps='[...]'` JSON이 필요합니다.
 - 다이어그램은 디자인 시스템을 따르는 인라인 SVG로 그립니다. 상자 안 라벨은 `<foreignObject>` 안의 `<div class="node-label"><span>…</span></div>`로 쓰고, 노드 폭·간격·간선 규칙은 `design-system.md`의 "그림 정렬 규칙"을 따릅니다.
-- 수식은 `_base.html`의 KaTeX 스크립트가 `$$...$$`를 자동 렌더링합니다.
+- 수식은 `index.html`에 내장된 KaTeX가 `$$...$$`를 자동 렌더링합니다.
 - 한글에 이탤릭을 쓰지 않습니다. 강조는 굵기나 강조색으로 합니다.
 
 ### Phase 5: 검토와 열기
@@ -392,7 +397,7 @@ python3 -I <skill-dir>/references/check-pages.py course-name/
 - **지면 팔레트**: 순백(#FFFFFF) 바탕, 차가운 회색 면(#F4F6F8), 평평하고 옅은 그림자
 - **교과 색 하나 + 먹색**: 논문 분야에 맞춰 프리셋에서 고른다(과학탐구 파랑이 기본, 수학 초록, 사회탐구 보라, 영어 주황). 그라데이션 금지
 - **개성 있는 타이포그래피**:
-  - 본문(한글+라틴): **Pretendard Variable** (jsDelivr, v1.3.9)
+  - 본문(한글+라틴): **Pretendard Variable** v1.3.9의 KS X 1001 부분 집합(OFL 예약 이름 때문에 `P2C Sans`로 이름을 바꿔 `vendor/fonts/`에 둠, 빌드 시 내장)
   - 제목도 **Pretendard** 하나로 쓴다(라틴 디스플레이 서체를 섞지 않는다). 고정폭 서체는 코드에만 쓴다
   - 코드·수식 보조: **JetBrains Mono** (한글 주석은 D2Coding/Pretendard로 폴백)
 - **한글 타이포그래피**: `word-break: keep-all` + `overflow-wrap: break-word`, 본문 행간 약 1.7, 제목 자간을 살짝 좁게, 한글 이탤릭 금지(`em`은 굵기 600 + 강조색), 대문자 라벨용 넓은 자간은 한글에 쓰지 않음

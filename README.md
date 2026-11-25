@@ -117,7 +117,7 @@ https://arxiv.org/abs/1706.03762 강의로 만들어 줘
 | 4. 생성 (Generate) | 단원별 HTML 작성(병렬 하위 에이전트 가능), 삽화 생성 | `modules/00~02`, `assets/fig-*.svg` |
 | 5. 검증 (Verify) | `lint-ko.py --strict` + `check-pages.py` 통과 시 완료 | 21쪽 전부 765px 이하, 경고 0건 |
 
-**④ 열람**: 생성된 디렉터리의 `index.html`을 브라우저로 연다. 런타임 의존성은 없다(KaTeX, 웹 폰트만 CDN).
+**④ 열람·공유**: 생성된 `index.html`을 브라우저로 연다. 이 파일은 CSS·JS·글꼴·KaTeX·삽화를 모두 안에 넣은 **단독 파일**이라 네트워크 없이 열리고, 이 파일 하나만 보내면 된다(외부 요청 0건).
 
 | 조작 | 기능 |
 |---|---|
@@ -211,14 +211,15 @@ paper-to-course/
 │   │   ├── lint-ko.py                한국어 린터 (16개 규칙)
 │   │   └── check-pages.py            화면 높이·도식 정렬·삽화 수 측정
 │   ├── 생성 도구
-│   │   ├── build.sh                  단원 파일 → index.html 조립
+│   │   ├── build.sh, build.py        단원 파일 → 단독 index.html 조립
 │   │   └── illustrate.py             로컬 모델 → 선화 SVG (선택, 별도 가상환경)
 │   └── 런타임 (산출물에 그대로 복사)
 │       ├── _base.html, _footer.html  HTML 골격
-│       └── styles.css, main.js       지면 양식, 쪽 넘김·채점·단계 진행
+│       ├── styles.css, main.js       지면 양식, 쪽 넘김·채점·단계 진행
+│       └── vendor/                   빌드 시 내장되는 자원: 글꼴(P2C Sans·JetBrains Mono), KaTeX
 ├── examples/
 │   └── attention-ko/             ★ 참조 산출물 (Attention Is All You Need)
-│       ├── index.html                최종 산출물 (build.sh가 생성)
+│       ├── index.html                최종 산출물 (build.sh가 생성한 단독 파일)
 │       ├── _cover.html               표지: 제목, 초록, 목차
 │       ├── modules/
 │       │   ├── 00-background.html    1단원 서론과 배경 (9쪽)
@@ -239,6 +240,7 @@ paper-to-course/
 ## Limitations
 
 - 레이아웃 검사는 데스크톱 1440×900 기준이다. 1200px 미만에서는 1단으로 전환되며 페이지 단위 보장을 하지 않는다.
+- 본문 글꼴은 KS X 1001 한글 2,350자 범위다. 그 밖의 글자는 시스템 글꼴로 표시된다.
 - 생성 품질은 원문 해석에 의존한다. 린터와 레이아웃 검사는 형식을 보장하지만 내용의 정확성은 보장하지 않는다.
 
 <br>

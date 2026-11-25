@@ -1,0 +1,3 @@
+/* 글꼴은 build.sh가 data URI로 index.html 안에 넣는다. P2C Sans = Pretendard v1.3.9 KS X 1001 부분 집합(OFL, 이름 변경본). */
+@font-face{font-family:'P2C Sans';font-style:normal;font-weight:45 930;font-display:swap;src:url(fonts/P2CSans-Variable.woff2) format("woff2-variations"),url(fonts/P2CSans-Variable.woff2) format("woff2")}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:100 800;font-display:swap;src:url(fonts/JetBrainsMono-latin.woff2) format("woff2-variations"),url(fonts/JetBrainsMono-latin.woff2) format("woff2")}

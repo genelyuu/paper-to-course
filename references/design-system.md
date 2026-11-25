@@ -19,7 +19,7 @@ paper-to-course 시스템의 CSS 디자인 토큰 전체 목록입니다. `style
 
 ## 디자인 아이덴티티
 
-- 한글+라틴 본문: **Pretendard Variable** (jsDelivr, `v1.3.9` 고정, dynamic-subset으로 필요한 글리프만 로드)
+- 한글+라틴 본문: **Pretendard Variable** `v1.3.9`을 KS X 1001 글자로 줄인 부분 집합. OFL 예약 글꼴 이름 조건 때문에 이름을 `P2C Sans`로 바꿨다(`references/vendor/fonts/`, 만든 방법은 `vendor/ksx-unicodes.py`·`rename-font.py`). 빌드가 data URI로 `index.html`에 넣으므로 CDN을 쓰지 않는다
 - 제목도 같은 **Pretendard** 하나로 씁니다. 라틴 디스플레이 서체를 섞으면 "트랜스포머(Attention…)"처럼 한 줄 안에서 서체가 갈라져 보이기 때문입니다.
 - 코드: **JetBrains Mono** → D2Coding / Nanum Gothic Coding → Pretendard (한글 주석용 폴백). 고정폭은 코드(의사코드·코드 블록·줄 번호)에만 쓰고, 라벨·수치·사이드바 번호는 Pretendard에 `tabular-nums`로 씁니다.
 - 그림자 대신 선: `--shadow-sm`·`--shadow-md`는 1px 테두리 링이고, 떠 있는 요소(툴팁 등)만 `--shadow-lg`·`--shadow-xl`을 씁니다. 스크롤 등장 애니메이션과 떠오르는 호버는 쓰지 않습니다.
