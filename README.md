@@ -17,7 +17,7 @@
 **1. 설치**: 스킬 폴더에 이 저장소를 복제합니다.
 
 ```bash
-git clone <이 저장소 URL> ~/.claude/skills/paper-to-course
+git clone https://github.com/genelyuu/paper-to-course.git ~/.claude/skills/paper-to-course
 ```
 
 **2. 요청**: Claude Code에서 논문과 함께 말합니다.
