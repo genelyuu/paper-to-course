@@ -13,7 +13,7 @@ min-height(100vh)를 풀고 내용의 실제 높이를 잰다.
 그림 정렬도 검사한다: 결과 막대 트랙의 시작 x·폭, SVG 요소의 viewBox 이탈과 노드 라벨 구조,
 의사코드 코드 줄과 설명 줄의 세로 위치, 문항 삽화의 형식(SVG만)과 색(교과 색 하나).
 배치도 검사한다(LAY): 화면·노트 칸 밖으로 가로로 넘친 요소, overflow로 잘린 내용, SVG 글자의 그림 경계 이탈,
-SVG 글자끼리 겹침, 페이지 가로 스크롤, 잘린 사이드바 목차 라벨, 색칠되지 않은 코드 칸.
+SVG 글자끼리 겹침, 상자 라벨(foreignObject)의 넘침, 페이지 가로 스크롤, 잘린 사이드바 목차 라벨, 색칠되지 않은 코드 칸.
 단원 첫 페이지는 단원 맨 위(내비 아래 여백 포함)부터 잰다.
 
 종료 코드: 넘치는 페이지나 그림 정렬 문제가 있으면 1, 아니면 0. 표준 라이브러리와 Chrome만 쓴다.
@@ -154,6 +154,22 @@ window.addEventListener('load', function () {
             if (clip && (TR.left < SR.left - 1 || TR.top < SR.top - 1 || TR.right > SR.right + 1 || TR.bottom > SR.bottom + 1))
               lay.push(where + ': SVG #' + (k + 1) + ' 글자가 그림 경계 밖에서 잘린다 "' + tx(t) + '"');
             bs.push([TR, tx(t)]);
+          });
+          // 상자 라벨: 보이는 글자(KaTeX의 숨은 MathML 제외)가 foreignObject 밖으로 2px 넘게 나가면 상자가 빡빡하다
+          svg.querySelectorAll('foreignObject').forEach(function (fo) {
+            var c = fo.firstElementChild; if (!c || !vis(c)) return;
+            var FR = fo.getBoundingClientRect(), g = null, w = document.createTreeWalker(c, NodeFilter.SHOW_TEXT);
+            for (var n = w.nextNode(); n; n = w.nextNode()) {
+              if (!n.nodeValue.trim() || n.parentElement.closest('.katex-mathml')) continue;
+              var rg = document.createRange(); rg.selectNodeContents(n);
+              [].forEach.call(rg.getClientRects(), function (q) {
+                if (!q.width) return;
+                g = g ? { l: Math.min(g.l, q.left), t: Math.min(g.t, q.top), r: Math.max(g.r, q.right), b: Math.max(g.b, q.bottom) } : { l: q.left, t: q.top, r: q.right, b: q.bottom };
+              });
+            }
+            if (!g) return;
+            var over = Math.max(FR.left - g.l, FR.top - g.t, g.r - FR.right, g.b - FR.bottom);
+            if (over > 2) lay.push(where + ': SVG #' + (k + 1) + ' 상자 라벨이 ' + Math.round(over) + 'px 넘친다(상자를 키우거나 줄을 나눈다) "' + tx(c) + '"');
           });
           for (var i = 0; i < bs.length; i++) for (var j = i + 1; j < bs.length; j++) {
             var a = bs[i][0], b = bs[j][0];

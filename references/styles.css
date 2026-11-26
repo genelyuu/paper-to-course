@@ -3037,3 +3037,6 @@ html { scroll-padding-top: var(--nav-height); }
 
 /* 열이 많은 표: 칸 안쪽 여백을 줄인다(인라인 <style> 대신) */
 .data-table.compact th, .data-table.compact td { padding: var(--space-2) 6px; }
+
+/* SVG 상자 라벨: 본문 줄 간격(1.75)을 물려받으면 두 줄 라벨이 상자를 넘는다 */
+.svg-diagram foreignObject > div, svg foreignObject > div.node-label { line-height: 1.35; }

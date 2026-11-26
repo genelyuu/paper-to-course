@@ -97,7 +97,7 @@
 
 ### 배치 문제(LAY)
 - **증상:** `check-pages.py`가 `LAY` 줄을 보고하고 종료 코드 1로 끝난다.
-- **검사 항목:** ① 화면·본문 칸 밖으로 가로 넘침, ② `overflow: hidden/clip` 상자에 잘린 내용, ③ 상자 안 가로 스크롤, ④ SVG 밖으로 나간 `<text>`(SVG `overflow`가 visible이 아닐 때), ⑤ 25% 넘게 겹친 SVG 글자, ⑥ 색이 입혀지지 않은 코드 줄(`pre`, `.pseudocode-line`), ⑦ 페이지 가로 스크롤, ⑧ 말줄임으로 잘린 사이드바 라벨.
+- **검사 항목:** ① 화면·본문 칸 밖으로 가로 넘침, ② `overflow: hidden/clip` 상자에 잘린 내용, ③ 상자 안 가로 스크롤, ④ SVG 밖으로 나간 `<text>`(SVG `overflow`가 visible이 아닐 때), ⑤ 25% 넘게 겹친 SVG 글자와 상자(foreignObject) 밖으로 2px 넘게 나간 라벨 글자, ⑥ 색이 입혀지지 않은 코드 줄(`pre`, `.pseudocode-line`), ⑦ 페이지 가로 스크롤, ⑧ 말줄임으로 잘린 사이드바 라벨.
 - **해결:** 넘침은 그림 폭(`--diagram-max`)이나 표(`.data-table.compact`)를 줄이고, 라벨은 함축하고, SVG 글자는 `viewBox` 안으로 옮긴다. 색 없는 코드 줄은 키워드를 대문자로 쓰거나(`RETURN`, `FOR`) 줄을 앞 줄에 붙인다.
 
 ### 측정 스크립트에서 SVG 회전이 사라짐
