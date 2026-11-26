@@ -81,7 +81,7 @@
   - 마지막에 같은 저장소의 RAG 서베이 강의로 이어진다는 안내와 더 읽을거리(HuggingFace RAG 문서 등)를 둔다.
 
 ## 반드시 먼저 읽을 것 (저장소 루트 = /Users/eugene/dev/paper2contents)
-- `SKILL.md`(이 강의를 만드는 스킬의 원본. 특히 "용어 표기", "작성 규칙 (필수, 모든 모듈에 적용)", Phase 3의 EBS 교재 구성, 순차 경로의 코넬 페이지 규칙)
+- `SKILL.md`(이 강의를 만드는 스킬의 원본. 특히 "용어 표기", "작성 규칙 (필수, 모든 모듈에 적용)", Phase 3의 학습서 구성, 순차 경로의 코넬 페이지 규칙)
 - `references/korean-style-guide.md` 전체
 - `references/interactive-elements.md`: **여기 있는 클래스와 마크업만 쓴다.** CSS와 JS는 새로 만들지 않는다.
 - `references/design-system.md`(색상 규약, 그림 정렬 규칙), `references/illustration.md`, `references/content-philosophy.md`, `references/gotchas.md`

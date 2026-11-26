@@ -11,7 +11,6 @@
     <div class="screen cornell">
       <aside class="cue">
         <div class="callout callout-info animate-in">
-          <div class="callout-icon">&#127919;</div>
           <div class="callout-content">
             <strong class="callout-title">학습 목표</strong>
             <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
@@ -74,7 +73,6 @@
     <div class="screen cornell">
       <aside class="cue">
         <div class="callout callout-info animate-in">
-          <div class="callout-icon">&#128214;</div>
           <div class="callout-content">
             <strong class="callout-title">배경 지식</strong>
             <p>이 화면은 논문을 읽기 위해 먼저 알아 둘 이전 연구이다.</p>
@@ -139,7 +137,6 @@
     <div class="screen cornell">
       <aside class="cue">
         <div class="callout callout-info animate-in">
-          <div class="callout-icon">&#128214;</div>
           <div class="callout-content">
             <strong class="callout-title">배경 지식</strong>
             <p>이 화면은 논문을 읽기 위해 먼저 알아 둘 이전 연구이다.</p>
@@ -192,7 +189,6 @@
     <div class="screen cornell">
       <aside class="cue">
         <div class="callout callout-info animate-in">
-          <div class="callout-icon">&#128214;</div>
           <div class="callout-content">
             <strong class="callout-title">배경 지식</strong>
             <p>이 화면은 논문을 읽기 위해 먼저 알아 둘 이전 연구이다.</p>
@@ -249,7 +245,6 @@
     <div class="screen cornell">
       <aside class="cue">
         <div class="callout callout-info animate-in">
-          <div class="callout-icon">&#128214;</div>
           <div class="callout-content">
             <strong class="callout-title">배경 지식</strong>
             <p>이 화면은 논문을 읽기 위해 먼저 알아 둘 이전 연구이다.</p>
@@ -263,7 +258,7 @@
       </aside>
       <div class="notes">
         <h3 class="screen-heading">점수 매기기: 가산과 내적</h3>
-        <div class="with-figure" style="--figure-side-width:260px">
+        <div class="with-figure" style="--figure-side-width:240px">
           <div>
             <p>비중 $\alpha$를 만들려면 먼저 디코더 상태 $\boldsymbol{s}$와 각 은닉 상태 $\boldsymbol{h}_i$가 얼마나 맞는지 점수를 매긴다. Bahdanau는 은닉층 하나인 작은 신경망으로 점수를 계산했으며, 이를 <span class="term" data-definition="가산 어텐션(additive attention): 두 벡터를 은닉층 하나인 작은 신경망에 넣어 관련도 점수를 계산하는 어텐션.">가산 어텐션</span>(additive attention)이라 한다.</p>
             <p><a href="https://arxiv.org/abs/1508.04025" target="_blank" rel="noopener">Luong et al.(2015)</a>은 <span class="term" data-definition="내적(dot product): 두 벡터의 같은 위치의 성분끼리 곱하여 모두 더한 값. 두 벡터가 비슷한 방향일수록 커짐.">내적</span>(dot product), general, concat 같은 점수 함수를 비교했다. 그중 내적 점수는 두 벡터를 곱해 더하기만 하면 된다. 버튼을 눌러 한 출력 단계의 계산을 따라가시오(점수 값은 예시).</p>
@@ -351,7 +346,7 @@
         <p>순차 계산을 줄이려는 다른 시도로 <span class="term" data-definition="합성곱 신경망(convolutional neural network, CNN): 작은 창(커널)을 입력 위로 밀며 이웃한 위치를 한꺼번에 계산하는 신경망.">합성곱 신경망</span>(convolutional neural network, CNN)을 쓴 Extended Neural GPU, <a href="https://arxiv.org/abs/1610.10099" target="_blank" rel="noopener">ByteNet</a>, <a href="https://arxiv.org/abs/1705.03122" target="_blank" rel="noopener">ConvS2S</a>가 있다. 이들은 모든 위치를 병렬로 계산했지만, 두 위치를 잇는 연산 수가 거리에 따라 ConvS2S는 선형으로, ByteNet은 로그로 늘어 먼 위치 사이 의존을 배우기 어려웠다(논문 2절).</p>
         <p>한편 한 시퀀스 안의 위치끼리 관련지어 표현을 만드는 <span class="term" data-definition="셀프 어텐션(self-attention): 한 시퀀스 안의 각 위치가 같은 시퀀스의 모든 위치를 참고해 표현을 만드는 어텐션.">셀프 어텐션</span>(self-attention)이 독해, 요약, 문장 표현 등에 이미 쓰이고 있었다. <span class="term" data-definition="트랜스포머(Transformer): 순환과 합성곱 없이 어텐션만으로 인코더와 디코더를 구성한 모델.">트랜스포머</span>는 순환과 합성곱을 빼고 <strong>셀프 어텐션만으로 층을 쌓은 첫 <span class="term" data-definition="시퀀스 변환(sequence transduction): 입력 시퀀스를 길이가 다를 수 있는 출력 시퀀스로 바꾸는 과제. 기계 번역이 대표적임.">시퀀스 변환</span>(sequence transduction) 모델</strong>이다.</p>
         <figure class="svg-diagram animate-in">
-          <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--space-4)">
+          <div class="cols-3">
 <svg viewBox="0 0 240 168" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="순환: 위치 4개에서 첫 위치와 끝 위치를 잇는 데 3단계">
 <rect class="node-rect sq" x="24" y="104" width="24" height="24"/><rect class="node-rect sq" x="80" y="104" width="24" height="24"/><rect class="node-rect sq" x="136" y="104" width="24" height="24"/><rect class="node-rect sq" x="192" y="104" width="24" height="24"/><line class="edge-line" x1="48" y1="116" x2="70" y2="116"/><polygon class="edge-arrow" points="70,111 80,116 70,121"/><line class="edge-line" x1="104" y1="116" x2="126" y2="116"/><polygon class="edge-arrow" points="126,111 136,116 126,121"/><line class="edge-line" x1="160" y1="116" x2="182" y2="116"/><polygon class="edge-arrow" points="182,111 192,116 182,121"/><foreignObject x="8" y="136" width="224" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; word-break:keep-all; line-height:1.4"><span>순환: 3단계</span></div></foreignObject>
 </svg>
@@ -375,7 +370,6 @@
     <div class="screen cornell">
       <aside class="cue">
         <div class="callout callout-accent animate-in">
-          <div class="callout-icon">&#10024;</div>
           <div class="callout-content">
             <strong class="callout-title">새로운 점</strong>
             <p>앞선 연구는 어텐션을 순환 신경망이나 합성곱 모델에 <em>덧붙였다</em>. 트랜스포머는 <strong>어텐션만 남겼다</strong>.</p>
@@ -407,8 +401,8 @@
       </aside>
       <div class="notes">
         <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>연구 계보<span class="paper-ref">논문 2절</span></h3>
-        <div class="lineage-tree animate-in" style="padding:var(--space-3) var(--space-4); margin:var(--space-3) 0 0">
-          <div class="lineage-node lineage-root" data-detail="트랜스포머(Transformer): 순환과 합성곱 없이 어텐션만으로 인코더와 디코더를 구성한 모델이다.">
+        <div class="lineage-tree animate-in" style="padding:var(--space-1) var(--space-4); margin:0">
+          <div class="lineage-node lineage-root" style="padding:var(--space-2) var(--space-5)" data-detail="트랜스포머(Transformer): 순환과 합성곱 없이 어텐션만으로 인코더와 디코더를 구성한 모델이다.">
             <span class="lineage-label">트랜스포머</span>
             <span class="lineage-detail">본 논문(2017)</span>
             <span class="novelty-badge">어텐션만으로 구성</span>
@@ -484,7 +478,6 @@
         </table>
         <p class="diff-line"><strong>핵심 비교</strong> 어텐션은 병목을 없앴고, 합성곱은 병렬화를 얻었으며, 트랜스포머는 셀프 어텐션만 남겨 병렬화와 짧은 경로를 함께 얻었다.</p>
         <div class="callout callout-warning animate-in">
-          <div class="callout-icon">&#128269;</div>
           <div class="callout-content">
             <strong class="callout-title">더 알아보기</strong>
             <p>짧은 경로에는 대가가 있다. 논문 2절은 모든 위치를 비중으로 평균 내면 표현의 해상도가 떨어진다고 밝히고, 이를 멀티헤드 어텐션(multi-head attention)으로 보완한다(3단원). 또 셀프 어텐션의 층당 계산량은 $O(n^2 \cdot d)$라서 문장이 길면 부담이 커진다(4단원).</p>
@@ -498,7 +491,6 @@
     <div class="screen cornell">
       <aside class="cue">
         <div class="callout callout-accent animate-in">
-          <div class="callout-icon">&#128161;</div>
           <div class="callout-content">
             <strong class="callout-title">핵심 정리</strong>
             <ol>

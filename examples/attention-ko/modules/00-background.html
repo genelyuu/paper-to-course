@@ -11,7 +11,6 @@
     <div class="screen cornell">
       <aside class="cue">
         <div class="callout callout-info animate-in">
-          <div class="callout-icon">&#127919;</div>
           <div class="callout-content">
             <strong class="callout-title">학습 목표</strong>
             <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
@@ -28,8 +27,8 @@
         <p>기존 번역 모델은 <span class="term" data-definition="순환 신경망(recurrent neural network, RNN): 토큰을 순서대로 하나씩 읽으면서 이전 단계의 은닉 상태를 다음 단계로 넘기는 신경망.">순환 신경망</span>(recurrent neural network, RNN)으로 단어를 하나씩 차례로 읽었다. 앞 단계가 끝나야 다음 단계를 계산할 수 있어 학습을 나누어 동시에 처리하기 어렵고, 멀리 떨어진 단어를 이으려면 여러 단계를 거쳐야 했다. 이 논문은 이 순서 의존을 없애려고 쓰였다.</p>
         <p>그림은 두 방식이 입력 문장 $x_1, \ldots, x_4$를 처리하는 과정을 나타낸 것이다.</p>
         <div class="svg-diagram animate-in" style="margin:var(--space-2) auto">
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4)">
-          <svg viewBox="0 0 392 152" width="100%" style="max-height:200px" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="이전 방식은 은닉 상태를 h1부터 h4까지 차례로 계산한다">
+          <div class="cols-2">
+          <svg viewBox="0 0 392 152" width="100%" style="max-height:112px" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="이전 방식은 은닉 상태를 h1부터 h4까지 차례로 계산한다">
           <foreignObject x="8" y="0" width="376" height="22"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4; font-weight:700"><span>이전 방식: 순환 신경망</span></div></foreignObject>
           <rect class="node-rect sq" x="8" y="92" width="70" height="32"/>
           <foreignObject x="8" y="92" width="70" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span><i class="mi">x</i><sub>1</sub></span></div></foreignObject>
@@ -60,7 +59,7 @@
           <foreignObject x="8" y="22" width="376" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; word-break:keep-all; line-height:1.4; color:var(--color-text-secondary)"><span>앞 상태가 끝나야 다음 상태를 계산한다</span></div></foreignObject>
           <foreignObject x="8" y="128" width="376" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; word-break:keep-all; line-height:1.4; font-weight:700"><span>순차 단계 <i class="mi">n</i>번, 먼 단어까지 <i class="mi">n</i>단계</span></div></foreignObject>
           </svg>
-          <svg viewBox="0 0 392 152" width="100%" style="max-height:200px" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="제안 방식은 셀프 어텐션으로 모든 위치를 한 번에 계산한다">
+          <svg viewBox="0 0 392 152" width="100%" style="max-height:112px" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="제안 방식은 셀프 어텐션으로 모든 위치를 한 번에 계산한다">
           <foreignObject x="8" y="0" width="376" height="22"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4; font-weight:700; color:var(--color-accent)"><span>제안 방식: 셀프 어텐션만</span></div></foreignObject>
           <rect class="node-rect accent sq" x="8" y="46" width="376" height="32"/>
           <foreignObject x="8" y="46" width="376" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4; font-weight:700"><span>모든 위치를 한 번에 비교</span></div></foreignObject>
@@ -82,7 +81,6 @@
           </div>
         </div>
         <div class="callout callout-accent animate-in">
-          <div class="callout-icon">&#10024;</div>
           <div class="callout-content">
             <strong class="callout-title">이 논문의 새로운 점</strong>
             <ol>
@@ -204,7 +202,7 @@
                data-explanation-right="② | 소프트맥스의 출력은 모두 양수이고 합이 1이므로 비중으로 해석할 수 있다."
                data-explanation-wrong="| 정답은 ②이다. 소프트맥스의 출력은 모두 양수이고 합이 1이므로 어텐션에서 비중으로 쓰인다. ①은 소프트맥스가 음수 점수도 양수로 바꾸므로 옳지 않다.">
             <h3 class="quiz-question"><span class="q-num">1</span>다음 중 소프트맥스의 출력에 대한 설명으로 옳은 것은?</h3>
-            <div class="quiz-options">
+            <div class="quiz-options row cols-3">
               <button class="quiz-option" data-value="option-a" onclick="selectOption(this)">
                 <div class="quiz-option-radio"></div>
                 <span>① 입력 점수 중 음수는 그대로 음수로 남는다.</span>
@@ -215,7 +213,7 @@
               </button>
               <button class="quiz-option" data-value="option-c" onclick="selectOption(this)">
                 <div class="quiz-option-radio"></div>
-                <span>③ 가장 큰 점수의 출력만 1이고 나머지는 0이다.</span>
+                <span>③ 최대 점수만 1이 되고 나머지는 0이다.</span>
               </button>
             </div>
             <div class="quiz-feedback"></div>
@@ -265,7 +263,6 @@
           </svg>
         </div>
         <div class="callout callout-warning animate-in">
-          <div class="callout-icon">&#128269;</div>
           <div class="callout-content">
             <strong class="callout-title">더 알아보기</strong>
             <p>순환 신경망은 앞 단계의 계산이 끝나야 다음 단계를 시작할 수 있어서 한 문장 안에서 계산을 나누어 동시에 처리하기 어렵다. 이 논문은 이 제약을 없애는 것을 목표로 삼는다.</p>
@@ -365,7 +362,6 @@
     <div class="screen cornell">
       <aside class="cue">
         <div class="callout callout-accent animate-in">
-          <div class="callout-icon">&#128161;</div>
           <div class="callout-content">
             <strong class="callout-title">핵심 정리</strong>
             <ol>

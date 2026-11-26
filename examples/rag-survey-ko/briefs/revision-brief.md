@@ -26,8 +26,8 @@
 본문에서 다른 단원을 가리킬 때는 화면 번호("4단원")를 쓴다. `_base.html`, `_cover.html`, 모듈 id, module-number는 이미 고쳐 두었다. 건드리지 않는다.
 
 ## 반드시 먼저 읽을 것 (저장소 루트 = /Users/eugene/dev/paper2contents)
-- `SKILL.md`: 특히 "용어 표기", Phase 3의 EBS 교재 구성(학습 목표·개념 체크·탐구 자료·핵심 정리·확인 문제), Phase 4의 작성 규칙, "코넬식 페이지" 규칙
-- `references/korean-style-guide.md`: 문체(한다체·EBS 교재 문체), 린터 규칙
+- `SKILL.md`: 특히 "용어 표기", Phase 3의 학습서 구성(학습 목표·개념 체크·탐구 자료·핵심 정리·확인 문제), Phase 4의 작성 규칙, "코넬식 페이지" 규칙
+- `references/korean-style-guide.md`: 문체(한다체·학습서 문체), 린터 규칙
 - `references/interactive-elements.md`: 마크업 양식(퀴즈, 어블레이션 토글, 수식 단계 풀이, 연구 계보, 데이터 표, 콜아웃 등). **여기 있는 클래스와 마크업만 쓴다.** CSS·JS는 새로 만들지 않는다.
 - `references/design-system.md`: 색상 규약(먹색 + 교과 색 하나), 그림 정렬 규칙
 - `references/illustration.md`: 도식은 인라인 SVG로 직접 쓴다

@@ -30,15 +30,32 @@
 
 | 입력 | 처리 (자동) | 출력 |
 |---|---|---|
-| arXiv URL 또는 PDF<br>영문 논문 15쪽 | 정독 → 배경 조사 → 설계<br>→ 단원 생성 → 자동 검증 | `index.html` 단일 파일<br>3단원 · 21쪽 · 문항 10개 · 도식 12개 · 삽화 3개 |
+| arXiv URL 또는 PDF<br>영문 논문 15쪽 | 정독 → 배경 조사 → 설계<br>→ 단원 생성 → 자동 검증 | `index.html` 단일 파일<br>6단원 · 58쪽 · 문항 25개 · 도식 50개 · 삽화 8개 |
 
 | 논문 원문 | 산출 강의에서의 형태 |
 |---|---|
 | §1 서론: "RNN은 순차 계산이라 병렬화가 어렵다" | 1단원 1쪽: **기존 방식 vs 제안 방식 비교도** + 신규성 3개 요약 |
-| §3.2.1 식 (1) $\mathit{softmax}(QK^\top/\sqrt{d_k})V$ | 2단원: 행렬 크기 도식 → **단계별 수식 유도**(스페이스바로 1단계씩) → 의사코드 행별 해설 |
-| 표 2 BLEU 28.4 / 41.8 | 3단원: **지표 전환형 결과 비교**, 채점 원리 삽화 |
-| 표 3 헤드 수 제거 실험 | 3단원: 헤드 수 1·4·8·16·32 **탭 전환** + 해석 |
-| 참고문헌의 선행 연구 | 1단원: **연구 계보 트리**(계승한 것 → 달라진 것, 신규성 표시) |
+| §1·§2 + 선행 연구: RNN·LSTM의 한계, seq2seq 병목, RNN에 붙은 어텐션 | 2단원: 기울기 소실 막대·LSTM 게이트·**고정 길이 병목**·Bahdanau 어텐션 부착도 → 경로 길이 비교 → 연대표 |
+| §3.2.1 식 (1) $\mathit{softmax}(QK^\top/\sqrt{d_k})V$ | 3단원: 행렬 크기 도식 → **단계별 수식 유도**(스페이스바로 1단계씩) → 의사코드 행별 해설 |
+| §3.2.3 어텐션의 세 가지 쓰임 | 3단원: **셀프 vs 크로스 비교도**(Q·K·V 출처, $n\times n$ vs $n_{tgt}\times n_{src}$), 삼각 마스크 행렬 |
+| §3.1·3.3·3.5, §4 표 1 | 4단원: N=6 스택 구조도, 잔차·LayerNorm, FFN 폭 막대, 위치 인코딩 곡선, **텐서 모양 따라가기**(단계별), 복잡도 곡선 |
+| 표 2 BLEU 28.4 / 41.8 | 5단원: **지표 전환형 결과 비교**, 채점 원리 삽화 |
+| 표 3 헤드 수·층 수·폭 제거 실험 | 5단원: 헤드 수 1·4·8·16·32, 층 수 2·4·6·8 **탭 전환** + 점 그래프·산점도 해석 |
+| 참고문헌의 선행 연구 | 2단원: **연구 계보 트리**(계승한 것 → 달라진 것, 신규성 표시) |
+| 논문 이후(보충) | 6단원: encoder-only / encoder-decoder / decoder-only 마스크 비교, decoder-only가 많이 쓰이는 이유, KV 캐시, Pre-LN·RoPE·GQA·MoE |
+
+### 예시 산출물 4종
+
+논문 유형이 달라도 같은 절차와 같은 검증(린터 ERROR·WARN 0건, 넘침 0쪽)을 거친다.
+
+| 논문 | 유형 | 산출물 | 규모 |
+|---|---|---|---|
+| Attention Is All You Need (arXiv 1706.03762) | 방법 제안 | [`examples/attention-ko/`](examples/attention-ko/) | 6단원 · 58쪽 · 문항 25개 · 도식 50개 · 삽화 8개 |
+| Technical Overview of the Common Language Runtime (Meijer, Gough 2001) | 시스템 설계 | [`examples/clr-ko/`](examples/clr-ko/) | 8단원 · 75쪽 · 문항 32개 · 도식 50개 · 삽화 4개 |
+| Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks (arXiv 2005.11401) | 방법 제안 | [`examples/rag-lewis-ko/`](examples/rag-lewis-ko/) | 7단원 · 65쪽 · 문항 29개 · 도식 49개 · 삽화 6개 |
+| Retrieval-Augmented Generation for Large Language Models: A Survey (arXiv 2312.10997) | 서베이 | [`examples/rag-survey-ko/`](examples/rag-survey-ko/) | 8단원 · 80쪽 · 문항 35개 · 도식 67개 · 삽화 5개 |
+
+RAG 원 논문 강의는 이전 연구의 한계(closed-book, retrieve-and-extract)에서 출발해 RAG-Sequence와 RAG-Token의 식 유도, 디코딩 의사코드, 표 1·2 결과 비교, 색인 교체 실험을 거쳐 FiD·RETRO·Atlas·REPLUG·Self-RAG 같은 후속 연구로 이어진다. 마지막 단원에서 RAG 서베이 강의로 연결된다.
 
 <br>
 
@@ -77,7 +94,7 @@ LLM 요약은 이미 일상이다. 다음 단계는 **요약이 아닌 학습 �
 ## What it produces
 
 <p align="center">
-  <img src="docs/images/page-opener.png" alt="2단원 첫 페이지. 왼쪽 단서 칸에 학습 목표, 오른쪽에 본문, 흐름도, 행렬 크기 그림, 하단에 요약" width="880">
+  <img src="docs/images/page-opener.png" alt="3단원(어텐션) 첫 페이지. 왼쪽 단서 칸에 학습 목표, 오른쪽에 본문, 흐름도, 행렬 크기 그림, 하단에 요약" width="880">
 </p>
 
 입력은 arXiv URL 또는 PDF, 출력은 브라우저에서 바로 여는 `index.html`이다. 별도 환경 설정이나 추가 입력 없이 한 파이프라인으로 끝난다.
@@ -116,9 +133,9 @@ https://arxiv.org/abs/1706.03762 강의로 만들어 줘
 |---|---|---|
 | 1. 정독 (Read) | 원문 3회 정독, 수식·결과표·데이터셋 추출 | 식 (1), 표 2(BLEU), 표 3(제거 실험) 목록 |
 | 2. 조사 (Ground) | 웹 검색으로 선수 개념·선행 연구·보충 도식 확보 | 선수 개념 4개, 계보(RNN → seq2seq → 어텐션 → Transformer) |
-| 3. 설계 (Plan) | 논문 절 → 단원 대응, 강의별 용어표 작성 | 3단원 구성안, `briefs/terms.md` |
-| 4. 생성 (Generate) | 단원별 HTML 작성(병렬 하위 에이전트 가능), 삽화 생성 | `modules/00~02`, `assets/fig-*.svg` |
-| 5. 검증 (Verify) | `lint-ko.py --strict` + `check-pages.py` 통과 시 완료 | 21쪽 전부 765px 이하, 경고 0건 |
+| 3. 설계 (Plan) | 논문 절 → 단원 대응, 강의별 용어표 작성 | 6단원 구성안, `briefs/terms.md` |
+| 4. 생성 (Generate) | 단원별 HTML 작성(병렬 하위 에이전트 가능), 삽화 생성 | `modules/00~05`, `assets/fig-*.svg` |
+| 5. 검증 (Verify) | `lint-ko.py --strict` + `check-pages.py` 통과 시 완료 | 58쪽 전부 765px 이하, 경고 0건 |
 
 **④ 열람·공유**: 생성된 `index.html`을 브라우저로 연다. CSS·JS·글꼴·KaTeX·삽화를 모두 넣은 **단독 파일**이라 네트워크 없이 열리고, 이 파일 하나만 보내면 된다(외부 요청 0건).
 
@@ -223,16 +240,27 @@ paper-to-course/
 │       ├── styles.css, main.js       지면 양식, 쪽 넘김·채점·단계 진행
 │       └── vendor/                   빌드 시 내장되는 자원: 글꼴(P2C Sans·JetBrains Mono), KaTeX
 ├── examples/
-│   └── attention-ko/             참조 산출물 (Attention Is All You Need)
-│       ├── index.html                최종 산출물 (build.sh가 생성한 단독 파일)
-│       ├── _cover.html               표지: 제목, 초록, 목차
-│       ├── modules/
-│       │   ├── 00-background.html    1단원 서론과 배경 (9쪽)
-│       │   ├── 01-attention.html     2단원 어텐션 (7쪽)
-│       │   └── 02-results.html       3단원 결과 (5쪽)
-│       ├── assets/fig-*.svg          삽화 3개 (+ 재현용 생성 조건 .json)
-│       ├── briefs/terms.md           강의별 용어표
-│       └── styles.css, main.js       references/에서 복사한 런타임
+│   ├── attention-ko/             참조 산출물 (Attention Is All You Need)
+│   │   ├── index.html                최종 산출물 (build.sh가 생성한 단독 파일)
+│   │   ├── _cover.html               표지: 제목, 초록, 목차
+│   │   ├── modules/
+│   │   │   ├── 00-background.html    1단원 서론과 배경 (8쪽)
+│   │   │   ├── 01-lineage.html       2단원 순환 신경망에서 어텐션으로 (10쪽)
+│   │   │   ├── 02-attention.html     3단원 어텐션 (11쪽)
+│   │   │   ├── 03-architecture.html  4단원 트랜스포머 구조 (10쪽)
+│   │   │   ├── 04-results.html       5단원 결과 (8쪽)
+│   │   │   └── 05-trends.html        6단원 이후 동향 (11쪽)
+│   │   ├── assets/fig-*.svg          삽화 8개 (+ 재현용 생성 조건 .json)
+│   │   ├── briefs/                   용어표, 확인된 출처, 개정·도표 지침
+│   │   └── styles.css, main.js       references/에서 복사한 런타임
+│   ├── clr-ko/                   CLR 기술 개요 (Meijer, Gough 2001): 8단원 75쪽
+│   │   └── modules/00-background ~ 07-trends   서론과 배경, JVM의 한계, CLI 구조, 타입 시스템,
+│   │                                           값·참조 타입, 메서드 호출, 검증, 이후 동향
+│   ├── rag-lewis-ko/             RAG 원 논문 (Lewis et al. 2020): 7단원 65쪽
+│   │   └── modules/00-background ~ 06-trends   서론과 배경, 이전 연구와 한계, RAG 모델,
+│   │                                           검색기·생성기·학습, 실험 설계, 결과, 이후 동향
+│   └── rag-survey-ko/            RAG 서베이 (Gao et al. 2023): 8단원 80쪽
+│       └── modules/00-bigpicture ~ 07-trends   훑어보기부터 서베이 이후 동향까지
 └── docs/
     ├── images/                   README 화면 캡처
     └── lint-fixtures/            린터 검증용 정상·오류 예시

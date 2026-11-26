@@ -8,7 +8,7 @@
     </div>
 
     <!-- 페이지 1: 무엇이 달라졌나 -->
-    <div class="screen cornell">
+    <div class="screen cornell dense">
       <aside class="cue">
         <span class="cue-label">핵심 질문</span>
         <ul><li>서베이 이후 RAG 연구는 어디에서 갈라졌는가?</li><li>이 단원의 주제는 어떤 순서로 읽는가?</li></ul>
@@ -60,7 +60,7 @@
     </div>
 
     <!-- 페이지 3: GraphRAG 작동 과정과 비용 -->
-    <div class="screen cornell">
+    <div class="screen cornell dense">
       <aside class="cue">
         <span class="cue-label">핵심 질문</span>
         <ul><li>GraphRAG는 질문 전에 무엇을 만들어 두는가?</li><li>map과 reduce는 각각 무엇을 하는가?</li><li>GraphRAG의 대가는 무엇인가?</li></ul>
@@ -84,7 +84,7 @@
     </div>
 
     <!-- 페이지 4: Parametric RAG -->
-    <div class="screen cornell">
+    <div class="screen cornell dense">
       <aside class="cue">
         <span class="cue-label">핵심 질문</span>
         <ul><li>지식을 문맥에 넣는 것과 파라미터에 넣는 것은 어떻게 다른가?</li><li>Parametric RAG는 어떤 비용을 오프라인으로 옮기는가?</li></ul>
@@ -123,7 +123,7 @@
         <h3 class="screen-heading">Agentic RAG와 강화 학습 검색</h3>
         <p><strong>무엇을 풀려는가:</strong> 5단원의 <span class="term" data-definition="adaptive retrieval(필요할 때만 검색): 생성 도중 검색이 필요한 때를 판단해 그때만 검색하는 방식.">adaptive retrieval(필요할 때만 검색)</span>에서 FLARE는 낮은 확률 토큰, Self-RAG는 reflection token이라는 정해 둔 신호로 검색 시점을 정했다. 이후 연구는 <strong>검색 시점과 query를 모델이 학습하는</strong> 쪽으로 나아갔다.</p>
         <p><strong>핵심 아이디어:</strong> Jin et al.(2025)의 <a href="https://arxiv.org/abs/2503.09516" target="_blank" rel="noopener">Search-R1</a>에서 모델은 추론하다가 <code>&lt;search&gt;</code> 토큰으로 검색을 부르고, 결과를 <code>&lt;information&gt;</code>으로 받아 추론을 이어 간다. 학습은 <span class="term" data-definition="강화 학습(Reinforcement Learning, RL): 정답을 직접 알려 주지 않고, 행동의 결과로 받은 보상이 커지도록 정책을 고쳐 나가는 학습 방법.">강화 학습(Reinforcement Learning, RL)</span>으로 하며 <span class="term" data-definition="PPO(Proximal Policy Optimization, 근접 정책 최적화): 정책이 한 번에 너무 크게 바뀌지 않게 제한하며 보상을 높이는 강화 학습 알고리즘.">PPO</span>와 <span class="term" data-definition="GRPO(Group Relative Policy Optimization, 그룹 상대 정책 최적화): 같은 질문에 낸 여러 답의 보상을 서로 비교해 정책을 고치는 강화 학습 알고리즘. 가치 함수가 필요 없음.">GRPO</span>를 쓴다. 보상은 최종 답의 <span class="term" data-definition="exact match(완전 일치, EM): 모델의 답이 정답 문자열과 정확히 같으면 1, 아니면 0을 주는 지표.">exact match(완전 일치, EM)</span>뿐이고 검색 결과 토큰은 손실에서 제외한다.</p>
-        <figure class="svg-diagram animate-in" style="margin:var(--space-2) auto"><svg viewBox="0 0 800 158" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Search-R1에서 모델은 think로 추론하고 search 태그로 query를 써서 검색하며, information 태그로 결과를 받아 다시 추론하는 과정을 반복하다가 answer 태그로 최종 답을 내고, 최종 답의 EM이 보상이 됨"><text class="muted" x="600" y="14" text-anchor="middle" font-size="12">충분하면 답함</text><path class="edge-line accent" d="M100,40 V20 H700 V30"/><polygon class="edge-arrow accent" points="695,30 700,40 705,30"/><rect class="node-rect sq" x="16" y="40" width="168" height="52" rx="2"/><foreignObject x="24" y="44" width="152" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span><code>&lt;think&gt; 추론</code></span></div></foreignObject><path class="edge-line" d="M184,66 H206"/><polygon class="edge-arrow" points="206,61 216,66 206,71"/><rect class="node-rect sq" x="216" y="40" width="168" height="52" rx="2"/><foreignObject x="224" y="44" width="152" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span><code>&lt;search&gt; query &lt;/search&gt;</code></span></div></foreignObject><path class="edge-line" d="M384,66 H406"/><polygon class="edge-arrow" points="406,61 416,66 406,71"/><rect class="node-rect sq" x="416" y="40" width="168" height="52" rx="2"/><foreignObject x="424" y="44" width="152" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span><code>&lt;information&gt; 검색 결과 &lt;/information&gt;</code></span></div></foreignObject><rect class="node-rect sq accent" x="616" y="40" width="168" height="52" rx="2"/><foreignObject x="624" y="44" width="152" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span><code>&lt;answer&gt; 최종 답 &lt;/answer&gt;</code></span></div></foreignObject><path class="edge-line" d="M500,92 V112 H100 V102"/><polygon class="edge-arrow" points="95,102 100,92 105,102"/><text class="muted" x="300" y="128" text-anchor="middle" font-size="12">부족하면 다시 생각하고 또 검색함</text><text x="100" y="150" text-anchor="middle" font-size="12">모델이 씀</text><text x="300" y="150" text-anchor="middle" font-size="12">모델이 query를 씀</text><text x="500" y="150" text-anchor="middle" font-size="12">검색 엔진이 채움 · 손실에서 제외</text><text x="700" y="150" text-anchor="middle" font-size="12">EM이 보상</text></svg><figcaption class="figure-caption">그림은 Search-R1이 추론과 검색을 번갈아 하다가 답을 내는 흐름을 나타낸 것이다. 출처: <a href="https://arxiv.org/abs/2503.09516" target="_blank" rel="noopener">Jin et al. 2025</a>를 바탕으로 새로 그림.</figcaption></figure>
+        <figure class="svg-diagram animate-in" style="margin:var(--space-2) auto"><svg viewBox="0 0 800 158" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Search-R1에서 모델은 think로 추론하고 search 태그로 query를 써서 검색하며, information 태그로 결과를 받아 다시 추론하는 과정을 반복하다가 answer 태그로 최종 답을 내고, 최종 답의 EM이 보상이 됨"><text class="muted" x="600" y="14" text-anchor="middle" font-size="12">충분하면 답함</text><path class="edge-line accent" d="M100,40 V20 H700 V30"/><polygon class="edge-arrow accent" points="695,30 700,40 705,30"/><rect class="node-rect sq" x="16" y="40" width="168" height="52" rx="2"/><foreignObject x="24" y="44" width="152" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span><code>&lt;think&gt; 추론</code></span></div></foreignObject><path class="edge-line" d="M184,66 H206"/><polygon class="edge-arrow" points="206,61 216,66 206,71"/><rect class="node-rect sq" x="216" y="40" width="168" height="52" rx="2"/><foreignObject x="224" y="44" width="152" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span><code>&lt;search&gt; query &lt;/search&gt;</code></span></div></foreignObject><path class="edge-line" d="M384,66 H406"/><polygon class="edge-arrow" points="406,61 416,66 406,71"/><rect class="node-rect sq" x="416" y="40" width="168" height="52" rx="2"/><foreignObject x="424" y="44" width="152" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span><code>&lt;information&gt;</code><br/><code>검색 결과 &lt;/information&gt;</code></span></div></foreignObject><rect class="node-rect sq accent" x="616" y="40" width="168" height="52" rx="2"/><foreignObject x="624" y="44" width="152" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span><code>&lt;answer&gt; 최종 답 &lt;/answer&gt;</code></span></div></foreignObject><path class="edge-line" d="M500,92 V112 H100 V102"/><polygon class="edge-arrow" points="95,102 100,92 105,102"/><text class="muted" x="300" y="128" text-anchor="middle" font-size="12">부족하면 다시 생각하고 또 검색함</text><text x="100" y="150" text-anchor="middle" font-size="12">모델이 씀</text><text x="300" y="150" text-anchor="middle" font-size="12">모델이 query를 씀</text><text x="500" y="150" text-anchor="middle" font-size="12">검색 엔진이 채움 · 손실에서 제외</text><text x="700" y="150" text-anchor="middle" font-size="12">EM이 보상</text></svg><figcaption class="figure-caption">그림은 Search-R1이 추론과 검색을 번갈아 하다가 답을 내는 흐름을 나타낸 것이다. 출처: <a href="https://arxiv.org/abs/2503.09516" target="_blank" rel="noopener">Jin et al. 2025</a>를 바탕으로 새로 그림.</figcaption></figure>
         <p>Singh et al.의 <a href="https://arxiv.org/abs/2501.09136" target="_blank" rel="noopener">Agentic RAG 서베이</a>(2026년 4월 개정판)는 성찰·계획·도구 사용·다중 에이전트 협업을 하는 자율 에이전트를 RAG 안에 두는 흐름을 정리하고, 이를 에이전트 수, 제어 구조, 자율성, 지식 표현의 네 축으로 나눈다. 강화 학습 기반 검색은 Lin et al.의 <a href="https://arxiv.org/abs/2510.16724" target="_blank" rel="noopener">agentic search 서베이</a>가 정리한다.</p>
         <p><strong>한계와 비용:</strong> 단계가 늘수록 LLM 호출 횟수와 <span class="term" data-definition="지연(Latency): 질문을 넣은 뒤 답이 나오기까지 걸리는 시간.">지연(Latency)</span>이 늘고, 한 단계의 잘못이 뒤로 넘어가는 <span class="term" data-definition="오류 전파(Error Propagation): 앞 단계의 잘못이 뒤 단계로 넘어가 쌓이는 현상.">오류 전파(Error Propagation)</span>가 생길 수 있다. 흐름이 질문마다 달라 평가도 어렵다. 이는 3단원에서 본 Modular RAG의 대가가 더 커진 것으로 해석할 수 있다.</p>
       </div>
@@ -231,7 +231,7 @@
     </div>
 
     <!-- 페이지 9: 핵심 정리 + 확인 문제 1 -->
-    <div class="screen cornell">
+    <div class="screen cornell dense">
       <aside class="cue">
         <div class="callout callout-accent animate-in">
           <div class="callout-content">

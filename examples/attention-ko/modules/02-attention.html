@@ -11,7 +11,6 @@
     <div class="screen cornell">
       <aside class="cue">
         <div class="callout callout-info animate-in">
-          <div class="callout-icon">&#127919;</div>
           <div class="callout-content">
             <strong class="callout-title">학습 목표</strong>
             <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
@@ -270,7 +269,6 @@
     <div class="screen cornell">
       <aside class="cue">
         <div class="callout callout-info animate-in">
-          <div class="callout-icon">&#128161;</div>
           <div class="callout-content">
             <strong class="callout-title">보충 설명</strong>
             <p>논문은 어텐션을 세 곳에 쓴다. 인코더의 <span class="term" data-definition="셀프 어텐션(self-attention): 같은 시퀀스 안의 토큰끼리 서로 참고하는 어텐션. 쿼리, 키, 값이 모두 같은 시퀀스에서 나옴.">셀프 어텐션</span>(self-attention), 디코더의 셀프 어텐션, 디코더가 인코더 출력을 참고하는 인코더-디코더 어텐션이다.</p>
@@ -399,7 +397,7 @@
         <p>논문은 크로스 어텐션을 <strong>인코더-디코더 어텐션</strong>(encoder-decoder attention)이라 부른다. 그림은 “나는 학교에 간다”를 “I go to school”로 옮길 때 두 어텐션의 재료와 점수 행렬을 나타낸 것이다. 문장과 어절 단위 <span class="term" data-definition="토큰(token): 모델이 한 번에 처리하는 글자 묶음의 단위. 단어나 단어 조각이 됨.">토큰</span>(token)은 설명을 위한 예시이다.</p>
         <div class="with-figure" style="--figure-side-width:376px">
           <figure class="svg-diagram animate-in" style="margin:0">
-<svg viewBox="0 0 376 296" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="셀프 어텐션은 인코더 입력 하나에서 Q, K, V를 모두 만들어 3×3 점수 행렬을 얻는다">
+<svg viewBox="0 0 376 296" width="100%" style="max-height:262px" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="셀프 어텐션은 인코더 입력 하나에서 Q, K, V를 모두 만들어 3×3 점수 행렬을 얻는다">
 <path class="edge-line" d="M188,76 V96 M96,96 H280"/>
 <path class="edge-line" d="M96,96 L96,110"/><polygon class="edge-arrow" points="91,110 96,120 101,110"/>
 <path class="edge-line" d="M188,96 L188,110"/><polygon class="edge-arrow" points="183,110 188,120 193,110"/>
@@ -424,7 +422,7 @@
             <figcaption class="figure-caption">그림은 Q·K·V가 모두 한 시퀀스에서 나오는 셀프 어텐션을 나타낸 것이다.</figcaption>
           </figure>
           <figure class="figure side">
-<svg viewBox="0 0 376 296" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="크로스 어텐션은 디코더 입력에서 Q, 인코더 출력에서 K와 V를 만들어 4×3 점수 행렬을 얻는다">
+<svg viewBox="0 0 376 296" width="100%" style="max-height:262px" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="크로스 어텐션은 디코더 입력에서 Q, 인코더 출력에서 K와 V를 만들어 4×3 점수 행렬을 얻는다">
 <path class="edge-line" d="M92,76 L92,110"/><polygon class="edge-arrow" points="87,110 92,120 97,110"/>
 <path class="edge-line accent" d="M284,76 V96 M240,96 H328"/>
 <path class="edge-line accent" d="M240,96 L240,110"/><polygon class="edge-arrow accent" points="235,110 240,120 245,110"/>
@@ -597,7 +595,6 @@
     <div class="screen cornell">
       <aside class="cue">
         <div class="callout callout-accent animate-in">
-          <div class="callout-icon">&#128161;</div>
           <div class="callout-content">
             <strong class="callout-title">핵심 정리</strong>
             <ol>

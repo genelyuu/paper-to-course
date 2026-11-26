@@ -11,7 +11,6 @@
     <div class="screen cornell">
       <aside class="cue">
         <div class="callout callout-info animate-in">
-          <div class="callout-icon">&#127919;</div>
           <div class="callout-content">
             <strong class="callout-title">학습 목표</strong>
             <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
@@ -162,7 +161,7 @@
       <div class="notes">
         <h3 class="screen-heading">잔차 연결과 LayerNorm<span class="paper-ref">논문 3.1절</span></h3>
         <p>하위 층마다 같은 포장이 붙는다. 하위 층의 입력 $x$를 하위 층 출력에 그대로 더하는 <span class="term" data-definition="잔차 연결(residual connection): 어떤 부품의 입력을 그 부품의 출력에 그대로 더하는 지름길 연결.">잔차 연결</span>(residual connection)을 한 뒤 <span class="term" data-definition="LayerNorm(layer normalization, 층 정규화): 한 위치의 벡터 성분들을 평균 0, 분산 1이 되게 맞춘 뒤 학습된 배율과 이동을 적용하는 정규화.">LayerNorm</span>(layer normalization, 층 정규화)을 적용한다. 그림의 Add &amp; Norm 상자가 이 포장이며, 식으로 쓰면 $\mathit{LayerNorm}(x + \mathit{Sublayer}(x))$이다.</p>
-        <figure class="svg-diagram animate-in" style="margin:var(--space-2) auto">
+        <figure class="svg-diagram animate-in" style="margin:0 auto">
 <svg viewBox="0 28 800 92" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="입력 x가 하위 층을 지난 출력과, 하위 층을 건너뛴 입력 x가 더해진 뒤 LayerNorm을 거쳐 출력이 되며 모든 화살표에서 모양은 n×512이다">
 <path class="edge-line accent" d="M150,60 L150,106 Q150,112 156,112 L442,112 Q448,112 448,106 L448,82"/><polygon class="edge-arrow accent" points="443,82 448,72 453,82"/>
 <path class="edge-line" d="M112,60 H190"/><polygon class="edge-arrow" points="190,55 200,60 190,65"/>
@@ -492,12 +491,12 @@
           </tbody>
           <caption>표는 층 종류별 복잡도, 순차 연산 수, 최대 경로 길이를 나타낸 것이다. (논문 표 1)</caption>
         </table>
-        <div class="with-figure" style="--figure-side-width:300px">
+        <div class="with-figure" style="--figure-side-width:250px">
           <div class="callout callout-info animate-in">
             <div class="callout-content">
               <strong class="callout-title">보충 설명</strong>
               <p>논문은 $n &lt; d$이면(문장 표현에서 흔함) 셀프 어텐션이 순환 층보다 빠르다고 본다. 예시 값으로 $d = 512$, $n = 50$이면 $n^2 d$는 128만, $n d^2$는 약 1,311만이다.</p>
-              <p>반대로 $n = 2000$이면 $n^2 d$가 약 20억으로 $n d^2$(약 5억)의 4배이다. 이는 긴 시퀀스에서 $n^2$이 부담이 된다는 해석으로 이어지며, 논문의 제한 셀프 어텐션은 이웃 $r$개만 보아 이 부담을 줄이는 안이다.</p>
+              <p>반대로 $n = 2000$이면 $n^2 d$가 약 20억으로 $n d^2$(약 5억)의 4배이다. 긴 시퀀스에서는 $n^2$이 부담이 된다고 볼 수 있으며, 논문의 제한 셀프 어텐션은 이웃 $r$개만 보아 이 부담을 줄이는 안이다.</p>
             </div>
           </div>
           <figure class="figure side">
@@ -615,7 +614,7 @@
               <p>ㄴ. FFN은 여러 위치를 섞어 계산한다.</p>
               <p>ㄷ. 학습형 위치 임베딩은 BLEU가 크게 낮았다.</p>
             </div>
-            <div class="quiz-options row" style="grid-template-columns:repeat(3, minmax(0, 1fr))">
+            <div class="quiz-options row cols-3">
               <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① ㄱ</span></button>
               <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② ㄴ</span></button>
               <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ ㄱ, ㄴ</span></button>
