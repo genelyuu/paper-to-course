@@ -1071,6 +1071,27 @@ p:last-child { margin-bottom: 0; }
 .dnd-chip:active { cursor: grabbing; transform: scale(1.05); }
 .dnd-chip.dragging { opacity: 0.4; }
 .dnd-chip.placed { opacity: 0.3; pointer-events: none; }
+.dnd-chip.selected { box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-accent); }
+/* 칩·칸 안의 수학 기호는 바탕색과 겹치지 않도록 둘레 글자색을 따른다 */
+.dnd-chip .mi, .dnd-chip sub, .dnd-chip sup,
+.dnd-zone-target .mi, .dnd-zone-target sub, .dnd-zone-target sup { color: inherit; }
+.dnd-zone-target { cursor: pointer; gap: var(--space-3); }
+/* 매칭 확인·스페이스바로 공개한 정답 */
+.dnd-zone-target.answer-shown { border-style: solid; border-color: var(--color-accent); background: var(--color-accent-light); color: var(--color-text); }
+.dnd-zone-target.incorrect-placed { color: var(--color-text); }
+.dnd-answer-label { font-size: var(--text-xs); font-weight: 700; color: var(--color-accent); }
+.dnd-zone-target.incorrect-placed .dnd-answer-label { color: var(--color-error); }
+.dnd-wrong { color: var(--color-text-muted); }
+
+/* 본문·콜아웃·캡션 속 외부 링크(더 알아보기의 출처 등): 브라우저 기본 파란 밑줄 대신 교과 색 */
+:is(.notes, .callout, .figure-caption, .data-table) a:not(.btn) {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+}
+:is(.notes, .callout, .figure-caption, .data-table) a:not(.btn):hover { color: var(--color-accent-hover); }
 
 .dnd-zones { display: flex; flex-direction: column; gap: var(--space-4); }
 .dnd-zone {
@@ -2707,7 +2728,9 @@ body { background-image: none; }
 /* 2. SVG 노드 라벨: foreignObject 안 글자를 상자 가운데로 */
 /* 라벨 구조: <foreignObject …><div class="node-label"><span>글자 <sub>k</sub></span></div></foreignObject>
    flex는 div의 자식 하나(span)만 가운데에 놓고, span 안의 글자와 <sub>는 한 줄 흐름을 유지한다. */
-.svg-diagram foreignObject > div {
+/* .svg-diagram 밖(본문 옆 figure.side, 단서 칸)의 인라인 SVG 라벨도 같게 맞춘다 */
+.svg-diagram foreignObject > div,
+svg foreignObject > div.node-label {
   height: 100%;
   display: flex;
   align-items: center;
@@ -2715,7 +2738,8 @@ body { background-image: none; }
   text-align: center;
   color: var(--color-text);
 }
-.svg-diagram foreignObject > div > span { display: block; }
+.svg-diagram foreignObject > div > span,
+svg foreignObject > div.node-label > span { display: block; }
 .svg-diagram svg { display: block; height: auto; }
 
 /* 1. 계보: 관계 라벨 폭을 고정해 자식 노드의 시작 x를 맞춘다 */
@@ -2962,6 +2986,57 @@ html { scroll-padding-top: var(--nav-height); }
 .data-table td.num, .data-table th.num { text-align: right; }
 .data-table tr.hl td { background: var(--color-accent-light); }
 .data-table tr.hl td:first-child { box-shadow: inset 3px 0 0 var(--color-accent); }
-/* 차이 한 줄: 비교표 아래 요약 문장 */
+/* 핵심 비교: 비교표 아래 요약 문장 */
 .diff-line { margin: var(--space-3) 0 0; padding: var(--space-2) var(--space-3); border-left: 3px solid var(--color-accent); background: var(--color-accent-light); font-size: var(--text-sm); }
 .diff-line strong { color: var(--color-accent); margin-right: var(--space-2); }
+
+/* ── 색상 변주: 정보·연구 계열 구성 요소도 교과 색에서 나온 색을 쓴다 ──
+   (파랑 교과 색이 아닌 강의에서 '배경 지식' 상자·시나리오·인용 카드가 파랗게 남지 않게) */
+:root {
+  --color-info:            var(--color-accent-hover);
+  --color-info-light:      var(--color-accent-light);
+  --color-research-accent: var(--color-accent-hover);
+  --color-research-bg:     color-mix(in srgb, var(--color-accent) 6%, var(--color-surface));
+  --color-math-border:     color-mix(in srgb, var(--color-accent) 18%, var(--color-border));
+}
+.callout-info { --callout-c: var(--color-accent-hover); }
+.quiz-feedback.warning { background: var(--color-accent-light); color: var(--color-accent-hover); }
+
+/* ── 쪽 여백: 화면 위아래 여백과 노트 칸 상자 사이 간격 ──
+   빽빽한 쪽(.dense)만 이전 간격으로 줄인다. check-pages가 넘침을 알려 주면 그 쪽의 <section class="screen cornell">에 dense를 붙인다 */
+:root { --page-pad-y: 32px; --block-gap: 16px; }
+.module { padding-left: var(--space-10); padding-right: var(--space-10); }
+.screen.cornell { padding: var(--page-pad-y) 0; row-gap: var(--space-5); }
+.module-header + .screen.cornell { padding-top: 0; }
+.cornell .notes .callout,
+.cornell .notes .katex-display { margin: var(--block-gap) 0; }
+.cornell > .notes > :is(.data-table, .svg-diagram, .figure, .pseudocode-translation, .quiz-container, .with-figure, .math-derivation, .result-comparison) {
+  margin-top: var(--block-gap); margin-bottom: var(--block-gap);
+}
+.cornell > .notes > :first-child { margin-top: 0; }
+.cornell > .notes > :last-child { margin-bottom: 0; }
+.screen.cornell.dense { --page-pad-y: 24px; --block-gap: 12px; row-gap: var(--space-4); }
+.module:has(.module-header + .screen.cornell.dense) { padding-top: calc(var(--nav-height) + var(--space-2)); }
+.module:has(.module-header + .screen.cornell.dense) .module-header { padding-bottom: var(--space-4); margin-bottom: var(--space-4); }
+
+/* ── 고급 쪽의 단서 칸 용어 정리(main.js가 노트 칸의 용어 툴팁에서 만든다) ── */
+.cue-terms { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--color-border-light); }
+.cue-terms .cue-label { margin-bottom: var(--space-2); }
+.cue-terms dl { margin: 0; }
+.cue-terms dt { margin-top: var(--space-2); font-size: var(--text-xs); font-weight: 700; color: var(--color-text); }
+.cue-terms dt:first-of-type { margin-top: 0; }
+.cue-terms dd { margin: 2px 0 0; font-size: var(--text-xs); line-height: 1.5; color: var(--color-text-secondary); }
+
+/* ── 코드 칸: 모든 pre는 어두운 코드 칸(IDE 토큰 색이 보이도록) ── */
+.notes pre:not(.pseudocode-block) {
+  background: var(--color-bg-code); color: #CDD6F4; padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md); font-family: var(--font-mono); font-size: 13px; line-height: 1.6;
+}
+.pseudocode-block .code-plain { color: #CDD6F4; }
+
+
+/* 열이 많은 표: 칸 안쪽 여백을 줄인다(인라인 <style> 대신) */
+.data-table.compact th, .data-table.compact td { padding: var(--space-2) 6px; }
+
+/* SVG 상자 라벨: 본문 줄 간격(1.75)을 물려받으면 두 줄 라벨이 상자를 넘는다 */
+.svg-diagram foreignObject > div, svg foreignObject > div.node-label { line-height: 1.35; }

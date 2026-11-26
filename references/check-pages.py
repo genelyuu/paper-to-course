@@ -191,6 +191,10 @@ window.addEventListener('load', function () {
     document.querySelectorAll('.sidebar-item-label').forEach(function (e) {
       if (e.scrollWidth > e.clientWidth + 1) lay.push('사이드바: 목차 라벨이 잘린다 "' + e.textContent.trim() + '" (더 짧게)');
     });
+    // scaffold.py가 남긴 빈자리
+    ((document.querySelector('main') || document.body).textContent.match(/\[작성 필요: [^\]]*\]/g) || []).slice(0, 5).forEach(function (t) {
+      lay.push('미작성 자리가 남았다 ' + t + ' (scaffold.py todo로 위치 확인)');
+    });
     var pre = document.createElement('pre');
     pre.id = '__fit_result';
     var images = document.querySelectorAll('figure img[src^="assets/"], figure img[data-asset]').length;   // 모델 삽화(사물·장면 선화)
