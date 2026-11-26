@@ -2707,7 +2707,9 @@ body { background-image: none; }
 /* 2. SVG 노드 라벨: foreignObject 안 글자를 상자 가운데로 */
 /* 라벨 구조: <foreignObject …><div class="node-label"><span>글자 <sub>k</sub></span></div></foreignObject>
    flex는 div의 자식 하나(span)만 가운데에 놓고, span 안의 글자와 <sub>는 한 줄 흐름을 유지한다. */
-.svg-diagram foreignObject > div {
+/* .svg-diagram 밖(본문 옆 figure.side, 단서 칸)의 인라인 SVG 라벨도 같게 맞춘다 */
+.svg-diagram foreignObject > div,
+svg foreignObject > div.node-label {
   height: 100%;
   display: flex;
   align-items: center;
@@ -2715,7 +2717,8 @@ body { background-image: none; }
   text-align: center;
   color: var(--color-text);
 }
-.svg-diagram foreignObject > div > span { display: block; }
+.svg-diagram foreignObject > div > span,
+svg foreignObject > div.node-label > span { display: block; }
 .svg-diagram svg { display: block; height: auto; }
 
 /* 1. 계보: 관계 라벨 폭을 고정해 자식 노드의 시작 x를 맞춘다 */
@@ -2962,6 +2965,6 @@ html { scroll-padding-top: var(--nav-height); }
 .data-table td.num, .data-table th.num { text-align: right; }
 .data-table tr.hl td { background: var(--color-accent-light); }
 .data-table tr.hl td:first-child { box-shadow: inset 3px 0 0 var(--color-accent); }
-/* 차이 한 줄: 비교표 아래 요약 문장 */
+/* 핵심 비교: 비교표 아래 요약 문장 */
 .diff-line { margin: var(--space-3) 0 0; padding: var(--space-2) var(--space-3); border-left: 3px solid var(--color-accent); background: var(--color-accent-light); font-size: var(--text-sm); }
 .diff-line strong { color: var(--color-accent); margin-right: var(--space-2); }

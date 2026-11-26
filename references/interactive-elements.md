@@ -976,7 +976,7 @@ codebase-to-course와 같은 패턴이며 개념과 정의, 방법과 논문 등
     <!-- 오른쪽: 제안 방식 (교과 색) — 입력 위치는 왼쪽과 같게 -->
     <rect class="node-rect accent" x="408" y="48" width="72" height="48" rx="12"/>
     <!-- … -->
-    <!-- 패널 아래: 차이 한 줄 -->
+    <!-- 패널 아래: 핵심 비교 -->
     <foreignObject x="16" y="176" width="368" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; color:var(--color-text-secondary)"><span>순차 단계 <i class="mi">n</i>번</span></div></foreignObject>
     <foreignObject x="408" y="176" width="376" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>한 번에 1번</span></div></foreignObject>
   </svg>
@@ -1034,7 +1034,7 @@ codebase-to-course와 같은 패턴이며 개념과 정의, 방법과 논문 등
 
 **지도 표시.** 구조도를 다룬 뒤의 페이지에는 같은 구조도를 작게(`--diagram-max:280px`) 단서 칸에 두고, 지금 설명하는 상자만 `node-rect.sq.accent`로 칠한다.
 
-**차이 비교.** 같은 입력 하나를 형제 개념 각각에 넣은 결과를 세로 칸으로 나란히 그리고(칸 제목 = 개념 이름, 같은 높이의 단계 상자), 아래에 비교표와 `차이 한 줄`을 둔다.
+**차이 비교.** 같은 입력 하나를 형제 개념 각각에 넣은 결과를 세로 칸으로 나란히 그리고(칸 제목 = 개념 이름, 같은 높이의 단계 상자), 아래에 비교표와 `핵심 비교`를 둔다.
 
 ```html
 <table class="data-table">
@@ -1046,5 +1046,5 @@ codebase-to-course와 같은 패턴이며 개념과 정의, 방법과 논문 등
   </tbody>
   <caption>표는 세 방식의 차이를 나타낸 것이다.</caption>
 </table>
-<p class="diff-line"><strong>차이 한 줄</strong> Naive는 검색 → 생성뿐, Advanced는 그 앞뒤를 다듬고, Modular는 단계 자체를 갈아 끼운다.</p>
+<p class="diff-line"><strong>핵심 비교</strong> Naive는 검색 → 생성뿐, Advanced는 그 앞뒤를 다듬고, Modular는 단계 자체를 갈아 끼운다.</p>
 ```

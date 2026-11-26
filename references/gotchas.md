@@ -251,3 +251,9 @@ python3 -I <skill-dir>/references/check-pages.py <course-dir>
 
 - **증상:** 그림에 교과 색 말고 다른 유채색이 있다. 베이지·크림 면이 있다. 한 대상에 색, 굵게, 밑줄이 겹친다. 본문 명암비가 4.5:1 미만이다.
 - **해결:** `design-system.md` "색상 규약"을 따른다. 그림은 먹색 + 교과 색 + 회색만, 상태 색은 정답·오답 피드백에만, 코드 칸 색은 `main.js`의 자동 색칠만 쓴다. `check-pages.py`가 그림당 유채색 1개 초과를 검출한다.
+
+## 화면 제목 안의 기호가 띄어 보임 ("top- k")
+
+- **증상:** `<h3 class="screen-heading">top-$k$와 MIPS</h3>`처럼 제목에 수식이나 `<i class="mi">`를 넣으면 "top-   k 와 MIPS"처럼 기호 앞뒤가 크게 벌어진다. 본문의 `top-$k$`도 KaTeX가 하이픈 뒤를 조금 띄운다.
+- **원인:** `.screen-heading`은 `display: flex` + `gap`이라 제목 안의 글자 조각과 인라인 요소가 각각 flex 항목이 되어 사이에 gap이 들어간다.
+- **해결:** 제목 글자를 span 하나로 묶는다: `<h3 class="screen-heading"><span>top-<i class="mi">k</i>와 MIPS</span><span class="paper-ref">…</span></h3>`. 본문에서 하이픈과 붙는 기호는 KaTeX 대신 `top-<i class="mi">k</i>`로 쓴다. 속성값(`data-definition` 등) 안에는 HTML을 넣지 말고 `top-k`로 쓴다.
