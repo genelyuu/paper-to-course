@@ -11,7 +11,8 @@
 min-height(100vh)를 풀고 내용의 실제 높이를 잰다.
 확인 문제는 모든 해설(정답·오답 중 긴 쪽)을 펼친 최악의 상태로 잰다.
 그림 정렬도 검사한다: 결과 막대 트랙의 시작 x·폭, SVG 요소의 viewBox 이탈과 노드 라벨 구조,
-의사코드 코드 줄과 설명 줄의 세로 위치, 문항 삽화의 형식(SVG만)과 색(교과 색 하나).
+의사코드 코드 줄과 설명 줄의 세로 위치, 문항 삽화(.q-figure)·그림(.figure)의 형식(SVG만)과 색(교과 색 하나;
+인라인 <svg>와 <img>로 넣은 SVG의 fill·stroke·stop-color 모두).
 배치도 검사한다(LAY): 화면·노트 칸 밖으로 가로로 넘친 요소, overflow로 잘린 내용, SVG 글자의 그림 경계 이탈,
 SVG 글자끼리 겹침, 상자 라벨(foreignObject)의 넘침, 페이지 가로 스크롤, 잘린 사이드바 목차 라벨, 색칠되지 않은 코드 칸.
 단원 첫 페이지는 단원 맨 위(내비 아래 여백 포함)부터 잰다.
@@ -87,27 +88,47 @@ window.addEventListener('load', function () {
         if (d.children.length !== 1 || d.childNodes.length !== 1) fig.push('SVG #' + (si + 1) + ': 노드 라벨을 <span> 하나로 감싸지 않았다 "' + d.textContent.trim().slice(0, 20) + '"');
       });
     });
-    // 문항 삽화: SVG만 허용, 색은 검정·회색 + 교과 색 하나
-    document.querySelectorAll('.q-figure, .figure').forEach(function (f, fi) {
-      var name = (f.classList.contains('q-figure') ? '문항 삽화 #' : '그림 #') + (fi + 1);
+    // 문항 삽화·그림: SVG만 허용, 색은 검정·회색 + 교과 색 하나(인라인 <svg>와 <img>로 넣은 SVG 모두)
+    function addHue(hues, c) {
+      var m = /rgba?\((\d+), (\d+), (\d+)(?:, ([\d.]+))?/.exec(c || '');
+      if (!m || (m[4] !== undefined && +m[4] === 0)) return;
+      var r = +m[1], g = +m[2], b = +m[3];
+      if (Math.max(r, g, b) - Math.min(r, g, b) < 24) return;   // 검정·회색·흰색
+      hues.add(r + ',' + g + ',' + b);
+    }
+    var colorProbe = document.createElement('span');
+    document.body.appendChild(colorProbe);
+    function cssColor(v) {   // SVG 속성의 색 값 → 계산된 rgb(). none·url(#…) 등은 ''
+      colorProbe.style.color = '';
+      colorProbe.style.color = v.trim();
+      return colorProbe.style.color ? getComputedStyle(colorProbe).color : '';
+    }
+    function svgText(src) {   // data URI(퍼센트·base64) 또는 check-pages.py가 읽어 둔 .svg 파일
+      var m = /^data:image\/svg\+xml(;[^,]*)?,(.*)$/is.exec(src);
+      try {
+        if (m) return /;base64/i.test(m[1] || '') ? decodeURIComponent(escape(atob(m[2]))) : decodeURIComponent(m[2]);
+      } catch (e) { return ''; }
+      return (window.__p2cSvg || {})[src] || '';
+    }
+    var figCount = { 'q-figure': 0, 'figure': 0 };
+    document.querySelectorAll('.q-figure, .figure').forEach(function (f) {
+      var kind = f.classList.contains('q-figure') ? 'q-figure' : 'figure';
+      var name = (kind === 'q-figure' ? '문항 삽화 #' : '그림 #') + (++figCount[kind]);
+      var hues = new Set();
       f.querySelectorAll('img').forEach(function (im) {
         var src = im.getAttribute('src') || '';
         if (!/\.svg(\?|#|$)/i.test(src) && !/^data:image\/svg\+xml[,;]/i.test(src)) fig.push(name + ': SVG가 아닌 이미지 ' + src.slice(0, 80) + ' (래스터는 벡터화해서 넣는다)');
         if (!im.complete || im.naturalWidth === 0) fig.push(name + ': 이미지를 불러오지 못했다 ' + src.slice(0, 80));
+        var t = svgText(src), re = /(?:^|[\s;{"'])(fill|stroke|stop-color)\s*(?:=\s*["']([^"']*)["']|:\s*([^;"'}<>]+))/g, mm;
+        while ((mm = re.exec(t))) addHue(hues, cssColor(mm[2] !== undefined ? mm[2] : mm[3]));
       });
-      var hues = new Set();
       f.querySelectorAll('svg *').forEach(function (e) {
         var cs = getComputedStyle(e);
-        [cs.stroke, cs.fill].forEach(function (c) {
-          var m = /rgba?\((\d+), (\d+), (\d+)(?:, ([\d.]+))?/.exec(c || '');
-          if (!m || (m[4] !== undefined && +m[4] === 0)) return;
-          var r = +m[1], g = +m[2], b = +m[3];
-          if (Math.max(r, g, b) - Math.min(r, g, b) < 24) return;   // 검정·회색·흰색
-          hues.add(r + ',' + g + ',' + b);
-        });
+        [cs.stroke, cs.fill].forEach(function (c) { addHue(hues, c); });
       });
       if (hues.size > 1) fig.push(name + ': 유채색이 ' + hues.size + '개다 (교과 색 하나만) ' + Array.from(hues).join(' | '));
     });
+    colorProbe.remove();
     document.querySelectorAll('.pseudocode-translation').forEach(function (pc, pi) {
       var a = pc.querySelectorAll('.pseudocode-line'), b = pc.querySelectorAll('.pe');
       if (a.length !== b.length) fig.push('의사코드 #' + (pi + 1) + ': 코드 줄 ' + a.length + '개, 설명 줄 ' + b.length + '개');
@@ -192,7 +213,7 @@ window.addEventListener('load', function () {
       if (e.scrollWidth > e.clientWidth + 1) lay.push('사이드바: 목차 라벨이 잘린다 "' + e.textContent.trim() + '" (더 짧게)');
     });
     // scaffold.py가 남긴 빈자리
-    ((document.querySelector('main') || document.body).textContent.match(/\[작성 필요: [^\]]*\]/g) || []).slice(0, 5).forEach(function (t) {
+    ((function () { var r = document.querySelector('main') || document.body, t = r.textContent; r.querySelectorAll('*').forEach(function (e) { for (var i = 0; i < e.attributes.length; i++) { var v = e.attributes[i].value; if (v.indexOf('작성 필요') >= 0) t = v + ' ' + t; } }); return t; })().match(/\[작성 필요: [^\]]*\]/g) || []).slice(0, 5).forEach(function (t) {
       lay.push('미작성 자리가 남았다 ' + t + ' (scaffold.py todo로 위치 확인)');
     });
     var pre = document.createElement('pre');
@@ -227,7 +248,15 @@ def main():
     if not os.path.isfile(path):
         sys.exit(f"파일이 없다: {path}")
     html = open(path, encoding="utf-8").read()
-    html = re.sub(r"</body>", lambda _: PROBE + "</body>", html, count=1, flags=re.I)
+    # 빌드 전 페이지의 <img src="….svg">: 색 검사용으로 SVG 원문을 미리 읽어 넣는다(file://에서는 fetch가 막힘)
+    base = os.path.dirname(os.path.abspath(path))
+    svgs = {}
+    for src in re.findall(r"""<img\b[^>]*\bsrc\s*=\s*["']([^"']+\.svg)(?:[?#][^"']*)?["']""", html, re.I):
+        f = os.path.join(base, htmllib.unescape(src))
+        if not re.match(r"^(?:[a-z][a-z0-9+.-]*:|//)", src, re.I) and os.path.isfile(f):
+            svgs[src] = open(f, encoding="utf-8", errors="replace").read()
+    pre = "<script>window.__p2cSvg = " + json.dumps(svgs).replace("</", "<\\/") + ";</script>" if svgs else ""
+    html = re.sub(r"</body>", lambda _: pre + PROBE + "</body>", html, count=1, flags=re.I)
 
     # 상대 경로(styles.css, main.js)를 그대로 쓰려고 같은 폴더에 임시 파일을 만든다
     fd, tmp = tempfile.mkstemp(prefix=".fit-", suffix=".html", dir=os.path.dirname(os.path.abspath(path)))

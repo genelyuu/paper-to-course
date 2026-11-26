@@ -323,8 +323,20 @@ class Linter(HTMLParser):
 
 
 # KO113: 이모지 금지(그림 문자·딩뱃 체크 표시·변형 선택자, 문자 참조 &#128161; 포함). 표의 갖춤 표시는 ○·△·×
-EMOJI_RE = re.compile(r"[\U0001F000-\U0001FAFF\u2600-\u27BF\u2B00-\u2BFF\uFE0F\u200D]"
-                      r"|&#(?:1[2-9]\d{3}|1[2-9]\d{4}|9[7-9]\d\d|1[01]\d{3});|&#x(?:1F[0-9A-Fa-f]{3}|2[67][0-9A-Fa-f]{2});")
+EMOJI_CHARS = r"[\U0001F000-\U0001FAFF\u2600-\u27BF\u2B00-\u2BFF\uFE0F\u200D]"
+EMOJI_CHAR_RE = re.compile(EMOJI_CHARS)
+# \uBB38\uC790 \uCC38\uC870\uB294 \uD480\uC5B4\uC11C \uAC19\uC740 \uBB38\uC790 \uC9D1\uD569\uC73C\uB85C \uD310\uC815\uD55C\uB2E4(&#12593; \u3131\u00B7&#12300; \u300C \uAC19\uC740 \uD55C\uAE00\u00B7CJK\uB294 \uD1B5\uACFC)
+EMOJI_RE = re.compile(EMOJI_CHARS + r"|&#(\d{1,8});|&#[xX]([0-9A-Fa-f]{1,7});")
+
+
+def emoji_matches(body):
+    for m in EMOJI_RE.finditer(body):
+        if m.group(1) is None and m.group(2) is None:
+            yield m
+            continue
+        cp = int(m.group(1), 10) if m.group(1) is not None else int(m.group(2), 16)
+        if cp <= 0x10FFFF and EMOJI_CHAR_RE.match(chr(cp)):
+            yield m
 
 
 def lint_file(path):
@@ -334,7 +346,7 @@ def lint_file(path):
     lt.close()
     lt.finish()
     body = re.sub(r"<(script|style)\b.*?</\1>", lambda m: "\n" * m.group(0).count("\n"), src, flags=re.S | re.I)
-    for m in EMOJI_RE.finditer(body):
+    for m in emoji_matches(body):
         lt.add(body.count("\n", 0, m.start()) + 1, "ERROR", "KO113", f"이모지 '{m.group(0)}'",
                "이모지를 지우시오. 표의 갖춤/없음 표시는 ○·△·×, 화살표는 →를 쓴다")
     lt.issues.sort(key=lambda i: (i["line"], i["id"]))

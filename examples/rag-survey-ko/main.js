@@ -446,6 +446,9 @@
   });
 
   /* ── QUIZ ENGINE ───────────────────────────────────────────── */
+  /* data-correct는 정답 목록이다(쉼표·공백으로 여러 개). 고른 값이 목록에 있으면 정답 */
+  const answerList = el => (el.dataset.correct || '').split(/[,\s]+/).filter(Boolean);
+
   window.selectOption = function (btn) {
     const block = btn.closest('.quiz-question-block');
     $$('.quiz-option', block).forEach(o => o.classList.remove('selected'));
@@ -459,7 +462,7 @@
       const selected  = $('.quiz-option.selected', q);
       const feedback  = $('.quiz-feedback', q);
       if (!feedback) return;
-      const correct   = q.dataset.correct;
+      const answers   = answerList(q);
       const rightExp  = q.dataset.explanationRight  || '';
       const wrongExp  = q.dataset.explanationWrong  || '';
 
@@ -470,14 +473,13 @@
       }
       $$('.quiz-option', q).forEach(o => o.disabled = true);
 
-      if (selected.dataset.value === correct) {
+      if (answers.includes(selected.dataset.value)) {
         selected.classList.add('correct');
         setFeedbackHTML(feedback, '<strong>' + i18n('correct') + '</strong> ' + rightExp);
         feedback.className = 'quiz-feedback show success';
       } else {
         selected.classList.add('incorrect');
-        const correctBtn = $(`.quiz-option[data-value="${CSS.escape(correct || '')}"]`, q);
-        if (correctBtn) correctBtn.classList.add('correct');
+        $$('.quiz-option', q).forEach(o => { if (answers.includes(o.dataset.value)) o.classList.add('correct'); });
         setFeedbackHTML(feedback, '<strong>' + i18n('incorrect') + '</strong> ' + wrongExp);
         feedback.className = 'quiz-feedback show error';
       }
@@ -491,7 +493,7 @@
     if (!container) return;
     $$('.quiz-question-block', container).forEach(q => {
       const feedback = $('.quiz-feedback', q);
-      const answers  = (q.dataset.correct || '').split(/[,\s]+/).filter(Boolean);
+      const answers  = answerList(q);
       $$('.quiz-option', q).forEach(o => {
         o.classList.remove('selected', 'correct', 'incorrect');
         if (answers.includes(o.dataset.value)) o.classList.add('selected', 'correct');
@@ -839,7 +841,7 @@
     if (!container) return;
     const selected = $('.assumption-option.selected', container);
     const feedback = $('.assumption-feedback', container);
-    const correct  = container.dataset.correct;
+    const answers  = answerList(container);
 
     if (!selected) {
       feedback.textContent = i18n('selectFirst');
@@ -848,14 +850,13 @@
     }
     $$('.assumption-option', container).forEach(o => o.disabled = true);
 
-    if (selected.dataset.value === correct) {
+    if (answers.includes(selected.dataset.value)) {
       selected.classList.add('correct');
       setFeedbackHTML(feedback, '<strong>' + i18n('correct') + '</strong> ' + (container.dataset.explanationRight || ''));
       feedback.className = 'assumption-feedback show success';
     } else {
       selected.classList.add('incorrect');
-      const correctBtn = $(`.assumption-option[data-value="${correct}"]`, container);
-      if (correctBtn) correctBtn.classList.add('correct');
+      $$('.assumption-option', container).forEach(o => { if (answers.includes(o.dataset.value)) o.classList.add('correct'); });
       setFeedbackHTML(feedback, '<strong>' + i18n('incorrect') + '</strong> ' + (container.dataset.explanationWrong || ''));
       feedback.className = 'assumption-feedback show error';
     }

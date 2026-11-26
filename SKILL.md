@@ -147,10 +147,10 @@ course-name/
 ```
 
 **Step 1~2 (공통): 레이아웃은 코드로 찍습니다.** 머리(`_base.html` 내비·사이드바), 꼬리(`_footer.html`), 단원 머리말, 코넬 쪽(`.cue | .notes / .summary`), 단서 칸 콜아웃(학습 목표·배경 지식·핵심 정리), 확인 문제는 공통 규약이며 `references/templates/*.html`에 틀로 보관합니다. 손으로 쓰지 않습니다.
-1. 커리큘럼을 `course-name/briefs/course.json`으로 적습니다(형식은 `references/templates/course.example.json`: 제목, 교과 색 `blue|green|purple|orange`, 모듈별 `slug`·`title`·`label`(사이드바, 14자 이내)·`subtitle`·`objectives`·`screens[]`(`heading`, `paper_ref`, `corner`, `questions`, `summary`, `dense`, `level`, `background`)·`takeaways`·`quiz[]`).
+1. 커리큘럼을 `course-name/briefs/course.json`으로 적습니다(형식은 `references/templates/course.example.json`: 제목, 교과 색 `blue|green|purple|orange`, 모듈별 `slug`·`title`·`label`(사이드바, 14자 이내)·`nav_tooltip`(내비 점 툴팁, 없으면 label)·`subtitle`·`objectives`·`screens[]`(`heading`, `paper_ref`, `corner`, `corner_style`(`outline`|`filled`), `questions`, `summary`, `dense`, `level`, `background`)·`takeaways`·`quiz[]`(`q`, `options` 2~5개, `answer` 1부터, `right`, `wrong`)·`quiz_per_page`(1~2 또는 쪽별 목록)·`quiz_corner_style`). 글자 필드의 이스케이프 규칙과 HTML 허용 필드는 `scaffold.py` 머리 설명에 있습니다. 명세가 틀리면 파일을 쓰기 전에 멈춥니다.
 2. `python3 -I <skill-dir>/references/scaffold.py init course-name course-name/briefs/course.json` — 자산 복사(`styles.css`, `main.js`, `_footer.html`, `build.sh`, `build.py`, `vendor/`), `_base.html`(제목·교과 색·내비 점·사이드바 자동 생성), 모듈 뼈대 `modules/0N-slug.html`을 만듭니다. 선수 모듈(`module-0`)의 둘째 쪽부터 `배경 지식` 콜아웃, 첫 쪽에 `학습 목표`, 확인 문제 쪽에 `핵심 정리`가 자동으로 들어가고 퀴즈는 쪽당 2문항으로 나뉩니다.
 3. 목차·색이 바뀌면 `scaffold.py base`로 `_base.html`만 다시 만듭니다. 쪽을 더할 때도 `course.json`에 쓰고 `scaffold.py modules ... --force`로 다시 찍은 뒤 본문을 옮기거나, 틀(`templates/screen.html`)과 똑같은 마크업을 씁니다.
-- 빠진 글은 `[작성 필요: …]`로 남습니다. `scaffold.py todo course-name`이 위치를 보여 주고, `check-pages.py`가 남은 자리를 LAY로 막습니다.
+- 빠진 글은 `[작성 필요: …]`로 남습니다. `scaffold.py todo course-name`이 위치를 보여 주고, `check-pages.py`(속성 안 자리 포함)와 `build.sh`가 남은 자리를 막습니다(`build.sh --allow-todo`는 경고만).
 - `lint-ko.py`·`check-pages.py`는 복사하지 않고 Phase 5에서 스킬 디렉터리의 것을 실행합니다. `_base.html`의 `<html lang="ko">`, vendor 참조는 건드리지 않고, 외부 URL(CDN 등)을 넣으면 빌드가 오류로 멈춥니다.
 
 **Step 2.5: `_cover.html` 작성**(Step 4 전 필요). 패턴은 `interactive-elements.md` "표지와 히어로 섹션 (Cover Page)". `<section class="course-cover">`이며 `.module`이 **아닙니다**. 내용: 논문 제목(`한국어 제목(English Original Title)`, 괄호 앞 공백 없음), 저자, 한 문장 부제, 2~3문장 초록, 메타 배지(난이도, 예상 소요 시간, 모듈 수), 선수 학습 모듈로 가는 "학습 시작하기" 버튼.

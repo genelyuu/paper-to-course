@@ -11,16 +11,21 @@
 
 공유 시 노출을 줄이는 처리:
   - main.js·styles.css는 vendor/의 압축·난독화본(main.min.js, styles.min.css)으로 바꿔 넣는다.
-    강의 폴더의 원본이 vendor/manifest.json의 해시와 다르면(수정됨) 원본을 주석만 지워 넣고 경고한다.
+    강의 폴더의 원본이 vendor/manifest.json의 해시와 다르면(수정됨) 원본을 넣고 경고한다
+    (CSS는 주석만 지우고, JS는 문자열·정규식을 깨뜨리지 않도록 손대지 않는다).
   - HTML 주석(<!-- -->), SVG 주석·<metadata>·편집기 속성을 지운다.
   - 실행 엔진·템플릿 안내문이 산출물에 남지 않는다. 단, 브라우저에서 돌아가는 코드는 원리상
     완전히 숨길 수 없다(난독화는 읽기 어렵게 만들 뿐이다).
 
 vendor/ 위치: <강의 폴더>/vendor → 이 스크립트 옆의 vendor → <강의 폴더>/../../references/vendor 순으로 찾는다.
 fontTools가 설치되어 있으면 본문 글꼴을 강의에 실제로 쓰인 글자만 남기도록 더 줄인다(없으면 그대로 넣음).
+
+"[작성 필요: …]" 자리(scaffold.py가 남김)가 하나라도 있으면 목록을 보이고 실패한다.
+미리 보기용으로 그대로 조립하려면 --allow-todo를 준다.
 """
 import base64
 import hashlib
+import html as htmllib
 import io
 import json
 import mimetypes
@@ -31,6 +36,7 @@ from urllib.parse import quote
 
 PROTECTED = re.compile(r"(<(script|style|pre|textarea)\b.*?</\2\s*>)", re.S | re.I)
 EXTERNAL = re.compile(r"^(?:[a-z][a-z0-9+.-]*:|//)", re.I)
+TODO_RE = re.compile(r"\[작성 필요:[^\]]*\]")
 MIME = {".woff2": "font/woff2", ".woff": "font/woff", ".ttf": "font/ttf", ".svg": "image/svg+xml",
         ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp",
         ".gif": "image/gif"}
@@ -71,7 +77,8 @@ def data_uri(p: Path, raw: bytes = None) -> str:
     raw = p.read_bytes() if raw is None else raw
     if mime == "image/svg+xml":  # SVG는 base64보다 짧은 퍼센트 인코딩으로 넣는다
         svg = re.sub(r"\s+", " ", clean_svg(raw.decode("utf-8")))
-        return "data:image/svg+xml," + quote(svg, safe=" /:=;,'()-._~!*+?@&$")
+        # '&'·"'"도 인코딩한다: 속성값 디코딩에서 &amp;가 &로 풀리면 XML이 깨진다
+        return "data:image/svg+xml," + quote(svg, safe=" /:=;,()-._~!*+?@$")
     return f"data:{mime};base64,{base64.b64encode(raw).decode('ascii')}"
 
 
@@ -88,12 +95,6 @@ def strip_css_comments(css: str) -> str:
     return re.sub(r"/\*.*?\*/", "", css, flags=re.S)
 
 
-def strip_js_comments(js: str) -> str:
-    """보수적: 줄 전체 주석과 블록 주석만 지운다(문자열 안 '//'를 건드리지 않도록)."""
-    js = re.sub(r"/\*.*?\*/", "", js, flags=re.S)
-    return "\n".join(l for l in js.splitlines() if not l.strip().startswith("//") and l.strip())
-
-
 def inline_css_urls(css: str, base: Path, fonts: dict) -> str:
     def rep(m):
         ref = m.group(2)
@@ -107,6 +108,45 @@ def inline_css_urls(css: str, base: Path, fonts: dict) -> str:
         raw = fonts.get(p.name)
         return f'url("{data_uri(p, raw)}")'
     return re.sub(r"""url\(\s*(['"]?)([^'")]+)\1\s*\)""", rep, css)
+
+
+def subset_text(html: str, extra_files) -> str:
+    """강의에 화면으로 나올 수 있는 글자 모음: 텍스트 노드뿐 아니라 모든 속성값(해설·용어 풀이·툴팁·
+    aria-label·alt·title)까지 들어가도록 태그를 지우지 않고 문자 참조만 푼다.
+    extra_files: 넣을 JS·CSS(정답/오답 문구, CSS content: 문자열)."""
+    parts = [htmllib.unescape(html)]
+    for f in extra_files:
+        try:
+            parts.append(Path(f).read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError):
+            pass
+    return "\n".join(parts)
+
+
+def find_todos(files, course: Path, limit: int = 10):
+    """[작성 필요: …] 자리: (전체 개수, 앞 limit개의 '파일:줄 내용')."""
+    found, n = [], 0
+    for p in files:
+        for ln, line in enumerate(p.read_text(encoding="utf-8").splitlines(), 1):
+            for t in TODO_RE.findall(line):
+                n += 1
+                if len(found) < limit:
+                    found.append(f"{p.relative_to(course)}:{ln} {t}")
+    return n, found
+
+
+def protect_scripts(html: str):
+    """<script>…</script> 본문을 자리표로 바꿔 둔다(그림·스타일·링크 치환이 작성자 JS를 건드리지 않도록)."""
+    saved = []
+
+    def keep(m):
+        saved.append(m.group(0))
+        return f"\x00P2CSCRIPT{len(saved) - 1}\x00"
+    return re.sub(r"<script\b[^>]*>.*?</script\s*>", keep, html, flags=re.S | re.I), saved
+
+
+def restore_scripts(html: str, saved) -> str:
+    return re.sub(r"\x00P2CSCRIPT(\d+)\x00", lambda m: saved[int(m.group(1))], html)
 
 
 def subset_body_font(font: Path, text: str):
@@ -157,15 +197,24 @@ def script_block(js: str) -> str:
     return "<script>" + js.replace("</script", "<\\/script") + "</script>"
 
 
-def build(course: Path):
+def build(course: Path, allow_todo: bool = False):
     for f in ("_base.html", "_cover.html", "_footer.html"):
         if not (course / f).is_file():
             die(f"{f} 가 없습니다.")
     mods = sorted((course / "modules").glob("*.html"))
     if not mods:
         die("modules/*.html 이 없습니다.")
-    html = "".join(p.read_text(encoding="utf-8") for p in
-                   [course / "_base.html", course / "_cover.html", *mods, course / "_footer.html"])
+    parts = [course / "_base.html", course / "_cover.html", *mods, course / "_footer.html"]
+    n_todo, todos = find_todos(parts, course)
+    if n_todo:
+        msg = (f"아직 쓰지 않은 [작성 필요: …] 자리가 {n_todo}개 남아 있습니다"
+               + (f" (앞 {len(todos)}개만 보임)" if n_todo > len(todos) else "") + ":\n  "
+               + "\n  ".join(todos))
+        if not allow_todo:
+            die(msg + "\n채운 뒤 다시 조립하시오 (python3 -I scaffold.py todo <강의 폴더>로 확인)."
+                " 미리 보기로만 조립하려면 --allow-todo (bash build.sh --allow-todo).")
+        warn(msg + "\n--allow-todo: 자리를 남긴 채 조립합니다(공유 금지).")
+    html = "".join(p.read_text(encoding="utf-8") for p in parts)
 
     vendor = find_vendor(course)
     manifest = json.loads((vendor / "manifest.json").read_text(encoding="utf-8"))
@@ -184,20 +233,31 @@ def build(course: Path):
             if p.is_file() and sha256(p) == manifest.get(name):
                 return (vendor / mini).read_text(encoding="utf-8"), vendor
             if p.is_file():
-                warn(f"{name} 파일이 references 원본과 다릅니다. 압축본 대신 원본을 주석만 지워 넣습니다"
+                warn(f"{name} 파일이 references 원본과 다릅니다. 압축본 대신 원본을 넣습니다"
                      " (references/vendor/make-vendor.sh로 압축본을 다시 만드세요).")
         if not p.is_file():
             die(f"파일이 없습니다: {p}")
         src = p.read_text(encoding="utf-8")
         if p.is_relative_to(vendor):  # 제3자 구성 요소: 압축본 그대로 두고 라이선스 고지만 붙인다
             return NOTICES.get(p.name, "") + (strip_css_comments(src) if p.suffix == ".css" else src), p.parent
-        return (strip_css_comments(src) if p.suffix == ".css" else strip_js_comments(src)), p.parent
+        # 작성자 JS는 그대로 넣는다(정규식 주석 지우기는 'figs/*.svg'·/a*/ 같은 문자열·정규식을 깨뜨린다)
+        return (strip_css_comments(src) if p.suffix == ".css" else src), p.parent
 
     # 본문 글꼴 부분 집합(선택)
     fonts = {}
     body_font = vendor / "fonts" / "P2CSans-Variable.woff2"
     if body_font.is_file():
-        text = re.sub(r"<[^>]+>", " ", html)
+        extra = []
+        for tag in re.findall(r"<(?:script|link)\b[^>]*>", html, re.I):
+            ref = attr(tag, "src") or attr(tag, "href")
+            if not ref or EXTERNAL.match(ref) or ref.startswith(("data:", "#")):
+                continue
+            p = resolve(ref)
+            extra.append(p)  # 강의 폴더의 main.js·styles.css 원본(압축본은 문자열이 암호화되어 있다)
+            mini = {"main.js": "main.min.js", "styles.css": "styles.min.css"}.get(p.name)
+            if mini:
+                extra.append(vendor / mini)
+        text = subset_text(html, extra)
         sub = subset_body_font(body_font, text)
         if sub:
             fonts[body_font.name] = sub
@@ -249,11 +309,13 @@ def build(course: Path):
     # 순서가 중요하다: 그림·인라인 <style>을 먼저 처리하고, 엔진 CSS·JS는 마지막에 넣는다
     # (넣은 JS 문자열 안의 '<img'·'<style' 같은 조각을 다시 건드리지 않도록).
     html = strip_html_comments(html)
+    html, scripts = protect_scripts(html)
     html = re.sub(r"<img\b[^>]*>", rep_img, html, flags=re.I)
     html = re.sub(r"(<style\b[^>]*>)(.*?)(</style>)",
                   lambda m: m.group(1) + inline_css_urls(strip_css_comments(m.group(2)), course, fonts) + m.group(3),
                   html, flags=re.S | re.I)
     html = re.sub(r"<link\b[^>]*>", rep_link, html, flags=re.I)
+    html = restore_scripts(html, scripts)
     html = re.sub(r"(<script\b[^>]*>)(.*?)</script\s*>", rep_script, html, flags=re.S | re.I)
     if deferred:
         html = re.sub(r"</body>", lambda _: "\n".join(deferred) + "\n</body>", html, count=1, flags=re.I)
@@ -274,4 +336,9 @@ def build(course: Path):
 
 
 if __name__ == "__main__":
-    build(Path(sys.argv[1] if len(sys.argv) > 1 else ".").resolve())
+    opts = [a for a in sys.argv[1:] if a.startswith("--")]
+    bad = [a for a in opts if a != "--allow-todo"]
+    if bad:
+        die(f"알 수 없는 옵션: {' '.join(bad)} (사용 가능: --allow-todo)")
+    pos = [a for a in sys.argv[1:] if not a.startswith("--")]
+    build(Path(pos[0] if pos else ".").resolve(), allow_todo="--allow-todo" in opts)
