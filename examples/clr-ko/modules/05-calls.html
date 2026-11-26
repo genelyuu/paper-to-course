@@ -1,0 +1,473 @@
+<section class="module" id="module-5">
+  <div class="module-content">
+
+    <div class="module-header">
+      <span class="module-number">6</span>
+      <h2 class="module-title">메서드 호출과 특수 명령어</h2>
+      <p class="module-subtitle">호출 명령어가 실행할 메서드를 고르는 방식과 tail call, 함수 포인터 같은 특수 기능을 살핀다</p>
+    </div>
+
+    <!-- 페이지 1: 정적 타입과 동적 타입 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">학습 목표</strong>
+            <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
+            <ol>
+              <li><code>call</code>, <code>call instance</code>, <code>callvirt</code>가 실행할 메서드를 고르는 시점을 비교할 수 있다.</li>
+              <li>tail call이 스택 프레임을 다루는 방식과 그 한계를 설명할 수 있다.</li>
+              <li><code>ldftn</code>, <code>calli</code>, <code>jmp</code>, <code>localloc</code>, <code>ldtoken</code>이 어떤 언어 기능을 돕는지 설명할 수 있다.</li>
+            </ol>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">같은 변수, 두 가지 타입<span class="paper-ref">논문 7, 8절</span></h3>
+        <p>5단원의 Foo와 Bar를 다시 쓴다. Foo에는 <span class="term" data-definition="가상 메서드(Virtual Method): 실제 객체의 타입에 따라 실행할 구현이 달라질 수 있는 메서드. 하위 클래스가 재정의할 수 있음.">가상 메서드(Virtual Method)</span> <code>f</code>, <span class="term" data-definition="인스턴스 메서드(Instance Method): 객체(this)를 받아 실행하지만 재정의로 바뀌지 않는 비가상 메서드.">인스턴스 메서드(Instance Method)</span> <code>g</code>, <span class="term" data-definition="정적 메서드(Static Method): 객체 없이 클래스 이름으로 부르는 메서드. this 매개변수가 없음.">정적 메서드(Static Method)</span> <code>h</code>가 있고, Bar는 Foo를 상속해 셋을 모두 다시 정의한다.</p>
+        <p>지역 변수 <code>bar</code>를 <code>class Foo</code>로 선언하고 Bar 객체를 담으면, 이 변수에는 타입이 두 개 생긴다. 선언이 정한 <span class="term" data-definition="정적 타입(Static Type, 선언된 타입): 변수나 스택 칸에 선언으로 붙은 타입. 컴파일러와 검증기가 보는 타입.">정적 타입(Static Type, 선언된 타입)</span>은 Foo이고, 실제 객체가 정한 <span class="term" data-definition="동적 타입(Dynamic Type, 실제 객체의 타입): 실행 중에 변수가 실제로 가리키는 객체의 타입.">동적 타입(Dynamic Type, 실제 객체의 타입)</span>은 Bar이다.</p>
+        <figure class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 176" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="지역 변수 bar의 정적 타입은 Foo이고, 화살표가 가리키는 GC 힙의 객체는 Bar 인스턴스이며, Bar는 Foo를 상속한다">
+<rect class="guide-fill" x="16" y="8" width="240" height="160" rx="4"/>
+<text class="muted" x="28" y="28" font-size="12">활성 레코드: 지역 변수</text>
+<rect class="guide-fill" x="280" y="8" width="240" height="160" rx="4"/>
+<text class="muted" x="292" y="28" font-size="12">GC 힙</text>
+<rect class="guide-fill" x="544" y="8" width="240" height="160" rx="4"/>
+<text class="muted" x="556" y="28" font-size="12">클래스 계층</text>
+<path class="edge-line" d="M232,104 H294"/><polygon class="edge-arrow" points="294,99 304,104 294,109"/>
+<path class="edge-line" d="M664,120 V102"/><polygon class="edge-arrow" points="659,102 664,92 669,102"/>
+<rect class="node-rect sq" x="40" y="72" width="192" height="64" rx="2"/>
+<foreignObject x="48" y="76" width="176" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span><code>bar</code><br/>정적 타입: Foo</span></div></foreignObject>
+<rect class="node-rect sq accent" x="304" y="72" width="192" height="64" rx="2"/>
+<foreignObject x="312" y="76" width="176" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span>Bar 인스턴스<br/>동적 타입: Bar</span></div></foreignObject>
+<rect class="node-rect" x="584" y="44" width="160" height="48" rx="8"/>
+<foreignObject x="592" y="48" width="144" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>Foo: f, g, h</span></div></foreignObject>
+<rect class="node-rect" x="584" y="120" width="160" height="40" rx="8"/>
+<foreignObject x="592" y="124" width="144" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>Bar: f, g, h</span></div></foreignObject>
+<text class="muted" x="672" y="110" font-size="12">상속</text>
+          </svg>
+          <figcaption class="figure-caption">그림은 지역 변수 <code>bar</code>(정적 타입 Foo)가 GC 힙의 Bar 객체(동적 타입 Bar)를 가리키는 상황을 나타낸 것이다.</figcaption>
+        </figure>
+        <p>호출 명령어는 이 두 타입 중 무엇을 보고 메서드를 고르는지가 다르다. 정적 타입으로 고르면 <span class="term" data-definition="early binding(컴파일 때 호출 대상 결정): 실행할 메서드를 선언된 타입만 보고 미리 정하는 방식.">early binding(컴파일 때 호출 대상 결정)</span>, 동적 타입으로 고르면 <span class="term" data-definition="late binding(실행 때 호출 대상 결정): 실행할 메서드를 실제 객체의 타입을 보고 실행 중에 정하는 방식.">late binding(실행 때 호출 대상 결정)</span>이다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>변수 <code>bar</code>의 정적 타입은 Foo, 동적 타입은 Bar이며, 호출 명령어는 둘 중 하나를 보고 메서드를 고른다.</p></div>
+    </div>
+
+    <!-- 페이지 2: call / callvirt 전환 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>같은 <code>bar</code>에 명령어만 바꾸면 무엇이 실행되는가?</li>
+          <li><code>callvirt</code>가 늘 late binding인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span><span>명령어를 바꾸면 실행되는 메서드</span><span class="paper-ref">논문 8절</span></h3>
+        <p>세 호출 모두 먼저 <code>ldloc bar</code>로 Bar 객체를 평가 스택에 올리고, 이 값이 호출된 메서드의 <code>this</code>가 된다. 탭을 눌러 명령어를 바꾸고 실행되는 메서드를 비교하시오.</p>
+        <div class="ablation-demo animate-in">
+          <div class="ablation-tabs">
+            <button class="ablation-tab active" onclick="showLayer('ca-call-inst', this)">call instance Foo::f</button>
+            <button class="ablation-tab" onclick="showLayer('ca-callvirt-f', this)">callvirt Foo::f</button>
+            <button class="ablation-tab" onclick="showLayer('ca-callvirt-g', this)">callvirt Foo::g</button>
+            <button class="ablation-tab" onclick="showLayer('ca-call-h', this)">call Foo::h</button>
+          </div>
+          <div class="ablation-viewport">
+            <div class="ablation-layer" id="ca-call-inst" style="display:block">
+              <div class="svg-diagram"><svg viewBox="0 0 640 120" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="call instance void Foo::f()는 정적 조회로 Foo::f를 실행한다">
+<path class="edge-line accent" d="M248,60 H320 V28 H382"/><polygon class="edge-arrow accent" points="382,23 392,28 382,33"/>
+<text class="muted" x="256" y="52" font-size="12">정적 조회</text>
+<rect class="node-rect sq" x="16" y="36" width="232" height="48" rx="2"/>
+<foreignObject x="24" y="40" width="216" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span><code>call instance void Foo::f()</code></span></div></foreignObject>
+<rect class="node-rect sq accent" x="392" y="8" width="232" height="40" rx="2"/>
+<foreignObject x="400" y="12" width="216" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>Foo::f() 실행</span></div></foreignObject>
+<rect class="node-rect sq" x="392" y="72" width="232" height="40" rx="2"/>
+<foreignObject x="400" y="76" width="216" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; color:var(--color-text-secondary)"><span>Bar::f()</span></div></foreignObject>
+              </svg></div>
+              <p class="ablation-description">early binding. 정적 타입 Foo만 보고 Foo::f()를 부른다. bar가 Bar 객체여도 Bar::f()는 실행되지 않는다(JVM의 invokespecial과 비슷).</p>
+            </div>
+            <div class="ablation-layer" id="ca-callvirt-f" style="display:none">
+              <div class="svg-diagram"><svg viewBox="0 0 640 120" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="callvirt void Foo::f()는 동적 조회로 Bar::f를 실행한다">
+<path class="edge-line accent" d="M248,60 H320 V92 H382"/><polygon class="edge-arrow accent" points="382,87 392,92 382,97"/>
+<text class="muted" x="256" y="52" font-size="12">동적 조회</text>
+<rect class="node-rect sq" x="16" y="36" width="232" height="48" rx="2"/>
+<foreignObject x="24" y="40" width="216" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span><code>callvirt void Foo::f()</code></span></div></foreignObject>
+<rect class="node-rect sq" x="392" y="8" width="232" height="40" rx="2"/>
+<foreignObject x="400" y="12" width="216" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; color:var(--color-text-secondary)"><span>Foo::f()</span></div></foreignObject>
+<rect class="node-rect sq accent" x="392" y="72" width="232" height="40" rx="2"/>
+<foreignObject x="400" y="76" width="216" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>Bar::f() 실행</span></div></foreignObject>
+              </svg></div>
+              <p class="ablation-description">late binding. 명령어에는 Foo::f()라고 적혀 있지만 this의 동적 타입이 Bar이므로 Bar::f()가 실행된다.</p>
+            </div>
+            <div class="ablation-layer" id="ca-callvirt-g" style="display:none">
+              <div class="svg-diagram"><svg viewBox="0 0 640 120" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="인스턴스 메서드 g를 callvirt로 불러도 정적 조회로 Foo::g를 실행한다">
+<path class="edge-line accent" d="M248,60 H320 V28 H382"/><polygon class="edge-arrow accent" points="382,23 392,28 382,33"/>
+<text class="muted" x="256" y="52" font-size="12">정적 조회</text>
+<rect class="node-rect sq" x="16" y="36" width="232" height="48" rx="2"/>
+<foreignObject x="24" y="40" width="216" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span><code>callvirt void Foo::g()</code></span></div></foreignObject>
+<rect class="node-rect sq accent" x="392" y="8" width="232" height="40" rx="2"/>
+<foreignObject x="400" y="12" width="216" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>Foo::g() 실행</span></div></foreignObject>
+<rect class="node-rect sq" x="392" y="72" width="232" height="40" rx="2"/>
+<foreignObject x="400" y="76" width="216" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; color:var(--color-text-secondary)"><span>Bar::g()</span></div></foreignObject>
+              </svg></div>
+              <p class="ablation-description">g는 가상 메서드가 아닌 인스턴스 메서드이다. 논문에 따르면 인스턴스 메서드에 callvirt를 써도 early binding이므로 Foo::g()가 실행된다.</p>
+            </div>
+            <div class="ablation-layer" id="ca-call-h" style="display:none">
+              <div class="svg-diagram"><svg viewBox="0 0 640 120" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="call void Foo::h()는 객체 없이 Foo::h를 실행한다">
+<path class="edge-line accent" d="M248,60 H320 V28 H382"/><polygon class="edge-arrow accent" points="382,23 392,28 382,33"/>
+<text class="muted" x="256" y="52" font-size="12">이름으로 결정</text>
+<rect class="node-rect sq" x="16" y="36" width="232" height="48" rx="2"/>
+<foreignObject x="24" y="40" width="216" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span><code>call void Foo::h()</code></span></div></foreignObject>
+<rect class="node-rect sq accent" x="392" y="8" width="232" height="40" rx="2"/>
+<foreignObject x="400" y="12" width="216" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>Foo::h() 실행</span></div></foreignObject>
+<rect class="node-rect sq" x="392" y="72" width="232" height="40" rx="2"/>
+<foreignObject x="400" y="76" width="216" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; color:var(--color-text-secondary)"><span>Bar::h()</span></div></foreignObject>
+              </svg></div>
+              <p class="ablation-description">정적 메서드는 this가 없으므로 ldloc bar가 필요 없다. 명령어에 적힌 Foo::h()가 그대로 실행된다(JVM의 invokestatic에 해당).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>같은 Bar 객체라도 <code>call instance</code>는 Foo::f(), <code>callvirt</code>는 Bar::f()를 실행하며, 인스턴스 메서드에는 <code>callvirt</code>도 early binding이다.</p></div>
+    </div>
+
+    <!-- 페이지 3: JVM 명령어와의 대응 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>JVM의 호출 명령어 네 개는 CLI의 무엇에 대응하는가?</li>
+          <li>명령어를 합치면 누가 일을 더 하는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">JVM 호출 명령어와의 대응<span class="paper-ref">논문 8절</span></h3>
+        <p>당시 <span class="term" data-definition="자바 가상 머신(Java Virtual Machine, JVM): Java 바이트코드를 실행하는 가상 머신.">자바 가상 머신(Java Virtual Machine, JVM)</span>은 호출 대상의 종류마다 명령어를 따로 두었다. <span class="term" data-definition="공통 언어 기반(Common Language Infrastructure, CLI): 여러 언어가 함께 쓰는 실행 환경의 표준 명세. Microsoft의 구현이 CLR임.">공통 언어 기반(Common Language Infrastructure, CLI)</span>은 직접 호출을 <code>call</code>과 <code>callvirt</code> 두 개로 묶고, 함수 포인터 호출 <code>calli</code>를 따로 둔다.</p>
+        <table class="data-table animate-in">
+          <thead><tr><th>호출하는 것</th><th>CLI</th><th>JVM</th><th>메서드를 고르는 기준</th></tr></thead>
+          <tbody>
+            <tr><td>정적 메서드</td><td><code>call</code></td><td><code>invokestatic</code></td><td>명령어에 적힌 이름</td></tr>
+            <tr><td>메서드를 정적으로 지정</td><td><code>call instance</code></td><td><code>invokespecial</code>과 비슷</td><td>정적 타입(early binding)</td></tr>
+            <tr class="hl"><td>가상 메서드(클래스)</td><td rowspan="2" style="vertical-align:middle"><code>callvirt</code></td><td><code>invokevirtual</code></td><td rowspan="2" style="vertical-align:middle">this의 동적 타입(late binding)</td></tr>
+            <tr class="hl"><td>가상 메서드(인터페이스)</td><td><code>invokeinterface</code></td></tr>
+            <tr><td>함수 포인터</td><td><code>calli</code></td><td>해당 명령어 없음</td><td>스택 맨 위의 포인터</td></tr>
+          </tbody>
+          <caption>표는 호출 대상별로 CLI와 당시 JVM의 명령어를 나타낸 것이다. (논문 8, 10절)</caption>
+        </table>
+        <p class="diff-line"><strong>핵심 비교</strong> JVM은 클래스 메서드와 인터페이스 메서드의 가상 호출을 두 명령어로 나누지만, CLI는 <code>callvirt</code> 하나로 처리한다.</p>
+        <p>논문은 JVM이 두 명령어로 나눈 탓에 “컴파일러 작성자가 다시 한번 고생한다”고 쓴다. 대가도 있다. 명령어 이름만으로는 가상 호출인지 알 수 없으므로, 대상 메서드가 가상인지 인스턴스인지를 메타데이터에서 확인하는 일은 <span class="term" data-definition="JIT(Just-In-Time) 컴파일러(실행 직전에 기계어로 번역): 중간 코드를 실행 직전에 기계어로 바꾸는 컴파일러.">JIT(Just-In-Time) 컴파일러</span>의 몫이 된다고 해석할 수 있다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>JVM의 <code>invokevirtual</code>과 <code>invokeinterface</code>는 CLI에서 <code>callvirt</code> 하나가 되고, 메서드 종류를 가리는 일은 JIT로 넘어간다.</p></div>
+    </div>
+
+    <!-- 페이지 4: tail call -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>재귀만으로 반복하는 언어에는 무엇이 필요한가?</li>
+          <li><code>tail.</code> 접두사는 스택 프레임을 어떻게 다루는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span><span>tail call과 스택 프레임</span><span class="paper-ref">논문 8.1절</span></h3>
+        <p>Haskell, Scheme, Mercury처럼 재귀가 유일한 반복 수단인 언어에서는 함수의 마지막 동작이 다시 호출인 <span class="term" data-definition="tail call(꼬리 호출, 함수의 마지막 동작인 호출): 호출이 끝나면 호출한 쪽도 곧바로 반환하는 형태의 호출. 호출한 쪽의 프레임을 남길 필요가 없음.">tail call(꼬리 호출, 함수의 마지막 동작인 호출)</span>이 반복문 역할을 한다. <code>tail.</code> 접두사는 JIT에게 호출 전에 호출한 쪽의 <span class="term" data-definition="활성 레코드(Activation Record, 스택 프레임): 메서드 호출 하나가 쓰는 인수, 지역 변수, 평가 스택, 반환 정보를 묶은 단위.">활성 레코드(Activation Record, 스택 프레임)</span>를 버리라고 지시한다.</p>
+        <div class="with-figure" style="--figure-side-width:272px">
+          <div>
+            <pre class="pseudocode-block" style="margin:0 0 12px"><code>.method public static void Bottom() {
+  .maxstack 8
+  tail. call void Bottom(); ret
+}</code></pre>
+            <p>논문에 따르면 이 메서드는 <span class="term" data-definition="스택 오버플로(Stack Overflow): 호출이 쌓여 스레드의 스택 공간이 바닥나는 오류.">스택 오버플로(Stack Overflow)</span> 예외 없이 영원히 돈다. 탭을 눌러 프레임 수를 비교하시오.</p>
+          </div>
+          <figure class="figure side">
+            <div class="ablation-demo animate-in" style="margin:0">
+              <div class="ablation-tabs">
+                <button class="ablation-tab active" onclick="showLayer('ca-tail-no', this)">tail. 없음</button>
+                <button class="ablation-tab" onclick="showLayer('ca-tail-yes', this)">tail. 있음</button>
+                <button class="ablation-tab" onclick="showLayer('ca-tail-jvm', this)">JVM</button>
+              </div>
+              <div class="ablation-viewport" style="padding:12px">
+                <div class="ablation-layer" id="ca-tail-no" style="display:block">
+                  <svg viewBox="0 0 240 184" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="tail.이 없으면 Bottom 프레임이 호출마다 하나씩 쌓인다">
+<path class="guide-axis" d="M212,168 V24" fill="none"/><polygon class="ink-fill" points="207,24 212,14 217,24"/>
+<rect class="node-rect sq" x="16" y="144" width="176" height="32" rx="2"/>
+<foreignObject x="24" y="148" width="160" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>호출한 쪽</span></div></foreignObject>
+<rect class="node-rect sq" x="16" y="108" width="176" height="32" rx="2"/>
+<foreignObject x="24" y="112" width="160" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>Bottom 1</span></div></foreignObject>
+<rect class="node-rect sq" x="16" y="72" width="176" height="32" rx="2"/>
+<foreignObject x="24" y="76" width="160" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>Bottom 2</span></div></foreignObject>
+<rect class="node-rect sq accent" x="16" y="36" width="176" height="32" rx="2"/>
+<foreignObject x="24" y="40" width="160" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>Bottom 3 …</span></div></foreignObject>
+<text class="muted" x="16" y="24" font-size="12">계속 쌓여 오버플로</text>
+                  </svg>
+                </div>
+                <div class="ablation-layer" id="ca-tail-yes" style="display:none">
+                  <svg viewBox="0 0 240 184" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="tail.이 있으면 Bottom 프레임 하나가 계속 교체된다">
+<path class="edge-line accent" d="M192,116 H216 V132 H202"/><polygon class="edge-arrow accent" points="202,127 192,132 202,137"/>
+<rect class="node-rect sq" x="16" y="144" width="176" height="32" rx="2"/>
+<foreignObject x="24" y="148" width="160" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>호출한 쪽</span></div></foreignObject>
+<rect class="node-rect sq accent" x="16" y="108" width="176" height="32" rx="2"/>
+<foreignObject x="24" y="112" width="160" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>Bottom (교체)</span></div></foreignObject>
+<text class="muted" x="16" y="92" font-size="12">프레임 수가 늘지 않음</text>
+                  </svg>
+                </div>
+                <div class="ablation-layer" id="ca-tail-jvm" style="display:none">
+                  <svg viewBox="0 0 240 184" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="JVM에서는 trampoline 반복문이 함수를 부르고 함수는 다음 호출을 돌려준다">
+<path class="edge-line" d="M64,108 V82"/><polygon class="edge-arrow" points="59,82 64,72 69,82"/>
+<path class="edge-line accent" d="M144,72 V98"/><polygon class="edge-arrow accent" points="139,98 144,108 149,98"/>
+<rect class="node-rect sq" x="16" y="144" width="176" height="32" rx="2"/>
+<foreignObject x="24" y="148" width="160" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>호출한 쪽</span></div></foreignObject>
+<rect class="node-rect sq" x="16" y="108" width="176" height="32" rx="2"/>
+<foreignObject x="24" y="112" width="160" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>trampoline 반복문</span></div></foreignObject>
+<rect class="node-rect sq" x="16" y="40" width="176" height="32" rx="2"/>
+<foreignObject x="24" y="44" width="160" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>Bottom 한 단계</span></div></foreignObject>
+<text class="muted" x="72" y="96" font-size="11">호출</text>
+<text class="accent-text" x="152" y="96" font-size="11">다음 호출 반환</text>
+<text class="muted" x="16" y="24" font-size="12">깊이는 2단, 매번 반환</text>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </figure>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p><code>tail.</code>이 있으면 JIT가 호출한 쪽 프레임을 버려 프레임 수가 늘지 않고, JVM은 trampoline으로 같은 효과를 흉내 낸다.</p></div>
+    </div>
+
+    <!-- 페이지 5: tail call의 대가와 한계 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>tail call이 프레임을 버리지 못하는 경우는 언제인가?</li>
+          <li>trampoline은 무엇을 대가로 치르는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">tail call의 한계와 JVM의 우회<span class="paper-ref">논문 1, 8.1절</span></h3>
+        <p>논문은 <code>tail.</code> 명령어를 언어 연구자들의 의견을 받아 직접 넣었다고 밝힌다. 그러나 신뢰하지 않는 코드가 신뢰하는 코드를 부를 때는 보안 때문에 호출한 쪽 프레임을 완전히 버릴 수 없다.</p>
+        <figure class="svg-diagram fit animate-in" style="--diagram-max:640px">
+          <svg viewBox="0 0 640 112" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="신뢰하지 않는 코드의 프레임이 tail.로 신뢰하는 코드를 부르면 그 프레임 일부가 남는다">
+<path class="edge-line accent" d="M248,48 H382"/><polygon class="edge-arrow accent" points="382,43 392,48 382,53"/>
+<text class="accent-text" x="272" y="38" font-size="12">tail. call</text>
+<rect class="node-rect sq accent" x="16" y="16" width="232" height="64" rx="2"/>
+<foreignObject x="24" y="20" width="216" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span>신뢰하지 않는 코드의 프레임<br/>(일부가 남음)</span></div></foreignObject>
+<rect class="node-rect sq" x="392" y="16" width="232" height="64" rx="2"/>
+<foreignObject x="400" y="20" width="216" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span>신뢰하는 코드</span></div></foreignObject>
+<text class="muted" x="16" y="104" font-size="12">권한 검사가 호출 경로를 확인해야 하므로 프레임 정보를 모두 지울 수 없다고 해석할 수 있다.</text>
+          </svg>
+          <figcaption class="figure-caption">그림은 보안 경계를 넘는 tail call에서 프레임 일부가 남는 상황을 나타낸 개념 그림이다.</figcaption>
+        </figure>
+        <table class="data-table animate-in">
+          <thead><tr><th>방식</th><th>프레임 깊이</th><th>대가와 한계</th></tr></thead>
+          <tbody>
+            <tr class="hl"><td>CLI <code>tail.</code></td><td>늘지 않음</td><td>보안 경계에서는 프레임을 완전히 버리지 못함</td></tr>
+            <tr><td>JVM <span class="term" data-definition="trampoline(꼬리 호출이 없을 때 반복문으로 호출을 대신 돌려주는 기법): 함수가 다음에 부를 호출을 값으로 돌려주고, 바깥 반복문이 그 값을 받아 대신 호출하는 방식.">trampoline(반복문이 호출을 대신 돌려주는 기법)</span></td><td>2단 안팎</td><td>호출마다 반환하고 다음 호출을 값으로 만들어야 함</td></tr>
+            <tr><td>아무 처리 없음</td><td>호출마다 1씩 증가</td><td>깊은 재귀에서 스택 오버플로</td></tr>
+          </tbody>
+          <caption>표는 재귀 반복을 다루는 세 방식을 비교한 것이다. (논문 8.1절과 해석)</caption>
+        </table>
+        <p>논문은 JVM에서는 trampoline 같은 편법으로 “JVM이 프레임을 버리도록 억지로” 만들어야 한다고 쓴다(참고문헌 [5, 27, 15, 18]).</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p><code>tail.</code>은 보안 경계에서 프레임을 다 버리지 못하고, JVM의 trampoline은 호출마다 반환과 재호출을 치른다.</p></div>
+    </div>
+
+    <!-- 페이지 6: 함수 포인터와 jmp -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>기본 가상 dispatch로 안 되는 언어는 어떻게 메서드를 고르는가?</li>
+          <li><code>jmp</code>는 다중 상속에서 무엇을 돕는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span>함수 포인터: <code>ldftn</code>, <code>calli</code>, <code>jmp</code></span><span class="paper-ref">논문 10절</span></h3>
+        <p>CLI에는 단일 구현 상속과 여러 인터페이스 구현을 위한 가상 <span class="term" data-definition="dispatch(호출할 메서드 고르기): 호출 시점에 실제로 실행할 메서드 구현을 고르는 일.">dispatch(호출할 메서드 고르기)</span>가 들어 있다. 그 밖의 방식을 쓰는 언어는 <span class="term" data-definition="디스패치 테이블(Dispatch Table): 메서드 번호마다 실행할 함수 포인터를 적어 둔 표.">디스패치 테이블(Dispatch Table)</span>을 직접 만든다. <code>ldftn</code>은 <span class="term" data-definition="함수 포인터(Function Pointer): 메서드의 진입점을 값으로 담은 것. 변수에 넣거나 표에 저장할 수 있음.">함수 포인터(Function Pointer)</span>를 평가 스택에 올리고, <code>calli</code>는 스택 맨 위의 함수 포인터를 호출한다.</p>
+        <figure class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 160" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ldftn으로 채운 디스패치 테이블의 1번 칸을 calli가 호출하고, 다중 상속에서는 this 조정 stub이 this를 옮긴 뒤 jmp로 본 메서드에 들어간다">
+<text class="muted" x="16" y="20" font-size="12">디스패치 테이블(예시)</text>
+<path class="edge-line" d="M200,44 H240"/><polygon class="edge-arrow" points="240,39 250,44 240,49"/>
+<path class="edge-line accent" d="M200,84 H240"/><polygon class="edge-arrow accent" points="240,79 250,84 240,89"/>
+<path class="edge-line" d="M200,124 H240"/><polygon class="edge-arrow" points="240,119 250,124 240,129"/>
+<rect class="node-rect sq" x="16" y="28" width="184" height="32" rx="2"/>
+<foreignObject x="24" y="32" width="168" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>0: <code>ldftn</code> Area</span></div></foreignObject>
+<rect class="node-rect sq accent" x="16" y="68" width="184" height="32" rx="2"/>
+<foreignObject x="24" y="72" width="168" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>1: <code>ldftn</code> Draw</span></div></foreignObject>
+<rect class="node-rect sq" x="16" y="108" width="184" height="32" rx="2"/>
+<foreignObject x="24" y="112" width="168" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>2: <code>ldftn</code> Move</span></div></foreignObject>
+<rect class="node-rect" x="250" y="28" width="120" height="32" rx="8"/>
+<foreignObject x="258" y="32" width="104" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>Area 구현</span></div></foreignObject>
+<rect class="node-rect accent" x="250" y="68" width="120" height="32" rx="8"/>
+<foreignObject x="258" y="72" width="104" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span><code>calli</code>로 실행</span></div></foreignObject>
+<rect class="node-rect" x="250" y="108" width="120" height="32" rx="8"/>
+<foreignObject x="258" y="112" width="104" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>Move 구현</span></div></foreignObject>
+<text class="muted" x="432" y="20" font-size="12">다중 상속의 this 조정(개념)</text>
+<path class="edge-line" d="M560,84 H600"/><polygon class="edge-arrow" points="600,79 610,84 600,89"/>
+<text class="muted" x="566" y="74" font-size="11">jmp</text>
+<rect class="node-rect sq" x="432" y="56" width="128" height="56" rx="2"/>
+<foreignObject x="440" y="60" width="112" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4"><span>stub: this 위치 조정</span></div></foreignObject>
+<rect class="node-rect" x="610" y="56" width="174" height="56" rx="8"/>
+<foreignObject x="618" y="60" width="158" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4"><span>본 메서드 진입점</span></div></foreignObject>
+          </svg>
+          <figcaption class="figure-caption">그림은 함수 포인터로 채운 디스패치 테이블(왼쪽)과 jmp로 만드는 this 조정 stub(오른쪽)을 나타낸 개념 그림이다. 메서드 이름은 예시이다.</figcaption>
+        </figure>
+        <p><code>jmp</code>는 메서드 참조를 받아 그 메서드의 진입점으로 제어를 옮긴다. <span class="term" data-definition="다중 상속(Multiple Inheritance): 한 클래스가 구현을 가진 부모 클래스를 둘 이상 상속하는 것.">다중 상속(Multiple Inheritance)</span>에서는 부모마다 객체 안의 위치가 달라 this를 옮겨야 하는데, 논문은 이 일을 하는 trampoline stub을 <code>jmp</code>로 만든다고 쓴다. 대가로 <code>calli</code>는 대상이 실행 중에 정해지므로 호출 시그니처를 명령어에 따로 적어야 한다(해석).</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p><code>ldftn</code>과 <code>calli</code>로 언어마다 다른 디스패치 테이블을 만들고, <code>jmp</code>로 다중 상속의 this 조정 stub을 만든다.</p></div>
+    </div>
+
+    <!-- 페이지 7: localloc과 ldtoken -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>배열 복사본을 어디에 두면 싼가?</li>
+          <li>타입 이름은 언제 묶이는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span><code>localloc</code>과 <code>ldtoken</code></span><span class="paper-ref">논문 10절</span></h3>
+        <p><span class="term" data-definition="conformant array(크기를 호출 때 정하는 배열 매개변수): 선언에는 크기가 없고 호출할 때 넘긴 배열의 크기를 따르는 배열 매개변수. Pascal 계열 언어에 있음.">conformant array(크기를 호출 때 정하는 배열 매개변수)</span>를 값으로 넘기는 언어는 호출 때 배열 복사본을 둘 공간이 필요하다. <code>localloc</code>은 현재 활성 레코드를 늘려 그 공간을 만들며, C의 <code>alloca</code>와 의미가 같다.</p>
+        <figure class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 136" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CLI의 localloc은 활성 레코드 안에 배열 복사본을 두고, JVM은 프레임에서 힙의 배열 객체를 참조한다">
+<text class="muted" x="16" y="20" font-size="12">CLI: localloc</text>
+<rect class="node-rect sq" x="16" y="32" width="352" height="40" rx="2"/>
+<foreignObject x="24" y="36" width="336" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>활성 레코드: 인수 · 지역 변수 · 평가 스택</span></div></foreignObject>
+<rect class="node-rect sq accent" x="16" y="72" width="352" height="40" rx="2"/>
+<foreignObject x="24" y="76" width="336" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>늘린 영역: 배열 복사본</span></div></foreignObject>
+<text class="muted" x="16" y="130" font-size="12">메서드가 끝나면 프레임과 함께 사라짐</text>
+<text class="muted" x="432" y="20" font-size="12">JVM: 힙 할당</text>
+<path class="edge-line" d="M584,72 H638"/><polygon class="edge-arrow" points="638,67 648,72 638,77"/>
+<rect class="node-rect sq" x="432" y="32" width="152" height="80" rx="2"/>
+<foreignObject x="440" y="36" width="136" height="72"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4"><span>프레임: 배열 참조만</span></div></foreignObject>
+<rect class="node-rect" x="648" y="48" width="136" height="48" rx="8"/>
+<foreignObject x="656" y="52" width="120" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4"><span>GC 힙의 배열 객체</span></div></foreignObject>
+<text class="muted" x="432" y="130" font-size="12">할당 비용, 나중에 GC가 회수</text>
+          </svg>
+          <figcaption class="figure-caption">그림은 배열 복사본을 활성 레코드 안에 두는 방식과 힙에 두는 방식을 비교한 것이다.</figcaption>
+        </figure>
+        <p><code>ldtoken</code>은 명령어 인수에 적힌 타입 참조의 런타임 타입 핸들을 스택에 올린다. 인스턴스 없이 타입 정보가 필요할 때 쓰는 <span class="term" data-definition="reflection(실행 중에 타입 정보를 조회·사용): 실행 중인 프로그램이 타입, 메서드, 필드 정보를 읽거나 그 정보로 호출하는 기능.">reflection(실행 중에 타입 정보를 조회·사용)</span>의 기본 부품이다.</p>
+        <table class="data-table animate-in">
+          <thead><tr><th>기준</th><th>CLI <code>ldtoken T</code></th><th>JVM <code>Class.forName("T")</code></th></tr></thead>
+          <tbody>
+            <tr><td>타입을 가리키는 것</td><td>명령어 인수의 타입 참조(메타데이터)</td><td>문자열 이름</td></tr>
+            <tr class="hl"><td>이름을 묶는 시점</td><td>실행 전 메타데이터에 고정</td><td>실행 시점</td></tr>
+          </tbody>
+          <caption>표는 타입 정보를 얻는 두 방식을 비교한 것이다. (논문 10절과 해석)</caption>
+        </table>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p><code>localloc</code>은 힙 대신 활성 레코드를 늘려 복사본을 두고, <code>ldtoken</code>은 타입을 이름 문자열이 아니라 메타데이터 참조로 가리킨다.</p></div>
+    </div>
+
+    <!-- 페이지 8: 핵심 정리 + 확인 문제 1, 2 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-accent animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">핵심 정리</strong>
+            <ol>
+              <li><code>call instance</code>는 정적 타입, <code>callvirt</code>는 this의 동적 타입으로 가상 메서드를 고른다. 인스턴스 메서드에는 <code>callvirt</code>도 early binding이다.</li>
+              <li><code>tail.</code>은 호출한 쪽 프레임을 버리지만 보안 경계에서는 완전히 버리지 못한다.</li>
+              <li><code>ldftn</code>·<code>calli</code>·<code>jmp</code>·<code>localloc</code>·<code>ldtoken</code>은 다른 방법으로 합성하기 어려운 언어 기능을 돕는다.</li>
+            </ol>
+            <p>호출 문항은 정적 타입과 동적 타입을 먼저 적고 명령어가 어느 쪽을 보는지 확인하라.</p>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag outline">확인 문제</span>호출 명령어</h3>
+        <div class="quiz-container animate-in" id="ca-quiz-a">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="② | callvirt는 가상 메서드를 this의 동적 타입으로 고르므로, 동적 타입이 Bar인 객체에서는 Bar::f()가 실행된다."
+               data-explanation-wrong="| 정답은 ②이다. callvirt는 가상 메서드 f를 동적 타입 Bar로 고른다. ①은 call instance의 결과이므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">1</span>지역 변수 b의 정적 타입은 Foo이고 Bar 객체를 담고 있다. f는 Foo의 가상 메서드이고 Bar가 재정의한다. <code>ldloc b; callvirt void Foo::f()</code>를 실행할 때 옳은 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 명령어에 적힌 대로 Foo::f()가 실행된다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② Bar::f()가 실행된다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ this가 없으므로 검증 오류가 난다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ Foo::f()와 Bar::f()가 차례로 실행된다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ JVM의 invokestatic과 같은 결과를 낸다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-d"
+               data-explanation-right="④ | 논문에 따르면 인스턴스 메서드에 callvirt를 쓰면 여전히 early binding이므로 ④는 옳지 않다."
+               data-explanation-wrong="| 정답은 ④이다. 인스턴스(비가상) 메서드는 callvirt로 불러도 정적 조회를 한다. ②는 call instance가 invokespecial과 비슷하다는 논문 설명이므로 옳다.">
+            <h3 class="quiz-question"><span class="q-num">2</span>CLI의 호출 명령어에 대한 설명으로 옳지 <u>않은</u> 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① <code>call</code>은 보통 정적 메서드를 부른다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② <code>call instance</code>의 효과는 JVM의 invokespecial과 비슷하다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ JVM의 invokevirtual과 invokeinterface가 하는 일을 <code>callvirt</code> 하나가 맡는다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 인스턴스 메서드에 <code>callvirt</code>를 쓰면 late binding이 된다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ <code>calli</code>는 함수 포인터로 간접 호출한다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('ca-quiz-a')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('ca-quiz-a')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>가상 메서드에서만 <code>call instance</code>와 <code>callvirt</code>의 결과가 갈린다.</p></div>
+    </div>
+
+    <!-- 페이지 9: 확인 문제 3, 4 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>tail call과 특수 명령어를 상황에 맞게 고를 수 있는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag outline">확인 문제</span>tail call과 특수 명령어</h3>
+        <div class="quiz-container animate-in" id="ca-quiz-b">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="③ | ㄱ, ㄷ은 논문 8.1절의 설명과 같다. 당시 JVM은 tail call이 없어 trampoline을 썼으므로 ㄴ은 옳지 않다."
+               data-explanation-wrong="| 정답은 ③이다. 당시 JVM은 tail call이 없어 trampoline을 썼으므로 ㄴ은 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">3</span>tail call에 대한 설명으로 옳은 것만을 <span class="nobr">&lt;보기&gt;에서</span> 있는 대로 고른 것은?</h3>
+            <div class="bogi">
+              <p>ㄱ. <code>tail.</code>은 호출한 쪽 프레임을 버리게 한다.</p>
+              <p>ㄴ. 당시 JVM에도 tail call 명령어가 있었다.</p>
+              <p>ㄷ. 보안 경계에서는 프레임을 다 버리지 못한다.</p>
+            </div>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① ㄱ</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② ㄴ</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ ㄱ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ ㄴ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ ㄱ, ㄴ, ㄷ</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="① | conformant array를 값으로 넘길 때 복사본 공간을 활성 레코드 안에 만드는 명령어는 localloc이다."
+               data-explanation-wrong="| 정답은 ①이다. localloc은 활성 레코드를 늘려 공간을 만든다. ④는 타입 핸들을 올리는 명령어이므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">4</span>Pascal 계열 언어의 컴파일러가 conformant array를 값으로 넘기려 한다. 힙 할당 없이 복사본 공간을 만들 때 쓰기에 알맞은 명령어는?</h3>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① localloc</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② jmp</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ calli</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ ldtoken</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ newobj</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('ca-quiz-b')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('ca-quiz-b')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>tail call은 프레임을 버려 재귀 반복을 가능하게 하고, <code>localloc</code>은 복사본을 활성 레코드 안에 둔다.</p></div>
+    </div>
+
+  </div>
+</section>

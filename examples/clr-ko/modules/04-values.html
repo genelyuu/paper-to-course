@@ -1,0 +1,520 @@
+<section class="module" id="module-4">
+  <div class="module-content">
+
+    <div class="module-header">
+      <span class="module-number">5</span>
+      <h2 class="module-title">값 타입과 참조 타입</h2>
+      <p class="module-subtitle">값을 제자리에 두는 타입과 힙에 두는 타입, 둘을 잇는 boxing을 익힌다</p>
+    </div>
+
+    <!-- 쪽 1: 학습 목표 + 저장 위치 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">학습 목표</strong>
+            <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
+            <ol>
+              <li>값 타입과 참조 타입의 저장 위치를 그림으로 비교할 수 있다.</li>
+              <li>FloatOrInt 공용체에 3.14를 쓰고 int32로 읽을 때의 값을 구할 수 있다.</li>
+              <li>newobj와 boxing이 JVM 방식과 다른 점을 대가와 함께 설명할 수 있다.</li>
+            </ol>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">값 타입과 참조 타입의 저장 위치<span class="paper-ref">논문 6, 7절</span></h3>
+        <p>Point 하나를 만들면 그 값은 어디에 놓일까? <span class="term" data-definition="공통 언어 기반(Common Language Infrastructure, CLI): 여러 언어가 함께 쓰는 실행 환경의 표준 명세. Microsoft의 구현이 CLR임.">공통 언어 기반(Common Language Infrastructure, CLI)</span>의 <span class="term" data-definition="값 타입(Value Type): 변수 칸 안에 필드 값을 직접 담는 타입. C의 struct, Pascal의 record와 비슷함.">값 타입(Value Type)</span>은 C의 struct나 Pascal의 record처럼 이름 붙은 필드의 묶음이며, 변수가 있는 그 자리에 할당한다. <span class="term" data-definition="참조 타입(Reference Type): 객체를 늘 GC 힙에 두고 변수에는 그 객체를 가리키는 참조만 담는 타입. 클래스, 인터페이스, 배열, 대리자 등.">참조 타입(Reference Type)</span>의 객체는 늘 <span class="term" data-definition="가비지 컬렉션(Garbage Collection, GC): 더 이상 쓰지 않는 객체의 메모리를 실행 환경이 자동으로 거두어들이는 일. GC가 관리하는 메모리를 GC 힙이라 함.">가비지 컬렉션(Garbage Collection, GC)</span>이 관리하는 <span class="term" data-definition="힙(Heap): 실행 중에 객체를 만들 때 쓰는 메모리 영역. 호출이 끝나도 사라지지 않음.">힙(Heap)</span>에 할당한다.</p>
+        <div class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 160" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="값 타입 p는 지역 변수 칸 안에 필드 x=3, y=5를 담고, 참조 타입 f는 칸에 주소만 담아 GC 힙의 Foo 객체를 가리킴">
+            <rect class="guide-fill" x="16" y="4" width="352" height="152" rx="4"/>
+            <rect class="guide-fill" x="416" y="4" width="368" height="152" rx="4"/>
+            <text class="muted" x="28" y="22" font-size="12">활성 레코드: 지역 변수</text>
+            <text class="muted" x="428" y="22" font-size="12">GC 힙</text>
+            <path class="edge-line" d="M340,120 H454"/>
+            <polygon class="edge-arrow" points="454,115 464,120 454,125"/>
+            <rect class="node-rect sq" x="32" y="32" width="320" height="56"/>
+            <foreignObject x="40" y="36" width="104" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>p : Point</span></div></foreignObject>
+            <rect class="node-rect sq accent" x="152" y="40" width="88" height="40"/>
+            <foreignObject x="160" y="44" width="72" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>x = 3</span></div></foreignObject>
+            <rect class="node-rect sq accent" x="252" y="40" width="88" height="40"/>
+            <foreignObject x="260" y="44" width="72" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>y = 5</span></div></foreignObject>
+            <rect class="node-rect sq" x="32" y="96" width="320" height="48"/>
+            <foreignObject x="40" y="100" width="104" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>f : Foo</span></div></foreignObject>
+            <rect class="node-rect sq" x="152" y="102" width="188" height="36"/>
+            <foreignObject x="160" y="104" width="172" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>객체 주소만</span></div></foreignObject>
+            <rect class="node-rect sq" x="464" y="80" width="304" height="64"/>
+            <foreignObject x="472" y="84" width="88" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>Foo 객체 머리</span></div></foreignObject>
+            <rect class="node-rect sq" x="568" y="92" width="184" height="40"/>
+            <foreignObject x="576" y="96" width="168" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>필드</span></div></foreignObject>
+          </svg>
+        </div>
+        <p class="figure-caption">그림은 값 타입 지역 변수 p와 참조 타입 지역 변수 f의 저장 위치를 나타낸 것이다(값 3, 5는 예시).</p>
+        <table class="data-table animate-in">
+          <caption>표는 두 타입의 차이를 나타낸 것이다. (논문 6, 7절)</caption>
+          <thead><tr><th>기준</th><th>값 타입</th><th>참조 타입</th></tr></thead>
+          <tbody>
+            <tr><td>놓이는 곳</td><td>변수 자리(제자리)</td><td>늘 GC 힙</td></tr>
+            <tr><td>대입하면</td><td>필드 값 전체를 복사</td><td>주소만 복사(같은 객체 공유)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>값 타입은 필드를 변수 자리에 바로 담고, 참조 타입은 객체를 GC 힙에 두고 변수에는 주소만 담는다.</p></div>
+    </div>
+
+    <!-- 쪽 2: 구조체, 열거형, initobj -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>CLI는 구조체와 열거형을 어떻게 선언하는가?</li>
+          <li>값 타입 변수는 어떤 명령어로 0으로 채우는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span>구조체, 열거형, <code>initobj</code></span><span class="paper-ref">논문 6.1, 6.3, 6.4절</span></h3>
+        <div class="with-figure" style="--figure-side-width:280px">
+          <div>
+            <p><span class="term" data-definition="구조체(Struct): 여러 필드를 하나로 묶은 값 타입. CLI에서는 .class value로 선언함.">구조체(Struct)</span> Point는 int 필드 x, y를 담는다. CLI는 필드를 어떤 순서로든 저장할 수 있다.</p>
+<pre class="pseudocode-block" style="margin:var(--space-3) 0;padding:var(--space-4)"><code>.class value Point {
+  .field public int x
+  .field public int y
+}</code></pre>
+            <p><code>initobj T</code>는 스택의 주소가 가리키는 값 타입의 모든 필드를 0이나 null로 채운다. 타입 하나에 매이지 않는 polytypic 명령어의 예이다.</p>
+<pre class="pseudocode-block" style="margin:var(--space-3) 0;padding:var(--space-4)"><code>.locals (valuetype Point p)
+ldloca p        <span class="code-comment">// 스택: [&amp;p]</span>
+initobj Point   <span class="code-comment">// 스택: [ ], p = (0, 0)</span></code></pre>
+          </div>
+          <figure class="figure side">
+            <svg viewBox="0 0 280 212" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Point p는 int32 칸 두 개이고 initobj 뒤 둘 다 0이 됨. Shape는 int32 하나에 0과 1을 담음">
+              <text x="16" y="18" font-size="12">valuetype Point p (8바이트)</text>
+              <rect class="ink" x="16" y="24" width="124" height="32"/><text class="mono" x="78" y="45" font-size="12" text-anchor="middle">x : int32</text>
+              <rect class="ink" x="140" y="24" width="124" height="32"/><text class="mono" x="202" y="45" font-size="12" text-anchor="middle">y : int32</text>
+              <text x="16" y="84" font-size="12">initobj Point 뒤</text>
+              <rect class="ink accent" x="16" y="90" width="124" height="32"/><text class="accent-text" x="78" y="111" font-size="13" text-anchor="middle">0</text>
+              <rect class="ink accent" x="140" y="90" width="124" height="32"/><text class="accent-text" x="202" y="111" font-size="13" text-anchor="middle">0</text>
+              <text x="16" y="150" font-size="12">valuetype Shape (int32 하나)</text>
+              <rect class="ink" x="16" y="156" width="248" height="32"/><text class="mono" x="140" y="177" font-size="12" text-anchor="middle">0 = RECTANGLE, 1 = CIRCLE</text>
+              <text class="muted" x="16" y="206" font-size="11">필드 순서는 CLI가 정할 수 있다</text>
+            </svg>
+          </figure>
+        </div>
+        <p><span class="term" data-definition="열거형(Enum): 정수 값에 이름을 붙인 값 타입. 이름과 정수를 타입 안전하게 묶음.">열거형(Enum)</span>은 이름과 정수 값을 타입 안전하게 묶는다. 내부 저장 타입과 비트 집합 여부도 정할 수 있다.</p>
+<pre class="pseudocode-block" style="margin:var(--space-3) 0;padding:var(--space-4)"><code>.class enum Shape {
+  .field public static valuetype Shape RECTANGLE = int32(0)
+  .field public static valuetype Shape CIRCLE = int32(1)
+}</code></pre>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>구조체와 열거형은 값 타입으로 선언하고, initobj는 주소가 가리키는 값 타입을 한 번에 0으로 채운다.</p></div>
+    </div>
+
+    <!-- 쪽 3: 공용체 FloatOrInt -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li><code>.field [0]</code>은 무엇을 뜻하는가?</li>
+          <li>3.14를 쓴 4바이트를 int32로 읽으면 얼마인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">공용체: 같은 4바이트를 겹쳐 쓴다<span class="paper-ref">논문 6.2절</span></h3>
+        <p><span class="term" data-definition="공용체(Union): 여러 필드가 같은 메모리를 겹쳐 쓰는 타입. 한 번에 한 필드의 값만 의미가 있음.">공용체(Union, 필드가 같은 메모리를 겹쳐 쓰는 타입)</span>는 필드 배치를 직접 정하는 <code>explicit</code>로 만든다. 아래 FloatOrInt의 두 필드는 모두 바이트 위치 0(<code>[0]</code>)에서 시작한다.</p>
+<pre class="pseudocode-block" style="margin:var(--space-3) 0;padding:var(--space-4)"><code>.class value explicit FloatOrInt {
+  .field [0] public float32 f
+  .field [0] public int32 n
+}</code></pre>
+        <div class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 128" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="FloatOrInt의 4바이트 40 48 F5 C3을 f는 float32 3.14로, n은 int32 1078523331로 읽음">
+            <text x="16" y="25" font-size="13">같은 4바이트</text>
+            <rect class="node-rect sq" x="216" y="4" width="128" height="32"/><text class="mono" x="280" y="26" font-size="14" text-anchor="middle">40</text>
+            <rect class="node-rect sq" x="352" y="4" width="128" height="32"/><text class="mono" x="416" y="26" font-size="14" text-anchor="middle">48</text>
+            <rect class="node-rect sq" x="488" y="4" width="128" height="32"/><text class="mono" x="552" y="26" font-size="14" text-anchor="middle">F5</text>
+            <rect class="node-rect sq" x="624" y="4" width="128" height="32"/><text class="mono" x="688" y="26" font-size="14" text-anchor="middle">C3</text>
+            <text class="mono" x="16" y="69" font-size="13">.field [0] f</text>
+            <rect class="node-rect sq accent" x="216" y="48" width="536" height="32"/>
+            <foreignObject x="224" y="50" width="520" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>f : float32 = 3.14</span></div></foreignObject>
+            <text class="mono" x="16" y="113" font-size="13">.field [0] n</text>
+            <rect class="node-rect sq" x="216" y="92" width="536" height="32"/>
+            <foreignObject x="224" y="94" width="520" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>n : int32 = 1078523331</span></div></foreignObject>
+          </svg>
+        </div>
+        <div class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 128" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="3.14의 float32 비트: 부호 0, 지수 10000000, 가수 10010001111010111000011">
+            <text x="34" y="18" font-size="12" text-anchor="middle">부호</text><text x="149" y="18" font-size="12" text-anchor="middle">지수 8비트</text><text x="518" y="18" font-size="12" text-anchor="middle">가수 23비트</text>
+            <rect class="node-rect sq accent" x="24" y="28" width="20" height="28"/><text class="mono" x="34" y="47" font-size="13" text-anchor="middle">0</text>
+            <rect class="node-rect sq" x="59" y="28" width="20" height="28"/><text class="mono" x="69" y="47" font-size="13" text-anchor="middle">1</text>
+            <rect class="node-rect sq" x="82" y="28" width="20" height="28"/><text class="mono" x="92" y="47" font-size="13" text-anchor="middle">0</text>
+            <rect class="node-rect sq" x="105" y="28" width="20" height="28"/><text class="mono" x="115" y="47" font-size="13" text-anchor="middle">0</text>
+            <rect class="node-rect sq" x="128" y="28" width="20" height="28"/><text class="mono" x="138" y="47" font-size="13" text-anchor="middle">0</text>
+            <rect class="node-rect sq" x="151" y="28" width="20" height="28"/><text class="mono" x="161" y="47" font-size="13" text-anchor="middle">0</text>
+            <rect class="node-rect sq" x="174" y="28" width="20" height="28"/><text class="mono" x="184" y="47" font-size="13" text-anchor="middle">0</text>
+            <rect class="node-rect sq" x="197" y="28" width="20" height="28"/><text class="mono" x="207" y="47" font-size="13" text-anchor="middle">0</text>
+            <rect class="node-rect sq" x="220" y="28" width="20" height="28"/><text class="mono" x="230" y="47" font-size="13" text-anchor="middle">0</text>
+            <rect class="node-rect sq" x="255" y="28" width="20" height="28"/><text class="mono" x="265" y="47" font-size="13" text-anchor="middle">1</text>
+            <rect class="node-rect sq" x="278" y="28" width="20" height="28"/><text class="mono" x="288" y="47" font-size="13" text-anchor="middle">0</text>
+            <rect class="node-rect sq" x="301" y="28" width="20" height="28"/><text class="mono" x="311" y="47" font-size="13" text-anchor="middle">0</text>
+            <rect class="node-rect sq" x="324" y="28" width="20" height="28"/><text class="mono" x="334" y="47" font-size="13" text-anchor="middle">1</text>
+            <rect class="node-rect sq" x="347" y="28" width="20" height="28"/><text class="mono" x="357" y="47" font-size="13" text-anchor="middle">0</text>
+            <rect class="node-rect sq" x="370" y="28" width="20" height="28"/><text class="mono" x="380" y="47" font-size="13" text-anchor="middle">0</text>
+            <rect class="node-rect sq" x="393" y="28" width="20" height="28"/><text class="mono" x="403" y="47" font-size="13" text-anchor="middle">0</text>
+            <rect class="node-rect sq" x="416" y="28" width="20" height="28"/><text class="mono" x="426" y="47" font-size="13" text-anchor="middle">1</text>
+            <rect class="node-rect sq" x="439" y="28" width="20" height="28"/><text class="mono" x="449" y="47" font-size="13" text-anchor="middle">1</text>
+            <rect class="node-rect sq" x="462" y="28" width="20" height="28"/><text class="mono" x="472" y="47" font-size="13" text-anchor="middle">1</text>
+            <rect class="node-rect sq" x="485" y="28" width="20" height="28"/><text class="mono" x="495" y="47" font-size="13" text-anchor="middle">1</text>
+            <rect class="node-rect sq" x="508" y="28" width="20" height="28"/><text class="mono" x="518" y="47" font-size="13" text-anchor="middle">0</text>
+            <rect class="node-rect sq" x="531" y="28" width="20" height="28"/><text class="mono" x="541" y="47" font-size="13" text-anchor="middle">1</text>
+            <rect class="node-rect sq" x="554" y="28" width="20" height="28"/><text class="mono" x="564" y="47" font-size="13" text-anchor="middle">0</text>
+            <rect class="node-rect sq" x="577" y="28" width="20" height="28"/><text class="mono" x="587" y="47" font-size="13" text-anchor="middle">1</text>
+            <rect class="node-rect sq" x="600" y="28" width="20" height="28"/><text class="mono" x="610" y="47" font-size="13" text-anchor="middle">1</text>
+            <rect class="node-rect sq" x="623" y="28" width="20" height="28"/><text class="mono" x="633" y="47" font-size="13" text-anchor="middle">1</text>
+            <rect class="node-rect sq" x="646" y="28" width="20" height="28"/><text class="mono" x="656" y="47" font-size="13" text-anchor="middle">0</text>
+            <rect class="node-rect sq" x="669" y="28" width="20" height="28"/><text class="mono" x="679" y="47" font-size="13" text-anchor="middle">0</text>
+            <rect class="node-rect sq" x="692" y="28" width="20" height="28"/><text class="mono" x="702" y="47" font-size="13" text-anchor="middle">0</text>
+            <rect class="node-rect sq" x="715" y="28" width="20" height="28"/><text class="mono" x="725" y="47" font-size="13" text-anchor="middle">0</text>
+            <rect class="node-rect sq" x="738" y="28" width="20" height="28"/><text class="mono" x="748" y="47" font-size="13" text-anchor="middle">1</text>
+            <rect class="node-rect sq" x="761" y="28" width="20" height="28"/><text class="mono" x="771" y="47" font-size="13" text-anchor="middle">1</text>
+            <path class="guide" d="M24,62 V68 H44 V62 M59,62 V68 H240 V62 M255,62 V68 H781 V62"/>
+            <text x="34" y="88" font-size="12" text-anchor="middle">0 → +</text><text x="149" y="88" font-size="12" text-anchor="middle">128 − 127 = 1 → 2¹ = 2</text><text x="518" y="88" font-size="12" text-anchor="middle">1.10010001111010111000011(2진) ≈ 1.57</text>
+            <text class="accent-text" x="400" y="120" font-size="13" text-anchor="middle">+1.57 × 2 ≈ 3.14 · 같은 32비트를 int32로 읽으면 0x4048F5C3 = 1078523331</text>
+          </svg>
+        </div>
+        <p class="figure-caption">그림은 FloatOrInt의 4바이트(높은 자리부터, 메모리 안 순서는 기계마다 다름)와 3.14의 IEEE-754 비트를 나타낸 것이다. 1078523331은 계산 값이다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>FloatOrInt의 f와 n은 같은 4바이트를 쓰므로, f에 3.14를 쓰면 n으로는 그 비트 패턴인 1078523331이 읽힌다.</p></div>
+    </div>
+
+    <!-- 쪽 4: 공용체 코드 단계별 풀이 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li><code>stfld</code>와 <code>ldfld</code>는 스택에서 무엇을 꺼내는가?</li>
+          <li>왜 n은 3이 아닌가?</li>
+          <li>이런 코드는 안전한가?</li>
+        </ul>
+        <div class="callout callout-warning animate-in">
+        <div class="callout-content">
+          <strong class="callout-title">더 알아보기</strong>
+          <p>이 기법은 타입 안전하지 않다. 판별자 없는 공용체의 이런 사용은 <span class="term" data-definition="검증기(Verifier): CIL 코드가 타입 규칙을 지키는지 실행 전에 검사하는 프로그램.">검증기(Verifier)</span>가 허용하지 않으므로, 신뢰하지 않는 코드에서는 쓸 수 없다(7단원).</p>
+        </div>
+      </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>float으로 쓰고 int로 읽기<span class="paper-ref">논문 6.4절</span></h3>
+        <p>지역 변수는 <code>.locals (valuetype FloatOrInt fi, int32 n)</code>이다. <span class="term" data-definition="평가 스택(Evaluation Stack): 명령어가 계산에 쓸 값을 쌓아 두는 스택. JVM에서는 operand stack이라 부름.">평가 스택(Evaluation Stack)</span> 상태를 함께 보며 버튼을 눌러 한 줄씩 따라가시오.</p>
+        <div class="pseudocode-translation animate-in" id="va-pseudo-union">
+          <div class="pseudocode-block">
+            <span class="translation-label">CIL (논문 코드)</span>
+            <span class="pseudocode-line">// fi.f = 3.14</span>
+            <span class="pseudocode-line">ldloca fi</span>
+            <span class="pseudocode-line">ldc.r4 3.14</span>
+            <span class="pseudocode-line">stfld float32 FloatOrInt::f</span>
+            <span class="pseudocode-line">// n = fi.n</span>
+            <span class="pseudocode-line">ldloca fi</span>
+            <span class="pseudocode-line">ldfld int32 FloatOrInt::n</span>
+          </div>
+          <div class="pseudocode-explanation">
+            <span class="translation-label">설명과 스택</span>
+            <div class="pseudocode-explanation-lines">
+              <p class="pe">앞 절반은 f에 3.14를 쓰는 부분이다.</p>
+              <p class="pe">fi의 주소를 올린다. 스택 [&amp;fi]</p>
+              <p class="pe">float32 상수 3.14를 올린다. 스택 [&amp;fi, 3.14]</p>
+              <p class="pe">둘을 꺼내 바이트 0~3에 3.14를 쓴다. 스택 [ ]</p>
+              <p class="pe">뒤 절반은 같은 자리를 n으로 읽는 부분이다.</p>
+              <p class="pe">다시 fi의 주소를 올린다. 스택 [&amp;fi]</p>
+              <p class="pe">&amp;fi를 꺼내 바이트 0~3을 int32로 읽는다. 스택 [1078523331]</p>
+            </div>
+          </div>
+          <div class="pseudocode-controls">
+            <button class="btn pseudocode-prev-btn">이전 줄</button>
+            <button class="btn pseudocode-next-btn">다음 줄</button>
+            <button class="btn pseudocode-reset-btn">처음부터</button>
+            <span class="pseudocode-progress"></span>
+          </div>
+        </div>
+        <p>n은 3.14의 비트를 그대로 정수로 읽은 값이다. n에 넣으려면 <code>stloc n</code>이 더 필요하다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>stfld로 f에 쓴 3.14를 ldfld로 n에서 읽으면 같은 비트가 정수 1078523331로 읽히며, 이 코드는 검증할 수 없다.</p></div>
+    </div>
+
+    <!-- 쪽 5: JVM에서 값 타입 흉내 내기 + 개념 체크 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>JVM은 열거형, 구조체, 공용체를 무엇으로 흉내 내는가?</li>
+          <li>흉내로도 안 되는 것은 무엇인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">JVM에서 값 타입 흉내 내기<span class="paper-ref">논문 6.4절</span></h3>
+        <p>논문은 값 타입이 enum, 레코드, 공용체가 있는 Pascal이나 C 같은 언어를 컴파일하는 데 꼭 필요하다고 주장한다. 당시 <span class="term" data-definition="자바 가상 머신(Java Virtual Machine, JVM): Java 바이트코드를 실행하는 가상 머신. 이 논문의 비교 대상임.">자바 가상 머신(Java Virtual Machine, JVM)</span>에는 값 타입이 없었다.</p>
+        <table class="data-table animate-in">
+          <caption>표는 C·Pascal의 기능을 두 플랫폼에서 표현하는 방법을 나타낸 것이다. (논문 6.4절)</caption>
+          <thead><tr><th>기능</th><th>CLI</th><th>당시 JVM</th></tr></thead>
+          <tbody>
+            <tr><td>열거형</td><td><code>.class enum</code> 값 타입</td><td>클래스로 흉내(비효율)</td></tr>
+            <tr><td>구조체·레코드</td><td><code>.class value</code> 값 타입</td><td>클래스로 흉내(힙 객체)</td></tr>
+            <tr><td>공용체</td><td><code>.class value explicit</code></td><td>클래스 계층으로 흉내</td></tr>
+            <tr class="hl"><td>float을 쓰고 int로 읽기</td><td>가능(검증할 수 없음)</td><td>불가능</td></tr>
+          </tbody>
+        </table>
+        <p class="diff-line"><strong>핵심 비교</strong> CLI는 값 타입으로 바이트 배치까지 그대로 옮기고, JVM은 클래스로 흉내 내므로 비효율적이고 겹쳐 쓰기는 아예 표현하지 못한다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>JVM은 값 타입을 클래스로 흉내 내야 해 비효율적이고, 공용체의 겹쳐 쓰기는 표현할 수 없다.</p></div>
+    </div>
+
+    <!-- 쪽 6: 참조 타입 Foo와 Bar -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>CLI 클래스는 어떤 종류의 메서드를 가질 수 있는가?</li>
+          <li>인스턴스 메서드는 가상 메서드와 무엇이 다른가?</li>
+          <li>생성자의 이름은 무엇인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">참조 타입: Foo와 Bar<span class="paper-ref">논문 7절</span></h3>
+        <p>참조 타입에는 <span class="term" data-definition="클래스(Class): 필드와 메서드를 묶어 객체의 모양을 정한 참조 타입.">클래스(Class)</span>, <span class="term" data-definition="인터페이스(Interface): 구현할 메서드의 목록만 정한 참조 타입.">인터페이스(Interface)</span>, 배열, <span class="term" data-definition="대리자(Delegate): 메서드를 가리키는 타입 안전한 객체.">대리자(Delegate, 메서드를 가리키는 타입 안전 객체)</span>가 있고, 논문은 클래스만 다룬다. Bar는 Foo를 상속하며 두 클래스는 같은 네 메서드를 정의한다.</p>
+<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin:var(--space-3) 0">
+<pre class="pseudocode-block" style="margin:0;font-size:12px;padding:var(--space-4)"><code>.class public Foo {
+  .method public virtual void f() {...}
+  .method public instance void g() {...}
+  .method public static void h() {...}
+  .method public specialname void .ctor() {...}
+}</code></pre>
+<pre class="pseudocode-block" style="margin:0;font-size:12px;padding:var(--space-4)"><code>.class public Bar extends Foo {
+  .method public virtual void f() {...}
+  .method public instance void g() {...}
+  .method public static void h() {...}
+  .method public specialname void .ctor() {...}
+}</code></pre>
+</div>
+        <table class="data-table animate-in">
+          <caption>표는 Foo의 메서드 종류를 나타낸 것이다. 호출 명령어와의 관계는 6단원에서 다룬다. (논문 7, 8절)</caption>
+          <thead><tr><th>종류</th><th>예</th><th>호출할 구현을 정하는 기준</th><th>비슷한 언어</th></tr></thead>
+          <tbody>
+            <tr class="hl"><td><span class="term" data-definition="가상 메서드(Virtual Method): 실행 때 객체의 실제 타입을 보고 어느 클래스의 구현을 부를지 정하는 메서드.">가상 메서드(Virtual Method)</span></td><td><code>f</code></td><td>실행 때 객체의 실제 타입</td><td>Eiffel, Java</td></tr>
+            <tr><td><span class="term" data-definition="인스턴스 메서드(Instance Method): this를 받지만 가상이 아니어서 선언된 타입만 보고 부를 구현을 정하는 메서드.">인스턴스 메서드(Instance Method)</span></td><td><code>g</code></td><td>선언된 타입(this는 받음)</td><td>C++</td></tr>
+            <tr><td><span class="term" data-definition="정적 메서드(Static Method): 객체 없이 클래스 이름으로 부르는 메서드. this가 없음.">정적 메서드(Static Method)</span></td><td><code>h</code></td><td>클래스 이름(this 없음)</td><td>Eiffel, Java</td></tr>
+            <tr><td><span class="term" data-definition="생성자(Constructor, .ctor): 새 객체의 필드를 초기화하는 특별한 메서드. 이름은 늘 .ctor이고 specialname을 붙임.">생성자(Constructor)</span></td><td><code>.ctor</code></td><td><code>newobj</code>가 부름</td><td>모든 클래스</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>CLI 클래스는 가상, 인스턴스, 정적 메서드를 모두 가질 수 있고, 생성자는 늘 specialname을 붙인 .ctor이다.</p></div>
+    </div>
+
+    <!-- 쪽 7: newobj 대 JVM -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li><code>newobj</code> 하나는 무엇과 무엇을 하는가?</li>
+          <li>JVM의 세 명령어 사이에는 어떤 상태가 생기는가?</li>
+          <li>그 상태 때문에 검증기는 무엇을 더 해야 하는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span><span><code>newobj</code>와 JVM의 객체 생성</span><span class="paper-ref">논문 7.1절</span></h3>
+        <p><code>newobj c</code>는 생성자 c의 클래스 인스턴스를 할당하고 필드를 초기화한 뒤, 새 인스턴스와 인수로 생성자를 부른다. 아래 b의 정적 타입은 Foo, 실제 객체는 Bar이다.</p>
+<pre class="pseudocode-block" style="margin:var(--space-3) 0;padding:var(--space-4)"><code>.locals (class Foo f, class Foo b)
+newobj void Foo::.ctor(); stloc f
+newobj void Bar::.ctor(); stloc b</code></pre>
+        <div class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 244" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CLI는 newobj 하나로 초기화된 객체를 스택에 올리고, JVM은 new, dup, invokespecial 사이에 미초기화 객체가 스택에 남음">
+            <text x="16" y="66" font-size="14" font-weight="700">CLI</text>
+            <text x="16" y="190" font-size="14" font-weight="700">JVM</text>
+            <rect class="node-rect sq accent" x="88" y="8" width="444" height="40"/>
+            <foreignObject x="96" y="12" width="428" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; font-family:var(--font-mono)"><span>newobj void Foo::.ctor()</span></div></foreignObject>
+            <rect class="node-rect sq" x="544" y="8" width="140" height="40"/>
+            <foreignObject x="552" y="12" width="124" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; font-family:var(--font-mono)"><span>stloc f</span></div></foreignObject>
+            <path class="guide-axis" d="M88,108 H532 M544,108 H684"/>
+            <rect class="node-rect sq accent" x="222" y="72" width="176" height="32"/>
+            <foreignObject x="230" y="74" width="160" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>Foo 객체(초기화 끝)</span></div></foreignObject>
+            <text class="muted" x="614" y="98" font-size="12" text-anchor="middle">빈 스택</text>
+            <rect class="node-rect sq" x="88" y="124" width="140" height="40"/>
+            <foreignObject x="96" y="128" width="124" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; font-family:var(--font-mono)"><span>new Foo</span></div></foreignObject>
+            <rect class="node-rect sq" x="240" y="124" width="140" height="40"/>
+            <foreignObject x="248" y="128" width="124" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; font-family:var(--font-mono)"><span>dup</span></div></foreignObject>
+            <rect class="node-rect sq" x="392" y="124" width="140" height="40"/>
+            <foreignObject x="396" y="126" width="132" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.3; font-family:var(--font-mono)"><span>invokespecial<br/>Foo.&lt;init&gt;()V</span></div></foreignObject>
+            <rect class="node-rect sq" x="544" y="124" width="140" height="40"/>
+            <foreignObject x="552" y="128" width="124" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>저장(예시)</span></div></foreignObject>
+            <path class="guide-axis" d="M88,236 H228 M240,236 H380 M392,236 H532 M544,236 H684"/>
+            <rect class="edge-line dashed" x="96" y="200" width="124" height="32"/><text x="158" y="221" font-size="12" text-anchor="middle">미초기화 Foo</text>
+            <rect class="edge-line dashed" x="248" y="200" width="124" height="32"/><text x="310" y="221" font-size="12" text-anchor="middle">미초기화 Foo</text>
+            <rect class="edge-line dashed" x="248" y="168" width="124" height="28"/><text x="310" y="187" font-size="12" text-anchor="middle">미초기화 Foo</text>
+            <rect class="node-rect sq" x="400" y="200" width="124" height="32"/><text x="462" y="221" font-size="12" text-anchor="middle">Foo 객체</text>
+            <text class="muted" x="614" y="226" font-size="12" text-anchor="middle">빈 스택</text>
+            <text class="accent-text" x="700" y="32" font-size="13">명령어 1개</text>
+            <text class="muted" x="700" y="52" font-size="11">할당 + 초기화</text>
+            <text x="700" y="148" font-size="13" font-weight="700">명령어 3개</text>
+            <text class="muted" x="700" y="168" font-size="11">사이에 미초기화</text>
+          </svg>
+        </div>
+        <p class="figure-caption">그림은 각 명령어 뒤의 스택을 나타낸 것이다(점선 칸은 초기화 전 객체, JVM의 저장은 예시).</p>
+        <p>JVM은 늘 <code>new c; dup; invokespecial c.&lt;init&gt;()V</code> 순서를 써야 한다. 그래서 검증기는 복잡한 <span class="term" data-definition="데이터 흐름 분석(Dataflow Analysis): 프로그램의 모든 실행 경로를 따라 각 지점에서 값의 상태를 추적하는 분석.">데이터 흐름 분석(Dataflow Analysis)</span>으로 초기화 전 사용과 두 번 초기화를 막아야 한다. 논문은 할당과 초기화를 한 명령어로 묶어 이 복잡함을 처음부터 피하는 편이 단순하다고 주장한다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>newobj는 할당과 초기화를 한 명령어로 끝내 미초기화 객체가 스택에 드러나지 않게 한다.</p></div>
+    </div>
+
+    <!-- 쪽 8: boxing과 unboxing -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>값 타입을 참조 타입 자리에 쓰려면 무엇이 필요한가?</li>
+          <li>box는 값을 옮기는가, 복사하는가?</li>
+          <li>boxing의 대가는 무엇인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">boxing과 unboxing<span class="paper-ref">논문 9절</span></h3>
+        <div class="with-figure" style="--figure-side-width:160px">
+          <div>
+            <p>Point를 컬렉션에 넣으려면 값 타입을 참조 타입 자리에 써야 한다. Scheme 같은 동적 언어와 Haskell, SML 같은 다형 함수형 언어도 다형 함수가 모든 인수를 같은 모양으로 받기를 기대하므로 같은 문제를 겪는다.</p>
+            <p><span class="term" data-definition="boxing(값을 객체로 감싸기): 값 타입의 값을 GC 힙의 새 객체에 복사해 object로 다루게 하는 일. 명령어는 box.">boxing(값을 객체로 감싸기)</span>은 택배 상자에 물건을 넣듯 값을 힙의 상자 객체에 <strong>복사</strong>한다. <span class="term" data-definition="unboxing(객체에서 값을 꺼내기): boxing한 객체에서 값 타입의 값을 다시 꺼내는 일. 명령어는 unbox.">unboxing(객체에서 값을 꺼내기)</span>은 반대 방향이다.</p>
+          </div>
+          <figure class="figure side"><img src="assets/fig-parcel.svg" alt="테이프를 붙여 봉한 택배 상자"><figcaption class="figure-caption">box는 값을 상자에 복사해 담고, unbox는 꺼내 복사한다.</figcaption></figure>
+        </div>
+        <div class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 216" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="box Point는 p의 값 3, 5를 GC 힙의 상자 객체로 복사하고, o는 그 상자를 가리키며, unbox Point는 상자의 값을 다시 값 타입으로 되돌림">
+            <rect class="guide-fill" x="16" y="8" width="256" height="200" rx="4"/>
+            <rect class="guide-fill" x="464" y="8" width="320" height="200" rx="4"/>
+            <text class="muted" x="28" y="28" font-size="12">활성 레코드: 지역 변수</text>
+            <text class="muted" x="476" y="28" font-size="12">GC 힙</text>
+            <path class="edge-line accent" d="M256,68 H470"/>
+            <polygon class="edge-arrow accent" points="470,63 480,68 470,73"/>
+            <text class="accent-text" x="368" y="58" font-size="12" text-anchor="middle">box Point: 값 복사</text>
+            <path class="edge-line" d="M256,124 H470"/>
+            <polygon class="edge-arrow" points="470,119 480,124 470,129"/>
+            <text class="muted" x="368" y="116" font-size="12" text-anchor="middle">상자를 가리키는 참조</text>
+            <path class="edge-line" d="M480,176 H266"/>
+            <polygon class="edge-arrow" points="266,171 256,176 266,181"/>
+            <text class="muted" x="368" y="168" font-size="12" text-anchor="middle">unbox Point: 값으로</text>
+            <rect class="node-rect sq" x="32" y="44" width="224" height="48"/>
+            <foreignObject x="40" y="48" width="208" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>p : Point = (3, 5)</span></div></foreignObject>
+            <rect class="node-rect sq" x="32" y="104" width="224" height="40"/>
+            <foreignObject x="40" y="108" width="208" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>o : object</span></div></foreignObject>
+            <rect class="node-rect sq" x="32" y="152" width="224" height="48"/>
+            <foreignObject x="40" y="156" width="208" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>q : Point = (3, 5)</span></div></foreignObject>
+            <rect class="node-rect sq accent" x="480" y="44" width="288" height="156"/>
+            <foreignObject x="488" y="48" width="272" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>Point 상자 객체(머리)</span></div></foreignObject>
+            <rect class="node-rect sq" x="504" y="112" width="112" height="48"/>
+            <foreignObject x="512" y="116" width="96" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>x = 3</span></div></foreignObject>
+            <rect class="node-rect sq" x="632" y="112" width="112" height="48"/>
+            <foreignObject x="640" y="116" width="96" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>y = 5</span></div></foreignObject>
+          </svg>
+        </div>
+        <p class="figure-caption">그림은 Point 값을 boxing하고 다시 unboxing하는 과정을 나타낸 것이다(값 3, 5는 예시).</p>
+        <p>대가로 box 한 번마다 힙 할당 한 번과 필드 복사가 일어난다. 논문은 값을 넘길 때마다 클래스 인스턴스를 직접 만드는 방식은 부담이 너무 크므로 런타임이 boxing을 기본으로 지원해야 한다고 주장한다. 당시 JVM은 boxing을 지원하지 않았다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>box는 값을 힙의 상자 객체로 복사해 object로 쓰게 하고, unbox는 되돌리며, 그 대가로 할당과 복사가 든다.</p></div>
+    </div>
+
+    <!-- 쪽 9: 핵심 정리 + 확인 문제 1, 2 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-accent animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">핵심 정리</strong>
+            <ol>
+              <li>값 타입은 제자리에, 참조 타입은 늘 GC 힙에 할당한다.</li>
+              <li>explicit 배치의 공용체는 같은 바이트를 겹쳐 쓰며, 이를 이용한 기법은 검증할 수 없다.</li>
+              <li>newobj는 할당과 초기화를 한 명령어로 묶는다.</li>
+              <li>boxing은 값을 힙으로 복사하므로 할당 비용이 든다.</li>
+              <li>공용체 문제는 같은 비트를 어떤 타입으로 읽는지부터 확인하라.</li>
+            </ol>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>값 타입과 공용체</h3>
+        <div class="quiz-container animate-in" id="va-quiz-1">
+          <div class="quiz-question-block" data-correct="option-c"
+               data-explanation-right="③ | 3.14의 float32 비트 0x4048F5C3을 int32로 읽으면 1078523331이다."
+               data-explanation-wrong="| 정답은 ③이다. ldfld int32는 같은 4바이트의 비트를 정수로 읽는다. ①은 값을 정수로 바꾼 결과이므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">1</span>fi.f에 3.14를 쓴 뒤 <code>ldfld int32 FloatOrInt::n</code>이 스택에 올리는 값은? <span class="q-points">[3점]</span></h3>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 3</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 314</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 1078523331</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ −1078523331</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 0</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <div class="quiz-question-block" data-correct="option-d"
+               data-explanation-right="④ | 값 타입은 제자리에 할당하고, 늘 GC 힙에 할당하는 것은 참조 타입이다."
+               data-explanation-wrong="| 정답은 ④이다. 값 타입은 변수 자리에 할당한다. ⑤는 논문이 필드를 어떤 순서로든 저장할 수 있다고 했으므로 옳다.">
+            <h3 class="quiz-question"><span class="q-num">2</span>값 타입에 대한 설명으로 옳지 <u>않은</u> 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 값 타입 지역 변수는 필드를 활성 레코드 안에 담는다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② initobj는 값 타입의 모든 필드를 0이나 null로 채운다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 열거형은 이름과 정수 값을 타입 안전하게 묶는다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 값 타입은 늘 GC 힙에 할당한다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ CLI는 구조체 필드를 어떤 순서로든 저장할 수 있다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('va-quiz-1')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('va-quiz-1')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>공용체는 같은 비트를 다른 타입으로 읽게 하고, 값 타입은 GC 힙이 아니라 제자리에 할당한다.</p></div>
+    </div>
+
+    <!-- 쪽 10: 확인 문제 3, 4 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>newobj는 JVM의 객체 생성과 무엇이 다른가?</li>
+          <li>boxing은 무엇을 복사하고 어떤 비용을 내는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>객체 생성과 boxing</h3>
+        <div class="quiz-container animate-in" id="va-quiz-2">
+          <div class="quiz-question-block" data-correct="option-c"
+               data-explanation-right="③ | JVM 검증기는 데이터 흐름 분석으로 초기화 전 사용을 검사하므로 ㄷ은 옳지 않다."
+               data-explanation-wrong="| 정답은 ③이다. ㄱ, ㄴ만 옳다.">
+            <h3 class="quiz-question"><span class="q-num">3</span>객체 생성에 대해 옳은 것만을 <span class="nobr">&lt;보기&gt;에서</span> 있는 대로 고른 것은?</h3>
+            <div class="bogi">
+              <p>ㄱ. newobj는 할당과 초기화를 함께 한다.</p>
+              <p>ㄴ. JVM은 new, dup, invokespecial을 쓴다.</p>
+              <p>ㄷ. JVM 검증기는 초기화를 검사하지 않는다.</p>
+            </div>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① ㄱ</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② ㄷ</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ ㄱ, ㄴ</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ ㄴ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ ㄱ, ㄴ, ㄷ</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <div class="quiz-question-block" data-correct="option-b"
+               data-explanation-right="② | box는 값을 힙의 새 상자 객체로 복사하므로 할당과 복사 비용이 든다."
+               data-explanation-wrong="| 정답은 ②이다. box는 주소가 아니라 값을 복사한다.">
+            <h3 class="quiz-question"><span class="q-num">4</span>boxing에 대한 설명으로 옳은 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① box는 값 타입의 주소만 힙에 저장한다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② box는 값을 힙으로 복사하므로 할당 비용이 든다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ unbox는 값 타입마다 새 클래스를 정의한다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 다형 함수형 언어는 인수의 균일한 표현이 필요 없다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 당시 JVM은 boxing 명령어를 지원했다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('va-quiz-2')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('va-quiz-2')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>newobj는 JVM의 세 명령어를 하나로 줄이고, boxing은 값을 힙으로 복사하는 비용을 치른다.</p></div>
+    </div>
+
+  </div>
+</section>

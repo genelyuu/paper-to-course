@@ -1,0 +1,466 @@
+<section class="module" id="module-7">
+  <div class="module-content">
+
+    <div class="module-header">
+      <span class="module-number">8</span>
+      <h2 class="module-title">이후 동향</h2>
+      <p class="module-subtitle">2001년 논문이 그린 다중 언어 실행 환경이 이후 어떻게 이어지고 바뀌었는지 일곱 갈래로 살핀다</p>
+    </div>
+
+    <!-- 페이지 1: 한눈에 보는 흐름 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">학습 목표</strong>
+            <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
+            <ol>
+              <li>논문 이후의 변화를 논문의 어느 설계에서 이어졌는지와 함께 설명할 수 있다.</li>
+              <li>JIT와 AOT 컴파일, CLI와 JVM의 이후 선택을 비용과 함께 비교할 수 있다.</li>
+            </ol>
+          </div>
+        </div>
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">보충 설명</strong>
+            <p>이 단원은 논문 이후의 보충이며, 조사 시점은 2026년 11월이다. 공식 문서, 표준, 논문, 저장소에서 직접 확인한 내용만 싣는다.</p>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">2001년 이후 25년의 흐름</h3>
+        <p>논문은 <span class="term" data-definition="공통 언어 기반(Common Language Infrastructure, CLI): 여러 언어가 같은 타입 시스템과 중간 언어로 함께 실행되도록 정한 명세. ECMA-335로 표준화됨.">공통 언어 기반(Common Language Infrastructure, CLI)</span>이 여러 언어를 위한 실행 환경으로서 <span class="term" data-definition="자바 가상 머신(Java Virtual Machine, JVM): Java 바이트코드를 실행하는 가상 머신.">자바 가상 머신(Java Virtual Machine, JVM)</span>보다 낫다고 주장했다. 아래 연표는 그 뒤에 일어난 일 가운데 이 단원에서 다룰 것을 고른 것이다.</p>
+        <figure class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 176" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="2001년 논문과 ECMA-335 1판부터 2024년 WebAssembly 3.0 제안 완료까지 여덟 사건을 나열한 연표">
+<path class="guide-axis" d="M16,88 H784"/>
+<path class="edge-line accent" d="M72,64 V88"/>
+<path class="edge-line" d="M166,112 V88"/>
+<path class="edge-line" d="M260,64 V88"/>
+<path class="edge-line" d="M354,112 V88"/>
+<path class="edge-line" d="M448,64 V88"/>
+<path class="edge-line" d="M542,112 V88"/>
+<path class="edge-line" d="M636,64 V88"/>
+<path class="edge-line" d="M730,112 V88"/>
+<rect class="node-rect accent" x="26" y="8" width="92" height="56" rx="6"/>
+<foreignObject x="28" y="10" width="88" height="52"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.3"><span><b>2001</b><br/>논문, ECMA-335 1판</span></div></foreignObject>
+<rect class="node-rect" x="120" y="112" width="92" height="56" rx="6"/>
+<foreignObject x="122" y="114" width="88" height="52"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.3"><span><b>2005</b><br/>C# 2.0 제네릭</span></div></foreignObject>
+<rect class="node-rect" x="214" y="8" width="92" height="56" rx="6"/>
+<foreignObject x="216" y="10" width="88" height="52"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.3"><span><b>2011</b><br/>JVM invokedynamic</span></div></foreignObject>
+<rect class="node-rect" x="308" y="112" width="92" height="56" rx="6"/>
+<foreignObject x="310" y="114" width="88" height="52"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.3"><span><b>2012</b><br/>ECMA-335 6판</span></div></foreignObject>
+<rect class="node-rect" x="402" y="8" width="92" height="56" rx="6"/>
+<foreignObject x="404" y="10" width="88" height="52"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.3"><span><b>2014</b><br/>.NET Core 오픈 소스</span></div></foreignObject>
+<rect class="node-rect" x="496" y="112" width="92" height="56" rx="6"/>
+<foreignObject x="498" y="114" width="88" height="52"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.3"><span><b>2017</b><br/>C# 7.0·7.2 ref 확장</span></div></foreignObject>
+<rect class="node-rect" x="590" y="8" width="92" height="56" rx="6"/>
+<foreignObject x="592" y="10" width="88" height="52"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.3"><span><b>2022</b><br/>C# 11 ref 필드</span></div></foreignObject>
+<rect class="node-rect" x="684" y="112" width="92" height="56" rx="6"/>
+<foreignObject x="686" y="114" width="88" height="52"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.3"><span><b>2024</b><br/>Wasm tail call 제안 완료</span></div></foreignObject>
+          </svg>
+          <figcaption class="figure-caption">그림은 논문 이후의 주요 사건을 연도순으로 나타낸 것이다. 사건 사이 간격은 실제 기간에 비례하지 않는다.</figcaption>
+        </figure>
+        <p>이 단원은 일곱 갈래를 다룬다. ① 표준화와 오픈 소스, ② 제네릭, ③ ref와 <code>Span&lt;T&gt;</code>, ④ JIT 대 AOT, ⑤ JVM 쪽의 응답, ⑥ WebAssembly, ⑦ F#이다. 갈래마다 무엇을 풀려 했는지, 대가는 무엇인지, 논문의 어느 설계에서 이어지는지를 차례로 본다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>논문 이후의 변화를 일곱 갈래로 나누고, 갈래마다 목적과 대가, 논문과의 연결을 살핀다.</p></div>
+    </div>
+
+    <!-- 페이지 2: ① 표준화와 오픈 소스 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>CLI 명세 하나로 몇 개의 구현이 나왔는가?</li>
+          <li>Windows 밖으로 나가는 데 무엇이 필요했는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">① 표준화와 오픈 소스</h3>
+        <p>논문은 <span class="term" data-definition="ECMA 표준(ECMA-335): CLI를 정의한 국제 표준 명세. ISO/IEC 23271과 같은 내용임.">ECMA 표준(ECMA-335)</span>으로 CLI가 여러 플랫폼에서 쓰이기를 기대했다. ECMA-335는 2001년 12월에 1판이, 2012년 6월에 현재의 6판이 나왔고 ISO/IEC 23271로도 표준이 되었다. 명세가 공개되자 Microsoft가 아닌 쪽의 구현도 생겼다.</p>
+        <figure class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 160" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ECMA-335 명세에서 .NET Framework, Mono, .NET 세 구현이 나온다">
+<path class="edge-line" d="M400,56 V76 H136 V94"/><polygon class="edge-arrow" points="131,94 141,94 136,104"/>
+<path class="edge-line" d="M400,76 V94"/><polygon class="edge-arrow" points="395,94 405,94 400,104"/>
+<path class="edge-line accent" d="M400,76 H664 V94"/><polygon class="edge-arrow accent" points="659,94 669,94 664,104"/>
+<rect class="node-rect sq" x="272" y="8" width="256" height="48" rx="2"/>
+<foreignObject x="280" y="12" width="240" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span>ECMA-335 명세<br/>(ISO/IEC 23271)</span></div></foreignObject>
+<rect class="node-rect" x="16" y="104" width="240" height="48" rx="8"/>
+<foreignObject x="24" y="108" width="224" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>.NET Framework<br/>Microsoft, Windows</span></div></foreignObject>
+<rect class="node-rect" x="280" y="104" width="240" height="48" rx="8"/>
+<foreignObject x="288" y="108" width="224" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>Mono<br/>오픈 소스 구현, 마지막 주요 릴리스 2019</span></div></foreignObject>
+<rect class="node-rect accent" x="544" y="104" width="240" height="48" rx="8"/>
+<foreignObject x="552" y="108" width="224" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>.NET(옛 .NET Core)<br/>MIT 라이선스, 크로스 플랫폼</span></div></foreignObject>
+          </svg>
+          <figcaption class="figure-caption">그림은 같은 명세에서 나온 세 구현을 나타낸 것이다. (출처: Microsoft .NET 소개 문서, Mono 프로젝트)</figcaption>
+        </figure>
+        <table class="data-table animate-in">
+          <thead><tr><th>구현</th><th>확인한 사실</th></tr></thead>
+          <tbody>
+            <tr><td>Mono</td><td>.NET Framework의 오픈 소스 구현이다. 2016년 Xamarin 인수로 Microsoft가 관리를 맡았고, 지금 상류 관리는 WineHQ로 넘어갔다.</td></tr>
+            <tr class="hl"><td>.NET Core</td><td>2014년 11월 12일 오픈 소스로 발표되었다. 당시에는 Windows에서만 실행되었고 크로스 플랫폼은 목표였다.</td></tr>
+            <tr><td>.NET(현재)</td><td>MIT 라이선스, .NET Foundation 프로젝트이며 Arm64·x64·x86에서 여러 언어를 실행한다.</td></tr>
+          </tbody>
+          <caption>표는 세 구현에 대해 1차 출처에서 확인한 사실을 정리한 것이다.</caption>
+        </table>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>ECMA-335 명세 하나에서 .NET Framework, Mono, .NET 세 구현이 나왔고, 크로스 플랫폼은 2014년 오픈 소스 전환 뒤 이루어졌다.</p></div>
+    </div>
+
+    <!-- 페이지 3: ② 제네릭 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>논문이 개선 중이라고 한 것은 무엇이었는가?</li>
+          <li>제네릭 코드는 인스턴스마다 따로 만들어지는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">② 논문이 예고한 제네릭</h3>
+        <p>논문은 JVM에 없는 기능으로 <span class="term" data-definition="제네릭(Generics): 타입을 매개변수로 받아 여러 타입에 같은 코드를 쓰게 하는 기능. 예: List&lt;int&gt;, List&lt;string&gt;.">제네릭(Generics)</span>을 꼽고, CLI의 비표준 패러다임 지원은 개선 중이라며 Kennedy와 Syme의 논문 [16]을 들었다. 이 PLDI 2001 논문은 제네릭을 CLR에 직접 넣는 설계로, <span class="term" data-definition="값 타입(Value Type): 값 자체를 변수나 필드에 직접 담는 타입. int32나 구조체가 해당함.">값 타입(Value Type)</span>으로도 인스턴스화할 수 있고 실행 중에도 정확한 타입을 유지한다. 이 설계는 2005년 11월 C# 2.0에서 언어 기능으로 쓰이기 시작했다.</p>
+        <figure class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 160" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="List of T에서 List of int와 List of double은 각자 특수화된 코드를, List of string과 List of Foo는 공유 코드를 쓴다">
+<path class="edge-line" d="M400,52 V72 H160 V90"/><polygon class="edge-arrow" points="155,90 165,90 160,100"/>
+<path class="edge-line accent" d="M400,72 H640 V90"/><polygon class="edge-arrow accent" points="635,90 645,90 640,100"/>
+<rect class="node-rect sq" x="300" y="8" width="200" height="44" rx="2"/>
+<foreignObject x="308" y="12" width="184" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span><code>List&lt;T&gt;</code> 하나의 CIL</span></div></foreignObject>
+<rect class="guide-fill" x="16" y="100" width="368" height="52" rx="4"/>
+<rect class="node-rect" x="32" y="108" width="160" height="36" rx="6"/>
+<foreignObject x="36" y="110" width="152" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span><code>List&lt;int&gt;</code> 전용 코드</span></div></foreignObject>
+<rect class="node-rect" x="208" y="108" width="160" height="36" rx="6"/>
+<foreignObject x="212" y="110" width="152" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span><code>List&lt;double&gt;</code> 전용 코드</span></div></foreignObject>
+<rect class="guide-fill" x="416" y="100" width="368" height="52" rx="4"/>
+<rect class="node-rect accent" x="432" y="108" width="336" height="36" rx="6"/>
+<foreignObject x="436" y="110" width="328" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span><code>List&lt;string&gt;</code>, <code>List&lt;Foo&gt;</code>가 함께 쓰는 코드</span></div></foreignObject>
+<text class="muted" x="172" y="92" font-size="11">값 타입: JIT 때 타입별로 특수화</text>
+<text class="muted" x="652" y="92" font-size="11">참조 타입: 표현이 같아 공유</text>
+          </svg>
+          <figcaption class="figure-caption">그림은 JIT 시점 특수화와 표현 기반 코드 공유를 나타낸 개념 그림이다. 어떤 인스턴스가 공유되는지의 구분은 해석이며, 타입 이름은 예시이다.</figcaption>
+        </figure>
+        <p>대가도 있다. 미리 컴파일하는 Native AOT에서는 구조체 인자 제네릭의 인스턴스마다 코드를 만들어 두어야 해서 파일이 커질 수 있다. 값 타입으로 바로 인스턴스화하면 5단원의 boxing(값을 객체로 감싸기) 없이 컬렉션에 Point를 담을 수 있다고 해석할 수 있다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>논문이 [16]으로 예고한 제네릭은 C# 2.0(2005)에서 쓰이기 시작했고, JIT 시점 특수화와 코드 공유를 섞어 구현한다.</p></div>
+    </div>
+
+    <!-- 페이지 4: ③ ref와 Span -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>4단원의 managed pointer는 C#에서 어떻게 드러났는가?</li>
+          <li><code>Span&lt;T&gt;</code>은 왜 힙에 둘 수 없는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span>③ managed pointer가 언어로: ref와 <code>Span&lt;T&gt;</code></span></h3>
+        <p>4단원의 <span class="term" data-definition="managed pointer(관리 포인터, T&amp;): GC가 추적하는 포인터. 객체 내부나 지역 변수를 가리킬 수 있음.">managed pointer(관리 포인터, <code>T&amp;</code>)</span>는 C#에서 ref 기능으로 점점 넓게 드러났다. <code>Span&lt;T&gt;</code>은 배열, 네이티브 메모리, 스택 메모리 어디든 연속 구간을 타입 안전하게 가리키는 타입이다. 아래는 문서 예제를 줄인 것으로, 길이 10 배열의 2번부터 5칸을 두 배로 만든다.</p>
+        <div class="with-figure" style="--figure-side-width:360px">
+          <pre class="pseudocode-block" style="margin:0"><code>int[] array = { 2, 4, 6, 8, 10,
+                12, 14, 16, 18, 20 };
+var slice = new Span&lt;int&gt;(array, 2, 5);
+for (int i = 0; i &lt; slice.Length; i++)
+    slice[i] *= 2;
+// 2 4 12 16 20 24 28 16 18 20</code></pre>
+          <figure class="figure side">
+            <svg viewBox="0 0 360 120" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="길이 10 배열에서 2번부터 6번 칸을 Span이 가리키고, 그 칸들만 두 배가 된다">
+<text class="muted" x="0" y="14" font-size="11">array (복사 없이 같은 메모리)</text>
+<rect class="node-rect sq" x="0" y="24" width="36" height="32" rx="2"/><foreignObject x="0" y="24" width="36" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px"><span>2</span></div></foreignObject>
+<rect class="node-rect sq" x="36" y="24" width="36" height="32" rx="2"/><foreignObject x="36" y="24" width="36" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px"><span>4</span></div></foreignObject>
+<rect class="node-rect sq accent" x="72" y="24" width="36" height="32" rx="2"/><foreignObject x="72" y="24" width="36" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px"><span>12</span></div></foreignObject>
+<rect class="node-rect sq accent" x="108" y="24" width="36" height="32" rx="2"/><foreignObject x="108" y="24" width="36" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px"><span>16</span></div></foreignObject>
+<rect class="node-rect sq accent" x="144" y="24" width="36" height="32" rx="2"/><foreignObject x="144" y="24" width="36" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px"><span>20</span></div></foreignObject>
+<rect class="node-rect sq accent" x="180" y="24" width="36" height="32" rx="2"/><foreignObject x="180" y="24" width="36" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px"><span>24</span></div></foreignObject>
+<rect class="node-rect sq accent" x="216" y="24" width="36" height="32" rx="2"/><foreignObject x="216" y="24" width="36" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px"><span>28</span></div></foreignObject>
+<rect class="node-rect sq" x="252" y="24" width="36" height="32" rx="2"/><foreignObject x="252" y="24" width="36" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px"><span>16</span></div></foreignObject>
+<rect class="node-rect sq" x="288" y="24" width="36" height="32" rx="2"/><foreignObject x="288" y="24" width="36" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px"><span>18</span></div></foreignObject>
+<rect class="node-rect sq" x="324" y="24" width="36" height="32" rx="2"/><foreignObject x="324" y="24" width="36" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px"><span>20</span></div></foreignObject>
+<path class="edge-line accent" d="M72,68 H252"/>
+<path class="edge-line accent" d="M72,62 V74"/>
+<path class="edge-line accent" d="M252,62 V74"/>
+<text class="accent-text" x="72" y="92" font-size="11">slice: 시작 2, 길이 5 → 두 배</text>
+<text class="muted" x="0" y="112" font-size="11">나머지 칸은 그대로이다</text>
+            </svg>
+          </figure>
+        </div>
+        <table class="data-table animate-in">
+          <thead><tr><th>C# 판</th><th>추가된 것</th></tr></thead>
+          <tbody>
+            <tr><td>7.0(2017년 3월)</td><td>ref 지역 변수, ref 반환</td></tr>
+            <tr class="hl"><td>7.2(2017년 11월)</td><td><code>ref struct</code>(늘 스택에 할당), <code>in</code> 매개변수, <code>ref readonly</code> 반환</td></tr>
+            <tr><td>11(2022년 11월)</td><td>ref 필드, <code>scoped ref</code></td></tr>
+          </tbody>
+          <caption>표는 C#에서 ref 기능이 넓어진 과정을 나타낸 것이다. (출처: C# 버전 기록, <code>Span&lt;T&gt;</code> API 문서)</caption>
+        </table>
+        <p><code>Span&lt;T&gt;</code>은 <code>ref struct</code>라서 boxing, 참조 타입의 필드, await 경계 넘기가 금지된다. 스택을 가리킬 수 있는 포인터를 힙에 두지 못하게 막는 대가로 해석할 수 있다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>managed pointer는 C# 7 이후 ref와 <code>Span&lt;T&gt;</code>으로 드러났고, 안전을 위해 힙에 둘 수 없다는 제약을 진다.</p></div>
+    </div>
+
+    <!-- 페이지 5: ④ JIT 대 AOT -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>미리 컴파일하면 무엇을 얻는가?</li>
+          <li>미리 컴파일하면 무엇을 잃는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">④ JIT 대 AOT 컴파일</h3>
+        <p>논문의 CLR은 CIL을 <span class="term" data-definition="JIT(Just-In-Time) 컴파일러(실행 직전에 기계어로 번역): 메서드를 처음 실행할 때 CIL을 기계어로 바꾸는 컴파일러.">JIT(Just-In-Time) 컴파일러(실행 직전에 기계어로 번역)</span>로 바꾼다. .NET 7부터는 <span class="term" data-definition="AOT(Ahead-Of-Time) 컴파일(실행 전에 미리 기계어로 번역): 프로그램을 배포하기 전에 기계어로 바꿔 두는 방식. .NET에서는 Native AOT라 부름.">AOT(Ahead-Of-Time) 컴파일(실행 전에 미리 기계어로 번역)</span>을 하는 Native AOT도 쓸 수 있다. 게시할 때 Linux x64 같은 특정 환경용 기계어를 만들어, 실행 때 JIT를 쓰지 않는다.</p>
+        <figure class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 136" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="JIT 경로는 CIL을 실행 중에 기계어로 바꾸고, Native AOT 경로는 게시할 때 미리 바꾼다">
+<text class="muted" x="16" y="16" font-size="12">JIT(논문의 CLR)</text>
+<path class="edge-line" d="M176,44 H246"/><polygon class="edge-arrow" points="246,39 256,44 246,49"/>
+<path class="edge-line" d="M448,44 H518"/><polygon class="edge-arrow" points="518,39 528,44 518,49"/>
+<rect class="node-rect sq" x="16" y="24" width="160" height="40" rx="2"/>
+<foreignObject x="24" y="28" width="144" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>CIL 배포</span></div></foreignObject>
+<rect class="node-rect" x="256" y="24" width="192" height="40" rx="8"/>
+<foreignObject x="264" y="28" width="176" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>실행 중 JIT 컴파일</span></div></foreignObject>
+<rect class="node-rect" x="528" y="24" width="256" height="40" rx="8"/>
+<foreignObject x="536" y="28" width="240" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>그 기계의 기계어로 실행</span></div></foreignObject>
+<text class="muted" x="16" y="92" font-size="12">Native AOT(.NET 7 이후)</text>
+<path class="edge-line accent" d="M176,112 H246"/><polygon class="edge-arrow accent" points="246,107 256,112 246,117"/>
+<path class="edge-line accent" d="M448,112 H518"/><polygon class="edge-arrow accent" points="518,107 528,112 518,117"/>
+<rect class="node-rect sq" x="16" y="96" width="160" height="32" rx="2"/>
+<foreignObject x="24" y="98" width="144" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>CIL</span></div></foreignObject>
+<rect class="node-rect accent" x="256" y="96" width="192" height="32" rx="8"/>
+<foreignObject x="264" y="98" width="176" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>게시할 때 AOT 컴파일</span></div></foreignObject>
+<rect class="node-rect" x="528" y="96" width="256" height="32" rx="8"/>
+<foreignObject x="536" y="98" width="240" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>특정 환경용 실행 파일, JIT 없음</span></div></foreignObject>
+          </svg>
+          <figcaption class="figure-caption">그림은 기계어로 바꾸는 시점을 두 방식으로 비교한 것이다. (출처: .NET Native AOT 문서)</figcaption>
+        </figure>
+        <table class="data-table animate-in">
+          <thead><tr><th>Native AOT로 얻는 것</th><th>Native AOT의 한계</th></tr></thead>
+          <tbody>
+            <tr><td>빠른 시작, 작은 메모리 사용</td><td><code>Assembly.LoadFile</code> 같은 동적 로딩 불가</td></tr>
+            <tr><td>JIT가 금지된 환경에서도 실행</td><td><code>System.Reflection.Emit</code>로 실행 중 코드 생성 불가</td></tr>
+            <tr class="hl"><td>실행 때 컴파일 비용 없음</td><td>trimming(쓰지 않는 코드 제거) 필요, 구조체 제네릭은 크기 증가</td></tr>
+          </tbody>
+          <caption>표는 Native AOT의 장점과 한계를 나타낸 것이다. (출처: .NET Native AOT 문서)</caption>
+        </table>
+        <p>4단원의 <code>native int</code>는 크기를 JIT 때 정했다. Native AOT는 게시할 때 대상 환경을 고르므로 이 결정이 앞당겨지는 대신, 실행 중에 코드를 새로 만드는 유연함을 내준다고 해석할 수 있다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>Native AOT는 시작이 빠르고 JIT가 없지만, 동적 로딩과 실행 중 코드 생성을 포기한다.</p></div>
+    </div>
+
+    <!-- 페이지 6: ⑤ JVM 쪽의 응답 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>논문이 지적한 JVM의 빈칸 가운데 무엇이 채워졌는가?</li>
+          <li>무엇이 아직 그대로인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">⑤ JVM 쪽의 응답</h3>
+        <p>논문은 JVM에 오버플로 감지 산술, 완전 동적 dispatch(호출할 메서드 고르기), 값 구조체 같은 기본 연산이 부족하다고 지적했다. JVM도 이후 몇 가지를 보탰지만, 방식은 CLI와 달랐다.</p>
+        <table class="data-table animate-in">
+          <thead><tr><th>논문이 지적한 빈칸</th><th>이후 JVM 쪽</th><th>방식</th></tr></thead>
+          <tbody>
+            <tr><td>오버플로 감지 산술(4단원 <code>add.ovf</code>)</td><td>Java 8 <code>Math.addExact</code>: int를 넘치면 ArithmeticException</td><td>명령어가 아닌 라이브러리 메서드</td></tr>
+            <tr class="hl"><td>동적 dispatch</td><td>Java SE 7(2011): 새 바이트코드 명령어 <code>invokedynamic</code></td><td>새 명령어(JSR 292)</td></tr>
+            <tr><td>값 구조체(5단원 값 타입)</td><td>JEP 401 value object: Release 28의 미리보기 기능</td><td>정체성 없는 불변 객체. C#식 struct 도입은 목표가 아님</td></tr>
+            <tr><td>메서드 코드 64K 제한(4단원)</td><td>JVM 명세 SE 21도 code_length를 65536 미만으로 제한</td><td>그대로 남음</td></tr>
+          </tbody>
+          <caption>표는 논문이 지적한 JVM의 한계와 이후 변화를 나타낸 것이다. (출처: JSR 292, Java 8 API 문서, JEP 401, JVM 명세 SE 21 §4.7.3)</caption>
+        </table>
+        <p class="diff-line"><strong>핵심 비교</strong> CLI는 2001년에 처음부터 명령어로 넣었고, JVM은 라이브러리, 새 명령어, 미리보기 기능으로 하나씩 보탰다.</p>
+        <p><code>invokedynamic</code>의 JSR 제목은 “Java 플랫폼에서 동적 타입 언어 지원”이다. 논문이 바란 다중 언어 실행 환경이라는 목표를 JVM도 나중에 받아들인 셈이라고 해석할 수 있다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>JVM은 addExact, <code>invokedynamic</code>, value object로 일부 빈칸을 채웠지만 64K 제한은 남아 있다.</p></div>
+    </div>
+
+    <!-- 페이지 7: ⑥ WebAssembly, ⑦ F# -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>새 스택 기반 형식은 tail call을 어떻게 다루었는가?</li>
+          <li>CLR 위의 함수형 언어는 <code>tail.</code>을 어떻게 쓰는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">⑥ WebAssembly와 ⑦ F#</h3>
+        <p><span class="term" data-definition="WebAssembly(Wasm, 웹 브라우저용 이식 가능한 바이트코드): 스택 기반 가상 머신을 위한 이진 명령어 형식. 여러 언어의 컴파일 대상임.">WebAssembly(Wasm, 웹 브라우저용 이식 가능한 바이트코드)</span>는 스택 기반 가상 머신을 위한 이진 명령어 형식이자, 여러 언어의 이식 가능한 컴파일 대상이다. 출발점이 CLI와 닮았다. tail call과 GC 제안은 명세 3.0에 들어가는 완료 제안이 되었다(작업 그룹 2024년 7월 10일).</p>
+        <table class="data-table animate-in">
+          <thead><tr><th>기준</th><th>CLI(2001)</th><th>JVM(2001)</th><th>Wasm(현재)</th></tr></thead>
+          <tbody>
+            <tr><td>명령어 형식</td><td>스택 기반 CIL</td><td>스택 기반 바이트코드</td><td>스택 기반 이진 형식</td></tr>
+            <tr class="hl"><td>tail call</td><td><code>tail.</code> 접두사</td><td>없음(trampoline)</td><td>3.0 완료 제안</td></tr>
+            <tr><td>GC</td><td>내장</td><td>내장</td><td>3.0 완료 제안</td></tr>
+          </tbody>
+          <caption>표는 세 형식을 비교한 것이다. CLI와 JVM 칸은 논문 기준이다. (출처: webassembly.org, WebAssembly 완료 제안 목록)</caption>
+        </table>
+        <p>F#은 .NET 위의 오픈 소스, 크로스 플랫폼 함수형 언어이다. 컴파일러 옵션 <code>--tailcalls</code>는 <code>tail.</code> IL 명령어를 쓸지 정하며 기본으로 켜져 있다. 6단원에서 본 <code>tail.</code>이 재귀 중심 언어에서 실제로 쓰이는 예이다.</p>
+        <figure class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 72" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="F# 꼬리 재귀 함수가 tailcalls 옵션을 거쳐 tail. 접두사가 붙은 CIL 호출이 된다">
+<path class="edge-line" d="M216,36 H278"/><polygon class="edge-arrow" points="278,31 288,36 278,41"/>
+<path class="edge-line accent" d="M512,36 H574"/><polygon class="edge-arrow accent" points="574,31 584,36 574,41"/>
+<rect class="node-rect" x="16" y="12" width="200" height="48" rx="8"/>
+<foreignObject x="24" y="16" width="184" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>F# 꼬리 재귀 함수</span></div></foreignObject>
+<rect class="node-rect" x="288" y="12" width="224" height="48" rx="8"/>
+<foreignObject x="296" y="16" width="208" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span><code>--tailcalls+</code>(기본값)</span></div></foreignObject>
+<rect class="node-rect accent" x="584" y="12" width="200" height="48" rx="8"/>
+<foreignObject x="592" y="16" width="184" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span><code>tail. call</code>, 프레임 재사용</span></div></foreignObject>
+          </svg>
+          <figcaption class="figure-caption">그림은 F# 컴파일러가 tail call을 CIL로 내보내는 흐름을 나타낸 것이다. (출처: F# 컴파일러 옵션 문서)</figcaption>
+        </figure>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>Wasm은 tail call과 GC를 3.0 완료 제안으로 받아들였고, F#은 <code>--tailcalls</code>로 CLI의 <code>tail.</code>을 기본으로 쓴다.</p></div>
+    </div>
+
+    <!-- 페이지 8: 한눈에 비교 + 더 알아보기 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>일곱 갈래는 논문의 어느 단원과 이어지는가?</li>
+        </ul>
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">더 알아보기</strong>
+            <ul>
+              <li><a href="https://ecma-international.org/publications-and-standards/standards/ecma-335/" target="_blank" rel="noopener">ECMA-335 표준</a></li>
+              <li><a href="https://www.microsoft.com/en-us/research/publication/design-and-implementation-of-generics-for-the-net-common-language-runtime/" target="_blank" rel="noopener">Kennedy &amp; Syme, PLDI 2001</a></li>
+              <li><a href="https://learn.microsoft.com/en-us/dotnet/api/system.span-1" target="_blank" rel="noopener">Span&lt;T&gt; 문서</a></li>
+              <li><a href="https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/" target="_blank" rel="noopener">Native AOT 문서</a></li>
+              <li><a href="https://openjdk.org/jeps/401" target="_blank" rel="noopener">JEP 401</a></li>
+              <li><a href="https://github.com/WebAssembly/proposals/blob/main/finished-proposals.md" target="_blank" rel="noopener">Wasm 완료 제안</a></li>
+            </ul>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">한눈에 보는 일곱 갈래</h3>
+        <p>일곱 갈래를 같은 틀로 정리하면 다음과 같다. 마지막 열은 이어지는 논문 내용을 다룬 단원이다.</p>
+        <table class="data-table animate-in">
+          <thead><tr><th>갈래</th><th>무엇을 풀려는가</th><th>대가·한계</th><th>단원</th></tr></thead>
+          <tbody>
+            <tr><td>① 표준·오픈 소스</td><td>여러 플랫폼과 구현</td><td>구현마다 수명이 다름(Mono)</td><td>1, 3</td></tr>
+            <tr><td>② 제네릭</td><td>타입 매개변수, 값 타입 인스턴스</td><td>AOT에서 크기 증가</td><td>2, 5</td></tr>
+            <tr><td>③ ref, <code>Span&lt;T&gt;</code></td><td>복사 없는 안전한 메모리 접근</td><td>힙에 둘 수 없음</td><td>4</td></tr>
+            <tr class="hl"><td>④ Native AOT</td><td>빠른 시작, JIT 없는 실행</td><td>동적 로딩·코드 생성 불가</td><td>4, 6</td></tr>
+            <tr><td>⑤ JVM의 응답</td><td>동적 호출, 오버플로, 값 객체</td><td>64K 제한 유지, 값 객체는 미리보기</td><td>2, 4, 5</td></tr>
+            <tr><td>⑥ WebAssembly</td><td>이식 가능한 컴파일 대상</td><td>tail call·GC는 나중에 추가</td><td>6</td></tr>
+            <tr><td>⑦ F#</td><td>재귀 중심 함수형 언어</td><td><code>tail.</code>의 보안 경계 제약은 그대로</td><td>6</td></tr>
+          </tbody>
+          <caption>표는 이 단원의 일곱 갈래를 같은 기준으로 비교한 것이다. ⑦의 대가는 6단원 내용에서 이어 본 해석이다.</caption>
+        </table>
+        <p class="diff-line"><strong>핵심 비교</strong> 논문의 CLI에 이미 있던 managed pointer와 <code>tail.</code>은 이후 언어 기능의 바탕이 되었고, 개선 중이라던 제네릭은 2005년에 들어왔다. JVM은 같은 필요의 일부를 나중에 다른 방식으로 채웠다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>일곱 갈래는 모두 논문의 특정 설계에서 이어지며, 저마다 새 대가를 안고 있다.</p></div>
+    </div>
+
+    <!-- 페이지 9: 핵심 정리 + 확인 문제 1, 2 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-accent animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">핵심 정리</strong>
+            <ol>
+              <li>ECMA-335에서 여러 구현이 나왔고, 제네릭은 C# 2.0(2005)에서 쓰이기 시작했다.</li>
+              <li>managed pointer는 ref와 <code>Span&lt;T&gt;</code>으로, JIT의 대안은 Native AOT로 이어졌다.</li>
+              <li>JVM은 라이브러리, 새 명령어, 미리보기 기능으로 일부 빈칸을 채웠다.</li>
+            </ol>
+            <p>연도 문항은 사건을 판(버전)과 짝지어 기억하라.</p>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag outline">확인 문제</span>.NET 쪽의 변화</h3>
+        <div class="quiz-container animate-in" id="tr-quiz-a">
+          <div class="quiz-question-block"
+               data-correct="option-d"
+               data-explanation-right="④ | Native AOT는 System.Reflection.Emit로 실행 중 코드를 만들 수 없다."
+               data-explanation-wrong="| 정답은 ④이다. 실행 중 코드 생성은 Native AOT의 한계이다. ①은 문서가 든 장점이므로 옳다.">
+            <h3 class="quiz-question"><span class="q-num">1</span>Native AOT에 대한 설명으로 옳지 <u>않은</u> 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 시작이 빠르고 메모리 사용이 작다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 게시할 때 특정 환경용 기계어를 만든다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 실행 때 JIT를 쓰지 않는다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 실행 중 Reflection.Emit로 코드를 만들 수 있다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ trimming이 필요하다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="② | 2번부터 5칸(6, 8, 10, 12, 14)만 두 배가 되고, Span은 복사본이 아니므로 원래 배열이 바뀐다."
+               data-explanation-wrong="| 정답은 ②이다. Span은 배열을 복사하지 않고 가리키므로 원래 배열의 2~6번 칸이 바뀐다. ①은 배열이 바뀌지 않는다고 본 것이므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">2</span>배열 {2, 4, 6, …, 20}에 <code>new Span&lt;int&gt;(array, 2, 5)</code>를 만들고 모든 원소를 두 배로 했다. 이후 배열은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 2 4 6 8 10 12 14 16 18 20</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 2 4 12 16 20 24 28 16 18 20</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 2 8 12 16 20 24 14 16 18 20</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 4 8 12 16 20 12 14 16 18 20</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 2 4 12 16 20 24 28 32 36 40</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('tr-quiz-a')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('tr-quiz-a')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>Native AOT는 실행 중 코드 생성을 포기하며, <code>Span&lt;T&gt;</code>은 복사 없이 원래 메모리를 바꾼다.</p></div>
+    </div>
+
+    <!-- 페이지 10: 확인 문제 3, 4 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>JVM과 다른 실행 환경의 이후 변화를 구분할 수 있는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag outline">확인 문제</span>JVM과 그 밖의 흐름</h3>
+        <div class="quiz-container animate-in" id="tr-quiz-b">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="③ | JVM 명세 SE 21도 64K 제한을 두므로 ㄴ은 옳지 않다."
+               data-explanation-wrong="| 정답은 ③이다. JVM 명세 SE 21도 64K 제한을 두므로 ㄴ은 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">3</span>JVM에 대해 옳은 것만을 <span class="nobr">&lt;보기&gt;에서</span> 고른 것은?</h3>
+            <div class="bogi">
+              <p>ㄱ. Java SE 7에 <code>invokedynamic</code>이 추가되었다.</p>
+              <p>ㄴ. 메서드 코드 64K 제한이 없어졌다.</p>
+              <p>ㄷ. <code>Math.addExact</code>는 넘치면 예외를 낸다.</p>
+            </div>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① ㄱ</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② ㄴ</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ ㄱ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ ㄴ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ ㄱ, ㄴ, ㄷ</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="① | --tailcalls는 tail. 명령어 사용을 정한다."
+               data-explanation-wrong="| 정답은 ①이다. ③은 활성 레코드를 늘리는 명령어이므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">4</span>F#의 <code>--tailcalls</code>와 이어지는 CIL 기능은?</h3>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① <code>tail.</code></span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② <code>callvirt</code></span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ <code>localloc</code></span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ <code>ldtoken</code></span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ <code>box</code></span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('tr-quiz-b')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('tr-quiz-b')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>JVM은 <code>invokedynamic</code>과 addExact를 보탰지만 64K 제한은 남았고, F#은 <code>tail.</code>을 기본으로 쓴다.</p></div>
+    </div>
+
+  </div>
+</section>

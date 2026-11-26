@@ -1,0 +1,388 @@
+<section class="module" id="module-2">
+  <div class="module-content">
+
+    <div class="module-header">
+      <span class="module-number">3</span>
+      <h2 class="module-title">CLI 구조와 어셈블리</h2>
+      <p class="module-subtitle">메서드 하나가 실행되는 틀과 프로그램을 묶어 배포하는 단위를 살펴본다</p>
+    </div>
+
+    <!-- 페이지 1: 스레드와 활성 레코드 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">학습 목표</strong>
+            <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
+            <ol>
+              <li>활성 레코드의 여덟 구성 요소를 설명할 수 있다.</li>
+              <li>JVM과 CLI의 저장 위치를 비교할 수 있다.</li>
+              <li>어셈블리와 매니페스트의 역할을 설명할 수 있다.</li>
+            </ol>
+          </div>
+        </div>
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>스레드는 무엇의 목록인가?</li>
+          <li>활성 레코드는 언제 생기고 언제 사라지는가?</li>
+          <li>이 논문에서 “스택”은 무엇을 가리키는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">스레드는 활성 레코드의 연결 리스트<span class="paper-ref">논문 2절</span></h3>
+        <p><span class="term" data-definition="공통 언어 기반(Common Language Infrastructure, CLI): 여러 언어를 한 실행 환경에서 돌리려고 정한 표준 명세.">공통 언어 기반</span>(Common Language Infrastructure, CLI)은 여러 <span class="term" data-definition="스레드(Thread): 프로그램 안에서 독립적으로 실행되는 하나의 흐름.">스레드</span>(Thread)를 동시에 관리하며, 이 스레드가 꼭 운영체제의 스레드일 필요는 없다. 논문은 스레드를 <span class="term" data-definition="활성 레코드(Activation Record, 스택 프레임): 메서드 한 번의 호출에 필요한 상태를 모아 둔 기록. 호출 때 생기고 호출이 끝나면 사라짐.">활성 레코드</span>(Activation Record, 스택 프레임)가 한 방향으로 이어진 연결 리스트로 본다. 메서드를 부르는 명령어가 새 레코드를 만들어 현재 레코드에 잇고, 호출이 끝나면 그 레코드를 없앤다.</p>
+        <div class="svg-diagram animate-in" style="margin:var(--space-3) auto">
+          <svg viewBox="0 0 800 168" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Main, F, G의 활성 레코드가 G에서 F, F에서 Main으로 되돌아가는 연결로 이어지고, 호출하면 새 레코드가 붙고 반환, tail call, 예외로 끝나면 사라진다">
+            <path class="edge-line" d="M296,52 H252"/><polygon class="edge-arrow" points="252,47 242,52 252,57"/>
+            <path class="edge-line" d="M560,52 H516"/><polygon class="edge-arrow" points="516,47 506,52 516,57"/>
+            <text x="274" y="40" font-size="12" text-anchor="middle">연결</text>
+            <text x="538" y="40" font-size="12" text-anchor="middle">연결</text>
+            <rect class="node-rect" x="32" y="24" width="210" height="56" rx="8"/><foreignObject x="40" y="28" width="194" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>Main()의 활성 레코드</span></div></foreignObject>
+            <rect class="node-rect" x="296" y="24" width="210" height="56" rx="8"/><foreignObject x="304" y="28" width="194" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>F()의 활성 레코드</span></div></foreignObject>
+            <rect class="node-rect accent" x="560" y="24" width="210" height="56" rx="8"/><foreignObject x="568" y="28" width="194" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; font-weight:700"><span>G()의 활성 레코드(실행 중)</span></div></foreignObject>
+            <rect class="guide-fill" x="32" y="100" width="360" height="56" rx="4"/>
+            <foreignObject x="40" y="104" width="344" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span><strong>생성</strong>: 메서드 호출 명령어가 새 레코드를 만들어 현재 레코드에 잇는다</span></div></foreignObject>
+            <rect class="guide-fill" x="410" y="100" width="360" height="56" rx="4"/>
+            <foreignObject x="418" y="104" width="344" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span><strong>제거</strong>: 정상 반환, tail call, 예외 중 하나로 호출이 끝나면 없앤다</span></div></foreignObject>
+          </svg>
+          <p class="figure-caption">그림은 Main이 F를, F가 G를 부른 순간의 스레드를 나타낸 것이다. 화살표는 호출한 쪽으로 되돌아가는 연결이다.</p>
+        </div>
+        <p>보통은 한 스레드의 활성 레코드를 런타임 스택에 잡지만, CLI는 레코드 관리를 추상화해 두었으므로 반드시 그럴 필요는 없다. 그래서 논문은 혼동을 피하려고 “스택”이라는 말을 <strong>평가 스택에만</strong> 쓴다. 이 강의도 같은 약속을 따른다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>CLI의 스레드는 활성 레코드의 연결 리스트이고, 레코드는 호출로 생겨 반환, tail call, 예외로 사라진다.</p></div>
+    </div>
+
+    <!-- 페이지 2: 활성 레코드의 구성 그림 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>활성 레코드 하나에는 무엇이 들어 있는가?</li>
+          <li>JVM과 구조가 다른 칸은 어디인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">활성 레코드 안의 여덟 칸<span class="paper-ref">논문 2절</span></h3>
+        <p>논문은 활성 레코드가 여덟 가지 요소로 이루어진다고 설명한다. 실행 위치를 가리키는 <span class="term" data-definition="명령어 포인터(Instruction Pointer, IP): 현재 메서드에서 다음에 실행할 CIL 명령어를 가리키는 값.">명령어 포인터</span>(Instruction Pointer, IP), 계산 중간값을 쌓는 <span class="term" data-definition="평가 스택(Evaluation Stack): 명령어가 계산에 쓸 값과 결과를 잠시 쌓아 두는 스택. JVM에서는 operand stack이라 부름.">평가 스택</span>(Evaluation Stack), 메서드가 쓰는 <span class="term" data-definition="지역 변수(Local Variable): 메서드 안에서만 쓰는 변수.">지역 변수</span>(Local Variable)와 호출자가 넘긴 <span class="term" data-definition="인수(Argument): 메서드를 부를 때 호출자가 넘기는 값.">인수</span>(Argument)가 그 예이다. 그림에서 강조한 두 배열이 JVM과 구조가 가장 다르다.</p>
+        <div class="svg-diagram animate-in" style="margin:var(--space-3) auto 0">
+          <svg viewBox="0 0 800 236" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="활성 레코드의 여덟 구성 요소: 명령어 포인터, 평가 스택, 지역 변수 배열, 인수 배열, methodInfo 핸들, 지역 메모리 풀, 반환 상태 핸들, 보안 기술자. 지역 변수 배열과 인수 배열을 강조">
+            <rect class="guide-fill" x="16" y="8" width="560" height="220" rx="6"/>
+            <text x="32" y="32" font-size="13" font-weight="700">G()의 활성 레코드</text>
+            <rect class="node-rect sq" x="32" y="44" width="264" height="36"/><foreignObject x="36" y="48" width="256" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>① 명령어 포인터(IP)</span></div></foreignObject>
+            <rect class="node-rect sq" x="296" y="44" width="264" height="36"/><foreignObject x="300" y="48" width="256" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>② 평가 스택</span></div></foreignObject>
+            <rect class="node-rect sq accent" x="32" y="88" width="264" height="36"/><foreignObject x="36" y="92" width="256" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; font-weight:700"><span>③ 지역 변수 배열(0번부터)</span></div></foreignObject>
+            <rect class="node-rect sq accent" x="296" y="88" width="264" height="36"/><foreignObject x="300" y="92" width="256" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; font-weight:700"><span>④ 인수 배열(0번부터)</span></div></foreignObject>
+            <rect class="node-rect sq" x="32" y="132" width="264" height="36"/><foreignObject x="36" y="136" width="256" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>⑤ methodInfo 핸들</span></div></foreignObject>
+            <rect class="node-rect sq" x="296" y="132" width="264" height="36"/><foreignObject x="300" y="136" width="256" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>⑥ 지역 메모리 풀</span></div></foreignObject>
+            <rect class="node-rect sq" x="32" y="176" width="264" height="36"/><foreignObject x="36" y="180" width="256" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>⑦ 반환 상태 핸들(동적 링크)</span></div></foreignObject>
+            <rect class="node-rect sq" x="296" y="176" width="264" height="36"/><foreignObject x="300" y="180" width="256" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>⑧ 보안 기술자</span></div></foreignObject>
+            <path class="edge-line accent" d="M560,106 H600"/><polygon class="edge-arrow accent" points="600,101 610,106 600,111"/>
+            <rect class="node-rect accent" x="610" y="44" width="174" height="124" rx="8"/>
+            <foreignObject x="618" y="48" width="158" height="116"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span><strong>JVM과 다른 점</strong><br/>인수와 지역 변수가 서로 다른 배열이고, 각 칸의 타입이 고정된다</span></div></foreignObject>
+          </svg>
+          <p class="figure-caption">그림은 논문 2절이 든 활성 레코드의 구성 요소 여덟 가지를 나타낸 것이다. 칸의 배치는 메모리 순서가 아니다.</p>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>활성 레코드는 IP, 평가 스택, 지역 변수 배열, 인수 배열, methodInfo, 지역 메모리 풀, 반환 상태, 보안 기술자로 이루어진다.</p></div>
+    </div>
+
+    <!-- 페이지 3: 구성 요소 표 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>각 칸은 무슨 일을 하는가?</li>
+          <li>JVM의 같은 칸과는 어떻게 다른가?</li>
+          <li>managed code가 직접 볼 수 없는 칸은 무엇인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>구성 요소가 하는 일<span class="paper-ref">논문 2절</span></h3>
+        <table class="data-table animate-in">
+          <caption>표는 활성 레코드의 구성 요소마다 하는 일과 JVM과의 차이를 나타낸 것이다.</caption>
+          <thead><tr><th>구성 요소</th><th>하는 일</th><th>JVM과 비교</th></tr></thead>
+          <tbody>
+            <tr><td>① 명령어 포인터(IP)</td><td>현재 메서드에서 다음에 실행할 명령어를 가리킨다</td><td>같은 역할</td></tr>
+            <tr><td>② 평가 스택</td><td>계산의 중간값을 쌓는다</td><td>JVM은 operand stack이라 부른다</td></tr>
+            <tr class="hl"><td>③ 지역 변수 배열</td><td>어떤 타입이든 담지만, 한 변수는 한 타입으로만 쓴다</td><td>JVM은 한 칸에 정수를 넣었다가 실수를 넣을 수 있다</td></tr>
+            <tr class="hl"><td>④ 인수 배열</td><td>호출자가 넘긴 인수를 담는다</td><td>JVM은 인수와 지역 변수가 한 배열이다</td></tr>
+            <tr><td>⑤ methodInfo 핸들</td><td>시그니처, 지역 변수의 타입, 예외 처리기 정보를 가리킨다</td><td>논문은 비교하지 않는다</td></tr>
+            <tr><td>⑥ 지역 메모리 풀</td><td>메서드 안에서 객체를 동적으로 할당한다(<code>localloc</code>, 6단원)</td><td>논문은 비교하지 않는다</td></tr>
+            <tr><td>⑦ 반환 상태 핸들</td><td>반환할 때 호출자의 상태를 되살린다</td><td>컴파일러 용어로 동적 링크</td></tr>
+            <tr><td>⑧ 보안 기술자</td><td>assert, permit-only, deny 같은 보안 재정의를 기록한다</td><td>managed code는 직접 읽을 수 없다</td></tr>
+          </tbody>
+        </table>
+        <p class="diff-line"><strong>핵심 비교</strong> CLI는 <strong>인수와 지역 변수를 나누고</strong> 각 칸의 타입을 고정한다. 그래서 검증기는 칸마다 한 타입만 따지면 된다(해석, 7단원).</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>CLI의 활성 레코드는 인수와 지역 변수를 따로 두고 칸마다 타입을 고정한다는 점에서 JVM과 다르다.</p></div>
+    </div>
+
+    <!-- 페이지 4: 저장 위치의 크기 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>JVM의 저장 위치는 몇 바이트인가?</li>
+          <li>CLI의 저장 위치는 왜 “다형적”이라 하는가?</li>
+          <li>같은 지역 변수 세 개가 JVM과 CLI에서 각각 몇 칸을 차지하는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">저장 위치의 크기: 4바이트 칸 대 다형적 칸<span class="paper-ref">논문 2절</span></h3>
+        <p>논문에 따르면 JVM은 지역 변수, 스택 칸, 인수를 모두 <strong>4바이트</strong> 칸에 둔다. 그래서 8바이트인 long과 double은 칸 두 개를 차지한다(JVM 명세의 배경 지식). CLI의 저장 위치는 담는 값에 따라 4바이트에서 사용자 정의 <span class="term" data-definition="값 타입(Value Type): 변수에 값 자체가 들어가는 타입. 구조체, 열거형 등.">값 타입</span>(Value Type)의 수백 바이트까지 크기가 다르지만, 프레임이 살아 있는 동안 타입은 고정된다.</p>
+        <div class="svg-diagram animate-in" style="margin:var(--space-3) auto">
+          <svg viewBox="0 0 800 176" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="int a, long b, double c를 JVM은 4바이트 칸 다섯 개에, CLI는 크기가 다른 지역 변수 세 개에 담는다">
+            <text x="16" y="30" font-size="13" font-weight="700">JVM</text>
+            <text x="16" y="48" font-size="12">칸 5개</text>
+            <rect class="node-rect sq" x="96" y="16" width="120" height="40"/><foreignObject x="100" y="20" width="112" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>0: a(int)</span></div></foreignObject>
+            <rect class="node-rect sq" x="216" y="16" width="120" height="40"/><foreignObject x="220" y="20" width="112" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>1: b(long) 앞</span></div></foreignObject>
+            <rect class="node-rect sq" x="336" y="16" width="120" height="40"/><foreignObject x="340" y="20" width="112" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>2: b(long) 뒤</span></div></foreignObject>
+            <rect class="node-rect sq" x="456" y="16" width="120" height="40"/><foreignObject x="460" y="20" width="112" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>3: c(double) 앞</span></div></foreignObject>
+            <rect class="node-rect sq" x="576" y="16" width="120" height="40"/><foreignObject x="580" y="20" width="112" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>4: c(double) 뒤</span></div></foreignObject>
+            <text x="716" y="41" font-size="12">각 4바이트</text>
+            <text class="accent-text" x="16" y="102" font-size="13" font-weight="700">CLI</text>
+            <text class="accent-text" x="16" y="120" font-size="12">위치 3개</text>
+            <rect class="node-rect sq" x="96" y="88" width="120" height="40"/><foreignObject x="100" y="92" width="112" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>0: a(int32)</span></div></foreignObject>
+            <rect class="node-rect sq accent" x="216" y="88" width="240" height="40"/><foreignObject x="220" y="92" width="232" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; font-weight:700"><span>1: b(int64)</span></div></foreignObject>
+            <rect class="node-rect sq accent" x="456" y="88" width="240" height="40"/><foreignObject x="460" y="92" width="232" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; font-weight:700"><span>2: c(float64)</span></div></foreignObject>
+            <text class="accent-text" x="716" y="113" font-size="12">값 크기대로</text>
+            <foreignObject x="96" y="136" width="600" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; color:var(--color-text-secondary)"><span>가로 길이는 바이트 수에 비례한다. 앞의 숫자는 칸 번호 또는 지역 변수 번호이다.</span></div></foreignObject>
+          </svg>
+          <p class="figure-caption">그림은 지역 변수 int a, long b, double c를 두 기계가 담는 방식을 나타낸 예시이다.</p>
+        </div>
+        <p class="diff-line"><strong>핵심 비교</strong> JVM에서는 b를 1, 2번 칸에 걸쳐 두므로 c는 3번이 되지만, CLI에서는 b가 1번, c가 2번 지역 변수이다. 크기가 큰 값 타입도 위치 하나에 그대로 담는다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>JVM은 모든 저장 위치가 4바이트라 long과 double이 두 칸을 쓰고, CLI는 크기가 다른 위치 하나에 타입을 고정해 담는다.</p></div>
+    </div>
+
+    <!-- 페이지 5: 어셈블리 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>어셈블리는 무엇으로 이루어지는가?</li>
+          <li>매니페스트에는 무엇이 적히는가?</li>
+          <li>어셈블리 단위로 이루어지는 일은 무엇인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">어셈블리: CLI의 소프트웨어 부품<span class="paper-ref">논문 3절</span></h3>
+        <div class="with-figure" style="--figure-side-width:168px">
+          <div>
+            <p><span class="term" data-definition="어셈블리(Assembly): CIL 코드와 메타데이터를 담은 파일 묶음으로, CLI에서 소프트웨어 부품의 기본 단위. 기계어를 사람이 읽게 쓴 어셈블리어와는 다른 말임.">어셈블리</span>(Assembly)는 <span class="term" data-definition="공통 중간 언어(Common Intermediate Language, CIL): CLI가 실행하는 중간 언어. MSIL이나 IL이라고도 부름.">공통 중간 언어</span>(Common Intermediate Language, CIL) 코드와 <span class="term" data-definition="메타데이터(Metadata): 코드에 들어 있는 타입, 메서드, 필드 등을 설명하는 데이터.">메타데이터</span>(Metadata)를 담은 <span class="term" data-definition="모듈(Module, 어셈블리를 이루는 파일): 어셈블리를 구성하는 각각의 파일.">모듈</span>(Module, 어셈블리를 이루는 파일)의 묶음이다. 컨테이너 화물에 목록표가 붙듯, 어셈블리에는 자신을 설명하는 <span class="term" data-definition="매니페스트(Manifest): 어셈블리의 버전, 구성 파일, 내보내는 타입, 서명 등을 적은 설명서.">매니페스트</span>(Manifest)가 붙는다.</p>
+            <p>매니페스트에는 버전, 구성 파일, 밖으로 내보내는 타입이 적히고, 선택적으로 <span class="term" data-definition="디지털 서명(Digital Signature): 내용이 바뀌지 않았고 누가 만들었는지를 확인하게 하는 암호 서명.">디지털 서명</span>(Digital Signature)과 <span class="term" data-definition="공개 키(Public Key): 서명을 확인할 때 쓰는, 누구에게나 공개하는 암호 키.">공개 키</span>(Public Key)도 들어간다.</p>
+          </div>
+          <figure class="figure side"><img src="assets/fig-container.svg" alt="목록 문서가 붙은 화물 컨테이너"><figcaption class="figure-caption">컨테이너 = 어셈블리, 붙은 목록표 = 매니페스트, 안의 짐 = 모듈(CIL과 메타데이터)이다.</figcaption></figure>
+        </div>
+        <div class="svg-diagram animate-in" style="margin:var(--space-2) auto 0">
+          <svg viewBox="0 0 800 164" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="어셈블리 안에 매니페스트와 모듈 두 개가 있고, 각 모듈은 CIL 코드와 메타데이터를 담는다. 보안, 버전, 타입 해석, 응용 프로그램 도메인이 어셈블리 단위로 이루어진다">
+            <rect class="guide-fill" x="16" y="8" width="520" height="148" rx="6"/>
+            <text x="32" y="30" font-size="13" font-weight="700">어셈블리</text>
+            <rect class="node-rect accent" x="32" y="40" width="152" height="104" rx="8"/>
+            <foreignObject x="40" y="44" width="136" height="96"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span><strong>매니페스트</strong><br/>버전 · 구성 파일<br/>내보내는 타입<br/>서명·공개 키(선택)</span></div></foreignObject>
+            <rect class="node-rect" x="200" y="40" width="160" height="104" rx="8"/>
+            <foreignObject x="208" y="44" width="144" height="96"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span><strong>모듈 1</strong><br/>CIL 코드<br/>메타데이터</span></div></foreignObject>
+            <rect class="node-rect" x="368" y="40" width="152" height="104" rx="8"/>
+            <foreignObject x="376" y="44" width="136" height="96"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span><strong>모듈 2</strong><br/>CIL 코드<br/>메타데이터</span></div></foreignObject>
+            <path class="edge-line" d="M536,82 H566"/><polygon class="edge-arrow" points="566,77 576,82 566,87"/>
+            <text x="584" y="30" font-size="13" font-weight="700">어셈블리 단위로 하는 일</text>
+            <rect class="node-rect sq" x="584" y="40" width="96" height="32"/><foreignObject x="588" y="42" width="88" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>보안</span></div></foreignObject>
+            <rect class="node-rect sq" x="688" y="40" width="96" height="32"/><foreignObject x="692" y="42" width="88" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>버전 관리</span></div></foreignObject>
+            <rect class="node-rect sq" x="584" y="80" width="96" height="44"/><foreignObject x="588" y="82" width="88" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>타입 해석</span></div></foreignObject>
+            <rect class="node-rect sq" x="688" y="80" width="96" height="44"/><foreignObject x="692" y="82" width="88" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>응용 프로그램<br/>도메인</span></div></foreignObject>
+          </svg>
+          <p class="figure-caption">그림은 논문 3절이 설명한 어셈블리의 구성과, 어셈블리 단위로 이루어지는 네 가지 일을 나타낸 것이다.</p>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>어셈블리는 CIL 코드와 메타데이터를 담은 모듈의 묶음에 매니페스트를 붙인 것으로, 보안과 버전 등이 이 단위로 처리된다.</p></div>
+    </div>
+
+    <!-- 페이지 6: ILASM 매니페스트 예 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>자기 어셈블리와 남의 어셈블리는 어떻게 구별해 적는가?</li>
+          <li>참조하는 어셈블리는 무엇으로 특정하는가?</li>
+        </ul>
+        <div class="callout callout-info animate-in" style="margin-top:var(--space-4)">
+          <div class="callout-content">
+            <strong class="callout-title">보충 설명</strong>
+            <p><span class="term" data-definition="응용 프로그램 도메인(Application Domain): 한 프로세스 안에서 어셈블리들을 서로 격리해 실행하는 단위.">응용 프로그램 도메인</span>(Application Domain)은 한 프로세스 안에서 프로그램을 격리하는 단위로, 논문은 이를 “프로세스”라고도 부른다.</p>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>ILASM으로 쓴 매니페스트 읽기<span class="paper-ref">논문 3절</span></h3>
+        <p>논문은 <span class="term" data-definition="ILASM(CIL 어셈블러 문법): CIL과 메타데이터를 사람이 읽고 쓸 수 있는 글자로 적는 문법.">ILASM</span>(CIL 어셈블러 문법)으로 쓴 매니페스트를 예로 든다. 다음 줄 버튼을 누르며 한 줄씩 읽어 보자.</p>
+        <div class="pseudocode-translation animate-in" id="ar-pseudo-ilasm" style="grid-template-columns:1.3fr 1fr">
+          <div class="pseudocode-block" style="font-size:13px">
+            <span class="translation-label">ILASM</span>
+            <span class="pseudocode-line">.assembly HelloWorld {}</span>
+            <span class="pseudocode-line">.assembly extern mscorlib {</span>
+            <span class="pseudocode-line">  .publickeytoken = (<span class="code-string">B7 7A 5C 56 19 34 E0 89</span>)</span>
+            <span class="pseudocode-line">  .ver 1:0:2411:0</span>
+            <span class="pseudocode-line">}</span>
+          </div>
+          <div class="pseudocode-explanation">
+            <span class="translation-label">설명</span>
+            <div class="pseudocode-explanation-lines">
+              <p class="pe">이 어셈블리 자신의 이름을 HelloWorld로 선언한다. 중괄호 안은 비어 있다.</p>
+              <p class="pe"><code>extern</code>은 이 어셈블리가 참조하는 다른 어셈블리를 뜻한다. 여기서는 기본 라이브러리인 mscorlib 어셈블리이다.</p>
+              <p class="pe">참조할 어셈블리를 공개 키에서 얻은 8바이트 토큰으로 특정한다(해석). 이름이 같아도 만든 쪽이 다르면 구별된다.</p>
+              <p class="pe">참조할 버전을 주.부.빌드.수정 번호의 네 수로 적는다(해석).</p>
+              <p class="pe">외부 어셈블리 선언을 닫는다.</p>
+            </div>
+          </div>
+          <div class="pseudocode-controls">
+            <button class="btn pseudocode-prev-btn">이전 줄</button>
+            <button class="btn pseudocode-next-btn">다음 줄</button>
+            <button class="btn pseudocode-reset-btn">처음부터</button>
+            <span class="pseudocode-progress"></span>
+          </div>
+        </div>
+        <p>자기 이름은 <code>.assembly</code>로, 참조하는 어셈블리는 <code>.assembly extern</code>으로 적는다. 참조 쪽에 공개 키 토큰과 버전을 함께 적으므로, 런타임은 이름만이 아니라 <strong>누가 만든 몇 번째 버전인지</strong>로 어셈블리를 찾는다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>ILASM 매니페스트는 <code>.assembly</code>로 자기 이름을, <code>.assembly extern</code>으로 참조 대상을 공개 키 토큰과 버전으로 적는다.</p></div>
+    </div>
+
+    <!-- 페이지 7: JAR과 비교, 최상위 메서드, custom attribute -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>어셈블리는 JAR 파일과 무엇이 비슷하고 무엇이 다른가?</li>
+          <li>CLI는 클래스 밖에 무엇을 둘 수 있는가?</li>
+          <li>custom attribute는 무엇을 가능하게 하는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">어셈블리와 JAR 파일<span class="paper-ref">논문 3절</span></h3>
+        <p>논문은 어셈블리를 JVM의 <span class="term" data-definition="JAR(Java Archive): Java 클래스 파일과 자원을 하나로 묶은 압축 파일.">JAR</span>(Java Archive) 파일과 <strong>대략</strong> 비교할 수 있다고 말한다. 표는 논문이 든 어셈블리의 특징을 JAR 파일과 나란히 놓은 것이다.</p>
+        <table class="data-table animate-in">
+          <caption>표는 어셈블리와 JAR 파일을 다섯 가지 기준으로 비교한 것이다. JAR 열은 강의가 덧붙인 배경 설명이다.</caption>
+          <thead><tr><th>기준</th><th>어셈블리(논문 3절)</th><th>JAR 파일(배경)</th></tr></thead>
+          <tbody>
+            <tr><td>묶는 것</td><td>CIL 코드와 메타데이터를 담은 모듈</td><td>클래스 파일과 자원</td></tr>
+            <tr><td>자기 설명</td><td>매니페스트(버전, 구성 파일, 내보내는 타입, 서명)</td><td>압축 파일 안의 매니페스트 파일</td></tr>
+            <tr><td>단위로 하는 일</td><td>보안, 버전, 타입 해석, 응용 프로그램 도메인</td><td>주로 배포와 클래스 경로</td></tr>
+            <tr class="hl"><td>최상위 메서드·필드</td><td>클래스 밖에 둘 수 있다</td><td>모든 메서드와 필드가 클래스 안에 있다</td></tr>
+            <tr class="hl"><td>메타데이터 확장</td><td>custom attribute로 사용자가 늘린다</td><td>2001년 당시 Java에는 없었다</td></tr>
+          </tbody>
+        </table>
+        <p>어셈블리 안에는 클래스, 인터페이스, 배열, delegate 같은 참조 타입과 구조체, 열거형 같은 값 타입, 중첩 타입을 정의한다. 논문은 메타데이터를 <span class="term" data-definition="custom attribute(사용자 정의 특성): 프로그래머가 새 종류의 메타데이터를 정의해 타입이나 메서드에 붙이는 기능.">custom attribute</span>(사용자 정의 특성)로 사용자가 확장할 수 있다는 점을 CLI만의 특징으로 든다. 이는 2001년 기준의 주장이며, 이후 Java도 비슷한 annotation을 들였다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>어셈블리는 JAR 파일과 비슷한 배포 단위이지만, 최상위 메서드와 필드를 허용하고 custom attribute로 메타데이터를 확장한다.</p></div>
+    </div>
+
+    <!-- 페이지 8: 핵심 정리 + 확인 문제 1~2 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-accent animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">핵심 정리</strong>
+            <ol>
+              <li>스레드는 활성 레코드의 연결 리스트이다.</li>
+              <li>CLI는 인수 배열과 지역 변수 배열을 따로 둔다.</li>
+              <li>JVM의 칸은 4바이트, CLI의 위치는 크기가 다르고 타입이 고정된다.</li>
+              <li>칸 수 문항은 long과 double이 JVM에서 두 칸임을 먼저 센다.</li>
+            </ol>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>활성 레코드와 저장 위치</h3>
+        <div class="quiz-container animate-in" id="ar-quiz-1">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="③ | CLI는 JVM과 달리 인수 배열과 지역 변수 배열을 따로 둔다."
+               data-explanation-wrong="| 정답은 ③이다. 두 배열은 따로 있다. ⑤의 보안 기술자는 managed code가 직접 읽을 수 없으므로 옳다.">
+            <h3 class="quiz-question"><span class="q-num">1</span>CLI의 활성 레코드에 대한 설명으로 옳지 <u>않은</u> 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 명령어 포인터는 다음에 실행할 명령어를 가리킨다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 지역 변수 하나는 한 타입으로만 쓴다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 인수와 지역 변수는 한 배열에 함께 있다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 반환 상태 핸들은 동적 링크에 해당한다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 보안 기술자는 managed code가 직접 읽지 못한다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="② | JVM은 1+2+2=5칸, CLI는 지역 변수 3개이다."
+               data-explanation-wrong="| 정답은 ②이다. JVM에서 long과 double은 4바이트 칸 두 개씩 쓰므로 1+2+2=5칸이다.">
+            <h3 class="quiz-question"><span class="q-num">2</span>지역 변수 int a, long b, double c를 담을 때 JVM의 칸 수와 CLI의 지역 변수 수를 순서대로 옳게 짝지은 것은?</h3>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 3, 3</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 5, 3</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 5, 5</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 3, 5</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 6, 3</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('ar-quiz-1')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('ar-quiz-1')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>CLI는 인수와 지역 변수를 나누고, JVM은 4바이트 칸이라 long과 double이 두 칸씩 든다.</p></div>
+    </div>
+
+    <!-- 페이지 9: 확인 문제 3~4 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>어셈블리 단위로 이루어지는 일은 무엇인가?</li>
+          <li>매니페스트에서 반드시 있는 것과 선택인 것은 무엇인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>어셈블리와 매니페스트</h3>
+        <div class="quiz-container animate-in" id="ar-quiz-2">
+          <div class="quiz-question-block"
+               data-correct="option-d"
+               data-explanation-right="④ | 서명과 공개 키는 선택 사항이므로 ㄴ만 틀린다."
+               data-explanation-wrong="| 정답은 ④이다. 매니페스트의 서명은 선택 사항이므로 ㄴ은 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">3</span>어셈블리에 대한 설명으로 옳은 것만을 <span class="nobr">&lt;보기&gt;에서</span> 있는 대로 고른 것은?</h3>
+            <div class="bogi">
+              <p>ㄱ. 보안과 버전 관리는 어셈블리 단위로 한다.</p>
+              <p>ㄴ. 매니페스트에는 디지털 서명이 반드시 있다.</p>
+              <p>ㄷ. 클래스 밖의 최상위 메서드를 둘 수 있다.</p>
+            </div>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① ㄱ</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② ㄷ</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ ㄱ, ㄴ</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ ㄱ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ ㄴ, ㄷ</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="② | extern 블록은 참조할 외부 어셈블리를 공개 키 토큰과 버전으로 특정한다."
+               data-explanation-wrong="| 정답은 ②이다. extern은 참조 대상을 적는다. ①처럼 자기 이름을 적는 줄은 첫 줄이므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">4</span>앞 쪽 ILASM 예의 2~5줄(<span class="nobr"><code>.assembly extern</code> 블록)</span>에 대한 설명으로 옳은 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 이 어셈블리 자신의 이름을 정한다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 참조할 외부 어셈블리를 토큰과 버전으로 특정한다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 이 어셈블리를 디지털 서명한다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 이 어셈블리가 내보내는 타입을 적는다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 활성 레코드의 지역 변수를 선언한다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('ar-quiz-2')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('ar-quiz-2')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>보안과 버전은 어셈블리 단위로 처리되고, 서명은 선택이며, extern 블록은 참조 대상을 특정한다.</p></div>
+    </div>
+
+  </div>
+</section>

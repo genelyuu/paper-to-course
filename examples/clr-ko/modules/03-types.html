@@ -1,0 +1,526 @@
+<section class="module" id="module-3">
+  <div class="module-content">
+
+    <div class="module-header">
+      <span class="module-number">4</span>
+      <h2 class="module-title">타입 시스템과 기본 명령어</h2>
+      <p class="module-subtitle">CLI의 타입과 포인터, 명령어가 값을 옮기고 계산하는 방식을 익힌다</p>
+    </div>
+
+    <!-- 쪽 1: 학습 목표 + 기본 타입 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">학습 목표</strong>
+            <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
+            <ol>
+              <li>CLI 포인터 세 종류의 차이를 GC와 관련지어 설명할 수 있다.</li>
+              <li>Swap 메서드의 CIL을 한 줄씩 따라가며 평가 스택 상태를 구할 수 있다.</li>
+              <li>CLI의 다형 명령어와 JVM의 타입별 명령어를 대가와 함께 비교할 수 있다.</li>
+            </ol>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">기본 타입<span class="paper-ref">논문 4절</span></h3>
+        <p>3단원에서 본 <span class="term" data-definition="활성 레코드(Activation Record, 스택 프레임): 메서드를 한 번 호출할 때마다 만드는 상태 묶음. 인수, 지역 변수, 평가 스택 등을 담음.">활성 레코드(Activation Record, 스택 프레임)</span>의 칸에는 어떤 값이 들어갈까? <span class="term" data-definition="공통 언어 기반(Common Language Infrastructure, CLI): 여러 언어가 함께 쓰는 실행 환경의 표준 명세. Microsoft의 구현이 CLR임.">공통 언어 기반(Common Language Infrastructure, CLI)</span>은 사용자가 정의하는 타입(5단원) 말고도 <span class="term" data-definition="기본 타입(Primitive Type): 실행 환경이 처음부터 정해 둔 가장 작은 단위의 타입. 정수, 부동소수점 수, 문자 등.">기본 타입(Primitive Type)</span>을 미리 정해 둔다. 부호 있는 정수는 <span class="term" data-definition="2의 보수(Two's Complement): 음수를 비트로 나타내는 방식. 모든 비트를 뒤집고 1을 더해 부호를 바꿈.">2의 보수(Two's Complement)</span>로 나타낸다.</p>
+        <table class="data-table animate-in">
+          <caption>표는 CLI의 기본 타입을 분류별로 나타낸 것이다. (논문 4절)</caption>
+          <thead><tr><th>분류</th><th>타입</th><th>뜻</th></tr></thead>
+          <tbody>
+            <tr><td>객체·문자열</td><td><code>object</code>, <code>string</code>, <code>void</code></td><td><code>System.Object</code>와 <code>System.String</code>의 줄임, 반환값 없음</td></tr>
+            <tr><td>논리·문자</td><td><code>bool</code>, <code>char</code></td><td>8비트 논리값, 16비트 Unicode 문자</td></tr>
+            <tr><td>정수</td><td><code>int8</code>~<code>int64</code>, 각각의 <code>unsigned</code></td><td>8·16·32·64비트의 2의 보수 정수와 부호 없는 정수</td></tr>
+            <tr class="hl"><td>자연 크기 정수</td><td><code>native int</code>, <code>unsigned native int</code></td><td>크기를 기계에 맞춰 나중에 정하는 정수</td></tr>
+            <tr><td>부동소수점</td><td><code>float32</code>, <code>float64</code></td><td>IEEE-754 부동소수점 수</td></tr>
+            <tr><td>내부 전용</td><td><code>native float</code></td><td>기계에 따른 부동소수점 수, 사용자에게 보이지 않음</td></tr>
+            <tr><td>기술자</td><td><span class="term" data-definition="typed reference(포인터와 타입을 묶은 값): 주소와 그 주소에 있는 값의 타입을 한 쌍으로 담은 값. 타입 안전한 가변 인수에 씀."><code>typed reference</code></span></td><td>포인터와 타입의 쌍, 타입 안전한 <span class="term" data-definition="가변 인수(Varargs): 호출할 때마다 개수가 달라질 수 있는 인수. C의 printf가 대표적인 예임.">가변 인수(Varargs)</span>에 씀</td></tr>
+          </tbody>
+        </table>
+        <p>색칠한 행의 <code>native int</code>는 크기가 정해져 있지 않다는 점에서 특별하다. 다음 쪽에서 이 성질을 그림으로 본다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>CLI는 객체, 문자열, 크기별 정수, 부동소수점 수, 자연 크기 정수, typed reference를 기본 타입으로 둔다.</p></div>
+    </div>
+
+    <!-- 쪽 2: 타입 생성자와 자연 크기 타입 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>기본 타입을 조합해 새 타입을 만드는 규칙은 무엇인가?</li>
+          <li><code>native int</code>의 크기는 언제 정해지는가?</li>
+          <li>JVM의 저장 위치는 왜 컴파일러 작성자를 괴롭혔는가?</li>
+        </ul>
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">보충 설명</strong>
+            <p>논문은 모든 저장 위치를 미리 32비트로 정한 JVM에서는 <code>long</code>과 <code>double</code>이 칸 두 개를 차지해 컴파일러 작성자를 괴롭힌다고 지적한다(3단원 그림).</p>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">타입 생성자와 자연 크기 타입<span class="paper-ref">논문 4절</span></h3>
+        <p>기본 타입은 <span class="term" data-definition="타입 생성자(Type Constructor): 이미 있는 타입을 조합해 새 타입을 만드는 규칙. 객체를 만드는 생성자(.ctor)와는 다른 개념임.">타입 생성자(Type Constructor, 타입을 조합해 새 타입을 만드는 규칙)</span>로 묶어 더 큰 타입이 된다.</p>
+        <table class="data-table animate-in">
+          <caption>표는 CLI의 타입 생성자를 나타낸 것이다. 이 단원은 색칠한 포인터를 다룬다. (논문 4절)</caption>
+          <thead><tr><th>생성자</th><th>만드는 타입</th><th>다루는 곳</th></tr></thead>
+          <tbody>
+            <tr><td><code>valuetype T</code>, <code>class T</code></td><td>값 타입, 참조 타입을 가리키는 이름</td><td>5단원</td></tr>
+            <tr><td><code>T pinned</code></td><td><span class="term" data-definition="pinned(GC가 옮기지 못하게 고정): 지역 변수가 가리키는 객체를 가비지 컬렉션이 다른 자리로 옮기지 못하게 묶어 둔 상태.">pinned</span>: <span class="term" data-definition="가비지 컬렉션(Garbage Collection, GC): 더 이상 쓰지 않는 객체의 메모리를 실행 환경이 자동으로 거두어들이는 일. 남은 객체를 한쪽으로 옮겨 압축하기도 함.">가비지 컬렉션(Garbage Collection, GC)</span>이 옮기지 못하게 고정</td><td>논문 범위 밖</td></tr>
+            <tr><td><code>T[bounds]</code></td><td>다차원 배열(<span class="term" data-definition="자바 가상 머신(Java Virtual Machine, JVM): Java 바이트코드를 실행하는 가상 머신. 이 논문의 비교 대상임.">자바 가상 머신(Java Virtual Machine, JVM)</span>과 달리 진짜 다차원)</td><td>논문 범위 밖</td></tr>
+            <tr><td><code>method callConv T*(…)</code></td><td>함수 포인터</td><td>논문 범위 밖</td></tr>
+            <tr class="hl"><td><code>T&amp;</code>, <code>T*</code></td><td>managed pointer, unmanaged pointer</td><td>이 단원</td></tr>
+          </tbody>
+        </table>
+        <p><span class="term" data-definition="자연 크기 타입(Natural-Size Type): 값의 크기를 CIL에 적지 않고 실행하는 프로세서에 맞춰 나중에 정하는 타입. native int, object, &amp;, * 등.">자연 크기 타입(Natural-Size Type)</span>은 크기 결정을 미루는 장치이다. <span class="term" data-definition="JIT(Just-In-Time) 컴파일러: 중간 코드를 실행 직전에 그 기계의 기계어로 번역하는 프로그램.">JIT(Just-In-Time) 컴파일러(실행 직전에 기계어로 번역)</span>가 <span class="term" data-definition="공통 중간 언어(Common Intermediate Language, CIL): CLI가 실행하는 스택 기반 중간 언어. MSIL 또는 IL이라고도 부름.">공통 중간 언어(Common Intermediate Language, CIL)</span> 코드를 번역할 때 프로세서를 보고 크기를 정한다.</p>
+        <div class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 120" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="같은 native int가 Pentium의 JIT에서는 4바이트 int32, IA64의 JIT에서는 8바이트 int64가 됨">
+            <path class="edge-line" d="M192,60 H224 V28 H262"/>
+            <polygon class="edge-arrow" points="262,23 272,28 262,33"/>
+            <path class="edge-line" d="M224,60 V92 H262"/>
+            <polygon class="edge-arrow" points="262,87 272,92 262,97"/>
+            <path class="edge-line" d="M448,28 H486"/>
+            <polygon class="edge-arrow" points="486,23 496,28 486,33"/>
+            <path class="edge-line" d="M448,92 H486"/>
+            <polygon class="edge-arrow" points="486,87 496,92 486,97"/>
+            <rect class="node-rect accent" x="16" y="16" width="176" height="88" rx="12"/>
+            <foreignObject x="24" y="20" width="160" height="80"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span>CIL에 적힌<br/>native int 하나</span></div></foreignObject>
+            <rect class="node-rect" x="272" y="8" width="176" height="40" rx="12"/>
+            <foreignObject x="280" y="12" width="160" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>JIT: Pentium</span></div></foreignObject>
+            <rect class="node-rect" x="272" y="72" width="176" height="40" rx="12"/>
+            <foreignObject x="280" y="76" width="160" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>JIT: IA64</span></div></foreignObject>
+            <rect class="ink" x="496" y="16" width="24" height="24"/>
+            <rect class="ink" x="520" y="16" width="24" height="24"/>
+            <rect class="ink" x="544" y="16" width="24" height="24"/>
+            <rect class="ink" x="568" y="16" width="24" height="24"/>
+            <text x="604" y="33" font-size="13">int32: 4바이트</text>
+            <rect class="ink accent" x="496" y="80" width="24" height="24"/>
+            <rect class="ink accent" x="520" y="80" width="24" height="24"/>
+            <rect class="ink accent" x="544" y="80" width="24" height="24"/>
+            <rect class="ink accent" x="568" y="80" width="24" height="24"/>
+            <rect class="ink accent" x="592" y="80" width="24" height="24"/>
+            <rect class="ink accent" x="616" y="80" width="24" height="24"/>
+            <rect class="ink accent" x="640" y="80" width="24" height="24"/>
+            <rect class="ink accent" x="664" y="80" width="24" height="24"/>
+            <text x="700" y="97" font-size="13">int64: 8바이트</text>
+          </svg>
+        </div>
+        <p class="figure-caption">그림은 같은 CIL이 프로세서마다 다른 크기로 정해지는 과정을 나타낸 것이다(칸 하나가 1바이트). <code>object</code>, <code>&amp;</code>, <code>*</code>도 같은 방식으로 정해진다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>타입 생성자는 기본 타입을 묶어 새 타입을 만들고, 자연 크기 타입은 크기 결정을 JIT 시점까지 미룬다.</p></div>
+    </div>
+
+    <!-- 쪽 3: 포인터 세 종류 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>object, managed pointer, unmanaged pointer는 각각 어디를 가리킬 수 있는가?</li>
+          <li>GC가 객체를 옮기면 어떤 포인터가 함께 고쳐지는가?</li>
+          <li>unmanaged pointer는 왜 GC 힙 안을 가리키면 안 되는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span>포인터 세 종류: <code>object</code>, <code>&amp;</code>, <code>*</code></span><span class="paper-ref">논문 4절</span></h3>
+        <p>왜 CLI는 포인터를 세 종류로 나눌까? <code>object</code>는 GC가 관리하는 <span class="term" data-definition="객체 참조(Object Reference): GC 힙에 있는 객체 전체를 가리키는 값. 객체의 시작을 가리킴.">객체 참조(Object Reference)</span>이다. <span class="term" data-definition="managed pointer(관리 포인터, T&amp;): GC가 추적하는 주소. 객체 내부의 필드나 지역 변수를 가리킬 수 있고 객체가 옮겨지면 함께 고쳐짐.">managed pointer(관리 포인터, <code>T&amp;</code>)</span>는 객체 <strong>내부</strong>도 가리키며, GC가 힙의 경계를 알기 때문에 힙 밖을 가리켜도 안전하다.</p>
+        <p><span class="term" data-definition="unmanaged pointer(비관리 포인터, T*): GC가 추적하지 않는 전통적인 메모리 주소. 네이티브 코드와 데이터를 주고받을 때 씀.">unmanaged pointer(비관리 포인터, <code>T*</code>)</span>는 다른 런타임의 전통적인 주소로, <span class="term" data-definition="네이티브 코드(Native Code): 특정 CPU가 바로 실행하는 기계어로 된 코드. CLI가 관리하지 않는 코드를 가리킴.">네이티브 코드(Native Code, 특정 CPU의 기계어)</span>와 함께 일하는 데 꼭 필요하다. 다만 GC가 객체를 옮기고 압축하므로 GC 힙 안은 가리킬 수 없다.</p>
+        <div class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 300" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="지역 변수 o는 객체 머리를, r은 객체 안의 필드 y를, s는 지역 변수 x를, p는 비관리 메모리의 버퍼를 가리킴. GC가 객체를 옮기면 o와 r이 고쳐짐">
+            <rect class="guide-fill" x="16" y="8" width="208" height="288" rx="4"/>
+            <rect class="guide-fill" x="264" y="8" width="280" height="288" rx="4"/>
+            <rect class="guide-fill" x="584" y="8" width="200" height="288" rx="4"/>
+            <text class="muted" x="28" y="28" font-size="12">활성 레코드: 지역 변수</text>
+            <text class="muted" x="276" y="28" font-size="12">GC 힙</text>
+            <text class="muted" x="596" y="28" font-size="12">비관리 메모리</text>
+            <path class="edge-line" d="M208,64 H248 V136 H310"/>
+            <polygon class="edge-arrow" points="310,131 320,136 310,141"/>
+            <path class="edge-line accent" d="M208,116 H236 V206 H310"/>
+            <polygon class="edge-arrow accent" points="310,201 320,206 310,211"/>
+            <path class="edge-line" d="M48,168 H32 V220 H38"/>
+            <polygon class="edge-arrow" points="38,215 48,220 38,225"/>
+            <path class="edge-line" d="M208,272 H598"/>
+            <polygon class="edge-arrow" points="598,267 608,272 598,277"/>
+            <path class="edge-line" d="M412,100 V110"/>
+            <polygon class="edge-arrow" points="407,110 417,110 412,120"/>
+            <rect class="node-rect sq" x="48" y="44" width="160" height="40"/>
+            <foreignObject x="56" y="48" width="144" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>o : object</span></div></foreignObject>
+            <rect class="node-rect sq accent" x="48" y="96" width="160" height="40"/>
+            <foreignObject x="56" y="100" width="144" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>r : int32&amp;</span></div></foreignObject>
+            <rect class="node-rect sq" x="48" y="148" width="160" height="40"/>
+            <foreignObject x="56" y="152" width="144" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>s : int32&amp;</span></div></foreignObject>
+            <rect class="node-rect sq" x="48" y="200" width="160" height="40"/>
+            <foreignObject x="56" y="204" width="144" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>x : int32 = 7</span></div></foreignObject>
+            <rect class="node-rect sq" x="48" y="252" width="160" height="40"/>
+            <foreignObject x="56" y="256" width="144" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>p : int32*</span></div></foreignObject>
+            <rect class="edge-line dashed" x="320" y="44" width="184" height="56"/>
+            <text class="muted" x="412" y="77" font-size="12" text-anchor="middle">옮기기 전 자리</text>
+            <text class="muted" x="424" y="116" font-size="11">GC 압축</text>
+            <rect class="node-rect sq" x="320" y="120" width="184" height="104"/>
+            <path class="guide" d="M320,152 H504 M320,188 H504"/>
+            <foreignObject x="328" y="124" width="168" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>객체 머리</span></div></foreignObject>
+            <foreignObject x="328" y="156" width="168" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>필드 x</span></div></foreignObject>
+            <foreignObject x="328" y="192" width="168" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>필드 y</span></div></foreignObject>
+            <text class="muted" x="276" y="252" font-size="11"><tspan font-style="italic">*</tspan>는 여기를 가리킬 수 없다</text>
+            <rect class="node-rect sq" x="608" y="252" width="160" height="40"/>
+            <foreignObject x="616" y="256" width="144" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>네이티브 버퍼</span></div></foreignObject>
+          </svg>
+        </div>
+        <p class="figure-caption">그림은 세 포인터가 가리키는 곳을 나타낸 것이다(이름과 값 7은 예시). GC가 객체를 옮기면 o와 r(교과 색, 객체 내부)이 함께 고쳐지고, p는 GC 힙 밖의 버퍼만 가리킨다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>object는 객체 전체를, managed pointer는 객체 내부와 힙 밖을, unmanaged pointer는 GC 힙 밖의 주소만 가리킨다.</p></div>
+    </div>
+
+    <!-- 쪽 4: 세 포인터와 JVM의 참조 타입 비교 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>세 포인터는 GC, 쓰임, 검증에서 어떻게 다른가?</li>
+          <li>JVM이 포인터를 하나로 묶은 것은 왜 약점인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>세 포인터와 JVM의 참조 타입<span class="paper-ref">논문 4절</span></h3>
+        <p>표는 같은 기준으로 CLI의 세 포인터와 JVM의 참조 타입을 비교한 것이다. JVM은 모든 포인터를 참조 타입 하나로 묶는다.</p>
+        <table class="data-table animate-in">
+          <caption>표는 포인터 종류별 성질을 비교한 것이다. (논문 4절, 7단원 검증 내용 포함)</caption>
+          <thead><tr><th>기준</th><th><code>object</code></th><th>managed <code>&amp;</code></th><th>unmanaged <code>*</code></th><th>당시 JVM 참조</th></tr></thead>
+          <tbody>
+            <tr><td>가리키는 곳</td><td>객체 시작</td><td>객체 내부, 지역 변수, 힙 밖</td><td>힙 밖의 아무 주소</td><td>객체 시작</td></tr>
+            <tr><td>GC가 옮길 때</td><td>고쳐짐</td><td>고쳐짐</td><td>추적 안 함</td><td>고쳐짐</td></tr>
+            <tr><td>주된 쓰임</td><td>객체 다루기</td><td>참조 전달, 필드 주소</td><td>네이티브 코드와 데이터 교환</td><td>모든 포인터 용도</td></tr>
+            <tr><td>대가·한계</td><td>객체 내부를 못 가리킴</td><td><code>object</code>와 바꿔 쓸 수 없음</td><td>검증할 수 없음(7단원)</td><td>세밀한 구분 불가</td></tr>
+          </tbody>
+        </table>
+        <p class="diff-line"><strong>핵심 비교</strong> CLI는 포인터를 가리키는 곳과 GC 추적 여부로 셋으로 나누고, JVM은 하나로 묶는다.</p>
+        <p>논문은 이 묶음이 더 세밀한 포인터가 필요한 언어와 컴파일러의 길을 막는다고 주장한다. 대가도 있다. <code>*</code>를 쓰는 코드는 안전성을 검증할 수 없으므로, 신뢰하지 않는 코드에서는 쓸 수 없다고 해석할 수 있다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>CLI는 포인터를 세 종류로 나눠 표현력을 얻고, unmanaged pointer는 검증할 수 없다는 대가를 치른다.</p></div>
+    </div>
+
+    <!-- 쪽 5: 다형 명령어와 load/store -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>CLI 명령어는 타입 정보를 어디에 적는가?</li>
+          <li>다형 명령어는 누구의 일을 늘리는가?</li>
+          <li>load와 store 명령어는 어떻게 나뉘는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">다형 명령어와 load/store 계열<span class="paper-ref">논문 5, 5.1절</span></h3>
+        <div class="with-figure" style="--figure-side-width:280px">
+          <div>
+            <p>CLI 명령어는 약 220개이다. JVM은 명령어 이름에 인수 타입을 박아 넣지만, CLI는 <span class="term" data-definition="다형 명령어(Polymorphic Instruction): 피연산자 타입에 따라 동작이 정해지는 명령어. CLI의 add 하나가 정수와 부동소수점 덧셈을 모두 맡음.">다형 명령어(피연산자 타입에 따라 동작이 정해지는 명령어)</span>를 쓰고 보통 결과 타입만 적는다.</p>
+            <p>그 덕분에 컴파일러는 CIL을 만들기 쉽다. 대가로 <strong>JIT가 할 일이 늘어난다</strong>. JIT가 <span class="term" data-definition="평가 스택(Evaluation Stack): 명령어가 계산에 쓸 값을 쌓아 두는 스택. JVM에서는 operand stack이라 부름.">평가 스택(Evaluation Stack)</span>의 타입을 추적해 어떤 덧셈인지 정해야 하기 때문이다.</p>
+            <p>JVM은 반대로 해석은 쉽지만 컴파일러마다 부담이 된다.</p>
+          </div>
+          <figure class="figure side">
+            <svg viewBox="0 0 280 216" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="int32, int64, float32, float64 덧셈이 CLI에서는 add 하나, JVM에서는 iadd, ladd, fadd, dadd 넷이 됨">
+              <path class="ink" d="M104,28 H88 M104,76 H88 M104,124 H88 M104,172 H88 M88,28 V172 M88,100 H82"/>
+              <polygon class="accent-fill" points="82,95 72,100 82,105"/>
+              <path class="ink" d="M176,28 H198 M176,76 H198 M176,124 H198 M176,172 H198"/>
+              <polygon class="ink-fill" points="198,23 208,28 198,33"/><polygon class="ink-fill" points="198,71 208,76 198,81"/><polygon class="ink-fill" points="198,119 208,124 198,129"/><polygon class="ink-fill" points="198,167 208,172 198,177"/>
+              <rect class="ink accent" x="8" y="8" width="64" height="184" rx="4"/>
+              <text class="mono accent-text" x="40" y="104" font-size="14" text-anchor="middle">add</text>
+              <rect class="ink" x="104" y="8" width="72" height="40" rx="4"/><text class="mono" x="140" y="32" font-size="12" text-anchor="middle">int32</text>
+              <rect class="ink" x="104" y="56" width="72" height="40" rx="4"/><text class="mono" x="140" y="80" font-size="12" text-anchor="middle">int64</text>
+              <rect class="ink" x="104" y="104" width="72" height="40" rx="4"/><text class="mono" x="140" y="128" font-size="12" text-anchor="middle">float32</text>
+              <rect class="ink" x="104" y="152" width="72" height="40" rx="4"/><text class="mono" x="140" y="176" font-size="12" text-anchor="middle">float64</text>
+              <rect class="ink" x="208" y="8" width="64" height="40" rx="4"/><text class="mono" x="240" y="32" font-size="13" text-anchor="middle">iadd</text>
+              <rect class="ink" x="208" y="56" width="64" height="40" rx="4"/><text class="mono" x="240" y="80" font-size="13" text-anchor="middle">ladd</text>
+              <rect class="ink" x="208" y="104" width="64" height="40" rx="4"/><text class="mono" x="240" y="128" font-size="13" text-anchor="middle">fadd</text>
+              <rect class="ink" x="208" y="152" width="64" height="40" rx="4"/><text class="mono" x="240" y="176" font-size="13" text-anchor="middle">dadd</text>
+              <text x="40" y="210" font-size="12" text-anchor="middle">CLI: 1개</text>
+              <text x="140" y="210" font-size="12" text-anchor="middle">a + b의 타입</text>
+              <text x="240" y="210" font-size="12" text-anchor="middle">JVM: 4개</text>
+            </svg>
+          </figure>
+        </div>
+        <p>값을 평가 스택에 올리는 명령어를 <span class="term" data-definition="load(스택에 올리기): 상수나 변수의 값, 또는 그 주소를 평가 스택 맨 위에 올리는 명령어 묶음.">load(스택에 올리기)</span>, 꺼내 저장하는 명령어를 <span class="term" data-definition="store(스택에서 꺼내 저장): 평가 스택 맨 위의 값을 꺼내 변수, 필드, 주소에 저장하는 명령어 묶음.">store(스택에서 꺼내 저장)</span>라 한다.</p>
+        <table class="data-table animate-in">
+          <caption>표는 load/store 계열을 대상별로 나타낸 것이다. n은 번호, t는 타입의 짧은 이름이다. (논문 5.1절)</caption>
+          <thead><tr><th>대상</th><th>값 올리기</th><th>주소 올리기</th><th>꺼내 저장</th></tr></thead>
+          <tbody>
+            <tr><td>상수</td><td><code>ldc.t v</code>, <code>ldnull</code></td><td>없음</td><td>없음</td></tr>
+            <tr><td>인수</td><td><code>ldarg n</code></td><td><code>ldarga n</code></td><td><code>starg n</code></td></tr>
+            <tr><td>지역 변수</td><td><code>ldloc n</code></td><td><code>ldloca n</code></td><td><code>stloc n</code></td></tr>
+            <tr class="hl"><td>주소가 가리키는 곳</td><td><code>ldind.t</code></td><td>없음</td><td><code>stind.t</code></td></tr>
+            <tr><td>인스턴스·정적 필드</td><td><code>ldfld</code>, <code>ldsfld</code></td><td><code>ldflda</code>, <code>ldsflda</code></td><td><code>stfld</code>, <code>stsfld</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>CLI는 다형 명령어로 컴파일러의 일을 덜고 JIT의 일을 늘리며, load/store 명령어가 값과 주소를 평가 스택으로 옮긴다.</p></div>
+    </div>
+
+    <!-- 쪽 6: Swap 의사코드 단계별 풀이 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>Swap은 x와 y의 값 대신 무엇을 받는가?</li>
+          <li><code>ldind.i4</code>와 <code>stind.i4</code>는 스택에서 무엇을 꺼내는가?</li>
+          <li>스택은 가장 높을 때 몇 칸인가?</li>
+        </ul>
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">보충 설명</strong>
+            <p>메서드 머리는 <code>.method static void Swap(int32&amp; xa, int32&amp; ya)</code>이고, 지시어 <code>.maxstack 2</code>, <code>.locals (int32 z)</code>가 이어진다. C#으로 쓰면 <code>Swap(ref x, ref y)</code>(예시)이다.</p>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>의사코드 단계별 풀이: Swap<span class="paper-ref">논문 5.1절</span></h3>
+        <p>Swap은 두 변수의 값을 맞바꾼다. <span class="term" data-definition="참조 전달(Pass by Reference): 인수의 값 대신 변수의 주소를 넘겨 호출된 메서드가 원래 변수를 고치게 하는 방식.">참조 전달(Pass by Reference)</span>로 받은 주소를 <span class="term" data-definition="역참조(Dereference): 포인터가 가리키는 곳에 가서 값을 읽거나 쓰는 일.">역참조(Dereference)</span>해 읽고 쓴다. x=3, y=5(예시 값)라 하고 버튼을 눌러 한 줄씩 보시오. 주석은 실행 뒤의 스택(왼쪽이 바닥)이다.</p>
+        <div class="pseudocode-translation animate-in" id="ty-pseudo-swap">
+          <div class="pseudocode-block">
+            <span class="translation-label">CIL (논문 코드)</span>
+            <span class="pseudocode-line">ldarg xa    // [&amp;x]</span>
+            <span class="pseudocode-line">ldind.i4    // [3]</span>
+            <span class="pseudocode-line">stloc z     // [ ]  z=3</span>
+            <span class="pseudocode-line">ldarg xa    // [&amp;x]</span>
+            <span class="pseudocode-line">ldarg ya    // [&amp;x, &amp;y]</span>
+            <span class="pseudocode-line">ldind.i4    // [&amp;x, 5]</span>
+            <span class="pseudocode-line">stind.i4    // [ ]  x=5</span>
+            <span class="pseudocode-line">ldarg ya    // [&amp;y]</span>
+            <span class="pseudocode-line">ldloc z     // [&amp;y, 3]</span>
+            <span class="pseudocode-line">stind.i4    // [ ]  y=3</span>
+            <span class="pseudocode-line">ret         // return</span>
+          </div>
+          <div class="pseudocode-explanation">
+            <span class="translation-label">설명</span>
+            <div class="pseudocode-explanation-lines">
+              <p class="pe">인수 xa에 든 주소 &amp;x를 올린다.</p>
+              <p class="pe">&amp;x를 꺼내 역참조하고 x의 값 3을 올린다.</p>
+              <p class="pe">3을 꺼내 지역 변수 z에 둔다.</p>
+              <p class="pe">값을 쓸 곳인 &amp;x를 다시 올린다.</p>
+              <p class="pe">&amp;y를 올린다. 높이가 2가 된다.</p>
+              <p class="pe">&amp;y를 꺼내 역참조하고 5를 올린다.</p>
+              <p class="pe">5와 &amp;x를 꺼내 x에 5를 쓴다.</p>
+              <p class="pe">값을 쓸 곳인 &amp;y를 올린다.</p>
+              <p class="pe">z에 둔 옛 x 값 3을 올린다.</p>
+              <p class="pe">3과 &amp;y를 꺼내 y에 3을 쓴다.</p>
+              <p class="pe">빈 스택으로 호출한 쪽에 돌아간다.</p>
+            </div>
+          </div>
+          <div class="pseudocode-controls">
+            <button class="btn pseudocode-prev-btn">이전 줄</button>
+            <button class="btn pseudocode-next-btn">다음 줄</button>
+            <button class="btn pseudocode-reset-btn">처음부터</button>
+            <span class="pseudocode-progress"></span>
+          </div>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>Swap은 주소를 역참조해 x를 z에 맡기고, y를 x에, z를 y에 써서 두 값을 바꾼다.</p></div>
+    </div>
+
+    <!-- 쪽 7: 스택 상태 그림, 호출하는 쪽, JVM 우회책 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>스택 높이는 <code>.maxstack 2</code>를 넘는가?</li>
+          <li>호출하는 쪽은 무엇을 넘기는가?</li>
+          <li>JVM은 같은 일을 어떻게 흉내 내는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>Swap의 스택 상태와 JVM의 우회책<span class="paper-ref">논문 5.1절</span></h3>
+        <div class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 180" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Swap의 각 명령어 뒤 평가 스택과 x, y, z의 값. 스택 높이는 최대 2칸이고, 끝에서 x는 5, y는 3이 됨">
+            <path class="edge-line dashed" d="M52,52 H792"/>
+            <text class="muted" x="792" y="46" font-size="11" text-anchor="end">.maxstack 2 (최대 높이)</text>
+            <text class="muted" x="8" y="92" font-size="12">스택</text>
+            <text class="muted" x="8" y="150" font-size="12">x, y</text>
+            <text class="muted" x="8" y="172" font-size="12">z</text>
+            <g font-size="11" text-anchor="middle">
+              <text class="mono" x="82" y="20">ldarg xa</text><text class="mono" x="150" y="20">ldind.i4</text><text class="mono" x="218" y="20">stloc z</text><text class="mono" x="286" y="20">ldarg xa</text><text class="mono" x="354" y="20">ldarg ya</text><text class="mono" x="422" y="20">ldind.i4</text><text class="mono" x="490" y="20">stind.i4</text><text class="mono" x="558" y="20">ldarg ya</text><text class="mono" x="626" y="20">ldloc z</text><text class="mono" x="694" y="20">stind.i4</text><text class="mono" x="762" y="20">ret</text>
+            </g>
+            <path class="guide-axis" d="M52,124 H112 M120,124 H180 M188,124 H248 M256,124 H316 M324,124 H384 M392,124 H452 M460,124 H520 M528,124 H588 M596,124 H656 M664,124 H724 M732,124 H792"/>
+            <rect class="node-rect sq" x="56" y="90" width="52" height="30"/><text x="82" y="110" font-size="13" text-anchor="middle">&amp;x</text>
+            <rect class="node-rect sq accent" x="124" y="90" width="52" height="30"/><text x="150" y="110" font-size="13" text-anchor="middle">3</text>
+            <rect class="node-rect sq" x="260" y="90" width="52" height="30"/><text x="286" y="110" font-size="13" text-anchor="middle">&amp;x</text>
+            <rect class="node-rect sq" x="328" y="90" width="52" height="30"/><text x="354" y="110" font-size="13" text-anchor="middle">&amp;x</text>
+            <rect class="node-rect sq" x="328" y="56" width="52" height="30"/><text x="354" y="76" font-size="13" text-anchor="middle">&amp;y</text>
+            <rect class="node-rect sq" x="396" y="90" width="52" height="30"/><text x="422" y="110" font-size="13" text-anchor="middle">&amp;x</text>
+            <rect class="node-rect sq accent" x="396" y="56" width="52" height="30"/><text x="422" y="76" font-size="13" text-anchor="middle">5</text>
+            <rect class="node-rect sq" x="532" y="90" width="52" height="30"/><text x="558" y="110" font-size="13" text-anchor="middle">&amp;y</text>
+            <rect class="node-rect sq" x="600" y="90" width="52" height="30"/><text x="626" y="110" font-size="13" text-anchor="middle">&amp;y</text>
+            <rect class="node-rect sq" x="600" y="56" width="52" height="30"/><text x="626" y="76" font-size="13" text-anchor="middle">3</text>
+            <g font-size="12" text-anchor="middle">
+              <text x="82" y="150">3, 5</text><text x="150" y="150">3, 5</text><text x="218" y="150">3, 5</text><text x="286" y="150">3, 5</text><text x="354" y="150">3, 5</text><text x="422" y="150">3, 5</text><text class="accent-text" x="490" y="150">5, 5</text><text x="558" y="150">5, 5</text><text x="626" y="150">5, 5</text><text class="accent-text" x="694" y="150">5, 3</text><text x="762" y="150">5, 3</text>
+              <text class="muted" x="82" y="172">?</text><text class="muted" x="150" y="172">?</text><text class="accent-text" x="218" y="172">3</text><text x="286" y="172">3</text><text x="354" y="172">3</text><text x="422" y="172">3</text><text x="490" y="172">3</text><text x="558" y="172">3</text><text x="626" y="172">3</text><text x="694" y="172">3</text><text x="762" y="172">3</text>
+            </g>
+          </svg>
+        </div>
+        <p class="figure-caption">그림은 x=3, y=5(예시 값)일 때 각 명령어 뒤의 평가 스택(아래가 바닥)과 변수 값을 나타낸 것이다. &amp;x, &amp;y는 int32&amp; 타입, 숫자는 int32 타입이며 교과 색 칸은 주소로 읽어 온 값이다.</p>
+        <p>호출하는 쪽은 지역 변수의 <strong>주소</strong>를 <code>ldloca</code>로 넘긴다. 당시 JVM은 지역 변수의 주소를 얻을 수 없어 원소 하나짜리 배열이나 box 클래스로 흉내 내야 했다(Gough [12]).</p>
+        <div class="animate-in" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin:var(--space-4) 0 0">
+<pre class="pseudocode-block" style="margin:0"><code>.locals (int32 x, int32 y)
+<span class="code-comment">// initialize x and y</span>
+ldloca x
+ldloca y
+call void Swap(int32&amp;, int32&amp;)</code></pre>
+<pre class="pseudocode-block" style="margin:0"><code><span class="code-comment">// JVM 우회책 (Java 예시)</span>
+int[] xa = { x }, ya = { y };
+swap(xa, ya);
+x = xa[0]; y = ya[0];
+<span class="code-comment">// swap 안: int z = xa[0];</span>
+<span class="code-comment">//   xa[0] = ya[0]; ya[0] = z;</span></code></pre>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>CLI는 지역 변수 주소를 넘겨 스택 두 칸으로 Swap을 끝내고, 당시 JVM은 배열을 새로 만들어 값을 넣고 다시 꺼내야 했다.</p></div>
+    </div>
+
+    <!-- 쪽 8: 산술 오버플로와 분기 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li><code>add</code>, <code>add.ovf</code>, <code>add.ovf.un</code>은 2147483647 + 1에서 어떻게 다른가?</li>
+          <li>오버플로 감지가 없으면 어떤 언어가 손해를 보는가?</li>
+          <li>CLI의 분기는 JVM과 무엇이 다른가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">산술 오버플로와 분기<span class="paper-ref">논문 5.2, 5.3절</span></h3>
+        <div class="with-figure" style="--figure-side-width:280px">
+          <div>
+            <p><code>add</code>는 스택 맨 위 두 값을 꺼내 더한다. 정수 <span class="term" data-definition="오버플로(Overflow): 계산 결과가 타입이 담을 수 있는 범위를 넘는 일. 정수는 반대쪽 끝으로 넘어가 버림.">오버플로(Overflow)</span>는 <code>.ovf</code>(부호 있음)나 <code>.ovf.un</code>(부호 없음)을 붙여야 감지한다. 부동소수점 오버플로는 +∞나 −∞가 된다.</p>
+            <p>당시 JVM은 정수 오버플로를 알리지 않았다. 그래서 감지가 필요한 Ada95나 SML은 연산마다 검사 코드를 넣어야 해 시간 손해가 클 수 있다고 논문은 지적한다.</p>
+          </div>
+          <figure class="figure side">
+            <svg viewBox="0 0 280 136" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="int32 범위의 끝 2147483647에 1을 더하면 반대쪽 끝 -2147483648로 넘어감">
+              <rect class="guide-fill" x="40" y="24" width="216" height="28"/>
+              <rect class="ink" x="40" y="24" width="216" height="28"/>
+              <path class="guide-axis" d="M148,24 V52"/>
+              <text x="148" y="16" font-size="11" text-anchor="middle">0</text>
+              <text x="40" y="72" font-size="11">−2147483648</text>
+              <text x="256" y="72" font-size="11" text-anchor="end">2147483647</text>
+              <path class="ink accent" d="M256,38 H272 V96 H16 V38 H30"/>
+              <polygon class="accent-fill" points="30,33 40,38 30,43"/>
+              <text class="accent-text" x="144" y="116" font-size="12" text-anchor="middle">+1 하면 반대쪽 끝으로</text>
+            </svg>
+          </figure>
+        </div>
+        <table class="data-table animate-in">
+          <caption>표는 2147483647 + 1을 명령어별로 계산한 결과이다(계산 값). 마지막 줄은 float32 최댓값 약 3.4 × 10<sup>38</sup>을 두 번 더한 예이다.</caption>
+          <thead><tr><th>명령어</th><th>값의 해석</th><th>결과</th></tr></thead>
+          <tbody>
+            <tr><td><code>add</code></td><td>부호 있는 int32, 검사 없음</td><td>−2147483648 (비트 0x80000000, 조용히 넘어감)</td></tr>
+            <tr class="hl"><td><code>add.ovf</code></td><td>부호 있는 int32</td><td>범위를 넘으므로 오버플로 예외</td></tr>
+            <tr><td><code>add.ovf.un</code></td><td>부호 없는 32비트</td><td>2147483648은 범위 안이므로 예외 없음</td></tr>
+            <tr><td><code>add</code> (float32)</td><td>float32 최댓값 + 최댓값(예외 없음)</td><td>+∞</td></tr>
+          </tbody>
+        </table>
+        <p><span class="term" data-definition="분기(Branch): 조건에 따라 다음에 실행할 명령어 위치를 바꾸는 일. br, beq, bge 등.">분기(Branch)</span> 명령어로는 <code>br</code>, <code>beq</code>, <code>bge</code> 등이 있다. CLI에는 JVM의 <span class="term" data-definition="서브루틴(Subroutine): 메서드 안에서 점프로 들어갔다가 돌아오는 코드 조각. JVM의 jsr 명령어가 이를 부름.">서브루틴(Subroutine)</span> 점프 <code>jsr</code>가 없고, JVM처럼 분기 거리를 64K로 제한하지도 않는다. 논문은 이 제한이 사람에게는 작은 문제지만 JVM <span class="term" data-definition="바이트코드(Bytecode): JVM이 실행하는 중간 코드. 명령어 하나가 대개 1바이트 번호로 표현됨.">바이트코드(Bytecode)</span>를 만드는 컴파일러에는 실제 문제라고 지적한다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>CLI는 오버플로 감지를 명령어 접미사로 고르게 하고, 분기 거리에 64K 제한을 두지 않는다.</p></div>
+    </div>
+
+    <!-- 쪽 9: 핵심 정리 + 확인 문제 1, 2 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-accent animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">핵심 정리</strong>
+            <ol>
+              <li>자연 크기 타입은 크기를 JIT 시점에 정한다.</li>
+              <li><code>&amp;</code>는 객체 내부와 힙 밖을 가리키고 GC가 고쳐 주며, <code>*</code>는 힙 밖만 가리킨다.</li>
+              <li>다형 명령어는 컴파일러의 일을 덜고 JIT의 일을 늘린다.</li>
+              <li><code>ldloca</code>와 <code>ldind</code>, <code>stind</code>로 참조 전달을 직접 구현한다.</li>
+              <li>스택 문제는 명령어마다 꺼내는 개수와 올리는 개수를 세어 풀어라.</li>
+            </ol>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>포인터와 Swap</h3>
+        <div class="quiz-container animate-in" id="ty-quiz-1">
+          <div class="quiz-question-block" data-correct="option-c"
+               data-explanation-right="③ | 바로 앞의 ldarg xa, ldarg ya로 [&amp;x, &amp;y]가 되고, ldind.i4가 &amp;y를 꺼내 5를 올리므로 [&amp;x, 5]이다."
+               data-explanation-wrong="| 정답은 ③이다. ldind.i4는 맨 위의 주소 하나만 값으로 바꾸므로 &amp;x는 그대로 남는다. ②는 ldind.i4를 실행하기 전의 상태이므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">1</span>x=3, y=5로 Swap을 호출했다. 첫 번째 <code>stind.i4</code>를 실행하기 직전의 평가 스택(바닥, 꼭대기 순)으로 옳은 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① [3]</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② [&amp;x, &amp;y]</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ [&amp;x, 5]</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ [&amp;y, 3]</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ [5, &amp;x]</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <div class="quiz-question-block" data-correct="option-c"
+               data-explanation-right="③ | GC는 객체를 다른 자리로 옮기는데 unmanaged pointer는 추적하지 않으므로 GC 힙 안을 가리키면 안 된다. 따라서 ③은 옳지 않다."
+               data-explanation-wrong="| 정답은 ③이다. unmanaged pointer는 GC 힙 안을 가리킬 수 없다. ②는 GC가 힙의 경계를 알기 때문에 옳은 설명이다.">
+            <h3 class="quiz-question"><span class="q-num">2</span>CLI의 포인터와 자연 크기 타입에 대한 설명으로 옳지 <u>않은</u> 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① managed pointer는 객체 내부를 가리킬 수 있다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② managed pointer는 GC 힙 밖을 가리켜도 안전하다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ unmanaged pointer는 GC 힙 안의 객체를 가리켜도 된다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ native int는 Pentium에서 int32, IA64에서 int64가 된다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 당시 JVM은 모든 포인터를 참조 타입 하나로 묶었다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('ty-quiz-1')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('ty-quiz-1')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>ldind는 맨 위 주소 하나를 값으로 바꾸고, unmanaged pointer는 GC 힙 안을 가리킬 수 없다.</p></div>
+    </div>
+
+    <!-- 쪽 10: 확인 문제 3, 4 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>다형 명령어의 이득과 대가는 무엇인가?</li>
+          <li>세 add 명령어는 같은 입력에서 어떻게 다르게 동작하는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>명령어와 오버플로</h3>
+        <div class="quiz-container animate-in" id="ty-quiz-2">
+          <div class="quiz-question-block" data-correct="option-c"
+               data-explanation-right="③ | ㄴ은 타입 판단을 JIT에 넘기므로 JIT의 일이 늘어 옳지 않다."
+               data-explanation-wrong="| 정답은 ③이다. 다형 명령어는 JIT의 일을 늘리므로 ㄴ은 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">3</span>CLI와 JVM의 명령어에 대한 설명으로 옳은 것만을 <span class="nobr">&lt;보기&gt;에서</span> 있는 대로 고른 것은?</h3>
+            <div class="bogi">
+              <p>ㄱ. CLI는 add 하나로 정수와 실수를 더한다.</p>
+              <p>ㄴ. 다형 명령어는 JIT의 일을 줄인다.</p>
+              <p>ㄷ. JVM은 long 덧셈에 ladd를 쓴다.</p>
+            </div>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① ㄱ</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② ㄴ</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ ㄱ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ ㄴ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ ㄱ, ㄴ, ㄷ</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <div class="quiz-question-block" data-correct="option-c"
+               data-explanation-right="③ | 부호 없는 32비트로 보면 2147483648은 최댓값 4294967295보다 작으므로 오버플로가 아니다."
+               data-explanation-wrong="| 정답은 ③이다. 부호 없는 수로 보면 2147483648은 범위 안이다. ①은 add가 검사 없이 −2147483648을 내므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">4</span>int32 값 2147483647과 1을 더할 때에 대한 설명으로 옳은 것은? <span class="q-points">[3점]</span></h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① add는 오버플로 예외를 던진다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② add.ovf는 −2147483648을 돌려준다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ add.ovf.un은 예외 없이 2147483648을 낸다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ float32 덧셈의 오버플로도 예외를 던진다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 당시 JVM의 iadd는 오버플로를 알렸다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('ty-quiz-2')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('ty-quiz-2')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>다형 명령어는 JIT의 일을 늘리고, 오버플로 검사 여부와 부호 해석은 add의 접미사가 정한다.</p></div>
+    </div>
+
+  </div>
+</section>
