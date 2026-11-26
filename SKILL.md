@@ -30,7 +30,7 @@ arXiv URL은 `https://arxiv.org/pdf/xxxx.xxxxx`로 바꿔 WebFetch 또는 Read�
 
 ## 문체: EBS·교육 회사 교재 문체
 
-강의 본문은 EBS·교육 회사 학습서 문체로, 글의 역할에 따라 종결을 나눕니다. 전체 규칙과 나쁜 예는 `references/korean-style-guide.md` §1(특히 §1.8)에 있습니다. (이 SKILL.md는 Claude용 지침이라 합니다체이고, EBS 문체는 생성물에만 적용합니다.)
+강의 본문은 EBS·교육 회사 학습서 문체로, 글의 역할에 따라 종결을 나눕니다. 전체 규칙과 나쁜 예는 `references/korean-style-guide.md` §1(특히 §1.8)에 있습니다. (이 SKILL.md는 에이전트용 지침이라 합니다체이고, EBS 문체는 생성물에만 적용합니다.)
 
 | 요소 | 규칙 | 예 |
 |---|---|---|
