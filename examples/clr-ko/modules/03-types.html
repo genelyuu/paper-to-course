@@ -33,8 +33,7 @@
             <tr><td>논리·문자</td><td><code>bool</code>, <code>char</code></td><td>8비트 논리값, 16비트 Unicode 문자</td></tr>
             <tr><td>정수</td><td><code>int8</code>~<code>int64</code>, 각각의 <code>unsigned</code></td><td>8·16·32·64비트의 2의 보수 정수와 부호 없는 정수</td></tr>
             <tr class="hl"><td>자연 크기 정수</td><td><code>native int</code>, <code>unsigned native int</code></td><td>크기를 기계에 맞춰 나중에 정하는 정수</td></tr>
-            <tr><td>부동소수점</td><td><code>float32</code>, <code>float64</code></td><td>IEEE-754 부동소수점 수</td></tr>
-            <tr><td>내부 전용</td><td><code>native float</code></td><td>기계에 따른 부동소수점 수, 사용자에게 보이지 않음</td></tr>
+            <tr><td>부동소수점</td><td><code>float32</code>, <code>float64</code>, <code>native float</code></td><td>IEEE-754 부동소수점 수, <code>native float</code>는 내부 전용</td></tr>
             <tr><td>기술자</td><td><span class="term" data-definition="typed reference(포인터와 타입을 묶은 값): 주소와 그 주소에 있는 값의 타입을 한 쌍으로 담은 값. 타입 안전한 가변 인수에 씀."><code>typed reference</code></span></td><td>포인터와 타입의 쌍, 타입 안전한 <span class="term" data-definition="가변 인수(Varargs): 호출할 때마다 개수가 달라질 수 있는 인수. C의 printf가 대표적인 예임.">가변 인수(Varargs)</span>에 씀</td></tr>
           </tbody>
         </table>
@@ -357,7 +356,7 @@
         </div>
         <p class="figure-caption">그림은 x=3, y=5(예시 값)일 때 각 명령어 뒤의 평가 스택(아래가 바닥)과 변수 값을 나타낸 것이다. &amp;x, &amp;y는 int32&amp; 타입, 숫자는 int32 타입이며 교과 색 칸은 주소로 읽어 온 값이다.</p>
         <p>호출하는 쪽은 지역 변수의 <strong>주소</strong>를 <code>ldloca</code>로 넘긴다. 당시 JVM은 지역 변수의 주소를 얻을 수 없어 원소 하나짜리 배열이나 box 클래스로 흉내 내야 했다(Gough [12]).</p>
-        <div class="animate-in" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin:var(--space-4) 0 0">
+        <div class="animate-in cols-2 gap-3" style="margin:var(--space-4) 0 0">
 <pre class="pseudocode-block" style="margin:0"><code>.locals (int32 x, int32 y)
 <span class="code-comment">// initialize x and y</span>
 ldloca x

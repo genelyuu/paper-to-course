@@ -30,7 +30,7 @@
 
   /* ── I18N (UI strings; language from <html lang>, default ko) ── */
   const I18N = {
-    // ko: EBS 교재 문체 — 표지(정답/오답) + 한다체 해설, 지시는 '~하시오'
+    // ko: 학습서 문체 — 표지(정답/오답) + 한다체 해설, 지시는 '~하시오'
     ko: {
       selectFirst: '먼저 답을 고르시오.',
       correct: '정답',
@@ -269,6 +269,10 @@
         const done = el.dataset.revealed || $$('.quiz-option', el).every(o => o.disabled);
         if (el.id && !done) { window.revealQuiz(el.id); return; }
       }
+      // 드래그 매칭: 칩을 놓지 않았어도 정답을 공개한다(매칭 확인과 같은 동작)
+      for (const el of inCur('.dnd-container', page)) {
+        if (el.id && !el.dataset.revealed) { window.checkDnD(el.id); return; }
+      }
       go(currentIndex() + 1);
     }
 
@@ -442,6 +446,9 @@
   });
 
   /* ── QUIZ ENGINE ───────────────────────────────────────────── */
+  /* data-correct는 정답 목록이다(쉼표·공백으로 여러 개). 고른 값이 목록에 있으면 정답 */
+  const answerList = el => (el.dataset.correct || '').split(/[,\s]+/).filter(Boolean);
+
   window.selectOption = function (btn) {
     const block = btn.closest('.quiz-question-block');
     $$('.quiz-option', block).forEach(o => o.classList.remove('selected'));
@@ -455,7 +462,7 @@
       const selected  = $('.quiz-option.selected', q);
       const feedback  = $('.quiz-feedback', q);
       if (!feedback) return;
-      const correct   = q.dataset.correct;
+      const answers   = answerList(q);
       const rightExp  = q.dataset.explanationRight  || '';
       const wrongExp  = q.dataset.explanationWrong  || '';
 
@@ -466,14 +473,13 @@
       }
       $$('.quiz-option', q).forEach(o => o.disabled = true);
 
-      if (selected.dataset.value === correct) {
+      if (answers.includes(selected.dataset.value)) {
         selected.classList.add('correct');
         setFeedbackHTML(feedback, '<strong>' + i18n('correct') + '</strong> ' + rightExp);
         feedback.className = 'quiz-feedback show success';
       } else {
         selected.classList.add('incorrect');
-        const correctBtn = $(`.quiz-option[data-value="${CSS.escape(correct || '')}"]`, q);
-        if (correctBtn) correctBtn.classList.add('correct');
+        $$('.quiz-option', q).forEach(o => { if (answers.includes(o.dataset.value)) o.classList.add('correct'); });
         setFeedbackHTML(feedback, '<strong>' + i18n('incorrect') + '</strong> ' + wrongExp);
         feedback.className = 'quiz-feedback show error';
       }
@@ -487,7 +493,7 @@
     if (!container) return;
     $$('.quiz-question-block', container).forEach(q => {
       const feedback = $('.quiz-feedback', q);
-      const answers  = (q.dataset.correct || '').split(/[,\s]+/).filter(Boolean);
+      const answers  = answerList(q);
       $$('.quiz-option', q).forEach(o => {
         o.classList.remove('selected', 'correct', 'incorrect');
         if (answers.includes(o.dataset.value)) o.classList.add('selected', 'correct');
@@ -517,6 +523,30 @@
     const chips = $$('.dnd-chip', containerEl);
     const zones = $$('.dnd-zone', containerEl);
 
+    // 칩을 칸에 놓는다. 수식 마크업(<i>, <sub>)을 그대로 옮기고, 칸에 있던 칩은 되돌리며, 채점 표시는 지운다
+    function place(target, chip) {
+      const prev = target.dataset.placed;
+      if (prev) {
+        const old = $(`.dnd-chip[data-answer="${prev}"]`, containerEl);
+        if (old) old.classList.remove('placed');
+      }
+      target.innerHTML      = `<span>${chip.innerHTML}</span>`;
+      target.dataset.placed = chip.dataset.answer;
+      chip.classList.add('placed');
+      chip.classList.remove('selected', 'dragging');
+      $$('.dnd-zone-target', containerEl).forEach(t => t.classList.remove('correct-placed', 'incorrect-placed', 'answer-shown'));
+    }
+
+    // 끌기가 어려운 환경(트랙패드·키보드)용: 칩을 누른 뒤 칸을 누르면 놓인다
+    chips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        if (chip.classList.contains('placed')) return;
+        const was = chip.classList.contains('selected');
+        chips.forEach(c => c.classList.remove('selected'));
+        if (!was) chip.classList.add('selected');
+      });
+    });
+
     chips.forEach(chip => {
       chip.addEventListener('dragstart', e => {
         e.dataTransfer.setData('text/plain', chip.dataset.answer);
@@ -536,9 +566,11 @@
         const answer = e.dataTransfer.getData('text/plain');
         const chip   = $(`.dnd-chip[data-answer="${answer}"]`, containerEl);
         if (!chip) return;
-        target.textContent    = chip.textContent;
-        target.dataset.placed = answer;
-        chip.classList.add('placed');
+        place(target, chip);
+      });
+      target.addEventListener('click', () => {
+        const sel = $('.dnd-chip.selected', containerEl);
+        if (sel) place(target, sel);
       });
     });
 
@@ -572,28 +604,38 @@
         const touch = e.changedTouches[0];
         const el    = document.elementFromPoint(touch.clientX, touch.clientY);
         const zt    = el && el.closest('.dnd-zone-target');
-        if (zt) {
-          zt.textContent    = chip.textContent;
-          zt.dataset.placed = chip._answer;
-          chip.classList.add('placed');
-        }
+        if (zt) place(zt, chip);
         zones.forEach(z => { const t = $('.dnd-zone-target', z); if (t) t.classList.remove('drag-over'); });
       });
     });
   }
 
+  /* 매칭 확인 = 채점 + 정답 공개. 칩을 다 놓지 않았어도(하나도 놓지 않았어도) 모든 칸에 정답을 보여 준다.
+     맞힌 칸: correct-placed / 틀린 칸: 고른 칩에 취소선 + 정답(incorrect-placed) / 빈칸: 정답(answer-shown) */
   window.checkDnD = function (containerId) {
     const container = $('#' + containerId);
     if (!container) return;
+    const chipHTML = a => { const c = $(`.dnd-chip[data-answer="${a}"]`, container); return c ? c.innerHTML : a; };
     $$('.dnd-zone', container).forEach(zone => {
-      const target  = $('.dnd-zone-target', zone);
-      if (!target || !target.dataset.placed) return;
-      if (target.dataset.placed === zone.dataset.correct) {
+      const target = $('.dnd-zone-target', zone);
+      if (!target) return;
+      const placed = target.dataset.placed, want = zone.dataset.correct;
+      target.classList.remove('correct-placed', 'incorrect-placed', 'answer-shown');
+      if (placed && placed === want) {
         target.classList.add('correct-placed');
-      } else {
+        return;
+      }
+      const label = `<span><span class="dnd-answer-label">${i18n('correct')}</span> ${chipHTML(want)}</span>`;
+      if (placed) {
+        target.innerHTML = `<s class="dnd-wrong">${chipHTML(placed)}</s>${label}`;
         target.classList.add('incorrect-placed');
+      } else {
+        target.innerHTML = label;
+        target.classList.add('answer-shown');
       }
     });
+    $$('.dnd-chip', container).forEach(c => c.classList.add('placed'));
+    container.dataset.revealed = '1';
   };
 
   window.resetDnD = function (containerId) {
@@ -602,9 +644,10 @@
     $$('.dnd-zone-target', container).forEach(t => {
       t.textContent = i18n('dropHere');
       delete t.dataset.placed;
-      t.classList.remove('correct-placed', 'incorrect-placed');
+      t.classList.remove('correct-placed', 'incorrect-placed', 'answer-shown');
     });
-    $$('.dnd-chip', container).forEach(c => c.classList.remove('placed', 'dragging'));
+    $$('.dnd-chip', container).forEach(c => c.classList.remove('placed', 'dragging', 'selected'));
+    delete container.dataset.revealed;
   };
 
   $$('.dnd-container').forEach(el => initDnD(el));
@@ -798,7 +841,7 @@
     if (!container) return;
     const selected = $('.assumption-option.selected', container);
     const feedback = $('.assumption-feedback', container);
-    const correct  = container.dataset.correct;
+    const answers  = answerList(container);
 
     if (!selected) {
       feedback.textContent = i18n('selectFirst');
@@ -807,14 +850,13 @@
     }
     $$('.assumption-option', container).forEach(o => o.disabled = true);
 
-    if (selected.dataset.value === correct) {
+    if (answers.includes(selected.dataset.value)) {
       selected.classList.add('correct');
       setFeedbackHTML(feedback, '<strong>' + i18n('correct') + '</strong> ' + (container.dataset.explanationRight || ''));
       feedback.className = 'assumption-feedback show success';
     } else {
       selected.classList.add('incorrect');
-      const correctBtn = $(`.assumption-option[data-value="${correct}"]`, container);
-      if (correctBtn) correctBtn.classList.add('correct');
+      $$('.assumption-option', container).forEach(o => { if (answers.includes(o.dataset.value)) o.classList.add('correct'); });
       setFeedbackHTML(feedback, '<strong>' + i18n('incorrect') + '</strong> ' + (container.dataset.explanationWrong || ''));
       feedback.className = 'assumption-feedback show error';
     }
@@ -887,135 +929,74 @@
   $$('.math-derivation').forEach(el => initMathDerivation(el));
 
   /* ── PSEUDOCODE WALKTHROUGH ────────────────────────────────── */
-  /* ── 의사코드 색칠: IDE 토큰 색(Catppuccin, .code-* 클래스)을 자동으로 입힌다 ──
-     이미 <span class="code-…">로 직접 칠한 줄은 건드리지 않는다.
-     키워드(대문자 제어어) · 함수(대문자 이름 + 괄호) · 주석(// 뒤) · 숫자 · 연산자 · 문자열 */
-  const PSEUDO_KEYWORDS = /^(INPUT|OUTPUT|RETURN|FOR|EACH|OF|IN|TO|DO|END|IF|THEN|ELSE|ELIF|WHILE|REPEAT|UNTIL|AND|OR|NOT|USING|LET|SET|BREAK|CONTINUE|FUNCTION|PROCEDURE)$/;
-  const CODE_ESC = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  const CODE_SPAN = (cls, t) => '<span class="code-' + cls + '">' + CODE_ESC(t) + '</span>';
-  const CIL_KEYWORDS = /^(public|private|family|assembly|static|instance|virtual|specialname|rtspecialname|hidebysig|newslot|abstract|sealed|extends|implements|explicit|sequential|auto|value|enum|extern|class|valuetype|interface|cil|managed|pinned|initonly|literal)$/;
-  const CIL_TYPES = /^(void|bool|char|string|object|int|int8|int16|int32|int64|uint8|uint16|uint32|uint64|unsigned|native|float32|float64|typedref)$/;
-  const CIL_OPCODE = /^(?:ld(?:arga?|loca?|c|null|ind|s?flda?|ftn|virtftn|token|elema?|len|str|obj)|st(?:arg|loc|ind|s?fld|elem|obj)|call(?:i|virt)?|newobj|newarr|initobj|ret|box|unbox(?:\.any)?|add|sub|mul|div|rem|neg|and|or|xor|shl|shr|br|brtrue|brfalse|beq|bne|bge|bgt|ble|blt|dup|pop|jmp|localloc|cpblk|initblk|castclass|isinst|throw|rethrow|nop|conv|leave|switch|ceq|cgt|clt)(?:\.[a-z0-9]+)*$/;
-  const CLIKE_KEYWORDS = /^(abstract|as|async|await|base|break|case|catch|class|const|continue|default|delegate|do|else|enum|event|explicit|extends|extern|false|final|finally|fixed|for|foreach|goto|if|implements|implicit|import|in|interface|internal|is|let|lock|namespace|new|null|operator|out|override|package|params|private|protected|public|readonly|record|ref|return|scoped|sealed|stackalloc|static|struct|super|switch|this|throw|throws|true|try|typeof|unsafe|using|var|virtual|void|volatile|while|yield)$/;
-  const CLIKE_TYPES = /^(bool|boolean|byte|char|decimal|double|float|int|long|nint|object|sbyte|short|string|uint|ulong|ushort)$/;
-  const SCHEME_KEYWORDS = /^(define|lambda|let|let\*|letrec|if|cond|else|begin|set!|quote|and|or|when|unless|do)$/;
-
-  /* 코드 덩어리의 언어를 고른다: data-lang이 있으면 그것, 없으면 내용으로 추정 */
-  function detectCodeLang(el, text) {
-    const host = el.closest('[data-lang]');
-    if (host) return host.dataset.lang;
-    if (/^\s*;|\(define\b/m.test(text)) return 'scheme';
-    if (/^\s*\.(method|locals|class|assembly|maxstack|field|module)\b/m.test(text) ||
-        /(^|\s)(ldarga?|ldloca?|ldind|stind|stloc|starg|callvirt|newobj|initobj|ldfld|stfld|ldc|tail\.)\b/m.test(text)) return 'cil';
-    if (/\b(INPUT|OUTPUT|RETURN|FOR EACH|IF|THEN|WHILE)\b/.test(text) && !/[;{}]/.test(text)) return 'pseudo';
-    return 'clike';
-  }
-
-  /* 텍스트 한 덩어리를 언어 규칙으로 토큰화해 HTML 문자열을 돌려준다 */
-  function tokenizeCode(text, lang) {
-    let re, out = '', last = 0, m;
-    if (lang === 'cil') {
-      // 1 주석 2 문자열 3·4 Type::member 5 지시어(.method) 6 낱말(+괄호) 7 숫자 8 연산자
-      re = /(\/\/.*$)|("[^"]*")|([A-Za-z_][\w]*)::(\.?[A-Za-z_][\w]*)|((?<![\w.])\.[a-z][a-z_]*)|([A-Za-z_][\w]*(?:\.[A-Za-z0-9]+)*\.?)(\s*\()?|(\b0x[0-9A-Fa-f]+\b|\b\d+(?:\.\d+)?\b)|([&*=+\-])/gm;
-      while ((m = re.exec(text))) {
-        out += CODE_ESC(text.slice(last, m.index));
-        if (m[1]) out += CODE_SPAN('comment', m[1]);
-        else if (m[2]) out += CODE_SPAN('string', m[2]);
-        else if (m[3]) out += CODE_SPAN('type', m[3]) + CODE_SPAN('operator', '::') + CODE_SPAN('function', m[4]);
-        else if (m[5]) out += CODE_SPAN(m[5] === '.ctor' ? 'function' : 'directive', m[5]);
-        else if (m[6]) {
-          const w = m[6], paren = m[7] || '';
-          if (w === 'tail.' || CIL_OPCODE.test(w)) out += CODE_SPAN('opcode', w) + CODE_ESC(paren);
-          else if (CIL_KEYWORDS.test(w)) out += CODE_SPAN('keyword', w) + CODE_ESC(paren);
-          else if (CIL_TYPES.test(w)) out += CODE_SPAN('type', w) + CODE_ESC(paren);
-          else if (paren) out += CODE_SPAN('function', w) + CODE_ESC(paren);
-          else out += CODE_ESC(w);
-        }
-        else if (m[8]) out += CODE_SPAN('number', m[8]);
-        else if (m[9]) out += CODE_SPAN('operator', m[9]);
-        last = re.lastIndex;
+  /* ── 코드 색칠: IDE 토큰 색(Catppuccin, .code-* 클래스)을 자동으로 입힌다 ──
+     의사코드 줄(.pseudocode-line)과 모든 코드 칸(pre)에 쓴다. 이미 <span class="code-…">로 칠한 부분,
+     KaTeX 결과, $…$가 남은 글자는 건드리지 않는다(수식 렌더링이 뒤에 오므로).
+     주석(// -- # %) · 문자열 · 키워드(대문자 제어어, Python·Lean·Cypher·While 키워드) · 함수(이름+괄호)
+     · 접두 이름(ex:Thing, :Label) · 숫자 · 연산자(:= ← → ≥ ∧ ∪ 등) */
+  const CODE_KEYWORDS = new Set(('INPUT OUTPUT RETURN RETURNS FOR EACH OF IN TO DO END IF THEN ELSE ELIF WHILE REPEAT UNTIL AND OR NOT USING LET SET BREAK CONTINUE FUNCTION PROCEDURE CALL '
+    + 'MATCH WHERE WITH OPTIONAL CONTAINS AS ORDER BY LIMIT UNWIND CREATE MERGE DISTINCT DELETE DETACH SELECT FROM ASK CONSTRUCT FILTER PREFIX UNION '
+    + 'from import def return if elif else for in while not and or class lambda None True False with as yield pass raise try except assert '
+    + 'structure theorem lemma where by fun let have show match then do end skip true false begin od fi inductive instance').split(' '));
+  const CODE_RE = new RegExp([
+    '((?:\\/\\/|(?:^|(?<=\\s))--\\s|(?:^|(?<=\\s))#\\s|^%).*$)',          // 1 주석
+    '("[^"\\n]*"|(?<![A-Za-z0-9_가-힣])\'[^\'\\n]*\')',                    // 2 문자열
+    '((?:[A-Za-z_][\\w-]*)?:[A-Za-z_][\\w]*)(?![\\w(])(?!\\s*=)',            // 3 접두 이름·레이블(ex:Thing, v:CVE, :HAS_CWE)
+    '([A-Za-z_][A-Za-z0-9_]*(?:-[A-Za-z][A-Za-z0-9_]*)*)(\\s*\\()?',       // 4 이름, 5 여는 괄호
+    '(\\d+(?:\\.\\d+)?)',                                                    // 6 숫자
+    '(:=|:-|<-|->|<=|>=|!=|==|[←→≥≤≠∧∨¬∪∩∘∈∉⊆⊂∅=+\\-*\\/<>])'               // 7 연산자
+  ].join('|'), 'gm');
+  const escHTML = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  function tokenizeCode(text, pseudo) {
+    let out = '', last = 0, m;
+    CODE_RE.lastIndex = 0;
+    while ((m = CODE_RE.exec(text))) {
+      if (m[0] === '') { CODE_RE.lastIndex++; continue; }
+      out += escHTML(text.slice(last, m.index));
+      if (m[1]) out += '<span class="code-comment">' + escHTML(m[1]) + '</span>';
+      else if (m[2]) out += '<span class="code-string">' + escHTML(m[2]) + '</span>';
+      else if (m[3]) out += '<span class="code-property">' + escHTML(m[3]) + '</span>';
+      else if (m[4]) {
+        const w = m[4];
+        // 의사코드 줄 맨 앞의 영어 동사(Deduplicate, Sort …)도 제어어로 본다(줄 번호 '19: ' 뒤 포함)
+        const lead = pseudo && /^[A-Z][a-z]+$/.test(w) && /^\s*(\d+:\s*)?$/.test(text.slice(text.lastIndexOf('\n', m.index - 1) + 1, m.index));
+        const kw = CODE_KEYWORDS.has(w) || (/^[A-Z]{2,}$/.test(w) && !m[5]) || lead;
+        if (kw) out += '<span class="code-keyword">' + w + '</span>' + (m[5] || '');
+        else if (m[5]) out += '<span class="code-function">' + w + '</span>' + m[5];
+        else out += w;
       }
-    } else if (lang === 'scheme') {
-      // 1 주석 2 문자열 3 인용 기호 4 여는 괄호 뒤 낱말 5 숫자 6 연산자
-      re = /(;.*$)|("[^"]*")|('[\w\-!?*]+)|\((\s*[A-Za-z_!?*<>=+\-][\w\-!?*<>=]*)|(\b\d+(?:\.\d+)?\b)/gm;
-      while ((m = re.exec(text))) {
-        out += CODE_ESC(text.slice(last, m.index));
-        if (m[1]) out += CODE_SPAN('comment', m[1]);
-        else if (m[2] || m[3]) out += CODE_SPAN('string', m[2] || m[3]);
-        else if (m[4]) {
-          const w = m[4].trim(), lead = m[4].slice(0, m[4].length - w.length);
-          const cls = SCHEME_KEYWORDS.test(w) ? 'keyword' : (/^[=<>+\-*\/]+$/.test(w) ? 'operator' : 'function');
-          out += '(' + CODE_ESC(lead) + CODE_SPAN(cls, w);
-        }
-        else if (m[5]) out += CODE_SPAN('number', m[5]);
-        last = re.lastIndex;
-      }
-    } else if (lang === 'pseudo') {
-      re = /(\/\/.*$)|("[^"]*")|((?<![A-Za-z0-9_가-힣])'[^']*')|([A-Za-z_][A-Za-z0-9_]*)(\s*\()?|(\d+(?:\.\d+)?)|(<=|>=|!=|==|[=+\-*\/<>←])/gm;
-      while ((m = re.exec(text))) {
-        out += CODE_ESC(text.slice(last, m.index));
-        if (m[1]) out += CODE_SPAN('comment', m[1]);
-        else if (m[2] || m[3]) out += CODE_SPAN('string', m[2] || m[3]);
-        else if (m[4]) {
-          if (PSEUDO_KEYWORDS.test(m[4])) out += CODE_SPAN('keyword', m[4]) + CODE_ESC(m[5] || '');
-          else if (m[5]) out += CODE_SPAN('function', m[4]) + CODE_ESC(m[5]);
-          else out += CODE_ESC(m[4]);
-        }
-        else if (m[6]) out += CODE_SPAN('number', m[6]);
-        else if (m[7]) out += CODE_SPAN('operator', m[7]);
-        last = re.lastIndex;
-      }
-    } else {
-      // C#·Java: 1 주석 2 문자열 3 문자 4 낱말(+괄호) 5 숫자 6 연산자
-      re = /(\/\/.*$)|("(?:[^"\\]|\\.)*")|('(?:[^'\\]|\\.)')|([A-Za-z_][\w]*)(\s*\()?|(\b0x[0-9A-Fa-f]+\b|\b\d+(?:\.\d+)?[fFdDmML]?\b)|(=>|==|!=|<=|>=|&&|\|\||\+\+|--|[=+\-*\/%<>!?:&|])/gm;
-      while ((m = re.exec(text))) {
-        out += CODE_ESC(text.slice(last, m.index));
-        if (m[1]) out += CODE_SPAN('comment', m[1]);
-        else if (m[2] || m[3]) out += CODE_SPAN('string', m[2] || m[3]);
-        else if (m[4]) {
-          const w = m[4], paren = m[5] || '';
-          if (CLIKE_KEYWORDS.test(w)) out += CODE_SPAN('keyword', w) + CODE_ESC(paren);
-          else if (CLIKE_TYPES.test(w)) out += CODE_SPAN('type', w) + CODE_ESC(paren);
-          else if (paren) out += CODE_SPAN('function', w) + CODE_ESC(paren);
-          else if (/^[A-Z]/.test(w)) out += CODE_SPAN('type', w);
-          else out += CODE_ESC(w);
-        }
-        else if (m[6]) out += CODE_SPAN('number', m[6]);
-        else if (m[7]) out += CODE_SPAN('operator', m[7]);
-        last = re.lastIndex;
-      }
+      else if (m[6]) out += '<span class="code-number">' + m[6] + '</span>';
+      else if (m[7]) out += '<span class="code-operator">' + escHTML(m[7]) + '</span>';
+      last = CODE_RE.lastIndex;
     }
-    return out + CODE_ESC(text.slice(last));
+    return out + escHTML(text.slice(last));
   }
-
-  /* 요소 안의 텍스트 노드만 색칠한다. 직접 칠한 <span class="code-…">와 수식은 건드리지 않는다(멱등) */
-  function highlightCode(el, lang) {
-    if (!el || el.dataset.colored) return;
-    el.dataset.colored = '1';
-    const text = el.textContent;
-    if (text.indexOf('$') >= 0 && /\$[^$]+\$/.test(text)) return;   // 수식이 섞인 줄
-    lang = lang || detectCodeLang(el, text);
-    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
-      acceptNode: n => (n.parentElement.closest('[class^="code-"], [class*=" code-"], .katex') &&
-                        n.parentElement.closest('[class^="code-"], [class*=" code-"], .katex') !== el)
-                       ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT
+  function colorizeCode(root) {
+    if (!root || root.dataset.colored) return;   // 멱등
+    root.dataset.colored = '1';
+    const pseudo = root.classList.contains('pseudocode-line');
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: n => (n.parentElement.closest('[class^="code-"], [class*=" code-"], .katex, .katex-display')
+        || (n.nodeValue.indexOf('$') >= 0 && !n.parentElement.closest('pre, code')) || !/[A-Za-z0-9:=←→≥≤≠∧∨∪∩∘∈∅+\-*\/<>"']/.test(n.nodeValue))
+        ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT
     });
     const nodes = [];
     while (walker.nextNode()) nodes.push(walker.currentNode);
     nodes.forEach(n => {
-      if (!n.nodeValue.trim()) return;
-      const tpl = document.createElement('template');
-      tpl.innerHTML = tokenizeCode(n.nodeValue, lang);
-      n.parentNode.replaceChild(tpl.content, n);
+      const html = tokenizeCode(n.nodeValue, pseudo);
+      if (html === escHTML(n.nodeValue)) return;
+      const t = document.createElement('template');
+      t.innerHTML = html;
+      n.parentNode.replaceChild(t.content, n);
     });
   }
-  function colorizePseudocode(line, lang) { highlightCode(line, lang); }
+  const colorizePseudocode = colorizeCode;
+  $$('pre').forEach(pre => { if (!pre.closest('svg')) colorizeCode(pre); });
 
   function initPseudocodeWalkthrough(containerEl) {
     if (!containerEl) return;
     const lines      = $$('.pseudocode-line', containerEl);
-    const codeLang = detectCodeLang(containerEl, lines.map(l => l.textContent).join('\n'));
-    lines.forEach(l => colorizePseudocode(l, codeLang));
+    lines.forEach(colorizePseudocode);
     const explLines  = $$('.pe', containerEl);
     const progressEl = $('.pseudocode-progress', containerEl);
     let current = -1;
@@ -1081,8 +1062,6 @@
   }
 
   $$('.pseudocode-translation').forEach(el => initPseudocodeWalkthrough(el));
-  // 일반 코드 블록(<pre><code>)도 같은 규칙으로 색칠한다
-  $$('pre > code').forEach(el => highlightCode(el));
 
   /* ── RESULT COMPARISON ─────────────────────────────────────── */
   function initResultComparison(containerEl) {
@@ -1138,5 +1117,88 @@
       }
     });
   });
+
+  /* ── 쪽 배치: 요약 위치를 모든 쪽에서 같게, 고급 쪽의 단서 칸에 용어 정리 ─────────
+     1) 단원 첫 쪽(단원 도입 + 첫 화면)도 다른 쪽처럼 요약(.summary)이 화면 맨 아래에 오도록
+        첫 화면의 min-height를 "창 높이 - 단원 위에서 첫 화면까지의 거리"로 맞춘다.
+     2) 고급 쪽(수식 블록·유도·의사코드·코드 칸이 있거나 용어가 4개 이상인 쪽, 표지 난이도 '고급'인 강의의 모든 쪽,
+        data-level="advanced")은 노트 칸의 용어 툴팁으로 단서 칸 아래에 '용어 정리'를 만든다.
+        앞 쪽에서 나온 용어도 다시 적는다. 쪽 높이를 넘지 않는 만큼만 넣는다. data-level="basic"이면 넣지 않는다. */
+  function initPageLayout() {
+    const firstScreens = $$('.module-header + .screen.cornell');
+    const navHeight = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-height')) || 48;
+    const courseAdvanced = $$('.course-cover-meta-item').some(e => e.textContent.trim() === '고급');
+
+    function allowedHeight(screen) {
+      if (firstScreens.includes(screen)) {
+        const mod = screen.closest('.module');
+        return window.innerHeight - (screen.getBoundingClientRect().top - mod.getBoundingClientRect().top);
+      }
+      return window.innerHeight - navHeight();
+    }
+    function termsOf(notes) {
+      const seen = new Set(), out = [];
+      $$('.term[data-definition]', notes).forEach(t => {
+        const d = t.dataset.definition.trim();
+        const k = d.search(/[:：]\s/);
+        const name = (k > 0 ? d.slice(0, k) : t.textContent).trim();
+        const def = (k > 0 ? d.slice(k + 1) : d).trim();
+        const key = name.replace(/\s+/g, '');
+        if (!name || seen.has(key)) return;
+        seen.add(key);
+        out.push([name, def]);
+      });
+      return out;
+    }
+    function isAdvanced(screen, notes) {
+      const lv = screen.dataset.level;
+      if (lv === 'basic') return false;
+      if (lv === 'advanced' || courseAdvanced) return true;
+      if ($('.katex-display, .math-derivation, .pseudocode-translation, pre', notes)) return true;
+      return termsOf(notes).length >= 4;
+    }
+    let lastKey = '';
+    function layout(force) {
+      const key = window.innerWidth + 'x' + window.innerHeight;
+      if (force !== true && key === lastKey) return;   // 크기가 그대로면 다시 짜지 않는다(깜빡임 방지)
+      lastKey = key;
+      $$('.cue-terms[data-auto]').forEach(e => e.remove());
+      firstScreens.forEach(s => { s.style.minHeight = ''; });
+      if (window.innerWidth < 1200) return;   // 한 단으로 접힌 화면은 높이 제한이 없다
+      firstScreens.forEach(s => { s.style.minHeight = Math.max(0, Math.floor(allowedHeight(s))) + 'px'; });
+      $$('.screen.cornell').forEach(screen => {
+        const cue = $(':scope > .cue', screen), notes = $(':scope > .notes', screen);
+        if (!cue || !notes || !isAdvanced(screen, notes)) return;
+        const listed = new Set($$('dt', cue).map(d => d.textContent.replace(/\s+/g, '')));
+        const terms = termsOf(notes).filter(([n]) => !listed.has(n.replace(/\s+/g, '')));
+        if (!terms.length) return;
+        const box = document.createElement('div');
+        box.className = 'cue-terms';
+        box.dataset.auto = '1';
+        box.innerHTML = '<span class="cue-label">용어 정리</span><dl></dl>';
+        const dl = $('dl', box);
+        cue.appendChild(box);
+        const limit = allowedHeight(screen) + 0.5;
+        let n = 0;
+        for (const [name, def] of terms) {
+          const dt = document.createElement('dt'), dd = document.createElement('dd');
+          dt.textContent = name; dd.textContent = def;
+          dl.append(dt, dd);
+          if (screen.getBoundingClientRect().height > limit) { dt.remove(); dd.remove(); break; }
+          n++;
+        }
+        if (!n) box.remove();
+      });
+    }
+    let timer = null;
+    const relayout = () => { clearTimeout(timer); timer = setTimeout(layout, 120); };
+    // KaTeX 렌더링(DOMContentLoaded + 100ms) 뒤에, 글꼴이 준비되면 다시
+    const first = () => setTimeout(() => layout(true), 250);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', first);
+    else first();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => setTimeout(() => layout(true), 300));
+    window.addEventListener('resize', relayout);
+  }
+  initPageLayout();
 
 })();

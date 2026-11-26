@@ -31,7 +31,7 @@
       <div class="notes">
         <h3 class="screen-heading">이 논문을 쓴 이유와 새로운 점<span class="paper-ref">논문 1절</span></h3>
         <p><span class="term" data-definition="자바 가상 머신(Java Virtual Machine, JVM): Java 프로그램의 바이트코드를 실행하는 가상 머신.">자바 가상 머신</span>(Java Virtual Machine, JVM)은 여러 언어 구현자가 실행 환경으로 택했지만, 저자들은 JVM이 <strong>다중 언어 플랫폼으로는 본질적으로 최적이 아니라고</strong> 주장한다. 이 논문은 처음부터 다중 언어용으로 설계한 <span class="term" data-definition="공통 언어 기반(Common Language Infrastructure, CLI): 여러 언어를 한 실행 환경에서 돌리려고 정한 표준 명세. ECMA-335로 표준화됨.">공통 언어 기반</span>(Common Language Infrastructure, CLI)를 JVM과 비교한다. 논문은 명세인 CLI와 Microsoft의 구현인 <span class="term" data-definition="공통 언어 런타임(Common Language Runtime, CLR): Microsoft가 만든 CLI 구현. 논문은 CLI와 섞어 씀.">공통 언어 런타임</span>(Common Language Runtime, CLR)을 섞어 쓰며, CLI용 코드는 <span class="term" data-definition="공통 중간 언어(Common Intermediate Language, CIL): CLI의 명령어로 쓴 중간 언어. MSIL 또는 IL이라고도 부름.">공통 중간 언어</span>(Common Intermediate Language, CIL)이다.</p>
-        <div class="svg-diagram animate-in" style="margin:0 auto">
+        <div class="svg-diagram animate-in" style="margin:0 auto;max-width:720px">
           <svg viewBox="0 0 800 184" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="이전에는 Scheme과 Pascal이 trampoline이나 원소 1개 배열 같은 우회책을 거쳐 JVM에 올라가고, CLI에서는 세 언어가 필요한 명령어로 바로 대응한다">
             <foreignObject x="16" y="0" width="368" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; font-weight:700"><span>이전: JVM 위의 여러 언어</span></div></foreignObject>
             <path class="edge-line" d="M112,48 H286"/><polygon class="edge-arrow" points="286,43 296,48 286,53"/>

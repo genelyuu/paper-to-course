@@ -159,8 +159,7 @@
                 12, 14, 16, 18, 20 };
 var slice = new Span&lt;int&gt;(array, 2, 5);
 for (int i = 0; i &lt; slice.Length; i++)
-    slice[i] *= 2;
-// 2 4 12 16 20 24 28 16 18 20</code></pre>
+    slice[i] *= 2;</code></pre>
           <figure class="figure side">
             <svg viewBox="0 0 360 120" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="길이 10 배열에서 2번부터 6번 칸을 Span이 가리키고, 그 칸들만 두 배가 된다">
 <text class="muted" x="0" y="14" font-size="11">array (복사 없이 같은 메모리)</text>
@@ -191,7 +190,7 @@ for (int i = 0; i &lt; slice.Length; i++)
           </tbody>
           <caption>표는 C#에서 ref 기능이 넓어진 과정을 나타낸 것이다. (출처: C# 버전 기록, <code>Span&lt;T&gt;</code> API 문서)</caption>
         </table>
-        <p><code>Span&lt;T&gt;</code>은 <code>ref struct</code>라서 boxing, 참조 타입의 필드, await 경계 넘기가 금지된다. 스택을 가리킬 수 있는 포인터를 힙에 두지 못하게 막는 대가로 해석할 수 있다.</p>
+        <p><code>Span&lt;T&gt;</code>은 <code>ref struct</code>라 boxing, 참조 타입 필드, await 경계 넘기가 금지된다. 스택 포인터를 힙에 두지 않으려는 대가로 해석할 수 있다.</p>
       </div>
       <div class="summary"><span class="summary-label">요약</span><p>managed pointer는 C# 7 이후 ref와 <code>Span&lt;T&gt;</code>으로 드러났고, 안전을 위해 힙에 둘 수 없다는 제약을 진다.</p></div>
     </div>
@@ -422,10 +421,10 @@ for (int i = 0; i &lt; slice.Length; i++)
         <div class="quiz-container animate-in" id="tr-quiz-b">
           <div class="quiz-question-block"
                data-correct="option-c"
-               data-explanation-right="③ | JVM 명세 SE 21도 64K 제한을 두므로 ㄴ은 옳지 않다."
-               data-explanation-wrong="| 정답은 ③이다. JVM 명세 SE 21도 64K 제한을 두므로 ㄴ은 옳지 않다.">
+               data-explanation-right="③ | SE 21 명세도 64K 제한을 두므로 ㄴ은 옳지 않다."
+               data-explanation-wrong="| 정답은 ③이다. SE 21 명세도 64K 제한을 두므로 ㄴ은 옳지 않다.">
             <h3 class="quiz-question"><span class="q-num">3</span>JVM에 대해 옳은 것만을 <span class="nobr">&lt;보기&gt;에서</span> 고른 것은?</h3>
-            <div class="bogi">
+            <div class="bogi" style="padding-top:var(--space-4)">
               <p>ㄱ. Java SE 7에 <code>invokedynamic</code>이 추가되었다.</p>
               <p>ㄴ. 메서드 코드 64K 제한이 없어졌다.</p>
               <p>ㄷ. <code>Math.addExact</code>는 넘치면 예외를 낸다.</p>
@@ -459,7 +458,7 @@ for (int i = 0; i &lt; slice.Length; i++)
           <button class="quiz-reset-btn" onclick="resetQuiz('tr-quiz-b')">다시 풀기</button>
         </div>
       </div>
-      <div class="summary"><span class="summary-label">요약</span><p>JVM은 <code>invokedynamic</code>과 addExact를 보탰지만 64K 제한은 남았고, F#은 <code>tail.</code>을 기본으로 쓴다.</p></div>
+      <div class="summary"><span class="summary-label">요약</span><p>JVM은 <code>invokedynamic</code>과 addExact를 보탰지만 64K 제한은 남았고, F#은 <code>tail.</code>을 쓴다.</p></div>
     </div>
 
   </div>

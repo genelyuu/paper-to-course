@@ -76,12 +76,12 @@
         <div class="with-figure" style="--figure-side-width:280px">
           <div>
             <p><span class="term" data-definition="구조체(Struct): 여러 필드를 하나로 묶은 값 타입. CLI에서는 .class value로 선언함.">구조체(Struct)</span> Point는 int 필드 x, y를 담는다. CLI는 필드를 어떤 순서로든 저장할 수 있다.</p>
-<pre class="pseudocode-block" style="margin:var(--space-3) 0;padding:var(--space-4)"><code>.class value Point {
+<pre class="pseudocode-block" style="margin:var(--space-2) 0;padding:var(--space-3)"><code>.class value Point {
   .field public int x
   .field public int y
 }</code></pre>
             <p><code>initobj T</code>는 스택의 주소가 가리키는 값 타입의 모든 필드를 0이나 null로 채운다. 타입 하나에 매이지 않는 polytypic 명령어의 예이다.</p>
-<pre class="pseudocode-block" style="margin:var(--space-3) 0;padding:var(--space-4)"><code>.locals (valuetype Point p)
+<pre class="pseudocode-block" style="margin:var(--space-2) 0;padding:var(--space-3)"><code>.locals (valuetype Point p)
 ldloca p        <span class="code-comment">// 스택: [&amp;p]</span>
 initobj Point   <span class="code-comment">// 스택: [ ], p = (0, 0)</span></code></pre>
           </div>
@@ -100,7 +100,7 @@ initobj Point   <span class="code-comment">// 스택: [ ], p = (0, 0)</span></co
           </figure>
         </div>
         <p><span class="term" data-definition="열거형(Enum): 정수 값에 이름을 붙인 값 타입. 이름과 정수를 타입 안전하게 묶음.">열거형(Enum)</span>은 이름과 정수 값을 타입 안전하게 묶는다. 내부 저장 타입과 비트 집합 여부도 정할 수 있다.</p>
-<pre class="pseudocode-block" style="margin:var(--space-3) 0;padding:var(--space-4)"><code>.class enum Shape {
+<pre class="pseudocode-block" style="margin:var(--space-2) 0;padding:var(--space-3)"><code>.class enum Shape {
   .field public static valuetype Shape RECTANGLE = int32(0)
   .field public static valuetype Shape CIRCLE = int32(1)
 }</code></pre>
@@ -278,7 +278,7 @@ initobj Point   <span class="code-comment">// 스택: [ ], p = (0, 0)</span></co
       <div class="notes">
         <h3 class="screen-heading">참조 타입: Foo와 Bar<span class="paper-ref">논문 7절</span></h3>
         <p>참조 타입에는 <span class="term" data-definition="클래스(Class): 필드와 메서드를 묶어 객체의 모양을 정한 참조 타입.">클래스(Class)</span>, <span class="term" data-definition="인터페이스(Interface): 구현할 메서드의 목록만 정한 참조 타입.">인터페이스(Interface)</span>, 배열, <span class="term" data-definition="대리자(Delegate): 메서드를 가리키는 타입 안전한 객체.">대리자(Delegate, 메서드를 가리키는 타입 안전 객체)</span>가 있고, 논문은 클래스만 다룬다. Bar는 Foo를 상속하며 두 클래스는 같은 네 메서드를 정의한다.</p>
-<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin:var(--space-3) 0">
+<div class="cols-2 gap-3" style="margin:var(--space-3) 0">
 <pre class="pseudocode-block" style="margin:0;font-size:12px;padding:var(--space-4)"><code>.class public Foo {
   .method public virtual void f() {...}
   .method public instance void g() {...}

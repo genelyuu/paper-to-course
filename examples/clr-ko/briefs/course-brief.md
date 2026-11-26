@@ -145,7 +145,7 @@
 - `$M/SKILL.md`가 없으면 `/Users/eugene/.claude/skills/paper-to-course/SKILL.md`를 읽는다. 특히 다음 부분이다.
   - "용어 표기"
   - "작성 규칙 (필수, 모든 모듈에 적용)"
-  - Phase 3의 EBS 교재 구성
+  - Phase 3의 학습서 구성
   - 코넬 페이지 규칙
 - `$M/references/`
   - `korean-style-guide.md` 전체
