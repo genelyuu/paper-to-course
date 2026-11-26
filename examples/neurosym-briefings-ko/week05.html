@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>신경·기호 AI 브리핑 · 5주차</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .card h3 a { color: inherit; }
+  .card .meta .badge { margin-right: 2px; }
+  .sum-table td:first-child { min-width: 180px; font-weight: 700; }
+  .sum-table td:last-child { min-width: 260px; }
+  .edu-table td:first-child { white-space: nowrap; font-weight: 700; }
+  .edu-table td { min-width: 150px; }
+  details > .body > :first-child { margin-top: 0; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="wrap">
+    <a href="index.html">← 전체 목록</a>
+    <nav class="weeknav">
+      <a href="week04.html">← <span class="label">4주차</span></a>
+      <a href="week06.html"><span class="label">6주차</span> →</a>
+    </nav>
+  </div>
+</div>
+
+<main class="wrap">
+<header class="hero">
+  <div class="eyebrow">WEEK 05 · 2026-10-23</div>
+  <h1>신경·기호 AI 주간 연구·교육 브리핑</h1>
+  <p class="lede">이번 주 가장 직접적인 자료는 AgentOnto, HeritageKGBench 연구, PerMIT 세 편이다. 특히 LLM 문장→복합 온톨로지 트리플 변환에서는 검증기를 뒤에 붙이는 것만으로 상류 추출 오류가 복구되지 않는다는 강한 부정적 결과가 제시되었다. SpecRepair(자연어→LTL 폐루프)와 NIKG(OWL/Turtle 및 전체 재현 코드 공개)는 교육·프로토타이핑에 특히 유용하다.</p>
+
+  <div class="stats">
+    <div class="stat"><div class="num">19</div><div class="label">수록 연구 (A 7 · B 4 · C 8)</div></div>
+    <div class="stat"><div class="num">2</div><div class="label">인접 참고 자료</div></div>
+    <div class="stat"><div class="num">3</div><div class="label">심사 완료로 표기된 연구</div></div>
+    <div class="stat"><div class="num">3</div><div class="label">상세 적용 설계</div></div>
+    <div class="stat"><div class="num">17</div><div class="label">교육 적용 검토 항목</div></div>
+    <div class="stat"><div class="num">1</div><div class="label">미니 튜토리얼 (NIKG)</div></div>
+  </div>
+
+  <ul class="toc">
+    <li><a href="#scope">1. 조사 범위</a></li>
+    <li><a href="#verdict">2. 이번 주 핵심 판단</a></li>
+    <li><a href="#list">3. 직접 관련 연구 목록</a></li>
+    <li><a href="#design">4. 3건의 적용 설계</a></li>
+    <li><a href="#edu">5. 교육공학적 적용</a></li>
+    <li><a href="#tutorial">6. 미니 튜토리얼</a></li>
+    <li><a href="#next">7. 향후 권장 방식</a></li>
+  </ul>
+</header>
+
+<section id="scope">
+  <h2>1. 조사 범위</h2>
+  <div class="card">
+    <dl class="kv">
+      <dt>검색 기준일</dt><dd>2026-10-23</dd>
+      <dt>포함 기간</dt><dd>2026-10-16 00:00–2026-10-22 23:59</dd>
+      <dt>검색원</dt><dd>arXiv의 cs.AI·cs.CL·cs.LG·cs.LO·cs.MA·cs.CR·cs.SE, SpringerLink/LNCS, ACL Anthology, OpenReview, ACM·IEEE 공개 색인, CEUR 및 저자 공개 저장소</dd>
+      <dt>주요 검색식</dt><dd>
+<pre><code>(neuro-symbolic OR neurosymbolic) AND (ontology OR knowledge graph OR reasoning)
+("natural language" OR sentence) AND (logic OR LTL OR FOL OR formalization)
+("multi-agent" OR agentic) AND (trust OR verification OR guard OR assurance)
+(ontology generation OR KG construction OR semantic parsing) AND LLM</code></pre></dd>
+      <dt>포함 기준</dt><dd>기간 중 최초 공개되었거나 방법·실험·결론이 실질적으로 바뀐 판본, 원문에서 연구 주제와 평가 설계를 확인할 수 있는 자료</dd>
+      <dt>제외 기준</dt><dd>단순 날짜·서식 수정, 응용 분야에서 ‘agent’만 사용하는 논문, 리뷰되지 않은 홍보자료, 동일 학회의 arXiv·출판 판본 중복</dd>
+    </dl>
+  </div>
+  <div class="callout warn"><strong>주의.</strong> ‘모두’는 위 검색원에서 발견되고 원문 관련성을 확인한 자료를 뜻한다. 비공개 기술 보고서와 색인 지연 자료까지 완전 포괄한다는 의미는 아니다.</div>
+  <p>표기: <span class="badge fact">사실</span> 원문·서지에서 확인, <span class="badge claim">저자 주장</span> 논문의 해석, <span class="badge link">연결 추론</span> 사용자 연구에 대한 제안.</p>
+</section>
+
+<section id="verdict">
+  <h2>2. 이번 주 핵심 판단</h2>
+  <p>가장 직접적인 자료는 세 편이다.</p>
+  <div class="grid-2">
+    <div class="card"><h3>1. AgentOnto</h3><p>데이터베이스·문서·예제 작업을 하나의 갱신 가능한 분석 온톨로지로 통합한다. 사용자의 제조·투자엔지니어링 문서 및 AACE 비용 온톨로지에 가장 직접적이다.</p></div>
+    <div class="card"><h3>2. HeritageKGBench 연구</h3><p>LLM 문장→복합 온톨로지 트리플 변환에서 검증기를 뒤에 붙이는 것만으로는 상류 추출 오류가 복구되지 않는다는 강한 부정적 결과를 제시한다.</p></div>
+    <div class="card"><h3>3. PerMIT</h3><p>공유 메모리와 에이전트 간 지식을 신뢰·검증하는 구체적 구조, 공격 실험 및 Lean 4 정리를 제공한다.</p></div>
+  </div>
+  <p>또한 이번 주에는 자연어→LTL→반례→자연어 수정의 폐루프를 구현한 <strong>SpecRepair</strong>, OWL/Turtle 산출물과 전체 재현 코드를 공개한 <strong>NIKG</strong>가 교육·프로토타이핑 관점에서 특히 유용하다.</p>
+</section>
+
+<section id="list">
+  <h2>3. 직접 관련 연구 목록</h2>
+
+  <h3>요약 표</h3>
+  <div class="table-wrap">
+    <table class="sum-table">
+      <thead><tr><th>제목</th><th>분야</th><th>공개일</th><th>심사</th><th>핵심 한 줄</th></tr></thead>
+      <tbody>
+        <tr><td><a href="#a1">AgentOnto</a></td><td>A 온톨로지·KG</td><td>v1 10/16</td><td>심사 중</td><td>DB·문서·예제 작업에서 갱신 가능한 분석 온톨로지를 만들어 계획·검사·SQL 실행·피드백에 사용</td></tr>
+        <tr><td><a href="#a2">LLM-Based KGC for Cultural Heritage</a></td><td>A 온톨로지·KG</td><td>10/16 온라인</td><td>심사 완료 (EKAW 2026)</td><td>복합 사건 그래프에서 모든 방법 F1≤0.06, 사후 SHACL로는 상류 오류 미복구</td></tr>
+        <tr><td><a href="#a3">NIKG</a></td><td>A 온톨로지·KG</td><td>v1 10/19</td><td>SKILLED-LLMs 2026 출판</td><td>nuScenes에서 OWL 스키마·인스턴스를 한 Turtle 그래프로 생성, 코드·OWL 공개</td></tr>
+        <tr><td><a href="#a4">RANGER</a></td><td>A 온톨로지·KG</td><td>v1 10/20</td><td>프리프린트</td><td>Transformer 정책이 KG를 탐색, LLM mentor 의미 보상으로 GRPO 학습</td></tr>
+        <tr><td><a href="#a5">ChronoSynth</a></td><td>A 온톨로지·KG</td><td>v1 10/21</td><td>프리프린트</td><td>temporal KG→질문 생성을 Temporal Intent State로 고정</td></tr>
+        <tr><td><a href="#a6">Kontrast</a></td><td>A 온톨로지·KG</td><td>10/16 온라인</td><td>심사 완료 (EKAW 2026)</td><td>텍스트·표·KG 간 불일치를 분류하고 Text-to-SPARQL+LLM으로 설명</td></tr>
+        <tr><td><a href="#a7">On the LLM Verification for Argument Graph Generation</a></td><td>A 온톨로지·KG</td><td>v1 10/19</td><td>CIKM GaLM 워크숍 채택</td><td>구조 검사→solver→LLM review→debate→인간 검토의 계층형 검증</td></tr>
+        <tr><td><a href="#b1">SpecRepair</a></td><td>B 자연어→논리</td><td>10/17 온라인</td><td>심사 완료 (ISoLA 2026)</td><td>자연어→LTL→반례→자연어 수정 폐루프</td></tr>
+        <tr><td><a href="#b2">SLoSa</a></td><td>B 자연어→논리</td><td>v1 10/20</td><td>프리프린트</td><td>PDDL 데이터 생성 후 SFT+verifier-reward RL, 4B–14B 모델 성공률 70.5–76.0%</td></tr>
+        <tr><td><a href="#b3">Toward Safe LLM Agents v3</a></td><td>B 자연어→논리</td><td>최초 6/22, v2 10/17, v3 10/20</td><td>ACM CSUR 심사 중</td><td>38편 PRISMA 검토, 9개 주장 중 7개가 GRADE ‘Very Low’</td></tr>
+        <tr><td><a href="#b4">Towards Robust and Safe Decision-Making Under Uncertainty</a></td><td>B 자연어→논리</td><td>10/17 온라인</td><td>ISoLA 2026 (심사 상태 미기재)</td><td>model learning→model checking→RL→runtime testing 연구 로드맵</td></tr>
+        <tr><td><a href="#c1">PerMIT</a></td><td>C 멀티에이전트</td><td>v1 10/20</td><td>프리프린트</td><td>비신뢰 메모리를 finite interface·confirmation gate로 격리, Lean 4 정리</td></tr>
+        <tr><td><a href="#c2">Proof-Carrying Contracts</a></td><td>C 멀티에이전트</td><td>v1 10/20</td><td>프리프린트</td><td>계약 보존 증명을 제출하고 Airlock이 기계 검사</td></tr>
+        <tr><td><a href="#c3">CATS</a></td><td>C 멀티에이전트</td><td>v1 10/21</td><td>프리프린트</td><td>실행 trace 기반 agent별 기여도 부여와 가지치기</td></tr>
+        <tr><td><a href="#c4">VerifierBench</a></td><td>C 멀티에이전트</td><td>v1 10/19</td><td>프리프린트</td><td>생성 verifier는 올바른 대안 답 수용에 특히 취약</td></tr>
+        <tr><td><a href="#c5">Who Verifies the Builder?</a></td><td>C 멀티에이전트</td><td>v1 10/16</td><td>프리프린트</td><td>build plane과 assurance plane 분리, fresh-context verifier가 더 많은 결함 탐지</td></tr>
+        <tr><td><a href="#c6">AgentPolicyForge</a></td><td>C 멀티에이전트</td><td>v1 10/20</td><td>프리프린트</td><td>정책 준수/위반 도구호출로 적응형 guard 학습, ASR 상대 40–44% 감소</td></tr>
+        <tr><td><a href="#c7">ReMAS</a></td><td>C 멀티에이전트</td><td>v1 10/20</td><td>프리프린트</td><td>RL attacker가 MAS의 system prompt를 추출하는 black-box red teaming</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>A. 온톨로지 생성·KG 구성·추론</h3>
+
+  <article class="card" id="a1">
+    <h3><a href="https://arxiv.org/abs/2610.23317" target="_blank" rel="noopener">AgentOnto</a></h3>
+    <div class="meta"><span class="badge topic">A</span><span>Pan 외</span><span>v1 10/16</span><span class="badge pre">심사 중</span><a href="https://doi.org/10.48550/arXiv.2610.23317" target="_blank" rel="noopener">DOI</a></div>
+    <dl class="kv">
+      <dt>핵심 기여·방법</dt><dd>DB·업무문서·예제 작업에서 <code>Entity/Relation–Metric–DB Mapping</code> 온톨로지를 만들고, 계획 생성·검사·SQL 실행·피드백 갱신 전 단계에 사용</dd>
+      <dt>평가·결과</dt><dd>WDI 282건+AQS 324건. 평균 분석 정확도 87.5% 대 최강 기준선 DIN-SQL 55.0%. 고정 온톨로지 분석만 비교하면 95.9%, silent semantic error 5.5%. 22개 갱신 사건에서 보고된 갱신·보존·일반화 성능은 모두 100%.</dd>
+      <dt>한계</dt><dd>코드·벤치마크 전체가 공개되지 않았고 한 계열의 생성/평가 모델에 크게 의존한다.</dd>
+      <dt>연구 연결</dt><dd><span class="badge link">연결 추론</span> <code>E=장비·문서·공정</code>, <code>M=비용/성숙도 계산 규칙</code>, <code>G=문서 위치·SQL·RDF 매핑</code>으로 옮기고, 갱신 시 correction/retention competency question을 실행한다.</dd>
+    </dl>
+  </article>
+
+  <article class="card" id="a2">
+    <h3><a href="https://doi.org/10.1007/978-3-032-41614-8_7" target="_blank" rel="noopener">LLM-Based KGC for Cultural Heritage</a></h3>
+    <div class="meta"><span class="badge topic">A</span><span>Peeters·Duan·Dimou</span><span>EKAW 2026</span><span>10/16 온라인</span><span class="badge peer">심사 완료</span></div>
+    <dl class="kv">
+      <dt>핵심 기여·방법</dt><dd>단일 프롬프트, 순차 에이전트+단계별 Design-by-Contract, 사후 SHACL 수리를 비교. CIDOC-CRM/CACAO 기반 HeritageKGBench 공개</dd>
+      <dt>평가·결과</dt><dd>Text2KGBench에서는 사후 SHACL이 F1 0.562→0.585로 복구했지만, 30개 박물관 텍스트의 복합 사건 그래프에서는 모든 방법이 F1≤0.06. 단계별 gate는 10개 중 9개 영역을 최대 37% 악화시키고, 에이전트 산출물 40%가 파싱 불가.</dd>
+      <dt>한계</dt><dd>작은 문화유산 표본이며 산업문서와 분포가 다르다.</dd>
+      <dt>연구 연결</dt><dd><span class="badge link">연결 추론</span> “트리플 생성 후 SHACL”만 평가하지 말고 사건 재구체화, 시간·근거·주관성 누락률을 별도 지표화해야 한다.</dd>
+    </dl>
+  </article>
+
+  <article class="card" id="a3">
+    <h3><a href="https://arxiv.org/abs/2610.26528" target="_blank" rel="noopener">NIKG</a></h3>
+    <div class="meta"><span class="badge topic">A</span><span>Nowara·Manzour·Elias</span><span>v1 10/19</span><span class="badge peer">SKILLED-LLMs 2026 출판</span><a href="https://doi.org/10.48550/arXiv.2610.26528" target="_blank" rel="noopener">DOI</a></div>
+    <dl class="kv">
+      <dt>핵심 기여·방법</dt><dd>nuScenes에서 OWL 스키마와 인스턴스를 하나의 Turtle 그래프로 생성. ego-relative motion, 공간구성, TTC 위험을 명시적 관계로 표현</dd>
+      <dt>평가·결과</dt><dd>nuScenes mini 10개 scene, 404 keyframe, 18,538 scene-participant, 211,335 triples. 세 의미 일관성 규칙 99.9%, 89.2%, 99.9%; 다음 프레임 운동 일관성 92.5%. 코드·OWL·평가 스크립트 공개.</dd>
+      <dt>한계</dt><dd>nuScenes mini만 평가했고 실제 의도예측 성능은 측정하지 않았다.</dd>
+      <dt>연구 연결</dt><dd><span class="badge link">연결 추론</span> Protégé 기반 스키마–인스턴스 병합, SHACL/규칙 검증, 문서별 provenance 실습의 좋은 템플릿이다. (<a href="#tutorial">6장 튜토리얼</a> 참조)</dd>
+    </dl>
+  </article>
+
+  <article class="card" id="a4">
+    <h3><a href="https://arxiv.org/abs/2610.28010" target="_blank" rel="noopener">RANGER</a></h3>
+    <div class="meta"><span class="badge topic">A</span><span>Mikhaylov 외</span><span>v1 10/20</span><span class="badge pre">프리프린트</span><a href="https://doi.org/10.48550/arXiv.2610.28010" target="_blank" rel="noopener">DOI</a></div>
+    <dl class="kv">
+      <dt>핵심 기여·방법</dt><dd>Transformer 정책이 KG를 탐색하고 LLM mentor의 의미 기반 보상으로 GRPO 학습</dd>
+      <dt>평가·결과</dt><dd>HotpotQA·TriviaQA·DiaASQ KG, 각 150문항 평가. HotpotQA 그래프 71,335노드/195,614엣지 등. GRPO hybrid의 LLM-judge 점수는 WaterCircles 대비 HotpotQA 0.673→0.810; TriviaQA 0.850→0.887.</dd>
+      <dt>한계</dt><dd>매우 작은 평가 샘플, LLM-judge 의존, 단순 질의를 합성해 학습.</dd>
+      <dt>연구 연결</dt><dd><span class="badge link">연결 추론</span> 온톨로지 추론 경로를 agent action space로 두되 mentor 보상과 논리 검증 보상을 분리해야 한다.</dd>
+    </dl>
+  </article>
+
+  <article class="card" id="a5">
+    <h3><a href="https://arxiv.org/abs/2610.29339" target="_blank" rel="noopener">ChronoSynth</a></h3>
+    <div class="meta"><span class="badge topic">A</span><span>Liang 외</span><span>v1 10/21</span><span class="badge pre">프리프린트</span><a href="https://doi.org/10.48550/arXiv.2610.29339" target="_blank" rel="noopener">DOI</a></div>
+    <dl class="kv">
+      <dt>핵심 기여·방법</dt><dd>temporal KG→질문 생성에서 답 필드·시간조건·참조 사건·순서를 Temporal Intent State로 고정하고 패턴 메모리와 검증 피드백으로 수정</dd>
+      <dt>평가·결과</dt><dd>CRONQUESTIONS·MultiTQ에서 기존 방법 대비 최고 성능을 보고하고 구성요소 절제를 수행. 원문 초록에는 정확한 분할·수치가 요약되어 있지 않다.</dd>
+      <dt>한계</dt><dd>역방향인 graph→text 작업이며 공개 코드 링크가 확인되지 않았다.</dd>
+      <dt>연구 연결</dt><dd><span class="badge link">연결 추론</span> 사용자의 sentence→logic 시스템을 왕복 검사하는 <code>text→graph→question</code> consistency 평가에 활용 가능하다.</dd>
+    </dl>
+  </article>
+
+  <article class="card" id="a6">
+    <h3><a href="https://doi.org/10.1007/978-3-032-41614-8_5" target="_blank" rel="noopener">Kontrast</a></h3>
+    <div class="meta"><span class="badge topic">A</span><span>Wei·Ehrhart·Troncy</span><span>EKAW 2026</span><span>10/16 온라인</span><span class="badge peer">심사 완료</span></div>
+    <dl class="kv">
+      <dt>핵심 기여·방법</dt><dd>텍스트·표·KG 사이의 직접 충돌, 세분성, 시간 변화, KG 불완전성을 분류하고 Text-to-SPARQL+LLM으로 설명</dd>
+      <dt>평가·결과</dt><dd>여러 Table-QA 자료에서 교차 모달 불일치가 흔함을 보고. 공개 초록에는 표본 규모와 지표 수치가 충분히 제시되지 않았다.</dd>
+      <dt>한계</dt><dd>전체 평가표 확인에는 출판 원문 접근이 필요하다.</dd>
+      <dt>연구 연결</dt><dd><span class="badge link">연결 추론</span> 견적표·서술문·Protégé 트리플 간 모순을 검출하는 품질관리 계층에 적합하다.</dd>
+    </dl>
+  </article>
+
+  <article class="card" id="a7">
+    <h3><a href="https://arxiv.org/abs/2610.27361" target="_blank" rel="noopener">On the LLM Verification for Argument Graph Generation</a></h3>
+    <div class="meta"><span class="badge topic">A</span><span>Bąba·Chudziak</span><span>v1 10/19</span><span class="badge peer">CIKM GaLM 워크숍 채택</span></div>
+    <dl class="kv">
+      <dt>핵심 기여·방법</dt><dd>결정적 구조 검사→solver→LLM review→불확실 시 debate→인간 검토의 계층형 검증</dd>
+      <dt>평가·결과</dt><dd>인위적 결함을 넣은 인간 주석 논증 그래프에서 LLM은 높은 recall을 보였지만 올바른 그래프 약 10%에도 이의를 제기하고 동일 입력 판정이 불안정하며 정확 검사보다 느렸다.</dd>
+      <dt>한계</dt><dd>작은 구조 결함 실험이며 의미 정확성 일반화는 미확인.</dd>
+      <dt>연구 연결</dt><dd><span class="badge link">연결 추론</span> RDF 구문, SHACL, reasoner 검사를 LLM critic보다 선행해야 한다.</dd>
+    </dl>
+  </article>
+
+  <h3>B. 자연어→논리·신경기호 검증</h3>
+
+  <article class="card" id="b1">
+    <h3><a href="https://doi.org/10.1007/978-3-032-40121-2_4" target="_blank" rel="noopener">SpecRepair</a></h3>
+    <div class="meta"><span class="badge topic">B</span><span>Liu 외</span><span>ISoLA 2026</span><span>10/17 온라인</span><span class="badge peer">심사 완료</span></div>
+    <dl class="kv">
+      <dt>핵심 기여·평가</dt><dd>자연어 요구사항→intent model→LTL→Strix realisability 검사→counterstrategy 설명→자연어 수정을 전문 에이전트들로 연결. 전문가 검토 벤치마크·프로토타입·결과를 Zenodo에 공개하고 direct LLM→LTL 기준선과 비교했다.</dd>
+      <dt>연구 연결</dt><dd><span class="badge link">연결 추론</span> Transformer 문장→논리 변환을 정답 문자열이 아니라 solver 실행 가능성, 반례 적절성, 수정 후 보존성으로 평가할 수 있다.</dd>
+    </dl>
+  </article>
+
+  <article class="card" id="b2">
+    <h3><a href="https://arxiv.org/abs/2610.28955" target="_blank" rel="noopener">SLoSa</a></h3>
+    <div class="meta"><span class="badge topic">B</span><span>Xu 외</span><span>v1 10/20</span><span class="badge pre">프리프린트</span></div>
+    <dl class="kv">
+      <dt>핵심 기여·평가</dt><dd>고전 planner·teacher LLM·formal verifier로 PDDL 데이터를 만들고, SFT 뒤 verifier-reward RL을 수행. 4개 PDDL 도메인, 2개 가정환경, Jetson과 실제 로봇에서 평가; 4B–14B 모델 성공률 70.5–76.0%, INT4 소비전력 17.85–26.41W.</dd>
+      <dt>한계</dt><dd>안전 보장은 인코딩된 제약에 한정.</dd>
+      <dt>연구 연결</dt><dd><span class="badge link">연결</span> 논리식 구문 정확도 대신 prover/reasoner 통과를 학습 보상으로 쓰는 근거다.</dd>
+    </dl>
+  </article>
+
+  <article class="card" id="b3">
+    <h3><a href="https://arxiv.org/abs/2608.14590" target="_blank" rel="noopener">Toward Safe LLM Agents v3</a></h3>
+    <div class="meta"><span class="badge topic">B</span><span>Dantas 외</span><span>최초 6/22 · v2 10/17 · v3 10/20</span><span class="badge pre">ACM CSUR 심사 중</span></div>
+    <dl class="kv">
+      <dt>핵심 기여·평가</dt><dd>6개 DB, 38편 PRISMA 검토. NL→PDDL 의미정확도 24.8–34.2%, 한 연구의 runtime monitor 위험 행동 감소 65.37%, 다른 연구에서는 위험 행동 94% 차단 후 안전한 완료가 대부분 5% 미만. 9개 주장의 7개는 GRADE ‘Very Low’.</dd>
+      <dt>연구 연결</dt><dd><span class="badge link">연결</span> 논리 변환·검증·실행 효용을 별도 축으로 보고해야 한다.</dd>
+    </dl>
+  </article>
+
+  <article class="card" id="b4">
+    <h3><a href="https://doi.org/10.1007/978-3-032-40121-2_3" target="_blank" rel="noopener">Towards Robust and Safe Decision-Making Under Uncertainty</a></h3>
+    <div class="meta"><span class="badge topic">B</span><span>Bartocci 외</span><span>ISoLA 2026</span><span>10/17 온라인</span></div>
+    <dl class="kv">
+      <dt>핵심 기여·평가</dt><dd>model learning→model checking/controller synthesis→RL→runtime testing의 연구 로드맵. 실증 비교보다 관점·통합 프레임워크 논문이다.</dd>
+      <dt>연구 연결</dt><dd><span class="badge link">연결</span> 온톨로지를 설명용 산출물이 아니라 검증 가능한 실행 모델로 다루라는 설계 근거다.</dd>
+    </dl>
+  </article>
+
+  <h3>C. 멀티에이전트 신뢰·검증</h3>
+
+  <article class="card" id="c1">
+    <h3><a href="https://arxiv.org/abs/2610.28987" target="_blank" rel="noopener">PerMIT</a></h3>
+    <div class="meta"><span class="badge topic">C</span><span>Jiang 외</span><span>v1 10/20</span><span class="badge pre">프리프린트</span></div>
+    <dl class="kv">
+      <dt>방법·평가·결과</dt><dd>비신뢰 메모리를 finite interface와 confirmation gate로 격리하고 두 integrity theorem을 Lean 4로 검사. Trojan Hippo의 4개 backbone에서 self/lightweight verifier의 관측 ASR 0%; verifier FPR 3–34%. τ²-bench에서 12/24/60/90 agent, 24 held-out tasks×2회. Sonnet·Kimi의 pooled utility 개선은 각각 +0.1363, +0.1120.</dd>
+      <dt>한계</dt><dd>정리는 명시적 trust assumption과 interface model에 한정되고 Lean artifact는 요청 기반이다. 커뮤니티 크기별 1회 construction이라 population 효과가 불확실하다.</dd>
+      <dt>연구 연결</dt><dd><span class="badge link">연결</span> 트리플마다 출처·검증자·승인범위·버전을 기록하는 신뢰 레지스트리로 이전 가능하다.</dd>
+    </dl>
+  </article>
+
+  <article class="card" id="c2">
+    <h3><a href="https://arxiv.org/abs/2610.28484" target="_blank" rel="noopener">Proof-Carrying Contracts</a></h3>
+    <div class="meta"><span class="badge topic">C</span><span>Ciliberto·Rudi·Tassi</span><span>v1 10/20</span><span class="badge pre">프리프린트</span></div>
+    <dl class="kv">
+      <dt>방법·평가·결과</dt><dd>실행 전 agent가 계약 보존 증명을 제출하고 Airlock이 기계 검사한다. 적대적 agent에서도 모델 내 불변식 보존 정리를 제시한다.</dd>
+      <dt>한계</dt><dd>70쪽의 이론 프레임워크이며 현실 시스템 효용·대규모 실험은 제시되지 않았다.</dd>
+      <dt>연구 연결</dt><dd><span class="badge link">연결</span> 에이전트가 생성한 온톨지 변경에 proof/check report를 동봉시키는 패턴으로 활용 가능하다.</dd>
+    </dl>
+  </article>
+
+  <article class="card" id="c3">
+    <h3><a href="https://arxiv.org/abs/2610.29292" target="_blank" rel="noopener">CATS</a></h3>
+    <div class="meta"><span class="badge topic">C</span><span>Tritthart·Zehle</span><span>v1 10/21</span><span class="badge pre">프리프린트</span></div>
+    <dl class="kv">
+      <dt>방법·평가·결과</dt><dd>실행 trace를 대조해 agent별 기여도를 부여하고 취약한 node/edge를 가지치기. BigCodeBench에서 score-only search 대비 +5.3%p, 배포 token 54% 감소. HotpotQA poisoning 3회 모두 공격 agent 제거.</dd>
+      <dt>한계</dt><dd>poisoning 시험이 3회에 불과하고 attribution 자체가 LLM 판단이다.</dd>
+      <dt>연구 연결</dt><dd><span class="badge link">연결</span> extractor·reasoner·critic의 신뢰도를 전역 팀 점수 대신 구성원별로 추적할 수 있다.</dd>
+    </dl>
+  </article>
+
+  <article class="card" id="c4">
+    <h3><a href="https://arxiv.org/abs/2610.28679" target="_blank" rel="noopener">VerifierBench</a></h3>
+    <div class="meta"><span class="badge topic">C</span><span>Yin 외</span><span>v1 10/19</span><span class="badge pre">프리프린트</span></div>
+    <dl class="kv">
+      <dt>방법·평가·결과</dt><dd>6개 agent benchmark에서 222 tasks/4,993 hidden tests, 19 models. 생성 verifier의 normalized balanced accuracy 10.6–62.1; 잘못된 답 거절보다 올바른 대안 답 수용에 특히 취약했다.</dd>
+      <dt>한계</dt><dd>소프트웨어·도구 검증 중심.</dd>
+      <dt>연구 연결</dt><dd><span class="badge link">연결</span> 온톨로지 검증기도 단일 gold serialization만 통과시키는 과도한 제약을 피해야 한다.</dd>
+    </dl>
+  </article>
+
+  <article class="card" id="c5">
+    <h3><a href="https://arxiv.org/abs/2610.28667" target="_blank" rel="noopener">Who Verifies the Builder?</a></h3>
+    <div class="meta"><span class="badge topic">C</span><span>Sion·April</span><span>v1 10/16</span><span class="badge pre">프리프린트</span></div>
+    <dl class="kv">
+      <dt>방법·평가·결과</dt><dd>build plane과 assurance plane을 분리. 사전등록된 3개 stateful service와 46개 주입 결함에서 fresh-context verifier가 builder test보다 더 많은 결함 탐지, Holm 보정 p=0.006. 다른 제공자 모델은 추가 탐지를 제공하지 않았다.</dd>
+      <dt>한계</dt><dd>작은 소프트웨어 표본이며 false oracle이 존재.</dd>
+      <dt>연구 연결</dt><dd><span class="badge link">연결</span> 트리플 생성 모델과 검증 모델·검증 규칙을 분리하고 blind evaluation을 적용한다.</dd>
+    </dl>
+  </article>
+
+  <article class="card" id="c6">
+    <h3><a href="https://arxiv.org/abs/2610.28989" target="_blank" rel="noopener">AgentPolicyForge</a></h3>
+    <div class="meta"><span class="badge topic">C</span><span>Shang 외</span><span>v1 10/20</span><span class="badge pre">프리프린트</span></div>
+    <dl class="kv">
+      <dt>방법·평가·결과</dt><dd>실행 환경에서 정책 준수/위반 도구호출을 생성하고 적응형 guard를 학습. 10 policy families, 698 train scenarios, 254 human-reviewed held-out scenarios. 최종 guard가 prompt-only 대비 ASR을 상대 40–44% 감소시키며 정상 요청 거절도 줄였다.</dd>
+      <dt>한계</dt><dd>정책 표현 및 공격 생성기의 범위에 종속.</dd>
+      <dt>연구 연결</dt><dd><span class="badge link">연결</span> Protégé 규칙을 실행 전 tool/ontology-change guard의 정책원으로 사용할 수 있다.</dd>
+    </dl>
+  </article>
+
+  <article class="card" id="c7">
+    <h3><a href="https://arxiv.org/abs/2610.28966" target="_blank" rel="noopener">ReMAS</a></h3>
+    <div class="meta"><span class="badge topic">C</span><span>Jia 외</span><span>v1 10/20</span><span class="badge pre">프리프린트</span></div>
+    <dl class="kv">
+      <dt>방법·평가·결과</dt><dd>RL attacker가 요청 재작성과 sub-agent 호출 template을 학습해 MAS의 system prompt를 추출하는 black-box red teaming을 제안. 여러 backend·MAS 구조로 전이를 보고했다.</dd>
+      <dt>한계</dt><dd>공개 초록에 데이터 규모와 절대 ASR 수치가 없어 정량 재검증이 어렵다.</dd>
+      <dt>연구 연결</dt><dd><span class="badge link">연결</span> 신뢰 agent가 프롬프트·온톨로지 스키마·비공개 문서 URI를 노출하는 공격을 별도 평가해야 한다.</dd>
+    </dl>
+  </article>
+
+  <h3>인접하지만 참고할 자료</h3>
+  <div class="grid-2">
+    <div class="card"><h3>전력망 경보의 KG+BiLSTM+4-agent 시스템</h3><p>356,950개 실경보, F1 96.9%, false alarm 4.2%, hallucination 15.8%→3.1%. 다만 분할 독립성·외부 전력망 일반화는 추가 확인이 필요하다.</p></div>
+    <div class="card"><h3>교통 예측의 CNN-LSTM–XAI–Formal Concept Analysis</h3><p>18개 요금소, 53개월, 73,891개 관측에서 neural attribution을 concept lattice와 규칙으로 변환한다.</p></div>
+  </div>
+</section>
+
+<section id="design">
+  <h2>4. 직접 관련성이 높은 3건의 적용 설계</h2>
+
+  <details open>
+    <summary>4.1 AgentOnto → 제조·투자엔지니어링 온톨로지</summary>
+    <div class="body">
+      <h3>적용 단계</h3>
+      <ol class="steps">
+        <li>문서·표·DB를 <code>E: 엔터티/관계</code>, <code>M: 계산·판정 규칙</code>, <code>G: 원문·열·SPARQL/SQL 매핑</code>으로 분리한다.</li>
+        <li>모든 항목에 출처 위치, 문서 버전, 확인 상태를 붙인다.</li>
+        <li>분석 요청을 <code>실행 / 추가질문 / 지원 불가</code>로 먼저 분류한다.</li>
+        <li>계획이 온톨로지의 정의·단위·적용조건과 일치할 때만 계산한다.</li>
+        <li>온톨로지 변경마다 correction test와 retention test를 함께 수행한다.</li>
+      </ol>
+      <dl class="kv">
+        <dt>필요 자료</dt><dd>현재 Transformer 추출기, Protégé OWL, 설계문서·견적표, gold competency questions. AgentOnto 구현은 공개 확인되지 않아 자체 재구현이 필요하다.</dd>
+        <dt>최소 검증 실험</dt><dd>60개 요청—30 실행 가능, 15 모호, 15 지원 불가. <code>직접 LLM/Transformer</code>, <code>온톨로지를 프롬프트에만 제공</code>, <code>계획-검사-실행 방식</code>을 비교한다. 지표는 action accuracy, result exact match, silent semantic error, SHACL 위반, 비용·지연이다.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <details open>
+    <summary>4.2 HeritageKGBench → 문장→온톨로지 트리플</summary>
+    <div class="body">
+      <h3>적용 단계</h3>
+      <ol class="steps">
+        <li>최소 100개 산업 문장에서 약 300–500개 gold triples를 전문가가 작성한다.</li>
+        <li>다음 세 조건을 비교한다: 단일 추출, 단계별 agent+gate, 단일 추출+사후 SHACL repair.</li>
+        <li>단순 SPO 외에 사건, 시간, 측정값·단위, 주장자, 근거 문서까지 재구체화한다.</li>
+        <li>단계별 gate가 빈 그래프를 만드는지 기록한다.</li>
+      </ol>
+      <dl class="kv">
+        <dt>최소 지표</dt><dd>micro/macro triple F1, Turtle parseability, SHACL validity, event-mediation completeness, provenance accuracy, near-empty graph rate.</dd>
+        <dt>핵심 가설</dt><dd>사후 SHACL은 형식·국소 제약은 복구하지만, 처음부터 누락된 사건이나 관계는 복원하지 못한다. 이는 원 논문의 강한 부정적 결과에서 도출한 <span class="badge link">연결 추론</span>이다.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <details open>
+    <summary>4.3 PerMIT → 멀티에이전트 온톨로지 신뢰 계층</summary>
+    <div class="body">
+      <h3>적용 단계</h3>
+      <ol class="steps">
+        <li>agent가 추출한 트리플을 곧바로 trusted KG에 넣지 않고 quarantine graph에 저장한다.</li>
+        <li>gate에는 정확한 트리플, 근거 문장, 문서·페이지, 생성 agent, 예정된 사용 범위를 표시한다.</li>
+        <li>승인된 내용만 trusted named graph로 승격하고 서명된 verdict를 남긴다.</li>
+        <li>다른 agent는 내용 자체가 아니라 <code>승인된 handle</code>을 통해서만 민감 작업에 사용한다.</li>
+        <li>반복적으로 승인되는 동일 내용은 범위가 같은 경우에만 재사용한다.</li>
+      </ol>
+      <dl class="kv">
+        <dt>최소 실험</dt><dd>정상 20건+간접 프롬프트 주입 20건을 2개 세션에 걸쳐 실행한다. raw shared memory, prompt filter, gated memory를 비교해 ASR, benign FPR, task completion, 사람 검토 횟수, 오래된 승인 재사용 오류를 측정한다.</dd>
+      </dl>
+    </div>
+  </details>
+</section>
+
+<section id="edu">
+  <h2>5. 교육공학적 적용 검토</h2>
+  <div class="callout warn"><strong>중요.</strong> 조사한 논문들은 교육 효과를 실험한 연구가 아니다. 다음 설계와 학습성과는 전부 <strong>교육적 제안 <span class="badge link">연결 추론</span></strong>이며, 논문이 입증한 시스템 성능과 구별해야 한다.</div>
+  <div class="table-wrap">
+    <table class="edu-table">
+      <thead><tr><th>연구</th><th>대상·사전지식</th><th>관찰 가능한 목표와 활동</th><th>평가·오개념 피드백</th></tr></thead>
+      <tbody>
+        <tr><td>AgentOnto</td><td>대학원생/데이터 엔지니어; RDF·SQL</td><td>동일 업무요청을 schema-only와 ontology-guided 방식으로 처리하고 silent error를 분류</td><td>plan–ontology–query 추적표 루브릭. “SQL 실행 성공=의미 정확” 오개념에는 반례 제공</td></tr>
+        <tr><td>HeritageKGBench</td><td>KG/NLP 수강생; SHACL</td><td>한 문단을 flat triple과 event-reified graph로 각각 변환</td><td>triple F1+사건완전성. “SHACL 통과=원문 충실”에는 누락 사건 사례로 피드백</td></tr>
+        <tr><td>NIKG</td><td>학부 고학년; OWL·Python</td><td>TTL에서 TBox/ABox와 세 관계를 찾아 의미 규칙을 검사</td><td>SPARQL 결과와 논문 통계 비교. “결측 triple=오류”에는 emission 조건 확인</td></tr>
+        <tr><td>RANGER</td><td>대학원생; RL·graph search</td><td>heuristic reward와 semantic reward의 retrieval path를 비교</td><td>경로 적합성·정답률·비용. “LLM 보상=정답”에는 작은 mentor의 false-positive 결과 제시</td></tr>
+        <tr><td>ChronoSynth</td><td>NLP/KG 수강생</td><td>시간조건을 바꾸지 않고 KG→질문 생성</td><td>answer set 보존 여부. 유창성만으로 채점하지 않음</td></tr>
+        <tr><td>Kontrast</td><td>데이터 품질 교육</td><td>표·본문·KG의 불일치를 네 유형으로 분류</td><td>유형 정확도와 설명 근거. temporal update와 직접 모순을 구분하도록 피드백</td></tr>
+        <tr><td>Argument-graph verification</td><td>논증·AI 수강생</td><td>cycle 검사와 LLM critic을 비용·안정성 면에서 비교</td><td>반복판정 일치도. “LLM이 더 지능적이므로 구조검사도 우월” 반례</td></tr>
+        <tr><td>SpecRepair</td><td>소프트웨어공학 대학원생; LTL</td><td>NL 요구를 LTL로 만들고 Strix 반례로 수정</td><td>realisability와 의미보존 루브릭. “satisfiable=realisable” 구분</td></tr>
+        <tr><td>SLoSa</td><td>로보틱스/AI</td><td>verifier reward가 성공·안전에 미치는 영향 설명</td><td>성공률과 제약 위반을 별도 채점</td></tr>
+        <tr><td>PerMIT</td><td>보안/멀티에이전트</td><td>trusted/untrusted flow와 gate 위치를 threat model로 설명</td><td>공격 성공·정상거절·검토비용 3축. “ASR 0=완전 안전”에는 표본·가정 지적</td></tr>
+        <tr><td>PC2</td><td>형식방법 수강생</td><td>계약, proof obligation, Airlock을 상태전이로 모델링</td><td>불변식 증명 개요. “증명=현실세계 안전”에는 model–world gap 피드백</td></tr>
+        <tr><td>CATS</td><td>MAS 수강생</td><td>agent 제거 전후 정확도·비용·poisoning을 분석</td><td>credit calibration과 3-run 한계 포함</td></tr>
+        <tr><td>VerifierBench</td><td>SE/AI 평가 수강생</td><td>verifier에 하나의 정답과 여러 동등 정답을 통과시키기</td><td>balanced accuracy와 false rejection. “모두 거절하는 verifier가 안전” 오개념 교정</td></tr>
+        <tr><td>Independent Assurance</td><td>소프트웨어 테스팅</td><td>builder와 verifier의 context를 분리해 mutation test 수행</td><td>seeded-fault detection과 false oracle 동시 채점</td></tr>
+        <tr><td>AgentPolicyForge</td><td>AI 보안</td><td>허용된 도구의 잘못된 인자·자원·문맥을 판별</td><td>ASR/FPR trade-off. tool allowlist만으로 충분하다는 오개념 교정</td></tr>
+        <tr><td>ReMAS</td><td>보안 대학원생</td><td>multi-agent prompt-extraction threat tree 작성</td><td>범위·재현성·방어책 루브릭</td></tr>
+        <tr><td>Safe-agent survey</td><td>연구방법론</td><td>근거 수준과 수치를 GRADE 기준으로 비판</td><td>주장마다 연구 수·도메인·certainty를 표시하도록 채점</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="tutorial">
+  <h2>6. 한국어 미니 튜토리얼: NIKG를 Protégé와 검증 스크립트로 살펴보기</h2>
+
+  <div class="callout warn"><strong>실행 상태.</strong> 아래 절차는 원문과 README를 대조해 작성했지만 이번 브리핑 작성 환경에서는 nuScenes 데이터를 내려받아 실제 실행하지 않았다.</div>
+
+  <h3>출처와 버전</h3>
+  <div class="card">
+    <dl class="kv">
+      <dt>논문</dt><dd>arXiv:2610.26528v1, 2026-10-19</dd>
+      <dt>코드·OWL·평가자료</dt><dd><a href="https://github.com/KhaledNowara/nuScenes-Intention-Knowledge-Graph" target="_blank" rel="noopener">공식 GitHub 저장소</a></dd>
+      <dt>저장소 구성·라이선스</dt><dd>Python 3.11 환경, OWL/Turtle, 생성기, 통계·일관성 검사 및 사전 생성 사례가 포함된다. 코드 MIT, 생성 그래프와 이미지는 nuScenes의 CC BY-NC-SA 조건을 따른다.</dd>
+    </dl>
+  </div>
+
+  <h3>개념</h3>
+  <p>NIKG는 다음 두 층을 한 Turtle 파일에 합친다.</p>
+  <ul>
+    <li><strong>TBox:</strong> <code>SceneParticipant</code>, <code>SpatialZone</code>, <code>TTCRiskLevel</code> 등의 클래스·속성·열거값</li>
+    <li><strong>ABox:</strong> 각 장면·프레임·참여자와 <code>motionTowardEgo</code>, <code>spatialConfiguration</code>, <code>ttcRisk</code> 사실</li>
+  </ul>
+  <div class="callout fact">논문에서 수행한 “semantic consistency”는 OWL reasoner의 자동 분류 결과가 아니라 RDF 트리플을 스캔해 세 가지 implication의 통과율을 계산한 것이다.</div>
+
+  <h3>준비물</h3>
+  <ul>
+    <li>Python 3.11와 Conda 또는 pip</li>
+    <li><a href="https://www.nuscenes.org/" target="_blank" rel="noopener">nuScenes mini</a> 사용 동의 및 데이터</li>
+    <li>Git</li>
+    <li>선택 사항: Protégé 5.x</li>
+  </ul>
+
+  <h3>재현 절차</h3>
+  <ol class="steps">
+    <li>저장소를 내려받고 환경을 만든다.
+<pre><code>git clone https://github.com/KhaledNowara/nuScenes-Intention-Knowledge-Graph.git
+cd nuScenes-Intention-Knowledge-Graph
+
+conda env create -f environment.yml
+conda activate exp006</code></pre></li>
+    <li>nuScenes mini를 준비한 뒤 다음을 실행한다.
+<pre><code>python main.py \
+  --dataroot /path/to/nuscenes \
+  --version v1.0-mini \
+  --ontology ontologies/ontology.ttl \
+  --out-ttl graphs/multi_scene.ttl \
+  --out-sparql graphs/multi_scene.sparql</code></pre></li>
+    <li>TTL만으로 가능한 검사를 먼저 수행한다.
+<pre><code>python evaluation/kg_stats.py \
+  --ttl graphs/multi_scene.ttl
+
+python evaluation/semantic_consistency.py \
+  --ttl graphs/multi_scene.ttl</code></pre></li>
+    <li>원 데이터와 다음 프레임을 대조하려면 다음을 추가한다.
+<pre><code>python evaluation/motion_forward_check.py \
+  --dataroot /path/to/nuscenes \
+  --version v1.0-mini</code></pre></li>
+    <li>Protégé에서는 <code>ontologies/ontology.ttl</code>을 먼저 열어 TBox를 보고, 이후 <code>graphs/multi_scene.ttl</code>을 별도 프로젝트로 열어 인스턴스를 확인한다. 대형 파일 로딩이 부담스러우면 README의 <code>--scenes</code>와 <code>--max-keyframes</code> 옵션으로 작은 그래프부터 생성한다.</li>
+  </ol>
+
+  <h3>예상 출력과 판정 기준</h3>
+  <p>전체 nuScenes mini를 같은 조건으로 처리했다면 논문 기준은 다음과 같다.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>항목</th><th>논문 기준값</th></tr></thead>
+      <tbody>
+        <tr><td>총 triples</td><td>211,335</td></tr>
+        <tr><td>keyframes</td><td>404</td></tr>
+        <tr><td>unique participants</td><td>911</td></tr>
+        <tr><td>SceneParticipant instances</td><td>18,538</td></tr>
+        <tr><td>의미 일관성: <code>High TTC → Approaching</code></td><td>1,988/1,990, 99.9%</td></tr>
+        <tr><td>의미 일관성: <code>High TTC → forward zone</code></td><td>1,688/1,892, 89.2%</td></tr>
+        <tr><td>의미 일관성: <code>Stationary → not High TTC</code></td><td>3,782/3,784, 99.9%</td></tr>
+        <tr><td>다음 프레임 운동 일관성</td><td>16,746 transitions 중 92.5%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>수치가 다르면 먼저 데이터 버전, scene 필터, keyframe 제한, ontology 파일 및 코드 commit을 확인한다.</p>
+
+  <h3>검증 질문과 정답 기준</h3>
+  <details>
+    <summary>1. 왜 첫 등장 participant에는 motionTowardEgo가 없을 수 있는가?</summary>
+    <div class="body"><p><strong>정답:</strong> 이전 keyframe과의 거리 변화가 필요하기 때문이다.</p></div>
+  </details>
+  <details>
+    <summary>2. ttcRisk=High인데 forward zone이 아닌 사례는 모두 그래프 오류인가?</summary>
+    <div class="body"><p><strong>정답:</strong> 아니다. TTC가 경로가 아닌 line-of-sight 평면거리로 계산되어 측면·후방 접근이 포함될 수 있다.</p></div>
+  </details>
+  <details>
+    <summary>3. SHACL·일관성 검사 통과는 의도예측 모델의 정확도를 입증하는가?</summary>
+    <div class="body"><p><strong>정답:</strong> 아니다. 스키마·관계의 내부 일관성과 downstream predictive validity는 다른 평가다.</p></div>
+  </details>
+  <details>
+    <summary>4. Protégé reasoner가 99.9% 통과율을 계산해 주는가?</summary>
+    <div class="body"><p><strong>정답:</strong> 논문의 수치는 제공 평가 스크립트의 implication 검사 결과다. OWL reasoner 결과와 혼동하면 안 된다.</p></div>
+  </details>
+
+  <h3>평가상 주의점</h3>
+  <ul>
+    <li>nuScenes mini에만 맞춘 수치이며 다른 데이터셋 일반화가 검증되지 않았다.</li>
+    <li>50m 공간 범위, 0.5m 정지 임계값 등은 코드에 고정되어 있다.</li>
+    <li>실제 의도예측 성능이나 인과적 안전 개선은 평가하지 않았다.</li>
+    <li>사용자의 산업문서 연구로 이전할 때는 <code>motion/TTC</code> 대신 <code>문서상태/설계성숙도/비용위험</code>을 관계로 바꾸고, 각 관계의 emission condition과 미기재 사유를 명시해야 한다.</li>
+  </ul>
+</section>
+
+<section id="next">
+  <h2>7. 향후 제공 작업을 더 구체화하는 권장 방식</h2>
+  <p>다음 주부터는 결과물을 다음처럼 고정하면 연구용으로 더 유용하다.</p>
+  <ul>
+    <li>관련성을 <strong>A: 즉시 실험 가능 / B: 방법 전이 가능 / C: 배경자료</strong>로 등급화</li>
+    <li>“새 논문”과 “실질 개정판”을 분리하고 개정판은 <strong>무엇이 바뀌었는지</strong>만 보고</li>
+    <li>코드·데이터 상태를 <code>공개/부분공개/요청필요/미공개</code>로 명시</li>
+    <li>결과값마다 <code>저자 보고값</code>, <code>독립 재현값</code>, <code>본 브리핑 미실행</code>을 구별</li>
+    <li>교육 설계는 논문별로 학습목표 하나, 실습 하나, 평가 문항 하나만 유지</li>
+    <li>사용자 연구 연결은 매주 최소 한 건씩 다음 중 하나로 끝내기:
+      <ul>
+        <li>Protégé에서 바로 시험할 competency question</li>
+        <li>문장→논리/트리플 gold 사례</li>
+        <li>멀티에이전트 공격·신뢰 최소 실험</li>
+        <li>AACE/엔지니어링 문서용 온톨로지 변경 제안</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="callout">이번 주의 우선 실행 순서는 <strong>HeritageKGBench 방식의 추출 오류 진단 → AgentOnto식 계획·갱신 계층 → PerMIT식 신뢰 gate</strong>가 가장 합리적이다.</div>
+</section>
+</main>
+
+<footer class="wrap">
+  출처: ChatGPT 공유 대화 ‘논문 기술보고서 목록화’의 5주차 응답을 정리한 페이지입니다. 내용의 사실 여부는 원문 링크로 확인하세요.
+</footer>
+</body>
+</html>

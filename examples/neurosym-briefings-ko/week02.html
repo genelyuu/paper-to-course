@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>신경·기호 AI 브리핑 · 2주차</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .card h3 .badge { margin-right: 6px; }
+  .sub { font-size: 14px; color: var(--ink-2); margin: 0 0 6px; }
+  blockquote { margin: 12px 0; padding: 8px 16px; border-left: 4px solid var(--line); color: var(--ink-2); background: var(--surface-2); border-radius: 0 var(--radius) var(--radius) 0; }
+  ul.tight { margin: 6px 0; padding-left: 20px; }
+</style>
+</head>
+<body>
+<header class="topbar"><div class="wrap">
+  <a href="index.html">← 전체 목록</a>
+  <nav class="weeknav"><a href="week01.html">← <span class="label">1주차</span></a><a href="week03.html"><span class="label">3주차</span> →</a></nav>
+</div></header>
+
+<main class="wrap">
+<section class="hero">
+  <div class="eyebrow">WEEK 02 · 2026-10-02</div>
+  <h1>신경·기호 AI 주간 연구·교육 브리핑</h1>
+  <p class="lede">2026년 9월 25일~10월 1일 검색에서 직접 관련성이 높은 자료 5건, 인접 연구 3건, 전주 누락 보완 1건을 확인했다. 온톨로지 학습은 문자열 일치 대신 reasoner 기반 함의로 평가하고, 에이전트 신뢰는 개별 성능이 아니라 에이전트·메시지 변환기·토폴로지를 합친 시스템 속성으로 보아야 한다는 점이 이번 주의 핵심이다. 성능 수치는 재현한 결과가 아니라 저자 보고값이다.</p>
+  <div class="stats">
+    <div class="stat"><div class="num">9</div><div class="label">수록 자료 (직접 5 · 인접 3 · 전주 보완 1)</div></div>
+    <div class="stat"><div class="num">3</div><div class="label">상세 분석 (직접 적용 우선순위)</div></div>
+    <div class="stat"><div class="num">3</div><div class="label">학회·워크숍 채택 표기 자료</div></div>
+    <div class="stat"><div class="num">5</div><div class="label">프리프린트 표기 자료</div></div>
+  </div>
+  <ul class="toc">
+    <li><a href="#scope">1. 조사 범위</a></li>
+    <li><a href="#list">2. 전체 목록</a></li>
+    <li><a href="#priority">3. 직접 적용 우선순위 3건</a></li>
+    <li><a href="#edu">4. 교육공학적 적용안</a></li>
+    <li><a href="#tutorial">5. 미니 튜토리얼</a></li>
+  </ul>
+</section>
+
+<h2 id="scope">1. 조사 범위</h2>
+<div class="card">
+<dl class="kv">
+  <dt>기준일</dt><dd><strong>2026년 10월 2일</strong></dd>
+  <dt>주요 검색 기간</dt><dd><strong>2026년 9월 25일~10월 1일</strong></dd>
+  <dt>검색원</dt><dd>arXiv, 저자가 연결한 GitHub·데이터 저장소, 검색으로 확인 가능한 학회 채택 정보</dd>
+  <dt>검색식 계열</dt><dd><code>neuro-symbolic</code>, <code>ontology learning</code>, <code>ontology reasoning</code>, <code>knowledge graph reasoning</code>, <code>multi-agent trust</code>, <code>multi-agent verification</code>, <code>agent evaluator</code></dd>
+  <dt>포함 기준</dt><dd>새로운 방법·벤치마크·실증 결과 또는 재현 가능한 평가 설계를 제시한 연구</dd>
+  <dt>제외 기준</dt><dd>단순 제품 홍보, 온톨로지·신뢰와 명목상으로만 관련된 연구, 원문 존재를 확인하지 못한 요약 페이지</dd>
+</dl>
+</div>
+<div class="callout warn"><strong>주의</strong> 출판 데이터베이스 전체를 대상으로 한 체계적 문헌고찰은 아니다. 성능 수치는 별도로 재현한 결과가 아니라 <strong>저자 보고값</strong>이다.</div>
+<p>이번 주에는 직접 관련성이 높은 자료 <strong>5건</strong>, 인접 연구 <strong>3건</strong>, 전주 누락 보완 <strong>1건</strong>을 확인했다.</p>
+
+<h2 id="list">2. 전체 목록</h2>
+<p class="sub">원문에는 별도 분야 표기가 없어 ‘분야’ 열 대신 원문의 우선도(A·B·C)를 표시했다.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>제목</th><th>우선도</th><th>공개일</th><th>심사</th><th>핵심 한 줄</th></tr></thead>
+<tbody>
+<tr><td><a href="#e1">APOLO: Automatic Prompt Optimization for Ontology Learning</a></td><td>A</td><td>9월 28일</td><td>ISWC 2026 Posters &amp; Demos 채택</td><td>DOID axiom precision 0.569→0.838 (저자 보고)</td></tr>
+<tr><td><a href="#e2">Ontology-Mediated Neurosymbolic Constraint Acquisition from Multiple Stakeholders</a></td><td>A</td><td>9월 24일 (이번 주 검색 보완)</td><td>KG-NeSy@ISWC 2026 채택</td><td>OWL 온톨로지로 제약 충돌을 찾고 재협상·우선순위 완화</td></tr>
+<tr><td><a href="#e3">Safety of Latent Communication in Multi-Agent Systems</a></td><td>A</td><td>9월 30일</td><td>프리프린트</td><td>RL 공격 후 harmful-compliance 27.9→76.9</td></tr>
+<tr><td><a href="#e4">PADMÉ: Preference Alignment Data Synthesis for Meta-Evaluation of LM Agent Evaluators</a></td><td>B</td><td>9월 28일</td><td>NeurIPS 2026 Trust-AI-Eval 워크숍 채택</td><td>합성 선호자료 1,000개, 인간 검증 150개에서 일치율 73%→85%</td></tr>
+<tr><td><a href="#e5">Neuro-Symbolic Computer Use: Learning Reusable Policies for Reliable and Efficient Execution</a></td><td>B</td><td>9월 29일</td><td>프리프린트</td><td>절차는 코드, 판단만 신경모델 — 비용 15~217배 감소 보고</td></tr>
+<tr><td><a href="#e6">The Crowd in the Machine</a></td><td>B</td><td>9월 25일</td><td>프리프린트</td><td>조정 품질·집단 신념 정확성·권한 준수를 별도 평가축으로 분리</td></tr>
+<tr><td><a href="#e7">Question-Specific Knowledge Graphs for Efficient Visual Reasoning</a></td><td>C</td><td>9월 28일 (9월 30일 개정)</td><td>표기 없음</td><td>질문에 필요한 엔터티–관계만 KG로 생성, 토큰 절감</td></tr>
+<tr><td><a href="#e8">Prototype-Rule Neurosymbolic Regularization…</a></td><td>C</td><td>9월 30일</td><td>프리프린트</td><td>규칙 결합 효과가 데이터셋마다 +8.82%p~−0.62%p로 갈림</td></tr>
+<tr><td><a href="#e9">5W1H+Which: Context-Valid Semantic Indexing with Progressive Ontology Binding</a></td><td>C</td><td>9월 28일</td><td>프리프린트</td><td>평가는 ‘계획’ 단계, 완결 실험 아님</td></tr>
+</tbody></table></div>
+
+<h3>자료별 상세</h3>
+
+<article class="card" id="e1">
+<h3><span class="badge topic">우선도 A</span>APOLO: Automatic Prompt Optimization for Ontology Learning</h3>
+<div class="meta"><span>Mai 외</span><span>9월 28일</span><span class="badge peer">ISWC 2026 Posters &amp; Demos 채택</span></div>
+<dl class="kv">
+<dt>방법·평가·결과</dt><dd>12개 공개 온톨로지에서 다중 에이전트가 텍스트–OWL 쌍을 생성하고, Greedy·Autoregressive 학습기의 프롬프트를 GEPA로 최적화한다. DOID·Plant Ontology를 보류 평가에 사용했다. Qwen3.5-27B AR의 DOID axiom precision은 <strong>0.569→0.838</strong>로 증가했다. 엔터티와 공리의 precision/recall을 분리하고, 공리 평가는 reasoner 기반 함의를 사용한다.</dd>
+<dt>핵심 한계</dt><dd>결과가 단일 실행이며, 기반 온톨로지가 LLM 사전학습에 포함됐을 가능성이 있다. 중복 공리를 별도로 벌점화하지 않아 과잉 생성이 유리할 수 있다. PO의 최적화 후 AxP는 0.174로 여전히 낮다.</dd>
+<dt><span class="badge link">연결</span> 연구 연결점</dt><dd>사용자의 <code>문장→논리 표현→트리플</code>을 <strong>엔터티 추출·공리 생성·일관성 검사</strong>로 분리하고, 정확 문자열 일치 대신 reasoner 기반 entailment 평가를 추가할 수 있다.</dd>
+<dt>링크</dt><dd><a href="https://arxiv.org/abs/2609.34540" target="_blank" rel="noopener">APOLO v1 원문 (arXiv)</a></dd>
+</dl>
+</article>
+
+<article class="card" id="e2">
+<h3><span class="badge topic">우선도 A</span>Ontology-Mediated Neurosymbolic Constraint Acquisition from Multiple Stakeholders</h3>
+<div class="meta"><span>Bischof 외</span><span>9월 24일 공개·이번 주 검색 보완</span><span class="badge peer">KG-NeSy@ISWC 2026 채택</span></div>
+<dl class="kv">
+<dt>방법·평가·결과</dt><dd>LLM이 수집한 선호와 하드웨어의 물리 제약을 OWL 구성 온톨로지로 통합하고, description logic으로 불만족성을 발견한다. 충돌 설명을 이용해 사용자와 제약을 재협상하며, 남은 충돌은 우선순위 기반 완화로 처리한다. 사례는 FLEXI 마이크로그리드다.</dd>
+<dt>핵심 한계</dt><dd>정량 비교실험이나 대규모 사용자 평가는 제시되지 않은 사례 중심 구조다. 일반화는 저자 주장 단계다.</dd>
+<dt><span class="badge link">연결</span> 연구 연결점</dt><dd>멀티에이전트가 생성한 트리플의 권한을 동일하게 보지 않고 <code>hard_constraint</code>, <code>soft_preference</code>, <code>source</code>, <code>priority</code>를 부여하는 설계에 직접 적용할 수 있다.</dd>
+</dl>
+</article>
+
+<article class="card" id="e3">
+<h3><span class="badge topic">우선도 A</span>Safety of Latent Communication in Multi-Agent Systems</h3>
+<div class="meta"><span>Huzaifa 외</span><span>9월 30일</span><span class="badge pre">프리프린트</span></div>
+<dl class="kv">
+<dt>방법·평가·결과</dt><dd>에이전트 간 텍스트 대신 내부 표현을 전달하는 trainable link를 분석한다. 3개 통신 토폴로지·4개 안전 벤치마크에서 RL 공격 후 평균 harmful-compliance가 <strong>27.9→76.9</strong>로 증가했다. 에이전트 본체를 변경하지 않고 링크만 안전 방향으로 보정하는 복구 실험도 수행했다.</dd>
+<dt>핵심 한계</dt><dd>공개 코드 연결을 확인하지 못했다. 초록만으로 모델·표본별 분산과 외부 모델 일반화 정도를 확정하기 어렵다.</dd>
+<dt><span class="badge link">연결</span> 연구 연결점</dt><dd>신뢰를 에이전트 개별 성능이 아니라 <strong>에이전트+메시지 변환기+토폴로지</strong>의 시스템 속성으로 평가해야 한다. 트리플 직렬화·요약·임베딩 전달 과정의 의미 변형 실험과 연결된다.</dd>
+</dl>
+</article>
+
+<article class="card" id="e4">
+<h3><span class="badge topic">우선도 B</span>PADMÉ: Preference Alignment Data Synthesis for Meta-Evaluation of LM Agent Evaluators</h3>
+<div class="meta"><span>Chang 외</span><span>9월 28일</span><span class="badge peer">NeurIPS 2026 Trust-AI-Eval 워크숍 채택</span></div>
+<dl class="kv">
+<dt>방법·평가·결과</dt><dd>4개 에이전트 도메인·3개 평가 기준에서 <strong>1,000개</strong> 선호 비교 자료를 합성했다. 150개 인간 검증 부분집합에서 판단 일치율이 naive baseline <strong>73%→85%</strong>로 증가했고, 25개 모델 평가에 사용했다. 코드와 데이터가 공개돼 있다.</dd>
+<dt>핵심 한계</dt><dd>인간 검증이 전체 1,000개 중 150개이며, 합성 데이터의 편향을 제거한 것은 아니다. 사람 없이 평가자료를 생성한다는 점과 인간 판단을 대체할 수 있다는 주장은 구분해야 한다.</dd>
+<dt><span class="badge link">연결</span> 연구 연결점</dt><dd>트리플 생성 모델의 LLM 평가자를 그대로 신뢰하지 말고, 전문가가 선호한 두 출력 중 어느 것을 평가자가 선택하는지 <strong>meta-evaluation</strong>하는 방법으로 활용 가능하다.</dd>
+</dl>
+</article>
+
+<article class="card" id="e5">
+<h3><span class="badge topic">우선도 B</span>Neuro-Symbolic Computer Use: Learning Reusable Policies for Reliable and Efficient Execution</h3>
+<div class="meta"><span>Suh 외</span><span>9월 29일</span><span class="badge pre">프리프린트</span></div>
+<dl class="kv">
+<dt>방법·평가·결과</dt><dd>반복 작업의 순서·반복·분기는 코드로 고정하고, 화면 grounding과 상태 판단만 신경모델에 맡긴다. OSWorld-Verified와 ScienceBoard에서 base agent 대비 Pass³가 <strong>3.6~15.8%p</strong> 높고, 실행당 비용은 <strong>15~217배</strong>, 지연은 <strong>3.4~5.1배</strong> 감소했다고 보고한다.</dd>
+<dt>핵심 한계</dt><dd>오류 판정기가 셸 반환값을 보지 못하고, 실행불가능한 작업을 인식하지 못하며, 늦게 나타난 증상을 최초 오류로 잘못 지정할 수 있다. 이 분석은 19개 실패 작업 중 일부를 제외한 표본에 기반한다.</dd>
+<dt><span class="badge link">연결</span> 연구 연결점</dt><dd>온톨로지 추출에서 변하지 않는 절차는 코드·검증 규칙으로 고정하고, 문장 의미 해석만 Transformer에 맡기는 <strong>좁은 신경–기호 경계</strong> 설계에 참고할 수 있다.</dd>
+</dl>
+</article>
+
+<article class="card" id="e6">
+<h3><span class="badge topic">우선도 B</span>The Crowd in the Machine</h3>
+<div class="meta"><span>Simon</span><span>9월 25일</span><span class="badge pre">프리프린트</span></div>
+<dl class="kv">
+<dt>방법·평가·결과</dt><dd>2026년 두 자율 에이전트 집단 사건을 crisis informatics 관점에서 비교한다. 조정 품질, 집단 신념의 정확성, 행동의 권한 준수를 서로 다른 평가축으로 분리한다.</dd>
+<dt>핵심 한계</dt><dd>통제실험이 아니라 공개 조사자료와 재구성 기록을 이용한 비교 사례연구다. 원인효과나 발생률을 추정할 수 없다.</dd>
+<dt><span class="badge link">연결</span> 연구 연결점</dt><dd>멀티에이전트 평가를 <code>task_success</code>, <code>belief_correctness</code>, <code>authorization_compliance</code>로 분리해야 한다는 개념적 근거로 활용할 수 있다.</dd>
+</dl>
+</article>
+
+<article class="card" id="e7">
+<h3><span class="badge topic">우선도 C</span>Question-Specific Knowledge Graphs for Efficient Visual Reasoning</h3>
+<div class="meta"><span>Chen 외</span><span>9월 28일 공개, 9월 30일 개정</span></div>
+<dl class="kv">
+<dt>방법·평가·결과</dt><dd>이미지 전체를 설명문으로 변환하는 대신 질문에 필요한 엔터티–관계만 KG로 생성하도록 RL 학습한다. 과학·수학·일반 시각질문에서 caption 기반 표현보다 토큰을 줄이면서 유사하거나 높은 성능을 보였고, GDPO가 GRPO보다 평균 정확도 <strong>2%p</strong> 높았다고 보고한다. 코드 링크가 제공된다.</dd>
+<dt>핵심 한계</dt><dd>OWL 추론이나 온톨로지 일관성을 다루는 연구는 아니다. 질문에 맞춘 정보 선택이 근거 누락을 일으키는지 별도 검증이 필요하다.</dd>
+<dt><span class="badge link">연결</span> 연구 연결점</dt><dd>문장 전체를 무조건 트리플화하지 않고, competency question별 <strong>최소 충분 부분 그래프</strong>를 만드는 연구로 확장 가능하다.</dd>
+</dl>
+</article>
+
+<article class="card" id="e8">
+<h3><span class="badge topic">우선도 C</span>Prototype-Rule Neurosymbolic Regularization…</h3>
+<div class="meta"><span>Protopapadakis 외</span><span>9월 30일</span><span class="badge pre">프리프린트</span></div>
+<dl class="kv">
+<dt>방법·평가·결과</dt><dd>4개 hyperspectral 데이터셋과 4개 Rank-R 설정을 7-fold·공간 분리 분할로 평가했다. 공간 분할 Macro-F1 변화는 Botswana <strong>+8.82%p</strong>, Indian Pines <strong>+5.49%p</strong>, Pavia <strong>+1.59%p</strong>, Salinas <strong>−0.62%p</strong>였다.</dd>
+<dt>핵심 한계</dt><dd>온톨로지·멀티에이전트 연구가 아니며, 이점 대부분이 학습 정규화에서 발생했다. 데이터셋에 따라 손해도 확인됐다.</dd>
+<dt><span class="badge link">연결</span> 연구 연결점</dt><dd>규칙 결합이 항상 성능을 높인다는 가정을 반박하는 비교 사례다. 사용자의 symbolic stage도 <code>neural-only</code>, <code>symbolic-only</code>, <code>train-time constraint</code>, <code>inference-time reasoning</code>으로 ablation해야 한다.</dd>
+</dl>
+</article>
+
+<article class="card" id="e9">
+<h3><span class="badge topic">우선도 C</span>5W1H+Which: Context-Valid Semantic Indexing with Progressive Ontology Binding</h3>
+<div class="meta"><span>9월 28일</span><span class="badge pre">프리프린트</span></div>
+<dl class="kv">
+<dt>방법·평가·결과</dt><dd>5W1H 기반 의미 인덱싱과 점진적 온톨로지 결합 구조를 제안한다.</dd>
+<dt>핵심 한계</dt><dd>검색 가능한 원문 정보상 평가는 “계획” 단계이며, 효과를 입증한 완결 실험으로 간주할 수 없다.</dd>
+<dt><span class="badge link">연결</span> 연구 연결점</dt><dd>출처·시간·장소·행위자·대상을 트리플 provenance에 구조화하는 아이디어만 참고할 가치가 있다.</dd>
+</dl>
+</article>
+
+<h2 id="priority">3. 직접 적용 우선순위 3건</h2>
+
+<h3>① APOLO — 현재 연구에 가장 직접적</h3>
+<div class="card">
+<p><strong>적용 위치</strong></p>
+<pre><code>문장
+→ 논리 표현
+→ 후보 클래스·개체·공리
+→ 파싱 및 일관성 검사
+→ 추론기 기반 함의 평가
+→ 트리플/OWL 저장</code></pre>
+<p>현재 exact match 또는 트리플 단위 F1만 사용하고 있다면 다음을 추가할 수 있다.</p>
+<ul class="tight">
+<li>Entity precision/recall</li>
+<li>Axiom precision: 생성 공리가 정답 온톨로지에서 함의되는 비율</li>
+<li>Axiom recall: 정답 공리가 생성 온톨로지에서 함의되는 비율</li>
+<li>Parse success rate</li>
+<li>Consistency rate</li>
+<li>Redundant axiom rate</li>
+<li>원문 인용과 공리 간 evidence alignment</li>
+</ul>
+<details open><summary>최소 검증 실험</summary><div class="body">
+<ul class="tight">
+<li>데이터: 기존 Petrucci 2,000건에서 train/validation/test를 문서 또는 온톨로지 단위로 분리</li>
+<li>비교군:
+<ol>
+<li>기존 Transformer→논리→트리플</li>
+<li>기존 모델+수동 프롬프트</li>
+<li>기존 모델+자동 최적화 프롬프트</li>
+<li>autoregressive ontology context 추가</li>
+</ol></li>
+<li>필수 조건: 같은 test set을 프롬프트 최적화 과정에서 반복 조회하지 않는다.</li>
+<li>권장 통계: 세 개 이상 seed, 문서 단위 bootstrap CI, 도메인별 분리 결과</li>
+<li>실험상 핵심: APOLO의 평가에서 빠진 <strong>중복 공리율과 과잉 생성률</strong>을 반드시 추가한다.</li>
+</ul></div></details>
+</div>
+
+<h3>② Ontology-Mediated Constraint Acquisition — 신뢰도 구조 설계</h3>
+<div class="card">
+<p>에이전트 출력에 다음 최소 메타데이터를 붙이는 방식이 적합하다.</p>
+<pre><code>claim_id
+source_agent
+source_sentence
+formal_axiom
+authority = hard | soft
+priority
+validation_status
+conflicts_with
+relaxation_history</code></pre>
+<details open><summary>최소 실험</summary><div class="body">
+<ul class="tight">
+<li>같은 개념에 대해 상충하는 30~50개 제약 쌍 구성</li>
+<li>조건:
+<ul>
+<li>출처 구분 없음</li>
+<li>hard/soft 구분만 적용</li>
+<li>출처+우선순위+OWL 충돌 검출 적용</li>
+</ul></li>
+<li>지표:
+<ul>
+<li>미검출 모순 수</li>
+<li>잘못 완화한 hard constraint 비율</li>
+<li>해결 불가능한 경우의 abstention 정확도</li>
+<li>설명에서 실제 충돌 공리를 정확히 지목한 비율</li>
+</ul></li>
+</ul></div></details>
+</div>
+
+<h3>③ Safety of Latent Communication — 시스템 수준 신뢰 평가</h3>
+<div class="card">
+<p>사용자 연구에서 에이전트 A가 만든 논리 표현을 에이전트 B가 검증한다면, 전달 형식별 성능을 비교할 수 있다.</p>
+<ul class="tight">
+<li>원문 자연어</li>
+<li>정형 JSON</li>
+<li>논리식</li>
+<li>트리플</li>
+<li>임베딩 또는 압축 표현</li>
+</ul>
+<p>각 조건에서 <strong>의미 보존율, 모순 탐지율, 공격 명령 전달률, 최종 트리플 F1</strong>을 함께 측정해야 한다. 개별 에이전트의 정확도가 같아도 통신 변환기가 오류나 공격 성공률을 증가시킬 수 있다는 것이 이번 연구의 핵심 경고다.</p>
+</div>
+
+<h2 id="edu">4. 교육공학적 적용안</h2>
+<div class="callout warn"><strong>주의</strong> 아래는 논문에서 입증된 교육 효과가 아니라, 논문 결과를 근거로 구성한 <strong>제안 수업 설계</strong>다.</div>
+<div class="table-wrap"><table>
+<thead><tr><th>요소</th><th>설계</th></tr></thead>
+<tbody>
+<tr><td>대상</td><td>Python·기초 ML을 알고 지식그래프 또는 OWL을 처음 적용하는 연구자·산업 AI 학습자</td></tr>
+<tr><td>사전 지식</td><td>클래스·개체·관계, precision/recall, train/test 분리</td></tr>
+<tr><td>학습목표 1</td><td>자연어 문장에서 클래스·개체·공리를 구분해 작성한다</td></tr>
+<tr><td>학습목표 2</td><td>문자열이 다른 두 공리가 논리적으로 동치 또는 함의 관계인지 reasoner 기준으로 판정한다</td></tr>
+<tr><td>학습목표 3</td><td>파싱 성공, 일관성, 엔터티 정확도, 공리 정확도를 분리해 보고한다</td></tr>
+<tr><td>학습목표 4</td><td>에이전트 결과·평가자 결과·인간 검수 결과가 불일치하는 사례를 분류한다</td></tr>
+<tr><td>실습</td><td>동일 텍스트에 Greedy 추출과 이전 공리를 참조하는 AR 추출을 적용하고, 누락·과잉·모순을 비교</td></tr>
+<tr><td>평가</td><td>공리 작성 30%, 오류 분류 20%, 지표 계산 20%, 테스트 누출 방지 설계 20%, 한계 기술 10%</td></tr>
+</tbody></table></div>
+
+<h3>예상 오개념과 피드백</h3>
+<div class="grid-2">
+<div class="card"><p><strong>“문법적으로 유효한 OWL이면 올바른 온톨로지다”</strong></p><p>→ 파싱 가능성, 논리적 일관성, 원문 충실성은 별도 조건임을 반례로 확인한다.</p></div>
+<div class="card"><p><strong>“생성 공리가 많을수록 recall이 높으므로 좋은 결과다”</strong></p><p>→ precision, 중복 공리율, 과잉 생성률을 함께 계산한다.</p></div>
+<div class="card"><p><strong>“reasoner가 모순을 찾지 못하면 원문 의미를 보존했다”</strong></p><p>→ reasoner는 주어진 공리들의 관계를 검사할 뿐, 자연어–공리 정렬 오류를 자동으로 보장하지 않는다.</p></div>
+<div class="card"><p><strong>“LLM 평가 점수가 높으면 인간 평가도 대체된다”</strong></p><p>→ PADMÉ에서도 인간 검증은 별도로 수행됐고, 보고된 일치율은 85%이지 100%가 아니다.</p></div>
+</div>
+
+<h2 id="tutorial">5. 정보 기반 미니 튜토리얼</h2>
+<h3>문자열 일치 대신 추론기 기준으로 온톨로지 출력을 평가하기</h3>
+<div class="callout warn"><strong>형태: 비실행형 개념·설계 튜토리얼.</strong> APOLO 원문과 수식·실험표는 공개되어 있지만, 이번 확인 범위에서는 완성된 공식 재현 저장소를 확인하지 못했다. 따라서 아래 절차는 실행 검증된 APOLO 복제 코드가 아니다.</div>
+
+<h3>준비물</h3>
+<ul class="tight">
+<li><a href="https://arxiv.org/abs/2609.34540" target="_blank" rel="noopener">APOLO v1 원문</a></li>
+<li>Protégé</li>
+<li>HermiT 또는 ELK reasoner</li>
+<li>두 개의 OWL 파일:
+<ul>
+<li><code>gold.owl</code>: 전문가 정답</li>
+<li><code>predicted.owl</code>: 모델 생성 결과</li>
+</ul></li>
+<li>원문 문장과 생성 공리를 연결한 표</li>
+</ul>
+
+<h3>예제</h3>
+<p>원문:</p>
+<blockquote>모든 전기 모터는 설비이며, Motor-01은 전기 모터이다.</blockquote>
+<div class="grid-2">
+<div><p><strong>정답 공리</strong></p><pre><code>ElectricMotor SubClassOf Equipment
+Motor01 Type ElectricMotor</code></pre></div>
+<div><p><strong>모델 출력 A</strong></p><pre><code>ElectricMotor SubClassOf Equipment
+Motor01 Type ElectricMotor</code></pre></div>
+<div><p><strong>모델 출력 B</strong></p><pre><code>Motor01 Type Equipment</code></pre></div>
+<div><p><strong>모델 출력 C</strong></p><pre><code>ElectricMotor DisjointWith Equipment
+Motor01 Type ElectricMotor</code></pre></div>
+</div>
+
+<h3>단계별 평가</h3>
+<ol class="steps">
+<li><strong>파싱 검사</strong><br>각 출력이 OWL 문법으로 로드되는지 확인한다. 로드되지 않으면 APOLO 방식에서는 해당 출력 점수를 0으로 처리한다.</li>
+<li><strong>일관성 검사</strong><br>Reasoner를 실행한다. 출력 C는 <code>ElectricMotor ⊑ Equipment</code>라는 정답 구조와 함께 사용할 경우 배타 공리와 충돌할 수 있다.</li>
+<li><strong>엔터티 평가</strong><br><code>ElectricMotor</code>, <code>Equipment</code>, <code>Motor01</code>의 추출 여부를 precision·recall로 계산한다.</li>
+<li><strong>공리 precision 평가</strong><br>모델 공리 각각이 <code>gold.owl</code>에서 함의되는지 검사한다.
+<ul class="tight">
+<li>A의 두 공리: 모두 함의됨</li>
+<li>B의 <code>Motor01 Type Equipment</code>: 정답에 명시되지는 않았지만 두 정답 공리로부터 함의됨</li>
+<li>따라서 B를 단순 문자열 불일치만으로 오답 처리하면 안 된다.</li>
+</ul></li>
+<li><strong>공리 recall 평가</strong><br>정답 공리 각각이 <code>predicted.owl</code>에서 함의되는지 검사한다.
+<ul class="tight">
+<li>B는 <code>Motor01 Type Equipment</code>만 포함하므로 원래의 클래스 계층과 직접 타입 공리를 복구하지 못한다.</li>
+<li>최종 사실 하나를 맞혔지만 온톨로지 구조의 재현성은 낮다.</li>
+</ul></li>
+<li><strong>원문 충실성 검사</strong><br>각 생성 공리에 근거 문장을 연결한다. Reasoner 통과 여부와 별개로, 원문이 실제로 해당 공리를 지지하는지 사람이 확인한다.</li>
+</ol>
+
+<h3>기대 출력</h3>
+<div class="table-wrap"><table>
+<thead><tr><th>출력</th><th>파싱</th><th>일관성</th><th>함의 기반 precision</th><th>구조 recall</th><th>판정</th></tr></thead>
+<tbody>
+<tr><td>A</td><td>통과</td><td>통과</td><td>높음</td><td>높음</td><td>적합</td></tr>
+<tr><td>B</td><td>통과</td><td>통과</td><td>높을 수 있음</td><td>낮음</td><td>불완전</td></tr>
+<tr><td>C</td><td>통과</td><td>실패 가능</td><td>낮음</td><td>판정 전 수정 필요</td><td>모순</td></tr>
+</tbody></table></div>
+
+<h3>검증 문항</h3>
+<details><summary>1. <code>Motor01 Type Equipment</code>가 정답 파일에 문자열로 없으면 무조건 오답인가?</summary><div class="body"><strong>정답:</strong> 아니다. 정답 온톨로지에서 논리적으로 함의되는지 확인해야 한다.</div></details>
+<details><summary>2. 일관성 있는 생성 온톨로지는 원문을 충실히 표현했는가?</summary><div class="body"><strong>정답:</strong> 보장되지 않는다. 잘못된 공리끼리도 일관적일 수 있다.</div></details>
+<details><summary>3. axiom recall만 최대화하면 어떤 문제가 발생하는가?</summary><div class="body"><strong>정답:</strong> 불필요하거나 근거 없는 공리를 대량 생성해 recall을 높일 수 있으므로 precision·중복률·과잉 생성률을 같이 봐야 한다.</div></details>
+
+<h3>평가상 주의</h3>
+<div class="callout warn"><ul class="tight">
+<li>reasoner 종류와 지원하는 OWL 프로파일을 고정해야 한다.</li>
+<li>동치 공리, 추이 관계, 복수의 유효한 형식화를 고려해야 한다.</li>
+<li>개발 과정에서 같은 test ontology를 반복 조회하면 프롬프트가 테스트셋에 맞춰질 수 있다.</li>
+<li>APOLO 결과는 단일 실행이므로, 적용 연구에서는 seed 반복과 신뢰구간 보고가 필요하다.</li>
+<li>바이오·식물 온톨로지에서의 결과를 사용자 도메인으로 직접 일반화할 수 없다. APOLO 연구 자체도 PO에서 상대적으로 낮은 공리 성능을 보였다.</li>
+</ul></div>
+</main>
+
+<div class="wrap"><footer>출처: ChatGPT 공유 대화 ‘논문 기술보고서 목록화’의 2주차 응답을 정리한 페이지입니다. 내용의 사실 여부는 원문 링크로 확인하세요.</footer></div>
+</body>
+</html>
