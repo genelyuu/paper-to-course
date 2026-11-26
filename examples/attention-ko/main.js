@@ -269,6 +269,10 @@
         const done = el.dataset.revealed || $$('.quiz-option', el).every(o => o.disabled);
         if (el.id && !done) { window.revealQuiz(el.id); return; }
       }
+      // 드래그 매칭: 칩을 놓지 않았어도 정답을 공개한다(매칭 확인과 같은 동작)
+      for (const el of inCur('.dnd-container', page)) {
+        if (el.id && !el.dataset.revealed) { window.checkDnD(el.id); return; }
+      }
       go(currentIndex() + 1);
     }
 
@@ -517,6 +521,30 @@
     const chips = $$('.dnd-chip', containerEl);
     const zones = $$('.dnd-zone', containerEl);
 
+    // 칩을 칸에 놓는다. 수식 마크업(<i>, <sub>)을 그대로 옮기고, 칸에 있던 칩은 되돌리며, 채점 표시는 지운다
+    function place(target, chip) {
+      const prev = target.dataset.placed;
+      if (prev) {
+        const old = $(`.dnd-chip[data-answer="${prev}"]`, containerEl);
+        if (old) old.classList.remove('placed');
+      }
+      target.innerHTML      = `<span>${chip.innerHTML}</span>`;
+      target.dataset.placed = chip.dataset.answer;
+      chip.classList.add('placed');
+      chip.classList.remove('selected', 'dragging');
+      $$('.dnd-zone-target', containerEl).forEach(t => t.classList.remove('correct-placed', 'incorrect-placed', 'answer-shown'));
+    }
+
+    // 끌기가 어려운 환경(트랙패드·키보드)용: 칩을 누른 뒤 칸을 누르면 놓인다
+    chips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        if (chip.classList.contains('placed')) return;
+        const was = chip.classList.contains('selected');
+        chips.forEach(c => c.classList.remove('selected'));
+        if (!was) chip.classList.add('selected');
+      });
+    });
+
     chips.forEach(chip => {
       chip.addEventListener('dragstart', e => {
         e.dataTransfer.setData('text/plain', chip.dataset.answer);
@@ -536,9 +564,11 @@
         const answer = e.dataTransfer.getData('text/plain');
         const chip   = $(`.dnd-chip[data-answer="${answer}"]`, containerEl);
         if (!chip) return;
-        target.textContent    = chip.textContent;
-        target.dataset.placed = answer;
-        chip.classList.add('placed');
+        place(target, chip);
+      });
+      target.addEventListener('click', () => {
+        const sel = $('.dnd-chip.selected', containerEl);
+        if (sel) place(target, sel);
       });
     });
 
@@ -572,28 +602,38 @@
         const touch = e.changedTouches[0];
         const el    = document.elementFromPoint(touch.clientX, touch.clientY);
         const zt    = el && el.closest('.dnd-zone-target');
-        if (zt) {
-          zt.textContent    = chip.textContent;
-          zt.dataset.placed = chip._answer;
-          chip.classList.add('placed');
-        }
+        if (zt) place(zt, chip);
         zones.forEach(z => { const t = $('.dnd-zone-target', z); if (t) t.classList.remove('drag-over'); });
       });
     });
   }
 
+  /* 매칭 확인 = 채점 + 정답 공개. 칩을 다 놓지 않았어도(하나도 놓지 않았어도) 모든 칸에 정답을 보여 준다.
+     맞힌 칸: correct-placed / 틀린 칸: 고른 칩에 취소선 + 정답(incorrect-placed) / 빈칸: 정답(answer-shown) */
   window.checkDnD = function (containerId) {
     const container = $('#' + containerId);
     if (!container) return;
+    const chipHTML = a => { const c = $(`.dnd-chip[data-answer="${a}"]`, container); return c ? c.innerHTML : a; };
     $$('.dnd-zone', container).forEach(zone => {
-      const target  = $('.dnd-zone-target', zone);
-      if (!target || !target.dataset.placed) return;
-      if (target.dataset.placed === zone.dataset.correct) {
+      const target = $('.dnd-zone-target', zone);
+      if (!target) return;
+      const placed = target.dataset.placed, want = zone.dataset.correct;
+      target.classList.remove('correct-placed', 'incorrect-placed', 'answer-shown');
+      if (placed && placed === want) {
         target.classList.add('correct-placed');
-      } else {
+        return;
+      }
+      const label = `<span><span class="dnd-answer-label">${i18n('correct')}</span> ${chipHTML(want)}</span>`;
+      if (placed) {
+        target.innerHTML = `<s class="dnd-wrong">${chipHTML(placed)}</s>${label}`;
         target.classList.add('incorrect-placed');
+      } else {
+        target.innerHTML = label;
+        target.classList.add('answer-shown');
       }
     });
+    $$('.dnd-chip', container).forEach(c => c.classList.add('placed'));
+    container.dataset.revealed = '1';
   };
 
   window.resetDnD = function (containerId) {
@@ -602,9 +642,10 @@
     $$('.dnd-zone-target', container).forEach(t => {
       t.textContent = i18n('dropHere');
       delete t.dataset.placed;
-      t.classList.remove('correct-placed', 'incorrect-placed');
+      t.classList.remove('correct-placed', 'incorrect-placed', 'answer-shown');
     });
-    $$('.dnd-chip', container).forEach(c => c.classList.remove('placed', 'dragging'));
+    $$('.dnd-chip', container).forEach(c => c.classList.remove('placed', 'dragging', 'selected'));
+    delete container.dataset.revealed;
   };
 
   $$('.dnd-container').forEach(el => initDnD(el));
@@ -887,38 +928,69 @@
   $$('.math-derivation').forEach(el => initMathDerivation(el));
 
   /* ── PSEUDOCODE WALKTHROUGH ────────────────────────────────── */
-  /* ── 의사코드 색칠: IDE 토큰 색(Catppuccin, .code-* 클래스)을 자동으로 입힌다 ──
-     이미 <span class="code-…">로 직접 칠한 줄은 건드리지 않는다.
-     키워드(대문자 제어어) · 함수(대문자 이름 + 괄호) · 주석(// 뒤) · 숫자 · 연산자 · 문자열 */
-  const PSEUDO_KEYWORDS = /^(INPUT|OUTPUT|RETURN|FOR|EACH|OF|IN|TO|DO|END|IF|THEN|ELSE|ELIF|WHILE|REPEAT|UNTIL|AND|OR|NOT|USING|LET|SET|BREAK|CONTINUE|FUNCTION|PROCEDURE)$/;
-  function colorizePseudocode(line) {
-    if (line.dataset.colored) return;   // 멱등
-    line.dataset.colored = '1';
-    // 직접 칠했거나 수식($…$) 등 자식 요소가 섞인 줄은 건드리지 않는다
-    if (!Array.from(line.childNodes).every(n => n.nodeType === 3)) return;
-    const text = line.textContent;
-    if (text.indexOf('$') >= 0) return;
-    const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    // 주석(//…)과 문자열을 하나의 순서 있는 alternation으로 처리 — 문자열 안의 //, 주석 안의 따옴표를 오인하지 않는다.
-    // 단어 안의 아포스트로피(don't)는 문자열 시작이 아니다(앞이 글자·숫자가 아닐 때만 ' 문자열)
-    const re = /(\/\/.*$)|("[^"]*")|((?<![A-Za-z0-9_가-힣])'[^']*')|([A-Za-z_][A-Za-z0-9_]*)(\s*\()?|(\d+(?:\.\d+)?)|(<=|>=|!=|==|[=+\-*\/<>←])/g;
+  /* ── 코드 색칠: IDE 토큰 색(Catppuccin, .code-* 클래스)을 자동으로 입힌다 ──
+     의사코드 줄(.pseudocode-line)과 모든 코드 칸(pre)에 쓴다. 이미 <span class="code-…">로 칠한 부분,
+     KaTeX 결과, $…$가 남은 글자는 건드리지 않는다(수식 렌더링이 뒤에 오므로).
+     주석(// -- # %) · 문자열 · 키워드(대문자 제어어, Python·Lean·Cypher·While 키워드) · 함수(이름+괄호)
+     · 접두 이름(ex:Thing, :Label) · 숫자 · 연산자(:= ← → ≥ ∧ ∪ 등) */
+  const CODE_KEYWORDS = new Set(('INPUT OUTPUT RETURN RETURNS FOR EACH OF IN TO DO END IF THEN ELSE ELIF WHILE REPEAT UNTIL AND OR NOT USING LET SET BREAK CONTINUE FUNCTION PROCEDURE CALL '
+    + 'MATCH WHERE WITH OPTIONAL CONTAINS AS ORDER BY LIMIT UNWIND CREATE MERGE DISTINCT DELETE DETACH SELECT FROM ASK CONSTRUCT FILTER PREFIX UNION '
+    + 'from import def return if elif else for in while not and or class lambda None True False with as yield pass raise try except assert '
+    + 'structure theorem lemma where by fun let have show match then do end skip true false begin od fi inductive instance').split(' '));
+  const CODE_RE = new RegExp([
+    '((?:\\/\\/|(?:^|(?<=\\s))--\\s|(?:^|(?<=\\s))#\\s|^%).*$)',          // 1 주석
+    '("[^"\\n]*"|(?<![A-Za-z0-9_가-힣])\'[^\'\\n]*\')',                    // 2 문자열
+    '((?:[A-Za-z_][\\w-]*)?:[A-Za-z_][\\w]*)(?![\\w(])(?!\\s*=)',            // 3 접두 이름·레이블(ex:Thing, v:CVE, :HAS_CWE)
+    '([A-Za-z_][A-Za-z0-9_]*(?:-[A-Za-z][A-Za-z0-9_]*)*)(\\s*\\()?',       // 4 이름, 5 여는 괄호
+    '(\\d+(?:\\.\\d+)?)',                                                    // 6 숫자
+    '(:=|:-|<-|->|<=|>=|!=|==|[←→≥≤≠∧∨¬∪∩∘∈∉⊆⊂∅=+\\-*\\/<>])'               // 7 연산자
+  ].join('|'), 'gm');
+  const escHTML = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  function tokenizeCode(text, pseudo) {
     let out = '', last = 0, m;
-    while ((m = re.exec(text))) {
-      out += esc(text.slice(last, m.index));
-      if (m[1]) out += '<span class="code-comment">' + esc(m[1]) + '</span>';
-      else if (m[2] || m[3]) out += '<span class="code-string">' + esc(m[2] || m[3]) + '</span>';
+    CODE_RE.lastIndex = 0;
+    while ((m = CODE_RE.exec(text))) {
+      if (m[0] === '') { CODE_RE.lastIndex++; continue; }
+      out += escHTML(text.slice(last, m.index));
+      if (m[1]) out += '<span class="code-comment">' + escHTML(m[1]) + '</span>';
+      else if (m[2]) out += '<span class="code-string">' + escHTML(m[2]) + '</span>';
+      else if (m[3]) out += '<span class="code-property">' + escHTML(m[3]) + '</span>';
       else if (m[4]) {
-        if (PSEUDO_KEYWORDS.test(m[4])) out += '<span class="code-keyword">' + m[4] + '</span>' + (m[5] || '');
-        else if (m[5]) out += '<span class="code-function">' + m[4] + '</span>' + m[5];
-        else out += m[4];
+        const w = m[4];
+        // 의사코드 줄 맨 앞의 영어 동사(Deduplicate, Sort …)도 제어어로 본다(줄 번호 '19: ' 뒤 포함)
+        const lead = pseudo && /^[A-Z][a-z]+$/.test(w) && /^\s*(\d+:\s*)?$/.test(text.slice(text.lastIndexOf('\n', m.index - 1) + 1, m.index));
+        const kw = CODE_KEYWORDS.has(w) || (/^[A-Z]{2,}$/.test(w) && !m[5]) || lead;
+        if (kw) out += '<span class="code-keyword">' + w + '</span>' + (m[5] || '');
+        else if (m[5]) out += '<span class="code-function">' + w + '</span>' + m[5];
+        else out += w;
       }
       else if (m[6]) out += '<span class="code-number">' + m[6] + '</span>';
-      else if (m[7]) out += '<span class="code-operator">' + esc(m[7]) + '</span>';
-      last = re.lastIndex;
+      else if (m[7]) out += '<span class="code-operator">' + escHTML(m[7]) + '</span>';
+      last = CODE_RE.lastIndex;
     }
-    out += esc(text.slice(last));
-    line.innerHTML = out;
+    return out + escHTML(text.slice(last));
   }
+  function colorizeCode(root) {
+    if (!root || root.dataset.colored) return;   // 멱등
+    root.dataset.colored = '1';
+    const pseudo = root.classList.contains('pseudocode-line');
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: n => (n.parentElement.closest('[class^="code-"], [class*=" code-"], .katex, .katex-display')
+        || (n.nodeValue.indexOf('$') >= 0 && !n.parentElement.closest('pre, code')) || !/[A-Za-z0-9:=←→≥≤≠∧∨∪∩∘∈∅+\-*\/<>"']/.test(n.nodeValue))
+        ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT
+    });
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(n => {
+      const html = tokenizeCode(n.nodeValue, pseudo);
+      if (html === escHTML(n.nodeValue)) return;
+      const t = document.createElement('template');
+      t.innerHTML = html;
+      n.parentNode.replaceChild(t.content, n);
+    });
+  }
+  const colorizePseudocode = colorizeCode;
+  $$('pre').forEach(pre => { if (!pre.closest('svg')) colorizeCode(pre); });
 
   function initPseudocodeWalkthrough(containerEl) {
     if (!containerEl) return;
@@ -1044,5 +1116,88 @@
       }
     });
   });
+
+  /* ── 쪽 배치: 요약 위치를 모든 쪽에서 같게, 고급 쪽의 단서 칸에 용어 정리 ─────────
+     1) 단원 첫 쪽(단원 도입 + 첫 화면)도 다른 쪽처럼 요약(.summary)이 화면 맨 아래에 오도록
+        첫 화면의 min-height를 "창 높이 - 단원 위에서 첫 화면까지의 거리"로 맞춘다.
+     2) 고급 쪽(수식 블록·유도·의사코드·코드 칸이 있거나 용어가 4개 이상인 쪽, 표지 난이도 '고급'인 강의의 모든 쪽,
+        data-level="advanced")은 노트 칸의 용어 툴팁으로 단서 칸 아래에 '용어 정리'를 만든다.
+        앞 쪽에서 나온 용어도 다시 적는다. 쪽 높이를 넘지 않는 만큼만 넣는다. data-level="basic"이면 넣지 않는다. */
+  function initPageLayout() {
+    const firstScreens = $$('.module-header + .screen.cornell');
+    const navHeight = () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-height')) || 48;
+    const courseAdvanced = $$('.course-cover-meta-item').some(e => e.textContent.trim() === '고급');
+
+    function allowedHeight(screen) {
+      if (firstScreens.includes(screen)) {
+        const mod = screen.closest('.module');
+        return window.innerHeight - (screen.getBoundingClientRect().top - mod.getBoundingClientRect().top);
+      }
+      return window.innerHeight - navHeight();
+    }
+    function termsOf(notes) {
+      const seen = new Set(), out = [];
+      $$('.term[data-definition]', notes).forEach(t => {
+        const d = t.dataset.definition.trim();
+        const k = d.search(/[:：]\s/);
+        const name = (k > 0 ? d.slice(0, k) : t.textContent).trim();
+        const def = (k > 0 ? d.slice(k + 1) : d).trim();
+        const key = name.replace(/\s+/g, '');
+        if (!name || seen.has(key)) return;
+        seen.add(key);
+        out.push([name, def]);
+      });
+      return out;
+    }
+    function isAdvanced(screen, notes) {
+      const lv = screen.dataset.level;
+      if (lv === 'basic') return false;
+      if (lv === 'advanced' || courseAdvanced) return true;
+      if ($('.katex-display, .math-derivation, .pseudocode-translation, pre', notes)) return true;
+      return termsOf(notes).length >= 4;
+    }
+    let lastKey = '';
+    function layout(force) {
+      const key = window.innerWidth + 'x' + window.innerHeight;
+      if (force !== true && key === lastKey) return;   // 크기가 그대로면 다시 짜지 않는다(깜빡임 방지)
+      lastKey = key;
+      $$('.cue-terms[data-auto]').forEach(e => e.remove());
+      firstScreens.forEach(s => { s.style.minHeight = ''; });
+      if (window.innerWidth < 1200) return;   // 한 단으로 접힌 화면은 높이 제한이 없다
+      firstScreens.forEach(s => { s.style.minHeight = Math.max(0, Math.floor(allowedHeight(s))) + 'px'; });
+      $$('.screen.cornell').forEach(screen => {
+        const cue = $(':scope > .cue', screen), notes = $(':scope > .notes', screen);
+        if (!cue || !notes || !isAdvanced(screen, notes)) return;
+        const listed = new Set($$('dt', cue).map(d => d.textContent.replace(/\s+/g, '')));
+        const terms = termsOf(notes).filter(([n]) => !listed.has(n.replace(/\s+/g, '')));
+        if (!terms.length) return;
+        const box = document.createElement('div');
+        box.className = 'cue-terms';
+        box.dataset.auto = '1';
+        box.innerHTML = '<span class="cue-label">용어 정리</span><dl></dl>';
+        const dl = $('dl', box);
+        cue.appendChild(box);
+        const limit = allowedHeight(screen) + 0.5;
+        let n = 0;
+        for (const [name, def] of terms) {
+          const dt = document.createElement('dt'), dd = document.createElement('dd');
+          dt.textContent = name; dd.textContent = def;
+          dl.append(dt, dd);
+          if (screen.getBoundingClientRect().height > limit) { dt.remove(); dd.remove(); break; }
+          n++;
+        }
+        if (!n) box.remove();
+      });
+    }
+    let timer = null;
+    const relayout = () => { clearTimeout(timer); timer = setTimeout(layout, 120); };
+    // KaTeX 렌더링(DOMContentLoaded + 100ms) 뒤에, 글꼴이 준비되면 다시
+    const first = () => setTimeout(() => layout(true), 250);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', first);
+    else first();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => setTimeout(() => layout(true), 300));
+    window.addEventListener('resize', relayout);
+  }
+  initPageLayout();
 
 })();

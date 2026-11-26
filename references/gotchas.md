@@ -95,6 +95,16 @@
 - **원인:** 한 페이지에 글과 요소를 너무 많이 넣었다. 퀴즈가 2문항을 넘는다. 높이가 큰 SVG를 그대로 넣었다.
 - **해결:** 글을 줄여 맞추지 말고 내용을 여러 `.screen.cornell` 페이지로 나눈다(페이지마다 핵심 질문과 요약을 둔다). 퀴즈는 `.quiz-container`를 나누어 각각 고유 id와 자기 버튼을 둔다. SVG는 `viewBox`를 유지한 채 높이를 제한한다. 고친 뒤 `python3 -I <skill-dir>/references/check-pages.py <course-dir>`를 다시 실행한다. 기준 높이 765px는 1440×900 브라우저 창의 보이는 영역(약 813px)에서 48px 내비게이션을 뺀 값이며 `check-pages.py`가 이 값으로 잰다. `--page-height: calc(100vh - 48px)`는 런타임 최소 높이이므로 짧은 페이지에서는 요약이 페이지 맨 아래에 놓이는 것이 의도된 동작이다.
 
+### 배치 문제(LAY)
+- **증상:** `check-pages.py`가 `LAY` 줄을 보고하고 종료 코드 1로 끝난다.
+- **검사 항목:** ① 화면·본문 칸 밖으로 가로 넘침, ② `overflow: hidden/clip` 상자에 잘린 내용, ③ 상자 안 가로 스크롤, ④ SVG 밖으로 나간 `<text>`(SVG `overflow`가 visible이 아닐 때), ⑤ 25% 넘게 겹친 SVG 글자, ⑥ 색이 입혀지지 않은 코드 줄(`pre`, `.pseudocode-line`), ⑦ 페이지 가로 스크롤, ⑧ 말줄임으로 잘린 사이드바 라벨.
+- **해결:** 넘침은 그림 폭(`--diagram-max`)이나 표(`.data-table.compact`)를 줄이고, 라벨은 함축하고, SVG 글자는 `viewBox` 안으로 옮긴다. 색 없는 코드 줄은 키워드를 대문자로 쓰거나(`RETURN`, `FOR`) 줄을 앞 줄에 붙인다.
+
+### 측정 스크립트에서 SVG 회전이 사라짐
+- **증상:** 직접 만든 측정·캡처 스크립트에서 세로 축 제목이 SVG 밖으로 나간 것처럼 보인다.
+- **원인:** `.animate-in *{transform:none}` 같은 덮어쓰기가 SVG `rotate()`까지 지운다.
+- **해결:** `.animate-in, .animate-in *:not(svg, svg *)`처럼 SVG를 빼고 덮어쓴다. `check-pages.py`는 이미 이렇게 한다. 헤드리스 캡처는 창 높이를 900으로 줘야 보이는 영역이 813px가 된다(813으로 주면 726px이 되어 `용어 정리`가 빠진다).
+
 ### 코넬 아닌 화면
 - **증상:** `check-pages.py`가 `코넬 아닌 화면`을 보고한다. 단서 칸과 요약이 없다.
 - **해결:** 모든 `.screen`을 `.screen.cornell`로 바꾸고 `.cue`, `.notes`, `.summary`를 갖춘다.

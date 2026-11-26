@@ -231,6 +231,24 @@ paper-to-course 시스템의 CSS 디자인 토큰 전체 목록입니다. `style
 - 765px는 1440×900 브라우저 창의 보이는 영역(약 813px)에서 48px 내비게이션을 뺀 값이며 `check-pages.py`가 이 값으로 잰다. `--page-height: calc(100vh - 48px)`는 런타임 최소 높이이므로 짧은 페이지에서는 `.summary`가 페이지 맨 아래에 놓인다(의도된 동작).
 - `.summary`는 오른쪽에 `.pager`가 겹치지 않도록 오른쪽 패딩을 둔다. `.bogi`의 마지막 자식은 아래 여백이 0이다.
 - 마크업과 쪽 맞춤 규칙은 `interactive-elements.md`의 "코넬식 페이지와 지면 요소"를 따른다. 측정은 `check-pages.py`가 한다.
+- **여백 토큰.** `.module` 좌우 `--space-10`, 코넬 페이지 위아래 `--page-pad-y: 32px`, 본문 블록(표·그림·콜아웃·퀴즈·유도·수식) 사이 `--block-gap: 16px`. 첫 블록의 위 여백과 마지막 블록의 아래 여백은 0이다. 꽉 찬 페이지는 `.screen.cornell.dense`(24px·12px, 첫 페이지면 머리말 여백도 줄임)를 쓴다.
+- **요약 위치.** 둘째 페이지부터는 `--page-height`가, 첫 페이지는 `main.js`(`initPageLayout`)가 `100vh - 머리말까지의 거리`로 최소 높이를 정해 요약이 모든 페이지에서 화면 맨 아래 같은 자리에 온다.
+- **단서 칸 용어 정리(`.cue-terms`).** 고급 페이지에서 `main.js`가 핵심 질문 아래에 위 경계선과 `용어 정리` 표지, `dl`(`dt` 굵게, `dd` `--text-xs` 회색)을 넣는다. 쪽 높이를 넘지 않는 만큼만 넣는다.
+- **사이드바 라벨**은 한 줄 말줄임이므로 약 14자 이내로 함축해 쓴다.
+
+#### 교과 색 파생 규칙
+
+컴포넌트 색은 교과 색 프리셋 하나에서 파생한다. 초록·보라·주황 강의에서도 `배경 지식`·`보충 설명` 콜아웃, 퀴즈 경고, 연구 노트, 수식 상자 테두리가 그 교과 색 계열로 바뀐다.
+
+| 토큰 | 값 |
+|---|---|
+| `--color-info`, `.callout-info` | `var(--color-accent-hover)` |
+| `--color-info-light`, `.quiz-feedback.warning` 배경 | `var(--color-accent-light)` |
+| `--color-research-accent` | `var(--color-accent-hover)` |
+| `--color-research-bg` | `color-mix(in srgb, var(--color-accent) 6%, var(--color-surface))` |
+| `--color-math-border` | `color-mix(in srgb, var(--color-accent) 18%, var(--color-border))` |
+
+성공·오류 색(정답·오답)과 코드 칸의 Catppuccin 토큰 색만 교과 색과 무관하다.
 
 ---
 

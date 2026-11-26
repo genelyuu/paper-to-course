@@ -8,6 +8,7 @@
 디렉터리를 주면 *.html 을 모두 검사한다(modules/ 가 함께 있으면 빌드 산출물 index.html 은 중복이라 제외).
 작업 폴더(_tmp/, _src/ 처럼 밑줄로 시작하는 폴더)와 vendor/ 안의 파일은 강의 본문이 아니므로 건너뛴다.
 <script>, <style>, <code>, <pre>, KaTeX 렌더 결과(class="katex"), $...$ / $$...$$ 수식은 본문 검사에서 제외한다.
+이모지(KO113)는 본문·속성·그림·코드 어디에도 쓰지 않는다(ERROR).
 EBS 문체(KO102/108/109)는 chat/dialogue/message/bubble 클래스 요소와 lang이 ko가 아닌 요소 안에서는 검사하지 않는다.
 """
 import json
@@ -321,12 +322,21 @@ class Linter(HTMLParser):
                          "문단을 나누거나 핵심만 남기세요")
 
 
+# KO113: 이모지 금지(그림 문자·딩뱃 체크 표시·변형 선택자, 문자 참조 &#128161; 포함). 표의 갖춤 표시는 ○·△·×
+EMOJI_RE = re.compile(r"[\U0001F000-\U0001FAFF\u2600-\u27BF\u2B00-\u2BFF\uFE0F\u200D]"
+                      r"|&#(?:1[2-9]\d{3}|1[2-9]\d{4}|9[7-9]\d\d|1[01]\d{3});|&#x(?:1F[0-9A-Fa-f]{3}|2[67][0-9A-Fa-f]{2});")
+
+
 def lint_file(path):
     src = Path(path).read_text(encoding="utf-8", errors="replace")
     lt = Linter(src, str(path))
     lt.feed(src)
     lt.close()
     lt.finish()
+    body = re.sub(r"<(script|style)\b.*?</\1>", lambda m: "\n" * m.group(0).count("\n"), src, flags=re.S | re.I)
+    for m in EMOJI_RE.finditer(body):
+        lt.add(body.count("\n", 0, m.start()) + 1, "ERROR", "KO113", f"이모지 '{m.group(0)}'",
+               "이모지를 지우시오. 표의 갖춤/없음 표시는 ○·△·×, 화살표는 →를 쓴다")
     lt.issues.sort(key=lambda i: (i["line"], i["id"]))
     return lt.issues
 

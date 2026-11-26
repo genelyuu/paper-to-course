@@ -126,7 +126,6 @@ paper-to-course 튜토리얼에서 사용하는 모든 인터랙티브 요소의
 **배경 지식 표시:** 논문 이전의 배경만 다루는 화면(모듈 0, 곧 id 기준 첫 모듈이자 화면 번호 1인 모듈의 둘째 쪽부터, 그 밖의 배경 전용 콜아웃)은 화면 맨 위에 `배경 지식` 콜아웃을 둔다. 예외로 모듈 0의 첫 쪽은 논문 1절 "왜 썼나·새로운 점" 쪽이므로 `.paper-ref`(논문 1절)를 달고 `배경 지식` 콜아웃을 두지 않는다. 모듈 0의 나머지 쪽이 배경 쪽이다(첫 쪽 구성은 아래 "첫 페이지: 왜 썼는가와 새로운 점"). 전용 소형 라벨 클래스가 `styles.css`에 없으므로 `callout callout-info`를 쓴다. 이 콜아웃은 `보충 설명`·`더 알아보기`의 모듈당 2개 상한에 넣지 않는다.
 ```html
 <div class="callout callout-info animate-in">
-  <div class="callout-icon">&#128214;</div>
   <div class="callout-content">
     <strong class="callout-title">배경 지식</strong>
     <p>이 화면은 논문의 주장이 아니라 논문을 읽기 위해 먼저 알아 둘 배경이다.</p>
@@ -815,11 +814,10 @@ codebase-to-course와 같은 패턴이며 개념과 정의, 방법과 논문 등
 
 선택 코너(`보충 설명`, `더 알아보기`)는 모듈당 최대 2개까지 씁니다. 고정 코너인 `학습 목표`와 `핵심 정리`는 이 개수에 넣지 않습니다.
 
-콜아웃은 테두리 상자이며 `.callout-title`이 교과 색(또는 변형 색) 칩으로 그려진다. `.callout-icon`은 CSS가 숨기므로 이모지는 화면에 보이지 않는다. 아이콘 div는 있어도 없어도 되며, 새로 쓸 때는 생략해도 된다.
+콜아웃은 테두리 상자이며 `.callout-title`이 교과 색(또는 변형 색) 칩으로 그려진다. 이모지는 어디에도 쓰지 않는다(본문·표·그림·콜아웃 모두). `.callout-icon` div도 쓰지 않는다. 표의 갖춤/없음 표시는 ○·△·×로 쓴다.
 
 ```html
 <div class="callout callout-accent animate-in">
-  <div class="callout-icon">&#128161;</div>
   <div class="callout-content">
     <strong class="callout-title">핵심 정리</strong>
     <p>LoPE는 모델이나 보상 함수를 바꾸지 않고 입력만 바꾼다. 이 점이 LoPE에서 가장 직관에 반하는 부분이다.</p>

@@ -199,7 +199,7 @@ OK   module-1 p1 [코넬] 736px  스케일드 내적 어텐션 논문 3.2.1절
 
 ```text
 paper-to-course/
-├── SKILL.md                      ★ 스킬 정의: 5단계 절차, 문체·용어·작성 규칙, 점검 목록
+├── SKILL.md                      스킬 정의: 5단계 절차, 문체·용어·작성 규칙, 점검 목록
 ├── README.md
 ├── references/                   스킬이 참조하는 규정·도구 (생성 시 읽거나 실행)
 │   ├── 규정 문서
@@ -222,7 +222,7 @@ paper-to-course/
 │       ├── styles.css, main.js       지면 양식, 쪽 넘김·채점·단계 진행
 │       └── vendor/                   빌드 시 내장되는 자원: 글꼴(P2C Sans·JetBrains Mono), KaTeX
 ├── examples/
-│   └── attention-ko/             ★ 참조 산출물 (Attention Is All You Need)
+│   └── attention-ko/             참조 산출물 (Attention Is All You Need)
 │       ├── index.html                최종 산출물 (build.sh가 생성한 단독 파일)
 │       ├── _cover.html               표지: 제목, 초록, 목차
 │       ├── modules/

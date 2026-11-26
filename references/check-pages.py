@@ -12,6 +12,9 @@ min-height(100vh)를 풀고 내용의 실제 높이를 잰다.
 확인 문제는 모든 해설(정답·오답 중 긴 쪽)을 펼친 최악의 상태로 잰다.
 그림 정렬도 검사한다: 결과 막대 트랙의 시작 x·폭, SVG 요소의 viewBox 이탈과 노드 라벨 구조,
 의사코드 코드 줄과 설명 줄의 세로 위치, 문항 삽화의 형식(SVG만)과 색(교과 색 하나).
+배치도 검사한다(LAY): 화면·노트 칸 밖으로 가로로 넘친 요소, overflow로 잘린 내용, SVG 글자의 그림 경계 이탈,
+SVG 글자끼리 겹침, 페이지 가로 스크롤, 잘린 사이드바 목차 라벨, 색칠되지 않은 코드 칸.
+단원 첫 페이지는 단원 맨 위(내비 아래 여백 포함)부터 잰다.
 
 종료 코드: 넘치는 페이지나 그림 정렬 문제가 있으면 1, 아니면 0. 표준 라이브러리와 Chrome만 쓴다.
 """
@@ -27,7 +30,7 @@ CHROME_CANDIDATES = [
 
 PROBE = r"""
 <style id="__fit_style">
-  .animate-in, .animate-in * { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .animate-in, .animate-in *:not(svg, svg *) { opacity: 1 !important; transform: none !important; transition: none !important; }
   .screen.cornell { min-height: 0 !important; }
   html { scroll-snap-type: none !important; }
   .quiz-feedback { transition: none !important; }
@@ -57,7 +60,7 @@ window.addEventListener('load', function () {
       screens.forEach(function (s, si) {
         var r = s.getBoundingClientRect();
         var top = r.top, label = s.querySelector('.screen-heading, h3');
-        if (si === 0 && header) top = header.getBoundingClientRect().top;
+        if (si === 0 && header) top = mod.getBoundingClientRect().top + nav;
         pages.push({
           module: mod.id || ('module-' + mi),
           page: si + 1,
@@ -113,10 +116,69 @@ window.addEventListener('load', function () {
         if (d > 1) { fig.push('의사코드 #' + (pi + 1) + ': ' + (i + 1) + '번째 줄이 설명과 ' + Math.round(d) + 'px 어긋난다'); break; }
       }
     });
+    // 배치 검사(LAY)
+    var lay = [];
+    function vis(el) {
+      if (el.closest && el.closest('.katex-mathml, .sr-only, .visually-hidden, .term-tooltip, [role=tooltip]')) return false;
+      var cs = getComputedStyle(el); if (cs.display === 'none' || cs.visibility === 'hidden') return false;
+      var r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0;
+    }
+    function nm(el) { var c = el.className && el.className.baseVal !== undefined ? el.className.baseVal : el.className; return el.tagName.toLowerCase() + (c ? '.' + String(c).split(/\s+/)[0] : ''); }
+    function tx(el) { return (el.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 24); }
+    document.querySelectorAll('.module').forEach(function (mod) {
+      mod.querySelectorAll('.screen').forEach(function (s, si) {
+        if (!vis(s)) return;
+        var where = (mod.id || 'module') + ' p' + (si + 1), sr = s.getBoundingClientRect();
+        var notes = s.querySelector(':scope > .notes'), nr = notes ? notes.getBoundingClientRect() : sr;
+        var seen = 0;
+        s.querySelectorAll('*').forEach(function (e) {
+          if (seen > 2) return;
+          if (e.closest('svg') && e.tagName.toLowerCase() !== 'svg') return;
+          if (!vis(e)) return;
+          var r = e.getBoundingClientRect(), box = notes && notes.contains(e) ? nr : sr;
+          if (r.right > box.right + 2 || r.left < box.left - 2) {
+            var inner = Array.prototype.some.call(e.children, function (c) { var q = c.getBoundingClientRect(); return vis(c) && (q.right > box.right + 2 || q.left < box.left - 2); });
+            if (!inner) { lay.push(where + ': 가로로 ' + Math.round(Math.max(r.right - box.right, box.left - r.left)) + 'px 넘친다 ' + nm(e) + ' "' + tx(e) + '"'); seen++; }
+          }
+          var cs = getComputedStyle(e), dx = e.scrollWidth - e.clientWidth, dy = e.scrollHeight - e.clientHeight;
+          if (((cs.overflowX === 'hidden' || cs.overflowX === 'clip') && dx > 2) || ((cs.overflowY === 'hidden' || cs.overflowY === 'clip') && dy > 2)) {
+            if (!e.closest('.sidebar') && !e.classList.contains('pseudocode-translation')) { lay.push(where + ': 내용이 잘린다(overflow) ' + nm(e) + ' dx=' + dx + ' dy=' + dy + ' "' + tx(e) + '"'); seen++; }
+          } else if ((cs.overflowX === 'auto' || cs.overflowX === 'scroll') && dx > 2) { lay.push(where + ': 가로 스크롤이 생긴다 ' + nm(e) + ' dx=' + dx); seen++; }
+        });
+        s.querySelectorAll('svg').forEach(function (svg, k) {
+          if (!vis(svg)) return;
+          var SR = svg.getBoundingClientRect(), clip = getComputedStyle(svg).overflow !== 'visible', bs = [];
+          svg.querySelectorAll('text').forEach(function (t) {
+            if (!vis(t) || !tx(t)) return;
+            var TR = t.getBoundingClientRect();
+            if (clip && (TR.left < SR.left - 1 || TR.top < SR.top - 1 || TR.right > SR.right + 1 || TR.bottom > SR.bottom + 1))
+              lay.push(where + ': SVG #' + (k + 1) + ' 글자가 그림 경계 밖에서 잘린다 "' + tx(t) + '"');
+            bs.push([TR, tx(t)]);
+          });
+          for (var i = 0; i < bs.length; i++) for (var j = i + 1; j < bs.length; j++) {
+            var a = bs[i][0], b = bs[j][0];
+            var ix = Math.min(a.right, b.right) - Math.max(a.left, b.left), iy = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+            var ar = Math.min(a.width * a.height, b.width * b.height);
+            if (ix > 1 && iy > 1 && ar > 0 && ix * iy / ar > 0.25 && !(bs[i][1] === bs[j][1] && Math.abs(a.left - b.left) < 1 && Math.abs(a.top - b.top) < 1))
+              lay.push(where + ': SVG #' + (k + 1) + ' 글자가 겹친다 "' + bs[i][1] + '" × "' + bs[j][1] + '"');
+          }
+        });
+        s.querySelectorAll('pre, .pseudocode-line').forEach(function (c) {
+          if (c.matches('.pseudocode-line') && c.closest('pre')) return;
+          if (/[A-Z]{2,}|\d|[:=←→≥≤≠∧∨∪∈"']|\w\(|\/\/|^\s*[A-Z][a-z]+\b/.test(c.textContent) && !c.querySelector('[class^="code-"], [class*=" code-"], .katex'))
+            lay.push(where + ': 코드 색칠이 안 됐다 ' + nm(c) + ' "' + tx(c) + '"');
+        });
+      });
+    });
+    var dw = document.documentElement.scrollWidth - window.innerWidth;
+    if (dw > 2) lay.push('페이지: 가로 스크롤 ' + dw + 'px');
+    document.querySelectorAll('.sidebar-item-label').forEach(function (e) {
+      if (e.scrollWidth > e.clientWidth + 1) lay.push('사이드바: 목차 라벨이 잘린다 "' + e.textContent.trim() + '" (더 짧게)');
+    });
     var pre = document.createElement('pre');
     pre.id = '__fit_result';
     var images = document.querySelectorAll('figure img[src^="assets/"], figure img[data-asset]').length;   // 모델 삽화(사물·장면 선화)
-    pre.textContent = JSON.stringify({ limit: Math.round(limit), width: window.innerWidth, pages: pages, fig: fig, images: images });
+    pre.textContent = JSON.stringify({ limit: Math.round(limit), width: window.innerWidth, pages: pages, fig: fig, lay: lay, images: images });
     document.body.appendChild(pre);
   }, 300);
 });
@@ -183,11 +245,16 @@ def main():
         print("\n그림 정렬:")
         for f in fig:
             print("FIG  " + f)
+    lay = data.get("lay", [])
+    if lay:
+        print("\n배치:")
+        for f in lay:
+            print("LAY  " + f)
     images = data.get("images", 0)
     if images < MIN_IMAGES:
         print(f"\nIMG  삽화(assets/ 선화)가 {images}개다 (최소 {MIN_IMAGES}개, references/illustrate.py로 만든다)")
-    print(f"\n요약: 페이지 {len(data['pages'])}개, 넘침 {over}개, 코넬 아닌 화면 {plain}개, 그림 정렬 문제 {len(fig)}개, 삽화 {images}개")
-    sys.exit(1 if over or fig or images < MIN_IMAGES else 0)
+    print(f"\n요약: 페이지 {len(data['pages'])}개, 넘침 {over}개, 코넬 아닌 화면 {plain}개, 그림 정렬 문제 {len(fig)}개, 배치 문제 {len(lay)}개, 삽화 {images}개")
+    sys.exit(1 if over or fig or lay or images < MIN_IMAGES else 0)
 
 
 if __name__ == "__main__":
