@@ -1,6 +1,6 @@
 ---
 name: paper-to-course
-description: "학술 논문을 EBS 교재 문체의 한국어 인터랙티브 HTML 강의로 바꾼다. 논문의 기여, 배경 지식, 수식, 실험 결과, 연구 계보를 단계별로 익히게 한다. 사용자가 '이 논문을 강의로 만들어 줘', '논문을 강의로 쉽게 설명해 줘', '논문을 튜토리얼로', '논문 해설 강의', '이 PDF로 강의 만들어 줘', 'arXiv 논문 강의로'처럼 말하면 사용한다. Turn any academic paper into a beautiful, interactive HTML course written in Korean (EBS textbook style). Trigger when users mention: 'turn this paper into a course,' 'explain this paper interactively,' 'make a tutorial from this paper,' 'teach me this paper,' 'interactive walkthrough of this research,' 'convert this PDF to a tutorial.'"
+description: "학술 논문을 교육 도메인 학습서 문체의 한국어 인터랙티브 HTML 강의로 바꾼다. 논문의 기여, 배경 지식, 수식, 실험 결과, 연구 계보를 단계별로 익히게 한다. 사용자가 '이 논문을 강의로 만들어 줘', '논문을 강의로 쉽게 설명해 줘', '논문을 튜토리얼로', '논문 해설 강의', '이 PDF로 강의 만들어 줘', 'arXiv 논문 강의로'처럼 말하면 사용한다. Turn any academic paper into a beautiful, interactive HTML course written in Korean (Korean study-guide style). Trigger when users mention: 'turn this paper into a course,' 'explain this paper interactively,' 'make a tutorial from this paper,' 'teach me this paper,' 'interactive walkthrough of this research,' 'convert this PDF to a tutorial.'"
 ---
 
 # Paper-to-Course
@@ -28,9 +28,9 @@ arXiv URL은 `https://arxiv.org/pdf/xxxx.xxxxx`로 바꿔 WebFetch 또는 Read�
 - UI 문구(버튼, 진행 표시, 퀴즈 피드백)도 한국어입니다. `main.js`의 i18n 사전이 `<html lang>`으로 문구를 고르므로 `_base.html`의 `<html lang="ko">`는 **절대 바꾸지 않습니다**(다른 언어 요청 시만 예외).
 - 중국어(한자 포함) 문구를 남기지 않습니다. 원문 인용이 꼭 필요하면 그 요소에 `lang` 속성을 답니다.
 
-## 문체: EBS·교육 회사 교재 문체
+## 문체: 교육 도메인 학습서 문체
 
-강의 본문은 EBS·교육 회사 학습서 문체로, 글의 역할에 따라 종결을 나눕니다. 전체 규칙과 나쁜 예는 `references/korean-style-guide.md` §1(특히 §1.8)에 있습니다. (이 SKILL.md는 에이전트용 지침이라 합니다체이고, EBS 문체는 생성물에만 적용합니다.)
+강의 본문은 교육 도메인 학습서 문체로, 글의 역할에 따라 종결을 나눕니다. 전체 규칙과 나쁜 예는 `references/korean-style-guide.md` §1(특히 §1.8)에 있습니다. (이 SKILL.md는 에이전트용 지침이라 합니다체이고, 학습서 문체는 생성물에만 적용합니다.)
 
 | 요소 | 규칙 | 예 |
 |---|---|---|
@@ -115,7 +115,7 @@ WebSearch로 **선수 개념**(전제하는 수학(확률론, 최적화, 정보 
 - 제목은 논문 절 제목의 한국어 번역(`어텐션`, `결과`)이며 교과서식 제목("핵심 아이디어: …")을 짓지 않습니다. 서베이는 절 제목을 그대로 써도 됩니다. 논문 절이 아닌 선수 모듈은 간결하게, 서론·배경 절과 합칠 수 있으면 합칩니다(`1 서론과 배경`).
 - 논문 위치는 `<h3 class="screen-heading">스케일드 내적 어텐션<span class="paper-ref">논문 3.2.1절</span></h3>`로, 논문 밖 보충 화면에는 달지 않습니다. `.module-subtitle`은 그대로, `.sec-num`은 쓰지 않습니다.
 
-**모든 모듈(EBS 구성, `korean-style-guide.md` §1.7):** `학습 목표` 2~3개 → 본문 페이지 3~8개(확인 문제 쪽 제외; `개념 체크`, `탐구 자료`, 필요하면 `보충 설명`·`더 알아보기`) → `핵심 정리`(요점 3~5개) → `확인 문제`(객관식 3~5문항, 하나 이상 `옳지 않은 것은?` 또는 `<보기>`형). 인터랙티브 요소 1개 이상, 필요한 곳에 SVG. `보충 설명`+`더 알아보기`는 모듈당 최대 2개(`학습 목표`·`핵심 정리`·`배경 지식`은 세지 않음).
+**모든 모듈(학습서 구성, `korean-style-guide.md` §1.7):** `학습 목표` 2~3개 → 본문 페이지 3~8개(확인 문제 쪽 제외; `개념 체크`, `탐구 자료`, 필요하면 `보충 설명`·`더 알아보기`) → `핵심 정리`(요점 3~5개) → `확인 문제`(객관식 3~5문항, 하나 이상 `옳지 않은 것은?` 또는 `<보기>`형). 인터랙티브 요소 1개 이상, 필요한 곳에 SVG. `보충 설명`+`더 알아보기`는 모듈당 최대 2개(`학습 목표`·`핵심 정리`·`배경 지식`은 세지 않음).
 
 **선수 학습 모듈(`module-0`, 필수):** 선수 개념 3~5개(직관 + 시각 자료 + (선택) 형식화, WebSearch로 검증), 개념 관계 "지식 지도" SVG, `확인 문제` 3~5문항. 첫 쪽은 논문 1절 "왜 썼나·새로운 점" 쪽(`paper-ref` 논문 1절, `배경 지식` 콜아웃 없음), 나머지 배경 쪽은 맨 위에 `callout callout-info` `배경 지식` 콜아웃.
 
@@ -188,7 +188,7 @@ course-name/
 - 강의가 만든 예시·수치에는 `예시` 표시. 캡션에 `논문 그림 n을 다른 예시로 재구성`, 쪽 제목 `paper-ref`에도 `그림 n`.
 - 핵심도 `하`(부록 반복 실험 등)는 한 문장이나 표 한 줄로 충분. 다루지 않은 그림은 `figures.md`에 이유를 적고 결과 보고에 남깁니다.
 
-**삽화**(먼저 `references/illustration.md`를 읽음). 확인 문제·탐구 자료에도 수능특강처럼 그림을 넣을 수 있습니다. 도식(좌표, 그래프, 장치 배치, 흐름)은 인라인 SVG, 문항 안에서는 `.q-body` + `.q-figure`로 선택지 오른쪽에(페이지 높이가 늘지 않음). 모델 환경이 없어 장면 삽화를 못 만들면 결과 보고에 적습니다. 그림 속 글자는 항상 SVG `<text>`이고 이미지 모델에 글자를 그리게 하지 않습니다.
+**삽화**(먼저 `references/illustration.md`를 읽음). 확인 문제·탐구 자료에도 학습서 문항처럼 그림을 넣을 수 있습니다. 도식(좌표, 그래프, 장치 배치, 흐름)은 인라인 SVG, 문항 안에서는 `.q-body` + `.q-figure`로 선택지 오른쪽에(페이지 높이가 늘지 않음). 모델 환경이 없어 장면 삽화를 못 만들면 결과 보고에 적습니다. 그림 속 글자는 항상 SVG `<text>`이고 이미지 모델에 글자를 그리게 하지 않습니다.
 
 #### 병렬 경로 (복잡한 논문)
 모듈을 최대 3개씩 하위 에이전트에게 맡깁니다. 각 에이전트에게 줄 것: 자기 모듈 브리프, `korean-style-guide.md`, `briefs/terms.md`(새 번역어는 결과 보고에 적게 함), `content-philosophy.md`, `gotchas.md`, 위 **작성 규칙** 블록 전체, `interactive-elements.md`의 "코넬식 페이지와 지면 요소"·"개념 그림", `design-system.md`의 "색상 규약", 그 밖에 브리프에 적힌 절.
@@ -222,7 +222,7 @@ python3 -I <skill-dir>/references/check-interact.py course-name/   # 퀴즈 채�
 - `check-interact.py`는 모든 확인 문제를 오답·초기화·정답 순으로 풀고, 내비 점·방향키·쪽 넘김 단추·스페이스바·용어 툴팁·콘솔 오류를 실제 입력으로 검사합니다. 요약이 `상호작용 문제 0개`여야 합니다(`--quick`은 퀴즈 3개만). Chrome이 없으면 건너뛰고 결과 보고에 "건너뜀"으로 적습니다.
 - 통과할 때까지 고치고 다시 빌드합니다. 통과하면 표지를 포함한 모든 페이지를 렌더링해 하나씩 눈으로 확인합니다(검사는 필요조건일 뿐). 그다음 `index.html`을 브라우저로 열고 만든 내용을 한국어로 안내하며 피드백을 요청합니다.
 
-**검토 체크리스트:** Phase 1~4의 필수 항목(표지 구성, 모듈 순서와 EBS 구성, 첫 페이지, 계보, 그림·구조도·비교·논문 그림 재현, 삽화 3개, 출처·판·라이선스, 용어표 병합, 번호와 `.paper-ref`, 코넬·765px·퀴즈 2문항, 색상·직각 간선, EBS 문체·용어)을 하나씩 다시 확인하고, 다음도 봅니다.
+**검토 체크리스트:** Phase 1~4의 필수 항목(표지 구성, 모듈 순서와 학습서 구성, 첫 페이지, 계보, 그림·구조도·비교·논문 그림 재현, 삽화 3개, 출처·판·라이선스, 용어표 병합, 번호와 `.paper-ref`, 코넬·765px·퀴즈 2문항, 색상·직각 간선, 학습서 문체·용어)을 하나씩 다시 확인하고, 다음도 봅니다.
 - [ ] 방법마다 단점·비용·실패 사례(구체 예), 처음 나오는 지표(precision, recall, F1, EM 등)를 작은 수치 예로 계산, 결과에 맥락(무엇과 비교, 좋은 수치인가), 한계를 드러냄, 수식은 직관 → 형식화 → 해석, 모듈 사이 연결이 자연스러움
 - [ ] 수식이 모두 렌더링(LaTeX 원문 노출 없음), 표지 메타에 이모지 없음, 링크는 교과 색, 도식 라벨이 화면에서 12px 이상, SVG 반응형, 한글 SVG 라벨이 잘리거나 넘치지 않음, 어절 중간 줄바꿈 없음(`keep-all`), 한자·전각 괄호(`（）`) 없음
 - [ ] 사이드바에 모든 모듈·스크롤 시 현재 모듈 강조·1024px 이하 토글, 인터랙티브 요소(퀴즈, 유도, 비교) 작동, 툴팁이 마우스 오버·클릭에 나타남
@@ -232,17 +232,17 @@ python3 -I <skill-dir>/references/check-interact.py course-name/   # 퀴즈 채�
 
 ## 디자인 정체성
 
-**수능특강 교재 지면 + 코넬식 노트**: 순백(#FFFFFF) 바탕, 차가운 회색 면(#F4F6F8), 평평하고 옅은 그림자, 교과 색 하나 + 먹색(그라데이션 금지). 본문·제목 모두 Pretendard(`P2C Sans`로 개명한 KS X 1001 부분 집합, 라틴 디스플레이 서체 금지), 고정폭 JetBrains Mono는 코드에만. `keep-all`, 한글 이탤릭 금지(`em`은 굵기 600 + 강조색), 4px 격자(선 1·2px 예외), 화면당 짧은 문단 3~4개, 코드 블록 #1E1E2E + Catppuccin, SVG는 viewBox로 반응형. 토큰·근거 전체는 `references/design-system.md`.
+**학습서 지면 + 코넬식 노트**: 순백(#FFFFFF) 바탕, 차가운 회색 면(#F4F6F8), 평평하고 옅은 그림자, 교과 색 하나 + 먹색(그라데이션 금지). 본문·제목 모두 Pretendard(`P2C Sans`로 개명한 KS X 1001 부분 집합, 라틴 디스플레이 서체 금지), 고정폭 JetBrains Mono는 코드에만. `keep-all`, 한글 이탤릭 금지(`em`은 굵기 600 + 강조색), 4px 격자(선 1·2px 예외), 화면당 짧은 문단 3~4개, 코드 블록 #1E1E2E + Catppuccin, SVG는 viewBox로 반응형. 토큰·근거 전체는 `references/design-system.md`.
 
 ---
 
 ## 참고 파일
 
 `references/`의 상세 명세는 **해당 단계에 도달했을 때만** 읽습니다(단계 안내가 더 앞선 단계를 가리키면 그 안내를 따름).
-- `korean-style-guide.md`(EBS 문체, 조사, 띄어쓰기, 번역투, 문항·해설): Phase 3.5·4, 병렬 경로 모든 모듈 에이전트에 전달
+- `korean-style-guide.md`(학습서 문체, 조사, 띄어쓰기, 번역투, 문항·해설): Phase 3.5·4, 병렬 경로 모든 모듈 에이전트에 전달
 - `glossary-ko.md`(표준 용어집, 쟁점 용어): Phase 3 용어표, 순차 경로에서 새 용어 쓰기 전
 - `content-philosophy.md`(교수 원칙, 퀴즈 설계, 툴팁): Phase 3.5·4. `gotchas.md`(자주 실패하는 지점): Phase 4·5
 - `module-brief-template.md`: Phase 3.5(복잡한 논문만)
 - `design-system.md`(토큰, 색·교과 색 프리셋, 4px 격자, 지면 레이아웃, 한글 타이포그래피, SVG): Phase 4
 - `templates/*.html` + `scaffold.py`(공통 레이아웃 틀과 생성기), `interactive-elements.md`(모듈 골격, 내비게이션, 모든 인터랙티브 HTML 패턴): Phase 4 Step 1~2부터
-- `lint-ko.py`(한자 잔존, `lang`, 전각 괄호, 번역투, EBS 문체), `check-pages.py`(헤드리스 Chrome 쪽 높이, 코넬 아닌 화면): Phase 5
+- `lint-ko.py`(한자 잔존, `lang`, 전각 괄호, 번역투, 학습서 문체), `check-pages.py`(헤드리스 Chrome 쪽 높이, 코넬 아닌 화면): Phase 5

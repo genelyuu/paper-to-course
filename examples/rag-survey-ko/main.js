@@ -30,7 +30,7 @@
 
   /* ── I18N (UI strings; language from <html lang>, default ko) ── */
   const I18N = {
-    // ko: EBS 교재 문체 — 표지(정답/오답) + 한다체 해설, 지시는 '~하시오'
+    // ko: 학습서 문체 — 표지(정답/오답) + 한다체 해설, 지시는 '~하시오'
     ko: {
       selectFirst: '먼저 답을 고르시오.',
       correct: '정답',

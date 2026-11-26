@@ -25,7 +25,7 @@
   --color-surface-subtle:   #F7F8FA;
 
   /* ACCENT — 교과 색. _base.html에서 강의마다 덮어쓴다 (design-system.md "교과 색 프리셋")
-     기본값은 수능특강 과학탐구 계열의 파랑 */
+     기본값은 과학 교과 계열의 파랑 */
   --color-accent:         #1F6FB2;
   --color-accent-hover:   #185A92;
   --color-accent-light:   #E8F1FA;
@@ -2120,7 +2120,7 @@ pre, code, pre code {
 .nav-dot::after { word-break: keep-all; }
 .term-tooltip { max-width: 320px; word-break: keep-all; overflow-wrap: break-word; }
 
-/* <보기> box (EBS 보기형 문항): ㄱ/ㄴ/ㄷ statements under a quiz question */
+/* <보기> box (보기형 문항): ㄱ/ㄴ/ㄷ statements under a quiz question */
 .bogi {
   position: relative;
   margin: var(--space-4) 0 var(--space-3);
@@ -2156,7 +2156,7 @@ pre, code, pre code {
 }
 
 
-/* ── TEXTBOOK PAGE LAYOUT (수능특강 지면 + 코넬식 노트) ─────────────
+/* ── TEXTBOOK PAGE LAYOUT (학습서 지면 + 코넬식 노트) ─────────────
    근거: design-system.md "지면 레이아웃".
    - 간격은 4px 격자(Carbon·Atlassian·USWDS의 4/8px 배수 체계). 선 두께 1·2px만 예외.
    - 한 화면(.screen.cornell) = 한 페이지. 1440×900 기준 스크롤 없이 한눈에 보인다.
@@ -2795,7 +2795,7 @@ svg foreignObject > div.node-label > span { display: block; }
   background: var(--color-surface);
 }
 
-/* ── 문항 삽화 (수능특강식) ──────────────────────────────────────
+/* ── 문항 삽화 (학습서식) ──────────────────────────────────────
    발문 아래에 선택지와 그림을 나란히 둔다(그림이 페이지 높이를 늘리지 않게).
    그림 규칙: 검은 선 + 교과 색 하나, 평면, 그림자·그라데이션 없음, 글자는 SVG <text>.
    <div class="q-body">

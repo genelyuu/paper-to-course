@@ -10,7 +10,7 @@
 <script>, <style>, <code>, <pre>, KaTeX 렌더 결과(class="katex"), $...$ / $$...$$ 수식은 본문 검사에서 제외한다.
 이모지(KO113)는 본문·속성·그림·코드 어디에도 쓰지 않는다(ERROR).
 인라인 배치 스타일(KO114: style 속성의 display:grid/flex, grid-template-columns)은 <svg> 밖에서 WARN. styles.css의 .cols-* 클래스를 쓴다.
-EBS 문체(KO102/108/109)는 chat/dialogue/message/bubble 클래스 요소와 lang이 ko가 아닌 요소 안에서는 검사하지 않는다.
+학습서 문체(KO102/108/109)는 chat/dialogue/message/bubble 클래스 요소와 lang이 ko가 아닌 요소 안에서는 검사하지 않는다.
 """
 import json
 import re
@@ -47,7 +47,7 @@ TRANSLATIONESE = [(re.compile(p), d, s) for p, d, s in TRANSLATIONESE]
 TONGHAE_RE = re.compile(r"[을를]\s*통해")
 TONGHAE_MAX = 3
 
-# EBS 교재 문체: 본문은 한다체. 합니다체/해요체 종결을 잡는다.
+# 학습서 문체: 본문은 한다체. 합니다체/해요체 종결을 잡는다.
 # (?!아): "아니다"(한다체 부정)는 합니다체가 아니다 — C1 E2E 테스트에서 오탐 확인
 FORMAL_RE = re.compile(r"(?:(?!아)[가-힣]니다|십시오)(?=\s*[.!?]|\s*$)")
 POLITE_RE = re.compile(r"(?:(?<![필중주수개긴소불])요|죠)(?=\s*[.!?])")
@@ -257,12 +257,12 @@ class Linter(HTMLParser):
             m = FORMAL_RE.search(text)
             if m:
                 self.add(ln(m), "WARN", "KO102",
-                         f"합니다체 종결 '{m.group(0)}': EBS 교재 본문은 한다체여야 합니다",
+                         f"합니다체 종결 '{m.group(0)}': 학습서 본문은 한다체여야 합니다",
                          "한다체로 바꾸세요 (예: ~합니다 -> ~한다, ~입니다 -> ~이다, ~하십시오 -> ~하시오)")
             m = POLITE_RE.search(text)
             if m:
                 self.add(ln(m), "WARN", "KO102",
-                         f"해요체 종결 '{m.group(0)}': EBS 교재 본문은 한다체여야 합니다",
+                         f"해요체 종결 '{m.group(0)}': 학습서 본문은 한다체여야 합니다",
                          "한다체로 바꾸세요 (예: ~해요 -> ~한다, ~예요 -> ~이다). 대화(chat) 요소 안의 대사만 해요체 허용")
             m = YEOREOBUN_RE.search(text)
             if m:

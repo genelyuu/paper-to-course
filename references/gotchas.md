@@ -163,7 +163,7 @@ python3 -I <skill-dir>/references/check-pages.py <course-dir>
 
 넘침 0, 코넬 아닌 화면 0, 린터 ERROR 0·WARN 0. 예외는 `korean-style-guide.md` §3.3의 알려진 린터 한계(KO104 서술격 `이다` 오탐 등)뿐이며, 남기면 사용자에게 보고한다.
 
-규칙: KO001 언어 / KO002 중국어 / KO003 전각 부호 / KO004 `data-steps` JSON / KO101 번역투 / KO102 문체(EBS 한다체) / KO103 괄호 간격 / KO104 조사 / KO105 숫자+단위 / KO106 긴 문단 / KO107 툴팁 형식 / KO108 피드백 칭찬 / KO109 `여러분` / KO110 해설 표지 중복 / KO111 용어 뜻풀이 서술문 종결 / KO112 수식 똑바른 글꼴 명령·이름 있는 연산자(`\cos`, `\max` 등은 `\mathit{cos}`로).
+규칙: KO001 언어 / KO002 중국어 / KO003 전각 부호 / KO004 `data-steps` JSON / KO101 번역투 / KO102 문체(학습서 한다체) / KO103 괄호 간격 / KO104 조사 / KO105 숫자+단위 / KO106 긴 문단 / KO107 툴팁 형식 / KO108 피드백 칭찬 / KO109 `여러분` / KO110 해설 표지 중복 / KO111 용어 뜻풀이 서술문 종결 / KO112 수식 똑바른 글꼴 명령·이름 있는 연산자(`\cos`, `\max` 등은 `\mathit{cos}`로).
 
 ## 그림 정렬이 어긋남
 - 막대가 라벨 길이에 따라 다른 x에서 시작, SVG 상자 글자가 위에 붙음, `d<sub>k</sub>`가 세 조각, 간선이 허공에서 끝남, 의사코드 줄과 설명 줄이 점점 어긋남 / 내용 따라 폭이 변하는 flex, span 없는 `foreignObject` flex 가운데 정렬, 손 좌표, 단락 여백이 부품 안으로 샘 / `design-system.md` 그림 정렬 규칙: 막대는 subgrid, 라벨 `.node-label > span`, 좌표는 폭 공식, 간선은 노드 테두리에서 끝. `check-pages.py`가 검사.

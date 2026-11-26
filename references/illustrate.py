@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""illustrate.py - 수능특강식 문항 삽화 파이프라인 (작은 로컬 모델 → 선화 SVG)
+"""illustrate.py - 학습서식 문항 삽화 파이프라인 (작은 로컬 모델 → 선화 SVG)
 
 도식(그래프, 좌표, 실험 장치 배치, 흐름)은 이 스크립트를 쓰지 않고 SVG를 직접 쓴다
 (references/illustration.md). 이 스크립트는 사물·장면 그림에만 쓴다.
