@@ -1071,6 +1071,27 @@ p:last-child { margin-bottom: 0; }
 .dnd-chip:active { cursor: grabbing; transform: scale(1.05); }
 .dnd-chip.dragging { opacity: 0.4; }
 .dnd-chip.placed { opacity: 0.3; pointer-events: none; }
+.dnd-chip.selected { box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-accent); }
+/* 칩·칸 안의 수학 기호는 바탕색과 겹치지 않도록 둘레 글자색을 따른다 */
+.dnd-chip .mi, .dnd-chip sub, .dnd-chip sup,
+.dnd-zone-target .mi, .dnd-zone-target sub, .dnd-zone-target sup { color: inherit; }
+.dnd-zone-target { cursor: pointer; gap: var(--space-3); }
+/* 매칭 확인·스페이스바로 공개한 정답 */
+.dnd-zone-target.answer-shown { border-style: solid; border-color: var(--color-accent); background: var(--color-accent-light); color: var(--color-text); }
+.dnd-zone-target.incorrect-placed { color: var(--color-text); }
+.dnd-answer-label { font-size: var(--text-xs); font-weight: 700; color: var(--color-accent); }
+.dnd-zone-target.incorrect-placed .dnd-answer-label { color: var(--color-error); }
+.dnd-wrong { color: var(--color-text-muted); }
+
+/* 본문·콜아웃·캡션 속 외부 링크(더 알아보기의 출처 등): 브라우저 기본 파란 밑줄 대신 교과 색 */
+:is(.notes, .callout, .figure-caption, .data-table) a:not(.btn) {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+}
+:is(.notes, .callout, .figure-caption, .data-table) a:not(.btn):hover { color: var(--color-accent-hover); }
 
 .dnd-zones { display: flex; flex-direction: column; gap: var(--space-4); }
 .dnd-zone {

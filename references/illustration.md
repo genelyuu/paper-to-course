@@ -88,6 +88,21 @@ python3 references/illustrate.py from-png sketch.png --out course/assets/fig-x.s
 - 영어로, 대상 하나를 구체적으로: `a glass flask and a beaker on a lab bench`
 - 스타일 접미사는 스크립트가 붙인다(선화, 평면, 흰 배경, 글자 없음). 프롬프트에 스타일어를 더 넣지 않는다.
 - 사람·손은 작은 모델이 자주 망가뜨린다. 가능하면 사물로 바꾼다.
+- 상태·변화(무너진 다리, 금 간 고리, 가격표 두 장)는 작은 모델이 잘 그리지 못한다. 온전한 사물 하나로 비유를 잡고, 상태는 캡션·SVG 라벨로 말한다. 그림이 프롬프트와 다르게 나오면 캡션과 `alt`를 **그림에 맞게** 고친다.
+- 동전·간판·종이처럼 글자가 들어가기 쉬운 대상은 가짜 글자가 생긴다. 시드를 바꾸거나 다른 대상으로 바꾼다.
+
+### 여러 강의를 동시에 만들 때
+
+모델을 동시에 여러 개 띄우면 메모리가 부족해진다. 모든 에이전트가 같은 잠금 경로를 써서 한 번에 하나만 돌린다.
+
+```bash
+LOCK="$TMPDIR/paper-to-course-illustrate.lock"
+until mkdir "$LOCK" 2>/dev/null; do sleep 5; done
+~/.cache/paper-to-course/venv/bin/python references/illustrate.py run --prompt "…" --out course/assets/fig-x.svg; rc=$?
+rmdir "$LOCK"; exit $rc
+```
+
+삽화 하나를 만든 뒤 바로 잠금을 푼다. 시드 여러 개를 시험할 때도 한 번 실행마다 잠금을 잡았다 푼다.
 
 ### 결과 검사 (사람이 본다)
 

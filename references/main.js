@@ -269,6 +269,10 @@
         const done = el.dataset.revealed || $$('.quiz-option', el).every(o => o.disabled);
         if (el.id && !done) { window.revealQuiz(el.id); return; }
       }
+      // 드래그 매칭: 칩을 놓지 않았어도 정답을 공개한다(매칭 확인과 같은 동작)
+      for (const el of inCur('.dnd-container', page)) {
+        if (el.id && !el.dataset.revealed) { window.checkDnD(el.id); return; }
+      }
       go(currentIndex() + 1);
     }
 
@@ -517,6 +521,30 @@
     const chips = $$('.dnd-chip', containerEl);
     const zones = $$('.dnd-zone', containerEl);
 
+    // 칩을 칸에 놓는다. 수식 마크업(<i>, <sub>)을 그대로 옮기고, 칸에 있던 칩은 되돌리며, 채점 표시는 지운다
+    function place(target, chip) {
+      const prev = target.dataset.placed;
+      if (prev) {
+        const old = $(`.dnd-chip[data-answer="${prev}"]`, containerEl);
+        if (old) old.classList.remove('placed');
+      }
+      target.innerHTML      = `<span>${chip.innerHTML}</span>`;
+      target.dataset.placed = chip.dataset.answer;
+      chip.classList.add('placed');
+      chip.classList.remove('selected', 'dragging');
+      $$('.dnd-zone-target', containerEl).forEach(t => t.classList.remove('correct-placed', 'incorrect-placed', 'answer-shown'));
+    }
+
+    // 끌기가 어려운 환경(트랙패드·키보드)용: 칩을 누른 뒤 칸을 누르면 놓인다
+    chips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        if (chip.classList.contains('placed')) return;
+        const was = chip.classList.contains('selected');
+        chips.forEach(c => c.classList.remove('selected'));
+        if (!was) chip.classList.add('selected');
+      });
+    });
+
     chips.forEach(chip => {
       chip.addEventListener('dragstart', e => {
         e.dataTransfer.setData('text/plain', chip.dataset.answer);
@@ -536,9 +564,11 @@
         const answer = e.dataTransfer.getData('text/plain');
         const chip   = $(`.dnd-chip[data-answer="${answer}"]`, containerEl);
         if (!chip) return;
-        target.textContent    = chip.textContent;
-        target.dataset.placed = answer;
-        chip.classList.add('placed');
+        place(target, chip);
+      });
+      target.addEventListener('click', () => {
+        const sel = $('.dnd-chip.selected', containerEl);
+        if (sel) place(target, sel);
       });
     });
 
@@ -572,28 +602,38 @@
         const touch = e.changedTouches[0];
         const el    = document.elementFromPoint(touch.clientX, touch.clientY);
         const zt    = el && el.closest('.dnd-zone-target');
-        if (zt) {
-          zt.textContent    = chip.textContent;
-          zt.dataset.placed = chip._answer;
-          chip.classList.add('placed');
-        }
+        if (zt) place(zt, chip);
         zones.forEach(z => { const t = $('.dnd-zone-target', z); if (t) t.classList.remove('drag-over'); });
       });
     });
   }
 
+  /* 매칭 확인 = 채점 + 정답 공개. 칩을 다 놓지 않았어도(하나도 놓지 않았어도) 모든 칸에 정답을 보여 준다.
+     맞힌 칸: correct-placed / 틀린 칸: 고른 칩에 취소선 + 정답(incorrect-placed) / 빈칸: 정답(answer-shown) */
   window.checkDnD = function (containerId) {
     const container = $('#' + containerId);
     if (!container) return;
+    const chipHTML = a => { const c = $(`.dnd-chip[data-answer="${a}"]`, container); return c ? c.innerHTML : a; };
     $$('.dnd-zone', container).forEach(zone => {
-      const target  = $('.dnd-zone-target', zone);
-      if (!target || !target.dataset.placed) return;
-      if (target.dataset.placed === zone.dataset.correct) {
+      const target = $('.dnd-zone-target', zone);
+      if (!target) return;
+      const placed = target.dataset.placed, want = zone.dataset.correct;
+      target.classList.remove('correct-placed', 'incorrect-placed', 'answer-shown');
+      if (placed && placed === want) {
         target.classList.add('correct-placed');
-      } else {
+        return;
+      }
+      const label = `<span><span class="dnd-answer-label">${i18n('correct')}</span> ${chipHTML(want)}</span>`;
+      if (placed) {
+        target.innerHTML = `<s class="dnd-wrong">${chipHTML(placed)}</s>${label}`;
         target.classList.add('incorrect-placed');
+      } else {
+        target.innerHTML = label;
+        target.classList.add('answer-shown');
       }
     });
+    $$('.dnd-chip', container).forEach(c => c.classList.add('placed'));
+    container.dataset.revealed = '1';
   };
 
   window.resetDnD = function (containerId) {
@@ -602,9 +642,10 @@
     $$('.dnd-zone-target', container).forEach(t => {
       t.textContent = i18n('dropHere');
       delete t.dataset.placed;
-      t.classList.remove('correct-placed', 'incorrect-placed');
+      t.classList.remove('correct-placed', 'incorrect-placed', 'answer-shown');
     });
-    $$('.dnd-chip', container).forEach(c => c.classList.remove('placed', 'dragging'));
+    $$('.dnd-chip', container).forEach(c => c.classList.remove('placed', 'dragging', 'selected'));
+    delete container.dataset.revealed;
   };
 
   $$('.dnd-container').forEach(el => initDnD(el));

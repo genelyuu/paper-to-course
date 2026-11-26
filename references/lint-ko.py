@@ -6,6 +6,7 @@
 
 종료 코드: ERROR가 있으면 1 (--strict 이면 WARN도 1), 아니면 0.
 디렉터리를 주면 *.html 을 모두 검사한다(modules/ 가 함께 있으면 빌드 산출물 index.html 은 중복이라 제외).
+작업 폴더(_tmp/, _src/ 처럼 밑줄로 시작하는 폴더)와 vendor/ 안의 파일은 강의 본문이 아니므로 건너뛴다.
 <script>, <style>, <code>, <pre>, KaTeX 렌더 결과(class="katex"), $...$ / $$...$$ 수식은 본문 검사에서 제외한다.
 EBS 문체(KO102/108/109)는 chat/dialogue/message/bubble 클래스 요소와 lang이 ko가 아닌 요소 안에서는 검사하지 않는다.
 """
@@ -335,6 +336,9 @@ def collect(target):
     if p.is_file():
         return [p]
     files = sorted(p.rglob("*.html"))
+    # 원문 HTML(_src/), 생성 스크립트·스크린숏용 임시 HTML(_tmp/), vendor/는 검사 대상이 아니다
+    files = [f for f in files
+             if not any(part.startswith("_") or part == "vendor" for part in f.relative_to(p).parts[:-1])]
     if (p / "modules").is_dir():
         files = [f for f in files if f.name != "index.html" or f.parent != p]
     return files
