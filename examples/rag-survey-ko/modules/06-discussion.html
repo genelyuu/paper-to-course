@@ -1,0 +1,279 @@
+<section class="module" id="module-6">
+  <div class="module-content">
+
+    <div class="module-header">
+      <span class="module-number">7</span>
+      <h2 class="module-title">논의와 향후 전망</h2>
+      <p class="module-subtitle">long context LLM 시대에도 RAG가 필요한 까닭과 남은 과제, 그리고 서베이의 의의를 정리한다</p>
+    </div>
+
+    <!-- 페이지 1 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">학습 목표</strong>
+            <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
+            <ol>
+              <li>long context LLM이 있어도 RAG가 필요한 까닭을 설명할 수 있다.</li>
+              <li>강건성, 하이브리드, 멀티모달 등 RAG의 남은 과제를 구분할 수 있다.</li>
+              <li>이 서베이의 의의와 한계를 판단할 수 있다.</li>
+            </ol>
+          </div>
+        </div>
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>LLM에 들어가는 입력은 어떻게 다른가?</li>
+          <li>long context가 있으면 RAG는 필요 없는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">long context와 RAG<span class="paper-ref">논문 7.1절</span></h3>
+        <p>요즘 <span class="term" data-definition="대규모 언어 모델(Large Language Model, LLM): 방대한 글을 학습해 다음 토큰을 예측하는, 파라미터가 수십억 개 이상인 언어 모델.">대규모 언어 모델(Large Language Model, LLM)</span>은 20만 토큰이 넘는 <span class="term" data-definition="long context(긴 입력 문맥): LLM이 한 번에 입력으로 받을 수 있는 매우 긴 토큰 범위임.">long context(긴 입력 문맥)</span>도 다룬다. 문서를 통째로 넣으면 되지 않을까? 논문은 그래도 <span class="term" data-definition="검색 증강 생성(Retrieval-Augmented Generation, RAG): 질문과 관련된 문서를 외부 지식 베이스에서 찾아 질문과 함께 언어 모델에 넣고 답을 만드는 방법.">검색 증강 생성(Retrieval-Augmented Generation, RAG)</span>이 필요하다고 본다.</p>
+<figure class="svg-diagram animate-in" style="margin:var(--space-2) auto"><svg viewBox="0 0 800 256" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="long context는 문서 전체를 LLM에 넣고, RAG는 retriever가 고른 청크 3개만 LLM에 넣는 입력의 차이"><text x="196" y="22" text-anchor="middle" font-size="15" font-weight="700">long context: 문서 전체를 넣음</text><text x="596" y="22" text-anchor="middle" font-size="15" font-weight="700">RAG: 관련 청크만 골라 넣음</text><rect class="node-rect sq" x="16" y="44" width="34" height="34" rx="2"/><rect class="node-rect sq" x="54" y="44" width="34" height="34" rx="2"/><rect class="node-rect sq" x="92" y="44" width="34" height="34" rx="2"/><rect class="node-rect sq" x="130" y="44" width="34" height="34" rx="2"/><rect class="node-rect sq" x="168" y="44" width="34" height="34" rx="2"/><rect class="node-rect sq" x="206" y="44" width="34" height="34" rx="2"/><rect class="node-rect sq" x="244" y="44" width="34" height="34" rx="2"/><rect class="node-rect sq" x="282" y="44" width="34" height="34" rx="2"/><rect class="node-rect sq" x="320" y="44" width="34" height="34" rx="2"/><rect class="node-rect sq" x="358" y="44" width="34" height="34" rx="2"/><rect class="node-rect sq" x="416" y="44" width="34" height="34" rx="2"/><rect class="node-rect sq accent" x="454" y="44" width="34" height="34" rx="2"/><rect class="node-rect sq" x="492" y="44" width="34" height="34" rx="2"/><rect class="node-rect sq" x="530" y="44" width="34" height="34" rx="2"/><rect class="node-rect sq accent" x="568" y="44" width="34" height="34" rx="2"/><rect class="node-rect sq" x="606" y="44" width="34" height="34" rx="2"/><rect class="node-rect sq" x="644" y="44" width="34" height="34" rx="2"/><rect class="node-rect sq accent" x="682" y="44" width="34" height="34" rx="2"/><rect class="node-rect sq" x="720" y="44" width="34" height="34" rx="2"/><rect class="node-rect sq" x="758" y="44" width="34" height="34" rx="2"/><text x="196" y="98" text-anchor="middle" font-size="13">문서 전체(20만 토큰 이상도 가능)</text><text x="596" y="98" text-anchor="middle" font-size="13">지식 베이스 청크 10개 중 상위 3개 선택</text><path class="edge-line" d="M196,104 V170"/><polygon class="edge-arrow" points="191,170 196,180 201,170"/><text x="214" y="148" text-anchor="start" font-size="13">전부 입력</text><rect class="node-rect sq accent" x="500" y="112" width="52" height="34" rx="2"/><rect class="node-rect sq accent" x="558" y="112" width="52" height="34" rx="2"/><rect class="node-rect sq accent" x="616" y="112" width="52" height="34" rx="2"/><path class="edge-line accent" d="M596,148 V170"/><polygon class="edge-arrow accent" points="591,170 596,180 601,170"/><rect class="node-rect sq" x="136" y="180" width="120" height="38" rx="2"/><text x="196.0" y="204.0" text-anchor="middle" font-size="14" font-weight="700">LLM</text><rect class="node-rect accent" x="536" y="180" width="120" height="38" rx="2"/><text x="596.0" y="204.0" text-anchor="middle" font-size="14" font-weight="700">LLM</text><text class="muted" x="196" y="244" text-anchor="middle" font-size="13">입력이 길어 비용과 지연이 커짐</text><text class="muted" x="596" y="244" text-anchor="middle" font-size="13">입력이 짧고 참조한 청크를 확인할 수 있음</text></svg><figcaption class="figure-caption">그림은 LLM에 들어가는 입력의 차이를 나타낸 것이다(청크 수는 예시). 출처: 논문 7.1절, <a href="https://arxiv.org/abs/2407.16833" target="_blank" rel="noopener">Li et al., RAG or Long-Context LLMs?</a>를 참고해 다시 그림.</figcaption></figure>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>long context는 문서 전체를, RAG는 고른 청크만 입력하므로 RAG가 비용·지연이 작고 근거를 확인할 수 있다.</p></div>
+    </div>
+
+    <!-- 페이지 2 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>long context와 RAG는 무엇이 다른가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">long context와 RAG의 비교<span class="paper-ref">논문 7.1절</span></h3>
+        <p>Li et al.(2024)은 자원이 충분하면 long context가 평균 성능에서 앞서지만 RAG의 비용이 훨씬 낮다고 보고했다. <span class="term" data-definition="query(검색 질의): 사용자가 검색에 넣는 질문이나 검색어.">query(검색 질의)</span>에 따라 둘 중 하나를 고르는 Self-Route로 비용을 크게 줄이면서 성능을 비슷하게 유지했다고 한다.</p>
+        <table class="data-table">
+          <thead><tr><th>기준</th><th>long context</th><th>RAG</th></tr></thead>
+          <tbody>
+            <tr><td>LLM 입력</td><td>문서 전체</td><td><span class="term" data-definition="retriever(검색기): query와 가까운 문서를 index에서 찾아 주는 구성 요소.">retriever(검색기)</span>가 고른 <span class="term" data-definition="청크(Chunk): 검색 단위로 쓰려고 문서를 잘라 낸 짧은 조각.">청크(Chunk)</span> 몇 개</td></tr>
+            <tr><td>비용·지연</td><td>입력 길이에 따라 커짐</td><td>입력이 짧아 작음</td></tr>
+            <tr><td>정확도</td><td>자원이 충분하면 평균 성능이 높다는 보고</td><td>검색이 놓친 정보는 답에 반영되지 않음</td></tr>
+            <tr><td>근거 확인</td><td>어느 부분을 썼는지 추적 어려움</td><td>참조한 청크를 보여 줄 수 있음</td></tr>
+          </tbody>
+          <caption>표는 두 방식의 차이를 나타낸 것이다. 정확도 칸은 Li et al.(2024)의 실험 보고를 요약함.</caption>
+        </table>
+        <p class="diff-line"><strong>핵심 비교</strong> long context는 모델이 알아서 찾도록 전부 넣고, RAG는 넣을 부분을 미리 골라 입력을 줄이는 대신 고르기에 실패할 위험을 진다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>long context는 평균 성능이, RAG는 비용과 근거 확인이 강점이며 query마다 고르는 절충도 있다.</p></div>
+    </div>
+
+    <!-- 페이지 3 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>섞인 문서의 종류에 따라 답은 어떻게 달라지는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">입력에 섞인 문서와 강건성<span class="paper-ref">논문 7.2절</span></h3>
+        <p>강건성도 과제이다. 사실과 다른 정보가 섞이면 답의 질이 떨어지지만, 한 연구는 관련 없는 문서를 넣었더니 정확도가 오히려 30% 넘게 오른 결과를 보고했다.</p>
+<figure class="svg-diagram animate-in" style="margin:var(--space-2) auto"><svg viewBox="0 0 800 200" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="정답 문서만 넣은 경우를 기준으로, 사실과 다른 문서를 섞으면 답의 질이 떨어지고 관련 없는 문서를 섞으면 정확도가 오른다는 방향 개념도"><text x="130" y="26" text-anchor="middle" font-size="14" font-weight="700">정답 문서만</text><text x="400" y="26" text-anchor="middle" font-size="14" font-weight="700">정답 문서 + 사실과 다른 문서</text><text x="670" y="26" text-anchor="middle" font-size="14" font-weight="700">정답 문서 + 관련 없는 문서</text><rect class="node-rect sq" x="30" y="40" width="200" height="44" rx="2"/><text x="130.0" y="67.0" text-anchor="middle" font-size="14" font-weight="700">기준 정확도</text><rect class="node-rect sq" x="300" y="40" width="200" height="44" rx="2"/><text x="400.0" y="67.0" text-anchor="middle" font-size="14" font-weight="700">답의 질이 떨어짐</text><rect class="node-rect sq accent" x="570" y="40" width="200" height="44" rx="2"/><text x="670.0" y="67.0" text-anchor="middle" font-size="14" font-weight="700">정확도가 오름</text><path class="edge-line thin" d="M130,84 V110"/><path class="edge-line" d="M400,84 V150"/><polygon class="edge-arrow" points="395,150 400,160 405,150"/><path class="edge-line accent" d="M670,126 V94"/><polygon class="edge-arrow accent" points="665,104 670,94 675,104"/><text x="250" y="128" text-anchor="middle" font-size="13"></text><text class="muted" x="400" y="184" text-anchor="middle" font-size="13">정확도 아래 방향</text><text class="muted" x="670" y="150" text-anchor="middle" font-size="13">30% 넘게(한 연구의 보고)</text><text class="muted" x="130" y="150" text-anchor="middle" font-size="13">비교 기준</text></svg><figcaption class="figure-caption">그림은 입력에 섞이는 문서의 종류에 따른 방향만 나타낸 개념도이다. 30% 넘는 값은 논문 7.2절이 인용한 한 연구의 보고이다.</figcaption></figure>
+        <p>논문은 이 반직관적 결과를 검색과 생성을 잇는 더 나은 방법이 필요하다는 신호로 읽는다. 어떤 문서가 도움이 되는지는 사람이 보는 관련성만으로 정해지지 않는다고 해석할 수 있다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>사실과 다른 문서는 답을 해치지만 관련 없는 문서는 정확도를 30% 넘게 올렸다는 보고가 있어, 검색과 생성의 연결이 아직 숙제이다.</p></div>
+    </div>
+
+    <!-- 페이지 4 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>RAG와 fine-tuning은 LLM의 무엇을 바꾸는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">하이브리드<span class="paper-ref">논문 7.3절</span></h3>
+        <p>하이브리드는 RAG와 <span class="term" data-definition="fine-tuning(미세 조정): 이미 학습된 모델을 특정 분야의 데이터로 추가 학습해 맞추는 일.">fine-tuning(미세 조정)</span>을 함께 쓰는 방향이다. CRAG처럼 가벼운 검색 평가기를 두어 검색 문서의 질을 판단하는 시도도 있다.</p>
+<figure class="svg-diagram animate-in" style="margin:var(--space-2) auto"><svg viewBox="0 0 800 212" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RAG는 LLM의 입력을, fine-tuning은 가중치를, 둘을 합친 하이브리드는 둘 다 바꾼다"><text x="136" y="22" text-anchor="middle" font-size="15" font-weight="700">RAG</text><rect class="node-rect sq" x="16" y="34" width="240" height="36" rx="2"/><text x="136.0" y="57.0" text-anchor="middle" font-size="14" font-weight="700">검색한 문서</text><rect class="node-rect" x="16" y="112" width="240" height="64" rx="4"/><rect class="node-rect sq accent" x="26" y="122" width="104" height="44" rx="2"/><text x="78.0" y="149.0" text-anchor="middle" font-size="14" font-weight="700">입력</text><rect class="node-rect sq" x="142" y="122" width="104" height="44" rx="2"/><text x="194.0" y="149.0" text-anchor="middle" font-size="14" font-weight="700">가중치</text><path class="edge-line accent" d="M78,70 V112"/><polygon class="edge-arrow accent" points="73,112 78,122 83,112"/><text class="muted" x="136" y="200" text-anchor="middle" font-size="13">바뀌는 것: 입력</text><text x="400" y="22" text-anchor="middle" font-size="15" font-weight="700">fine-tuning</text><rect class="node-rect sq" x="280" y="34" width="240" height="36" rx="2"/><text x="400.0" y="57.0" text-anchor="middle" font-size="14" font-weight="700">학습 데이터</text><rect class="node-rect" x="280" y="112" width="240" height="64" rx="4"/><rect class="node-rect sq" x="290" y="122" width="104" height="44" rx="2"/><text x="342.0" y="149.0" text-anchor="middle" font-size="14" font-weight="700">입력</text><rect class="node-rect sq accent" x="406" y="122" width="104" height="44" rx="2"/><text x="458.0" y="149.0" text-anchor="middle" font-size="14" font-weight="700">가중치</text><path class="edge-line accent" d="M458,70 V112"/><polygon class="edge-arrow accent" points="453,112 458,122 463,112"/><text class="muted" x="400" y="200" text-anchor="middle" font-size="13">바뀌는 것: 가중치</text><text x="664" y="22" text-anchor="middle" font-size="15" font-weight="700">RAG + fine-tuning</text><rect class="node-rect sq" x="544" y="34" width="240" height="36" rx="2"/><text x="664.0" y="57.0" text-anchor="middle" font-size="14" font-weight="700">검색한 문서 + 학습 데이터</text><rect class="node-rect" x="544" y="112" width="240" height="64" rx="4"/><rect class="node-rect sq accent" x="554" y="122" width="104" height="44" rx="2"/><text x="606.0" y="149.0" text-anchor="middle" font-size="14" font-weight="700">입력</text><rect class="node-rect sq accent" x="670" y="122" width="104" height="44" rx="2"/><text x="722.0" y="149.0" text-anchor="middle" font-size="14" font-weight="700">가중치</text><path class="edge-line accent" d="M606,70 V112"/><polygon class="edge-arrow accent" points="601,112 606,122 611,112"/><path class="edge-line accent" d="M722,70 V112"/><polygon class="edge-arrow accent" points="717,112 722,122 727,112"/><text class="muted" x="664" y="200" text-anchor="middle" font-size="13">바뀌는 것: 입력과 가중치</text></svg><figcaption class="figure-caption">그림은 세 방식이 LLM의 어느 부분을 바꾸는지 나타낸 것이다. 출처: 논문 7.3절을 바탕으로 새로 그림.</figcaption></figure>
+        <table class="data-table">
+          <thead><tr><th>기준</th><th>RAG</th><th>fine-tuning</th><th>하이브리드</th></tr></thead>
+          <tbody>
+            <tr><td>새 지식 반영</td><td>문서만 바꾸면 됨</td><td>다시 학습해야 함</td><td>지식은 문서로, 형식은 학습으로</td></tr>
+            <tr><td>강점</td><td>근거 확인</td><td>말투·형식·도메인 용어</td><td>근거를 갖춘 답을 원하는 형식으로</td></tr>
+            <tr><td>약점</td><td>검색 실패, 긴 입력</td><td>학습 비용, 갱신 어려움</td><td>두 비용을 함께 짐</td></tr>
+          </tbody>
+          <caption>표는 세 방식의 차이를 나타낸 것이다.</caption>
+        </table>
+        <p class="diff-line"><strong>핵심 비교</strong> RAG는 질문마다 입력을 바꾸고, fine-tuning은 가중치를 한 번 바꾸며, 하이브리드는 둘을 함께 쓴다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>RAG는 입력을, fine-tuning은 가중치를 바꾸며, 하이브리드는 둘을 합쳐 쓴다.</p></div>
+    </div>
+
+    <!-- 페이지 5 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>모델이 클수록 RAG도 좋아지는가?</li>
+          <li>실서비스용 RAG는 무엇을 더 갖춰야 하는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">scaling law, 실서비스, 생태계<span class="paper-ref">논문 7.4절, 7.5절, 그림 6</span></h3>
+        <div class="step-cards animate-in">
+          <div class="step-card"><div class="step-num">1</div><div class="step-body"><strong><span class="term" data-definition="scaling law(규모 법칙): 모델 크기와 성능 사이에 성립하는 경험적 관계임.">scaling law(규모 법칙)</span></strong><p>RETRO++처럼 파라미터를 늘리는 시도가 있지만, RAG에서 scaling law가 성립하는지는 아직 불확실하며 작은 모델이 큰 모델을 앞서는 inverse scaling law(역규모 법칙)의 가능성도 남아 있다.</p></div></div>
+          <div class="step-card"><div class="step-num">2</div><div class="step-body"><strong>실서비스</strong><p>검색 효율, 큰 지식 베이스에서의 <span class="term" data-definition="recall(재현율): 정답 전체 가운데 실제로 가져온 정답의 비율.">recall(재현율)</span>, 문서 출처나 메타데이터가 새지 않게 하는 데이터 보안이 과제이다.</p></div></div>
+        </div>
+        <p>실서비스 도구로는 LangChain과 LlamaIndex가 대표적이며, Flowise AI, HayStack, Meltano, Cohere Coral 같은 도구도 등장했다. 논문은 RAG 도구의 흐름을 맞춤화, 단순화, 전문화의 세 방향으로 정리한다.</p>
+        <p>그림은 논문이 정리한 RAG 생태계를 줄여 나타낸 것이다.</p>
+        <div class="svg-diagram animate-in" style="margin:var(--space-2) auto"><svg viewBox="0 0 800 188" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="논문 그림 6을 줄인 RAG 생태계: 하위 과제, 기술 스택, 과제, 전망"><rect class="node-rect accent" x="304" y="8" width="192" height="44" rx="8"/><foreignObject x="308" y="12" width="184" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span><b>RAG 생태계</b></span></div></foreignObject><rect class="node-rect sq" x="16" y="100" width="180" height="36" rx="2"/><foreignObject x="20" y="104" width="172" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span><b>하위 과제</b></span></div></foreignObject><foreignObject x="16" y="140" width="180" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4; color:var(--color-text-secondary)"><span>질의응답·대화·추천·정보 추출</span></div></foreignObject><rect class="node-rect sq" x="212" y="100" width="180" height="36" rx="2"/><foreignObject x="216" y="104" width="172" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span><b>기술 스택</b></span></div></foreignObject><foreignObject x="212" y="140" width="180" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4; color:var(--color-text-secondary)"><span>LangChain·LlamaIndex 등</span></div></foreignObject><rect class="node-rect sq" x="408" y="100" width="180" height="36" rx="2"/><foreignObject x="412" y="104" width="172" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span><b>과제</b></span></div></foreignObject><foreignObject x="408" y="140" width="180" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4; color:var(--color-text-secondary)"><span>강건성·long context·scaling law</span></div></foreignObject><rect class="node-rect sq" x="604" y="100" width="180" height="36" rx="2"/><foreignObject x="608" y="104" width="172" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span><b>전망</b></span></div></foreignObject><foreignObject x="604" y="140" width="180" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4; color:var(--color-text-secondary)"><span>맞춤화·단순화·전문화</span></div></foreignObject><path class="edge-line" d="M400,52 V76 H106 V90"/><polygon class="edge-arrow" points="101,90 106,100 111,90"/><path class="edge-line" d="M400,76 H302 V90"/><polygon class="edge-arrow" points="297,90 302,100 307,90"/><path class="edge-line" d="M400,76 H498 V90"/><polygon class="edge-arrow" points="493,90 498,100 503,90"/><path class="edge-line" d="M400,76 H694 V90"/><polygon class="edge-arrow" points="689,90 694,100 699,90"/></svg></div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>RAG의 scaling law와 실서비스 보안은 열린 과제이며, 도구는 맞춤화·단순화·전문화로 나아간다.</p></div>
+    </div>
+
+    <!-- 페이지 6 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>RAG는 글 말고 무엇을 검색할 수 있는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">멀티모달 RAG<span class="paper-ref">논문 7.6절</span></h3>
+        <p>RAG는 글을 넘어 <span class="term" data-definition="멀티모달(Multimodal): 글 외에 이미지, 소리, 영상 등 여러 형태의 자료를 함께 다루는 방식임.">멀티모달(Multimodal)</span> 자료로 넓어지고 있다. 이미지에서는 RA-CM3과 BLIP-2, 소리와 영상에서는 GSS와 Vid2Seq, 코드에서는 RBPS가 그 예이다. 구조화 지식에서는 CoK가 <span class="term" data-definition="지식 그래프(Knowledge Graph, KG): 개체를 점으로, 개체 사이의 관계를 선으로 나타낸 자료 구조.">지식 그래프(Knowledge Graph, KG)</span>의 사실을 검색해 쓴다.</p>
+<figure class="svg-diagram animate-in" style="margin:var(--space-2) auto"><svg viewBox="0 0 800 200" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="query에 따라 이미지, 소리와 영상, 코드, 구조화 지식에서 검색해 generator에 넣는 멀티모달 RAG"><rect class="node-rect sq" x="16" y="92" width="150" height="52" rx="2"/><text x="91.0" y="115.0" text-anchor="middle" font-size="14" font-weight="700">query</text><text class="mono" x="91.0" y="133.0" text-anchor="middle" font-size="12">이 사진 속 건물은?</text><rect class="node-rect sq accent" x="644" y="92" width="140" height="52" rx="2"/><text x="714.0" y="123.0" text-anchor="middle" font-size="14" font-weight="700">generator</text><path class="edge-line" d="M166,118 H228 M228,38 V182"/><path class="edge-line" d="M590,38 V182 M590,118 H644"/><polygon class="edge-arrow" points="634,113 644,118 634,123"/><rect class="node-rect sq" x="290" y="20" width="260" height="36" rx="2"/><text x="420" y="36" text-anchor="middle" font-size="13" font-weight="700">이미지</text><text class="mono" x="420" y="51" text-anchor="middle" font-size="12">RA-CM3, BLIP-2</text><path class="edge-line" d="M228,38 H280"/><polygon class="edge-arrow" points="280,33 290,38 280,43"/><path class="edge-line" d="M550,38 H590"/><rect class="node-rect sq" x="290" y="68" width="260" height="36" rx="2"/><text x="420" y="84" text-anchor="middle" font-size="13" font-weight="700">소리·영상</text><text class="mono" x="420" y="99" text-anchor="middle" font-size="12">GSS, Vid2Seq</text><path class="edge-line" d="M228,86 H280"/><polygon class="edge-arrow" points="280,81 290,86 280,91"/><path class="edge-line" d="M550,86 H590"/><rect class="node-rect sq" x="290" y="116" width="260" height="36" rx="2"/><text x="420" y="132" text-anchor="middle" font-size="13" font-weight="700">코드</text><text class="mono" x="420" y="147" text-anchor="middle" font-size="12">RBPS</text><path class="edge-line" d="M228,134 H280"/><polygon class="edge-arrow" points="280,129 290,134 280,139"/><path class="edge-line" d="M550,134 H590"/><rect class="node-rect sq" x="290" y="164" width="260" height="36" rx="2"/><text x="420" y="180" text-anchor="middle" font-size="13" font-weight="700">구조화 지식(표·지식 그래프)</text><text class="mono" x="420" y="195" text-anchor="middle" font-size="12">CoK</text><path class="edge-line" d="M228,182 H280"/><polygon class="edge-arrow" points="280,177 290,182 280,187"/><path class="edge-line" d="M550,182 H590"/></svg><figcaption class="figure-caption">그림은 멀티모달 RAG가 검색하는 자료의 종류와 논문 7.6절이 든 대표 예를 나타낸 것이다(query는 예시).</figcaption></figure>
+        <p>검색 대상이 바뀌어도 query를 받아 관련 자료를 찾아 <span class="term" data-definition="generator(생성기): 검색한 문맥을 받아 답을 쓰는 LLM.">generator(생성기)</span>에 넣는 흐름은 같다고 볼 수 있다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>RAG는 이미지·소리·코드·지식 그래프로 넓어지며, 검색 대상만 바뀌고 흐름은 같다.</p></div>
+    </div>
+
+    <!-- 페이지 7: 의의와 한계 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>이 서베이가 남긴 것은 무엇인가?</li>
+          <li>이 서베이를 읽을 때 무엇을 조심해야 하는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">의의와 한계<span class="paper-ref">논문 8절</span></h3>
+        <p>논문은 결론에서 RAG를 Naive RAG, Advanced RAG, Modular RAG의 세 패러다임으로 정리하고, 검색·생성·증강의 핵심 기술과 평가 틀을 묶어 냈다고 밝힌다. 이 정리는 흩어진 연구를 한 지도에 놓았다는 점에서 의의가 크다고 볼 수 있다.</p>
+        <p>이 서베이 뒤에 무엇이 나왔는지는 8단원에서 본다. 말뭉치 전체를 지식 그래프로 요약하는 <span class="term" data-definition="GraphRAG: LLM으로 개체와 관계를 뽑아 지식 그래프를 만들고 커뮤니티별 요약을 미리 써 두어 말뭉치 전체에 대한 질문에 답하는 방식.">GraphRAG</span>, 문서를 문맥 대신 파라미터로 넣는 <span class="term" data-definition="Parametric RAG(PRAG): 검색한 문서를 프롬프트에 붙이지 않고 문서별로 학습한 작은 파라미터 묶음을 모델에 합쳐 지식을 넣는 방식.">Parametric RAG(PRAG)</span>, 에이전트가 검색을 계획하고 되풀이하는 <span class="term" data-definition="Agentic RAG(에이전트가 검색을 계획·반복하는 RAG): 성찰·계획·도구 사용을 하는 에이전트를 RAG 흐름 안에 두어 검색을 스스로 이끌게 하는 방식.">Agentic RAG</span>를 다룬다.</p>
+        <div class="assumption-challenge animate-in" id="assumption-module5"
+             data-correct="option-b"
+             data-explanation-right="② | 서베이는 각 연구의 보고를 모아 정리했을 뿐 같은 조건에서 방법을 다시 비교하지 않았으므로, 어느 방법이 더 낫다는 결론은 원 논문의 실험에 기대고 있다."
+             data-explanation-wrong="| 정답은 ②이다. 서베이는 방법들을 같은 조건에서 직접 실험하지 않았다. ①은 논문이 long context 시대에도 RAG가 필요하다고 밝힌 내용이므로 숨은 가정이 아니다.">
+          <h3>다음 결론에 숨어 있는 가정으로 가장 적절한 것을 고르시오.</h3>
+          <div class="assumption-claim">“Modular RAG는 Naive RAG와 Advanced RAG보다 발전한 패러다임이다.”</div>
+          <div class="assumption-options">
+            <button class="assumption-option" data-value="option-a" onclick="selectAssumption(this)"><div class="quiz-option-radio"></div><span>① long context LLM이 RAG를 완전히 대신한다고 가정한다.</span></button>
+            <button class="assumption-option" data-value="option-b" onclick="selectAssumption(this)"><div class="quiz-option-radio"></div><span>② 각 원 논문이 보고한 향상이 같은 조건에서도 성립한다고 가정한다.</span></button>
+            <button class="assumption-option" data-value="option-c" onclick="selectAssumption(this)"><div class="quiz-option-radio"></div><span>③ retriever는 학습할 수 없다고 가정한다.</span></button>
+          </div>
+          <div class="assumption-feedback"></div>
+          <button class="quiz-check-btn" onclick="checkAssumption('assumption-module5')">정답 확인</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>이 서베이는 RAG 연구를 한 지도로 묶었지만, 방법 사이의 우열은 원 논문의 실험에 기댄다.</p></div>
+    </div>
+
+    <!-- 페이지 8: 핵심 정리 + 확인 문제 1 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-accent animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">핵심 정리</strong>
+            <ul>
+              <li>long context 시대에도 RAG는 속도와 근거 확인에서 강점이 있다.</li>
+              <li>강건성, scaling law, 데이터 보안은 열린 과제이다.</li>
+              <li>RAG는 입력을, fine-tuning은 가중치를 바꾼다.</li>
+              <li>RAG는 멀티모달로 넓어지고 있다.</li>
+              <li>전망 문항은 논문이 밝힌 사실과 해석을 나누어 읽어라.</li>
+            </ul>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag outline">확인 문제</span>남은 과제</h3>
+        <div class="quiz-container animate-in" id="quiz-module5a">
+          <div class="quiz-question-block" data-correct="option-c"
+               data-explanation-right="③ | 논문은 RAG가 참조한 근거를 확인할 수 있게 해 준다는 점을 long context 시대에도 RAG가 필요한 까닭으로 든다."
+               data-explanation-wrong="| 정답은 ③이다. 근거 확인은 RAG의 강점이다. ①은 long context LLM이 20만 토큰 넘게 다루므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">1</span>long context LLM이 있어도 RAG가 필요한 까닭으로 가장 적절한 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① long context LLM은 1만 토큰도 못 받는다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② RAG는 LLM이 필요 없다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ RAG는 참조한 근거를 확인하게 해 준다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ RAG는 잡음에 완전히 강건하다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ RAG에서는 scaling law가 증명되었다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <div class="quiz-question-block" data-correct="option-b"
+               data-explanation-right="② | 자주 바뀌는 사내 규정에는 다시 학습하지 않고 문서만 바꾸면 되는 RAG가 알맞고, 근거 조항도 보여 줄 수 있다."
+               data-explanation-wrong="| 정답은 ②이다. 규정이 자주 바뀌므로 외부 지식을 갈아 끼우는 RAG가 알맞다. ①은 규정이 바뀔 때마다 다시 학습해야 하므로 알맞지 않다.">
+            <h3 class="quiz-question"><span class="q-num">2</span>매달 바뀌는 사내 규정에 답하고 근거 조항도 보여 주는 챗봇을 만들 때 가장 알맞은 방법은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 매달 LLM을 fine-tuning한다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 규정 문서로 RAG를 만든다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 프롬프트만 고친다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 더 큰 LLM으로 바꾼다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 규정 없이 LLM에 맡긴다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module5a')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module5a')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>RAG의 강점은 근거 확인이고, scaling law는 아직 열린 문제이다.</p></div>
+    </div>
+
+    <!-- 페이지 9: 확인 문제 2 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>섞인 문서와 하이브리드·멀티모달에 대한 논문의 서술을 정확히 가려낼 수 있는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag outline">확인 문제</span>강건성과 확장</h3>
+        <div class="quiz-container animate-in" id="ds-quiz-b">
+          <div class="quiz-question-block" data-correct="option-b"
+               data-explanation-right="② | 7.2절은 관련 없는 문서로 정확도가 30% 넘게 오른 연구를 인용하므로, 섞인 문서를 무조건 해롭다고 볼 수 없다."
+               data-explanation-wrong="| 정답은 ②이다. 관련 없는 문서로 정확도가 30% 넘게 오른 보고가 있다. ①은 이 보고와 어긋나므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">3</span>검색 결과에 query와 관련 없는 문서가 섞여 들어온다. 논문 7.2절에 비추어 가장 적절한 해석은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 관련 없는 문서는 언제나 정확도를 떨어뜨린다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 정확도가 오히려 오른 보고가 있어 영향을 실험으로 확인해야 한다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 사실과 다른 문서가 섞여도 답의 질은 그대로이다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 사람이 관련 있다고 본 문서만 도움이 된다고 확인되었다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ long context LLM을 쓰면 이 문제가 사라진다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <div class="quiz-question-block" data-correct="option-c"
+               data-explanation-right="③ | 하이브리드는 입력과 가중치를 함께 바꾸고(ㄱ), CRAG는 검색 평가기를 둔다(ㄷ)."
+               data-explanation-wrong="| 정답은 ③이다. 멀티모달 RAG도 검색한 자료를 generator에 넣으므로 ㄴ은 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">4</span>논문 7절의 남은 과제에 대한 설명으로 옳은 것만을 <span class="nobr">&lt;보기&gt;에서</span> 있는 대로 고른 것은?</h3>
+            <div class="bogi">
+              <p>ㄱ. 하이브리드는 입력과 가중치를 함께 바꾼다.</p>
+              <p>ㄴ. 멀티모달 RAG에는 검색해 넣는 흐름이 없다.</p>
+              <p>ㄷ. CRAG는 검색 평가기로 문서의 질을 판단한다.</p>
+            </div>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① ㄱ</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② ㄴ</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ ㄱ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ ㄴ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ ㄱ, ㄴ, ㄷ</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('ds-quiz-b')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('ds-quiz-b')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>섞인 문서의 영향은 한 방향으로 단정할 수 없고, 하이브리드와 멀티모달 RAG도 검색해 넣는 흐름은 같다.</p></div>
+    </div>
+
+  </div>
+</section>

@@ -1,0 +1,373 @@
+<section class="module" id="module-5">
+  <div class="module-content">
+
+    <div class="module-header">
+      <span class="module-number">6</span>
+      <h2 class="module-title">과제와 평가</h2>
+      <p class="module-subtitle">RAG를 어떤 과제로 시험하고, 무엇을 어떤 지표와 도구로 재는지 정리한다</p>
+    </div>
+
+    <!-- 페이지 1: 하위 과제와 데이터셋 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">학습 목표</strong>
+            <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
+            <ol>
+              <li>RAG 평가에 쓰이는 과제와 데이터셋의 분포를 해석할 수 있다.</li>
+              <li>평가 측면 7개를 검색 품질과 생성 품질로 구분할 수 있다.</li>
+              <li>평가 측면에 맞는 지표와 평가 틀을 고르고, precision·recall·F1·EM 값을 계산할 수 있다.</li>
+            </ol>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>하위 과제와 데이터셋<span class="paper-ref">논문 6.1절, 표 2</span></h3>
+        <p>논문은 <span class="term" data-definition="검색 증강 생성(Retrieval-Augmented Generation, RAG): 질문과 관련된 문서를 외부 지식 베이스에서 찾아 질문과 함께 언어 모델에 넣고 답을 만드는 방법.">검색 증강 생성(Retrieval-Augmented Generation, RAG)</span> 평가를 26개 과제와 약 50개 데이터셋으로 정리한다. 자료는 논문 표 2의 행을 과제 묶음별로 센 것이며, 데이터셋은 모두 48개이다.</p>
+        <div class="result-comparison animate-in" data-unit="" data-max="22">
+          <div class="result-header">
+            <h4>과제 묶음별 규모(논문 표 2를 센 값)</h4>
+            <div class="result-metric-toggle">
+              <button class="result-metric active" data-metric="datasets">데이터셋 수</button>
+              <button class="result-metric" data-metric="subtasks">하위 과제 수</button>
+            </div>
+          </div>
+          <div class="result-bars">
+            <div class="result-bar" data-datasets="21" data-subtasks="6"><span class="result-label">질의응답</span><div class="result-bar-track"><div class="result-fill ours" style="width:0%"></div></div><span class="result-value"></span></div>
+            <div class="result-bar" data-datasets="4" data-subtasks="3"><span class="result-label">대화</span><div class="result-bar-track"><div class="result-fill baseline" style="width:0%"></div></div><span class="result-value"></span></div>
+            <div class="result-bar" data-datasets="1" data-subtasks="1"><span class="result-label">추천</span><div class="result-bar-track"><div class="result-fill baseline" style="width:0%"></div></div><span class="result-value"></span></div>
+            <div class="result-bar" data-datasets="4" data-subtasks="2"><span class="result-label">정보 추출</span><div class="result-bar-track"><div class="result-fill baseline" style="width:0%"></div></div><span class="result-value"></span></div>
+            <div class="result-bar" data-datasets="3" data-subtasks="3"><span class="result-label">추론</span><div class="result-bar-track"><div class="result-fill baseline" style="width:0%"></div></div><span class="result-value"></span></div>
+            <div class="result-bar" data-datasets="15" data-subtasks="11"><span class="result-label">기타</span><div class="result-bar-track"><div class="result-fill baseline" style="width:0%"></div></div><span class="result-value"></span></div>
+          </div>
+        </div>
+        <p>질의응답이 48개 가운데 21개로 가장 많아, 평가가 질의응답 쪽에 치우쳐 있다고 해석할 수 있다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>RAG 평가 데이터셋 48개 가운데 21개가 질의응답이어서, 평가는 질의응답 중심이다.</p></div>
+    </div>
+
+    <!-- 페이지 2 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>RAG 흐름의 어느 쌍이 어느 점수인가?</li>
+          <li>faithfulness와 answer relevance는 어떻게 다른가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">평가 대상과 질 점수<span class="paper-ref">논문 6.2절, 6.3절</span></h3>
+        <p>평가 대상은 검색 품질과 생성 품질이다. 질 점수 3개는 RAG 흐름의 세 지점인 <span class="term" data-definition="query(검색 질의): 사용자가 검색에 넣는 질문이나 검색어.">query(검색 질의)</span>, context, answer를 둘씩 짝지어 하나씩 잰다. TruLens는 이 세 쌍을 RAG triad라 부르고, faithfulness를 groundedness라고도 한다.</p>
+        <figure class="svg-diagram animate-in" style="margin:var(--space-2) auto"><svg viewBox="0 0 800 262" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RAG 구조에서 세 점수가 재는 위치: query와 context 사이는 context relevance, context와 answer 사이는 faithfulness, query와 answer 사이는 answer relevance"><rect class="guide-fill" x="0" y="0" width="800" height="262" rx="4"/><rect class="node-rect sq" x="16" y="96" width="128" height="52" rx="2"/><text x="80.0" y="119.0" text-anchor="middle" font-size="14" font-weight="700">query</text><text class="mono" x="80.0" y="137.0" text-anchor="middle" font-size="12">에펠탑 높이는?</text><rect class="node-rect sq" x="172" y="96" width="104" height="52" rx="2"/><text x="224.0" y="127.0" text-anchor="middle" font-size="14" font-weight="700">retriever</text><rect class="node-rect sq" x="304" y="96" width="152" height="52" rx="2"/><text x="380.0" y="119.0" text-anchor="middle" font-size="14" font-weight="700">context</text><text class="mono" x="380.0" y="137.0" text-anchor="middle" font-size="12">에펠탑은 330 m이다</text><rect class="node-rect sq" x="484" y="96" width="112" height="52" rx="2"/><text x="540.0" y="127.0" text-anchor="middle" font-size="14" font-weight="700">generator</text><rect class="node-rect sq accent" x="624" y="96" width="160" height="52" rx="2"/><text x="704.0" y="119.0" text-anchor="middle" font-size="14" font-weight="700">answer</text><text class="mono" x="704.0" y="137.0" text-anchor="middle" font-size="12">약 330 m이다</text><path class="edge-line" d="M144,122 H163"/><polygon class="edge-arrow" points="162,117 172,122 162,127"/><path class="edge-line" d="M276,122 H295"/><polygon class="edge-arrow" points="294,117 304,122 294,127"/><path class="edge-line" d="M456,122 H475"/><polygon class="edge-arrow" points="474,117 484,122 474,127"/><path class="edge-line" d="M596,122 H615"/><polygon class="edge-arrow" points="614,117 624,122 614,127"/><path class="edge-line accent" d="M80,96 V76 H380 V96"/><path class="edge-line accent" d="M380,76 H704 V96"/><path class="edge-line accent" d="M80,148 V212 H704 V148"/><circle class="dot-accent" cx="80" cy="96" r="4"/><circle class="dot-accent" cx="380" cy="96" r="4"/><circle class="dot-accent" cx="704" cy="96" r="4"/><circle class="dot-accent" cx="80" cy="148" r="4"/><circle class="dot-accent" cx="704" cy="148" r="4"/><text x="230" y="36" text-anchor="middle" font-size="14" font-weight="700">① context relevance</text><text class="muted" x="230" y="54" text-anchor="middle" font-size="13">query ↔ context</text><text x="542" y="36" text-anchor="middle" font-size="14" font-weight="700">② faithfulness</text><text class="muted" x="542" y="54" text-anchor="middle" font-size="13">context ↔ answer</text><text x="392" y="236" text-anchor="middle" font-size="14" font-weight="700">③ answer relevance</text><text class="muted" x="392" y="254" text-anchor="middle" font-size="13">query ↔ answer</text></svg><figcaption class="figure-caption">그림은 RAG 흐름 위에 세 점수가 재는 쌍을 나타낸 것이다(문장은 예시). 출처: <a href="https://www.trulens.org/getting_started/core_concepts/rag_triad/" target="_blank" rel="noopener">TruLens, RAG Triad</a>, <a href="https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/" target="_blank" rel="noopener">Ragas 지표 문서</a>를 참고해 다시 그림.</figcaption></figure>
+        <p><span class="term" data-definition="context relevance(검색 문맥의 관련성): 검색한 문맥이 query에 꼭 맞고 군더더기가 적은 정도임.">context relevance(검색 문맥의 관련성)</span>는 <span class="term" data-definition="retriever(검색기): query와 가까운 문서를 index에서 찾아 주는 구성 요소.">retriever(검색기)</span>의 몫이다. <span class="term" data-definition="faithfulness(답이 문맥에 충실한 정도): 생성한 답이 검색한 문맥과 어긋나지 않는 정도임.">faithfulness(답이 문맥에 충실한 정도)</span>는 문맥에 없는 말을 지어냈는지를 보고, <span class="term" data-definition="answer relevance(답이 질문에 맞는 정도): 생성한 답이 query에 곧바로 답하는 정도임.">answer relevance(답이 질문에 맞는 정도)</span>는 동문서답인지를 본다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>context relevance는 query와 context, faithfulness는 context와 answer, answer relevance는 query와 answer 사이를 잰다.</p></div>
+    </div>
+
+    <!-- 페이지 3 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>검색 문서가 어떤 상태일 때 어느 능력을 보는가?</li>
+          <li>답을 거부하는 능력은 왜 필요한가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">필요 능력 4개<span class="paper-ref">논문 6.2절, 6.3절</span></h3>
+        <p>질 점수 외에 RAG가 갖춰야 할 능력 4개가 있다. <span class="term" data-definition="noise robustness(잡음 문서에 대한 강건성): query와 관련은 있으나 쓸모 있는 정보가 없는 문서에 흔들리지 않는 능력임.">noise robustness(잡음 문서에 대한 강건성)</span>, <span class="term" data-definition="negative rejection(답이 없으면 답하지 않기): 검색 문서에 필요한 지식이 없을 때 답을 삼가는 능력임.">negative rejection(답이 없으면 답하지 않기)</span>, <span class="term" data-definition="information integration(여러 문서 정보 통합): 여러 문서의 정보를 모아 복잡한 query에 답하는 능력임.">information integration(여러 문서 정보 통합)</span>, <span class="term" data-definition="counterfactual robustness(틀린 문서에 속지 않기): 문서 속 알려진 오류를 알아보고 무시하는 능력임.">counterfactual robustness(틀린 문서에 속지 않기)</span>이다.</p>
+        <table class="data-table">
+          <thead><tr><th>능력</th><th>검색 문서 상황과 query(예시)</th><th>좋은 답</th><th>나쁜 답</th></tr></thead>
+          <tbody>
+            <tr><td><strong>noise robustness</strong></td><td>관련은 있으나 답 없는 문서 여러 개와 정답 문서 하나. “2022년 노벨 문학상 수상자는?”</td><td>정답 문서를 골라 “아니 에르노”</td><td>잡음 문서에 나온 다른 이름을 답함</td></tr>
+            <tr><td><strong>negative rejection</strong></td><td>답이 든 문서가 하나도 없음. “2030년 월드컵 우승국은?”</td><td>“제공된 문서로는 알 수 없다”</td><td>그럴듯한 나라를 지어내 답함</td></tr>
+            <tr><td><strong>information integration</strong></td><td>답의 재료가 두 문서에 나뉨. “에펠탑(330 m)과 롯데월드타워(555 m)의 높이 차는?”</td><td>두 문서를 합쳐 “약 225 m”</td><td>한 문서만 쓰고 “330 m”라고 답함</td></tr>
+            <tr><td><strong>counterfactual robustness</strong></td><td>문서에 틀린 사실이 있음. “물은 1기압에서 몇 도에 끓나?”(문서는 “90℃”)</td><td>“100℃이며, 문서 내용이 사실과 다르다”</td><td>문서를 믿고 “90℃”라고 답함</td></tr>
+          </tbody>
+          <caption>표는 RGB가 가르는 네 능력을 예시 query로 비교한 것이다(문장은 예시). 출처: <a href="https://arxiv.org/abs/2309.01431" target="_blank" rel="noopener">Chen et al., Benchmarking LLMs in RAG(RGB)</a>의 능력 정의를 참고함.</caption>
+        </table>
+        <p class="diff-line"><strong>핵심 비교</strong> 네 능력은 검색 문서의 상태로 갈린다. 잡음이 섞이면 noise robustness, 답이 없으면 negative rejection, 답이 흩어져 있으면 information integration, 답이 틀렸으면 counterfactual robustness이다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>네 능력은 잡음, 답 없음, 흩어진 답, 틀린 문서라는 검색 문서의 상태로 갈리며, context relevance와 noise robustness는 주로 검색을 잰다.</p></div>
+    </div>
+
+    
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>어떤 지표가 가장 많은 측면에 쓰이는가?</li>
+          <li>지금의 지표는 RAG 평가에 충분한가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>측면별 지표<span class="paper-ref">논문 6.3절, 표 3</span></h3>
+        <p>그림은 논문 표 3에서 지표 11개가 측면 7개 가운데 어디에 쓰이는지를 점으로 나타낸 것이다.</p>
+        <figure class="figure" style="max-width:100%; margin:var(--space-2) 0"><svg viewBox="0 0 800 312" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="논문 표 3: 지표 11개가 측면 7개 가운데 어디에 쓰이는지 점으로 표시한 행렬"><text x="220" y="13" text-anchor="middle" font-size="12">context</text><text x="220" y="27" text-anchor="middle" font-size="12">relevance</text><text x="308" y="24" text-anchor="middle" font-size="12">faithfulness</text><text x="396" y="13" text-anchor="middle" font-size="12">answer</text><text x="396" y="27" text-anchor="middle" font-size="12">relevance</text><text x="484" y="13" text-anchor="middle" font-size="12">noise</text><text x="484" y="27" text-anchor="middle" font-size="12">robustness</text><text x="572" y="13" text-anchor="middle" font-size="12">negative</text><text x="572" y="27" text-anchor="middle" font-size="12">rejection</text><text x="660" y="13" text-anchor="middle" font-size="12">information</text><text x="660" y="27" text-anchor="middle" font-size="12">integration</text><text x="748" y="13" text-anchor="middle" font-size="12">counterfactual</text><text x="748" y="27" text-anchor="middle" font-size="12">robustness</text><rect class="guide-fill" x="8" y="40" width="784" height="24"/><text x="164" y="57" text-anchor="end" font-size="13">Accuracy</text><circle class="dot-accent" cx="220" cy="52" r="5"/><circle class="dot-accent" cx="308" cy="52" r="5"/><circle class="dot-accent" cx="396" cy="52" r="5"/><circle class="dot-accent" cx="484" cy="52" r="5"/><circle class="dot-accent" cx="572" cy="52" r="5"/><circle class="dot-accent" cx="660" cy="52" r="5"/><circle class="dot-accent" cx="748" cy="52" r="5"/><text x="164" y="81" text-anchor="end" font-size="13">EM</text><circle class="ink-fill" cx="572" cy="76" r="5"/><rect class="guide-fill" x="8" y="88" width="784" height="24"/><text x="164" y="105" text-anchor="end" font-size="13">Recall</text><circle class="ink-fill" cx="220" cy="100" r="5"/><text x="164" y="129" text-anchor="end" font-size="13">Precision</text><circle class="ink-fill" cx="220" cy="124" r="5"/><circle class="ink-fill" cx="484" cy="124" r="5"/><rect class="guide-fill" x="8" y="136" width="784" height="24"/><text x="164" y="153" text-anchor="end" font-size="13">R-Rate</text><circle class="ink-fill" cx="748" cy="148" r="5"/><text x="164" y="177" text-anchor="end" font-size="13">Cosine Similarity</text><circle class="ink-fill" cx="396" cy="172" r="5"/><rect class="guide-fill" x="8" y="184" width="784" height="24"/><text x="164" y="201" text-anchor="end" font-size="13">Hit Rate</text><circle class="ink-fill" cx="220" cy="196" r="5"/><text x="164" y="225" text-anchor="end" font-size="13">MRR</text><circle class="ink-fill" cx="220" cy="220" r="5"/><rect class="guide-fill" x="8" y="232" width="784" height="24"/><text x="164" y="249" text-anchor="end" font-size="13">nDCG</text><circle class="ink-fill" cx="220" cy="244" r="5"/><text x="164" y="273" text-anchor="end" font-size="13">BLEU</text><circle class="ink-fill" cx="220" cy="268" r="5"/><circle class="ink-fill" cx="308" cy="268" r="5"/><circle class="ink-fill" cx="396" cy="268" r="5"/><rect class="guide-fill" x="8" y="280" width="784" height="24"/><text x="164" y="297" text-anchor="end" font-size="13">ROUGE/ROUGE-L</text><circle class="ink-fill" cx="220" cy="292" r="5"/><circle class="ink-fill" cx="308" cy="292" r="5"/><circle class="ink-fill" cx="396" cy="292" r="5"/></svg><figcaption class="figure-caption">논문 표 3을 점 행렬로 옮김. 점 = 해당 측면에 쓰는 지표</figcaption></figure>
+        <p>Accuracy만 7개 측면 모두에 쓰이고, Hit Rate·MRR·nDCG 같은 <span class="term" data-definition="정보 검색(Information Retrieval, IR): 많은 문서 가운데 query에 맞는 문서를 찾아 순위를 매기는 일.">정보 검색(Information Retrieval, IR)</span> 지표는 context relevance에만 쓰인다. 논문은 이 지표들이 전통적인 측정일 뿐 RAG 평가를 위한 성숙하고 표준화된 방법은 아직 아니라고 밝힌다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>RAG 평가는 아직 전통 지표를 빌려 쓰며, 측면마다 맞는 지표가 다르다.</p></div>
+    </div>
+
+    <!-- 페이지 5: 검색 지표를 k에 따라 읽기 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>precision과 recall은 top-$k$에서 무엇을 세는가?</li>
+          <li>$k$를 늘리면 두 값은 어느 쪽으로 움직이는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>검색 지표를 k에 따라 읽기</h3>
+        <p>표 3의 Precision과 Recall은 검색해 온 <span class="term" data-definition="top-k(상위 k개): 유사도가 높은 순서로 뽑은 상위 k개의 검색 결과.">top-$k$(상위 $k$개)</span> 안에 정답 문서가 몇 개 있는지로 계산한다. <span class="term" data-definition="precision(정밀도): 가져온 결과 가운데 정답이 차지하는 비율. Precision@k는 top-k 안의 정답 수를 k로 나눈 값.">precision(정밀도)</span> $P$는 가져온 $k$개 가운데 정답의 비율 $h/k$, <span class="term" data-definition="recall(재현율): 정답 전체 가운데 실제로 가져온 정답의 비율. Recall@k는 top-k 안의 정답 수를 정답 전체 수로 나눈 값.">recall(재현율)</span> $R$은 정답 $g$개 가운데 가져온 비율 $h/g$이다. <span class="term" data-definition="F1(precision과 recall의 조화 평균): 2PR/(P+R)로 구하는 값. 둘 중 하나만 높으면 낮게 나옴.">F1(precision과 recall의 조화 평균)</span>은 $2PR/(P+R)$이다.</p>
+        <p>여기서 $h$는 top-$k$ 안의 정답 수이다. 예시로 정답 문서 3개가 검색 순위 1위, 4위, 9위에 있다고 하자. 탭으로 $k$를 바꾸시오.</p>
+        <div class="ablation-demo animate-in" style="margin:var(--space-3) 0">
+      <div class="ablation-tabs"><button class="ablation-tab active" onclick="showLayer('ev-k1', this)">k = 1</button><button class="ablation-tab" onclick="showLayer('ev-k3', this)">k = 3</button><button class="ablation-tab" onclick="showLayer('ev-k5', this)">k = 5</button><button class="ablation-tab" onclick="showLayer('ev-k10', this)">k = 10</button></div>
+      <div class="ablation-viewport" style="padding:var(--space-3) var(--space-4)">
+      <div class="ablation-layer" id="ev-k1" style="display:block">
+        <div class="svg-diagram" style="margin:0 auto"><svg viewBox="0 0 800 88" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="검색 순위 1~10위 칸 가운데 정답 문서는 1위, 4위, 9위에 있고 top-1까지만 가져온 모습"><rect class="node-rect sq accent" x="16.0" y="20" width="69.6" height="36" rx="2"/><foreignObject x="19.0" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>1위</span></div></foreignObject><text class="accent-text" x="50.8" y="13" text-anchor="middle" font-size="12" font-weight="700">정답</text><rect class="node-rect sq" x="93.6" y="20" width="69.6" height="36" rx="2" style="fill:none; stroke-dasharray:4 4"/><foreignObject x="96.6" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35; color:var(--color-text-muted)"><span>2위</span></div></foreignObject><rect class="node-rect sq" x="171.2" y="20" width="69.6" height="36" rx="2" style="fill:none; stroke-dasharray:4 4"/><foreignObject x="174.2" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35; color:var(--color-text-muted)"><span>3위</span></div></foreignObject><rect class="node-rect sq" x="248.8" y="20" width="69.6" height="36" rx="2" style="fill:none; stroke-dasharray:4 4"/><foreignObject x="251.8" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35; color:var(--color-text-muted)"><span>4위</span></div></foreignObject><text class="muted" x="283.6" y="13" text-anchor="middle" font-size="12">정답(놓침)</text><rect class="node-rect sq" x="326.4" y="20" width="69.6" height="36" rx="2" style="fill:none; stroke-dasharray:4 4"/><foreignObject x="329.4" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35; color:var(--color-text-muted)"><span>5위</span></div></foreignObject><rect class="node-rect sq" x="404.0" y="20" width="69.6" height="36" rx="2" style="fill:none; stroke-dasharray:4 4"/><foreignObject x="407.0" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35; color:var(--color-text-muted)"><span>6위</span></div></foreignObject><rect class="node-rect sq" x="481.6" y="20" width="69.6" height="36" rx="2" style="fill:none; stroke-dasharray:4 4"/><foreignObject x="484.6" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35; color:var(--color-text-muted)"><span>7위</span></div></foreignObject><rect class="node-rect sq" x="559.2" y="20" width="69.6" height="36" rx="2" style="fill:none; stroke-dasharray:4 4"/><foreignObject x="562.2" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35; color:var(--color-text-muted)"><span>8위</span></div></foreignObject><rect class="node-rect sq" x="636.8" y="20" width="69.6" height="36" rx="2" style="fill:none; stroke-dasharray:4 4"/><foreignObject x="639.8" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35; color:var(--color-text-muted)"><span>9위</span></div></foreignObject><text class="muted" x="671.6" y="13" text-anchor="middle" font-size="12">정답(놓침)</text><rect class="node-rect sq" x="714.4" y="20" width="69.6" height="36" rx="2" style="fill:none; stroke-dasharray:4 4"/><foreignObject x="717.4" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35; color:var(--color-text-muted)"><span>10위</span></div></foreignObject><path class="guide-axis" d="M89.6,16 V60" style="stroke-dasharray:4 4"/><text class="muted" x="16" y="80" font-size="12">실선 칸 = 가져온 top-1(1위), 점선 칸 = 잘려 나간 순위, 교과 색 = 가져온 정답 1개</text></svg></div>
+        <div class="ablation-metric">P 1.00 / R 0.33 / F1 0.50</div>
+        <p class="ablation-description">적중 1개. $P=1/1=1.00$, $R=1/3\approx0.33$, $F_1=2\times1.00\times0.33/(1.00+0.33)\approx0.50$</p>
+      </div>
+      <div class="ablation-layer" id="ev-k3" style="display:none">
+        <div class="svg-diagram" style="margin:0 auto"><svg viewBox="0 0 800 88" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="검색 순위 1~10위 칸 가운데 정답 문서는 1위, 4위, 9위에 있고 top-3까지만 가져온 모습"><rect class="node-rect sq accent" x="16.0" y="20" width="69.6" height="36" rx="2"/><foreignObject x="19.0" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>1위</span></div></foreignObject><text class="accent-text" x="50.8" y="13" text-anchor="middle" font-size="12" font-weight="700">정답</text><rect class="node-rect sq" x="93.6" y="20" width="69.6" height="36" rx="2"/><foreignObject x="96.6" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>2위</span></div></foreignObject><rect class="node-rect sq" x="171.2" y="20" width="69.6" height="36" rx="2"/><foreignObject x="174.2" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>3위</span></div></foreignObject><rect class="node-rect sq" x="248.8" y="20" width="69.6" height="36" rx="2" style="fill:none; stroke-dasharray:4 4"/><foreignObject x="251.8" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35; color:var(--color-text-muted)"><span>4위</span></div></foreignObject><text class="muted" x="283.6" y="13" text-anchor="middle" font-size="12">정답(놓침)</text><rect class="node-rect sq" x="326.4" y="20" width="69.6" height="36" rx="2" style="fill:none; stroke-dasharray:4 4"/><foreignObject x="329.4" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35; color:var(--color-text-muted)"><span>5위</span></div></foreignObject><rect class="node-rect sq" x="404.0" y="20" width="69.6" height="36" rx="2" style="fill:none; stroke-dasharray:4 4"/><foreignObject x="407.0" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35; color:var(--color-text-muted)"><span>6위</span></div></foreignObject><rect class="node-rect sq" x="481.6" y="20" width="69.6" height="36" rx="2" style="fill:none; stroke-dasharray:4 4"/><foreignObject x="484.6" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35; color:var(--color-text-muted)"><span>7위</span></div></foreignObject><rect class="node-rect sq" x="559.2" y="20" width="69.6" height="36" rx="2" style="fill:none; stroke-dasharray:4 4"/><foreignObject x="562.2" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35; color:var(--color-text-muted)"><span>8위</span></div></foreignObject><rect class="node-rect sq" x="636.8" y="20" width="69.6" height="36" rx="2" style="fill:none; stroke-dasharray:4 4"/><foreignObject x="639.8" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35; color:var(--color-text-muted)"><span>9위</span></div></foreignObject><text class="muted" x="671.6" y="13" text-anchor="middle" font-size="12">정답(놓침)</text><rect class="node-rect sq" x="714.4" y="20" width="69.6" height="36" rx="2" style="fill:none; stroke-dasharray:4 4"/><foreignObject x="717.4" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35; color:var(--color-text-muted)"><span>10위</span></div></foreignObject><path class="guide-axis" d="M244.8,16 V60" style="stroke-dasharray:4 4"/><text class="muted" x="16" y="80" font-size="12">실선 칸 = 가져온 top-3(1~3위), 점선 칸 = 잘려 나간 순위, 교과 색 = 가져온 정답 1개</text></svg></div>
+        <div class="ablation-metric">P 0.33 / R 0.33 / F1 0.33</div>
+        <p class="ablation-description">적중 1개(4위는 잘림). $P=1/3\approx0.33$, $R=1/3\approx0.33$, $F_1=2\times0.33\times0.33/(0.33+0.33)\approx0.33$</p>
+      </div>
+      <div class="ablation-layer" id="ev-k5" style="display:none">
+        <div class="svg-diagram" style="margin:0 auto"><svg viewBox="0 0 800 88" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="검색 순위 1~10위 칸 가운데 정답 문서는 1위, 4위, 9위에 있고 top-5까지만 가져온 모습"><rect class="node-rect sq accent" x="16.0" y="20" width="69.6" height="36" rx="2"/><foreignObject x="19.0" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>1위</span></div></foreignObject><text class="accent-text" x="50.8" y="13" text-anchor="middle" font-size="12" font-weight="700">정답</text><rect class="node-rect sq" x="93.6" y="20" width="69.6" height="36" rx="2"/><foreignObject x="96.6" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>2위</span></div></foreignObject><rect class="node-rect sq" x="171.2" y="20" width="69.6" height="36" rx="2"/><foreignObject x="174.2" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>3위</span></div></foreignObject><rect class="node-rect sq accent" x="248.8" y="20" width="69.6" height="36" rx="2"/><foreignObject x="251.8" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>4위</span></div></foreignObject><text class="accent-text" x="283.6" y="13" text-anchor="middle" font-size="12" font-weight="700">정답</text><rect class="node-rect sq" x="326.4" y="20" width="69.6" height="36" rx="2"/><foreignObject x="329.4" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>5위</span></div></foreignObject><rect class="node-rect sq" x="404.0" y="20" width="69.6" height="36" rx="2" style="fill:none; stroke-dasharray:4 4"/><foreignObject x="407.0" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35; color:var(--color-text-muted)"><span>6위</span></div></foreignObject><rect class="node-rect sq" x="481.6" y="20" width="69.6" height="36" rx="2" style="fill:none; stroke-dasharray:4 4"/><foreignObject x="484.6" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35; color:var(--color-text-muted)"><span>7위</span></div></foreignObject><rect class="node-rect sq" x="559.2" y="20" width="69.6" height="36" rx="2" style="fill:none; stroke-dasharray:4 4"/><foreignObject x="562.2" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35; color:var(--color-text-muted)"><span>8위</span></div></foreignObject><rect class="node-rect sq" x="636.8" y="20" width="69.6" height="36" rx="2" style="fill:none; stroke-dasharray:4 4"/><foreignObject x="639.8" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35; color:var(--color-text-muted)"><span>9위</span></div></foreignObject><text class="muted" x="671.6" y="13" text-anchor="middle" font-size="12">정답(놓침)</text><rect class="node-rect sq" x="714.4" y="20" width="69.6" height="36" rx="2" style="fill:none; stroke-dasharray:4 4"/><foreignObject x="717.4" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35; color:var(--color-text-muted)"><span>10위</span></div></foreignObject><path class="guide-axis" d="M400.0,16 V60" style="stroke-dasharray:4 4"/><text class="muted" x="16" y="80" font-size="12">실선 칸 = 가져온 top-5(1~5위), 점선 칸 = 잘려 나간 순위, 교과 색 = 가져온 정답 2개</text></svg></div>
+        <div class="ablation-metric">P 0.40 / R 0.67 / F1 0.50</div>
+        <p class="ablation-description">적중 2개(1·4위). $P=2/5=0.40$, $R=2/3\approx0.67$, $F_1=2\times0.40\times0.67/(0.40+0.67)\approx0.50$</p>
+      </div>
+      <div class="ablation-layer" id="ev-k10" style="display:none">
+        <div class="svg-diagram" style="margin:0 auto"><svg viewBox="0 0 800 88" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="검색 순위 1~10위 칸 가운데 정답 문서는 1위, 4위, 9위에 있고 top-10까지만 가져온 모습"><rect class="node-rect sq accent" x="16.0" y="20" width="69.6" height="36" rx="2"/><foreignObject x="19.0" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>1위</span></div></foreignObject><text class="accent-text" x="50.8" y="13" text-anchor="middle" font-size="12" font-weight="700">정답</text><rect class="node-rect sq" x="93.6" y="20" width="69.6" height="36" rx="2"/><foreignObject x="96.6" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>2위</span></div></foreignObject><rect class="node-rect sq" x="171.2" y="20" width="69.6" height="36" rx="2"/><foreignObject x="174.2" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>3위</span></div></foreignObject><rect class="node-rect sq accent" x="248.8" y="20" width="69.6" height="36" rx="2"/><foreignObject x="251.8" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>4위</span></div></foreignObject><text class="accent-text" x="283.6" y="13" text-anchor="middle" font-size="12" font-weight="700">정답</text><rect class="node-rect sq" x="326.4" y="20" width="69.6" height="36" rx="2"/><foreignObject x="329.4" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>5위</span></div></foreignObject><rect class="node-rect sq" x="404.0" y="20" width="69.6" height="36" rx="2"/><foreignObject x="407.0" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>6위</span></div></foreignObject><rect class="node-rect sq" x="481.6" y="20" width="69.6" height="36" rx="2"/><foreignObject x="484.6" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>7위</span></div></foreignObject><rect class="node-rect sq" x="559.2" y="20" width="69.6" height="36" rx="2"/><foreignObject x="562.2" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>8위</span></div></foreignObject><rect class="node-rect sq accent" x="636.8" y="20" width="69.6" height="36" rx="2"/><foreignObject x="639.8" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>9위</span></div></foreignObject><text class="accent-text" x="671.6" y="13" text-anchor="middle" font-size="12" font-weight="700">정답</text><rect class="node-rect sq" x="714.4" y="20" width="69.6" height="36" rx="2"/><foreignObject x="717.4" y="22" width="63.6" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>10위</span></div></foreignObject><path class="guide-axis" d="M796.0,16 V60" style="stroke-dasharray:4 4"/><text class="muted" x="16" y="80" font-size="12">실선 칸 = 가져온 top-10(1~10위), 점선 칸 = 잘려 나간 순위, 교과 색 = 가져온 정답 3개</text></svg></div>
+        <div class="ablation-metric">P 0.30 / R 1.00 / F1 0.46</div>
+        <p class="ablation-description">적중 3개(1·4·9위). $P=3/10=0.30$, $R=3/3=1.00$, $F_1=2\times0.30\times1.00/(0.30+1.00)\approx0.46$</p>
+      </div>
+      </div>
+    </div>
+        <p>$k$를 1에서 10으로 늘리면 recall은 0.33에서 1.00으로 오르고 precision은 1.00에서 0.30으로 내려간다. 많이 가져올수록 정답을 덜 놓치지만 정답이 아닌 문서도 함께 들어오기 때문이다. F1은 0.50, 0.33, 0.50, 0.46으로 오르내리므로 알맞은 $k$는 두 값의 균형으로 고른다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>$k$를 늘리면 recall은 오르고 precision은 내려가며, F1은 두 값의 균형을 보여 준다.</p></div>
+    </div>
+
+    <!-- 페이지 6: 순위 지표와 Ragas -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>정답이 몇 위에 있는지는 어떤 지표가 보는가?</li>
+          <li>Ragas의 context precision·context recall은 무엇을 넓혔는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">순위 지표 MRR·nDCG와 Ragas</h3>
+        <p>precision과 recall은 top-$k$ 안의 순서를 보지 않는다. <span class="term" data-definition="MRR(Mean Reciprocal Rank, 첫 정답 순위의 역수 평균): query마다 첫 정답의 순위 r을 1/r로 바꾸어 평균한 값.">MRR(Mean Reciprocal Rank, 첫 정답 순위의 역수 평균)</span>은 query마다 첫 정답의 순위 $r$을 $1/r$로 바꿔 평균한다. 앞 쪽의 예는 첫 정답이 1위이므로 $1/1=1.0$이고, 첫 정답이 4위였다면 $1/4=0.25$이다.</p>
+        <p><span class="term" data-definition="nDCG(순위 가중 누적 이득): 위 순위의 정답일수록 큰 가중치를 주어 더한 값을 가장 이상적인 순서의 값으로 나눈 지표. 1에 가까울수록 정답이 위에 몰려 있음.">nDCG(순위 가중 누적 이득)</span>는 $i$위의 정답에 가중치 $1/\mathit{log}_2(i+1)$을 주어 더한 값을, 정답 3개가 1~3위에 놓인 이상적인 값으로 나눈다. 이 예의 nDCG@10은 $(1+0.43+0.30)/(1+0.63+0.50)\approx0.81$이다.</p>
+        <figure class="svg-diagram fit animate-in" style="--diagram-max:720px; margin:var(--space-2) auto"><svg viewBox="0 0 800 148" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="순위 1~10위의 nDCG 가중치 막대. 순위가 낮아질수록 가중치가 작아지고, 정답이 있는 1위, 4위, 9위 막대를 강조함"><path class="guide-axis" d="M16,104 H784"/><rect class="accent-fill" x="28.0" y="32.0" width="45.6" height="72.0"/><text class="mono accent-text" x="50.8" y="26.0" text-anchor="middle" font-size="13">1.00</text><text x="50.8" y="122" text-anchor="middle" font-size="13">1위</text><rect class="guide-fill" x="105.6" y="58.6" width="45.6" height="45.4"/><text class="mono" x="128.4" y="52.6" text-anchor="middle" font-size="13">0.63</text><text x="128.4" y="122" text-anchor="middle" font-size="13">2위</text><rect class="guide-fill" x="183.2" y="68.0" width="45.6" height="36.0"/><text class="mono" x="206.0" y="62.0" text-anchor="middle" font-size="13">0.50</text><text x="206.0" y="122" text-anchor="middle" font-size="13">3위</text><rect class="accent-fill" x="260.8" y="73.0" width="45.6" height="31.0"/><text class="mono accent-text" x="283.6" y="67.0" text-anchor="middle" font-size="13">0.43</text><text x="283.6" y="122" text-anchor="middle" font-size="13">4위</text><rect class="guide-fill" x="338.4" y="76.1" width="45.6" height="27.9"/><text class="mono" x="361.2" y="70.1" text-anchor="middle" font-size="13">0.39</text><text x="361.2" y="122" text-anchor="middle" font-size="13">5위</text><rect class="guide-fill" x="416.0" y="78.4" width="45.6" height="25.6"/><text class="mono" x="438.8" y="72.4" text-anchor="middle" font-size="13">0.36</text><text x="438.8" y="122" text-anchor="middle" font-size="13">6위</text><rect class="guide-fill" x="493.6" y="80.0" width="45.6" height="24.0"/><text class="mono" x="516.4" y="74.0" text-anchor="middle" font-size="13">0.33</text><text x="516.4" y="122" text-anchor="middle" font-size="13">7위</text><rect class="guide-fill" x="571.2" y="81.3" width="45.6" height="22.7"/><text class="mono" x="594.0" y="75.3" text-anchor="middle" font-size="13">0.32</text><text x="594.0" y="122" text-anchor="middle" font-size="13">8위</text><rect class="accent-fill" x="648.8" y="82.3" width="45.6" height="21.7"/><text class="mono accent-text" x="671.6" y="76.3" text-anchor="middle" font-size="13">0.30</text><text x="671.6" y="122" text-anchor="middle" font-size="13">9위</text><rect class="guide-fill" x="726.4" y="83.2" width="45.6" height="20.8"/><text class="mono" x="749.2" y="77.2" text-anchor="middle" font-size="13">0.29</text><text x="749.2" y="122" text-anchor="middle" font-size="13">10위</text><text class="muted" x="16" y="144" font-size="13">막대 = 그 순위의 가중치, 교과 색 = 이 예의 정답 순위(1·4·9위). 첫 정답이 1위이므로 MRR = 1/1 = 1.0</text></svg><figcaption class="figure-caption">그림은 순위별 nDCG 가중치와 이 예의 정답 순위를 나타낸 것이다(직접 계산한 예시 값).</figcaption></figure>
+        <table class="data-table" style="margin:var(--space-3) 0 0">
+          <thead><tr><th>Ragas 지표</th><th>바탕 개념</th><th>넓힌 점</th></tr></thead>
+          <tbody>
+            <tr><td><strong>context precision</strong></td><td>Precision@k</td><td>정답 청크가 나온 순위마다 Precision@k를 구해 평균함. 정답이 위에 있을수록 높음(이 예는 (1/1+2/4+3/9)/3≈0.61). 관련 여부는 <span class="term" data-definition="대규모 언어 모델(Large Language Model, LLM): 방대한 글을 학습해 다음 토큰을 예측하는, 파라미터가 수십억 개 이상인 언어 모델.">대규모 언어 모델(Large Language Model, LLM)</span>이나 참조 답으로 판정</td></tr>
+            <tr><td><strong>context recall</strong></td><td>Recall@k</td><td>참조 답을 주장 단위로 나누어 검색 문맥이 뒷받침하는 주장의 비율을 셈(LLM 판정). 참조 문맥이 있으면 그중 검색된 비율로도 셈</td></tr>
+          </tbody>
+          <caption>표는 Ragas의 두 지표가 precision·recall을 어떻게 넓혔는지 나타낸 것이다. 출처: <a href="https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/" target="_blank" rel="noopener">Ragas 지표 문서</a></caption>
+        </table>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>MRR은 첫 정답의 순위를, nDCG는 정답 전체의 순위를 보며, Ragas의 두 지표는 precision·recall에 순위와 LLM 판정을 더한 것이다.</p></div>
+    </div>
+
+    <!-- 페이지 7: 답변 지표 EM과 F1 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>EM과 토큰 F1은 답을 어떻게 채점하는가?</li>
+          <li>한국어 답에서 F1이 흔들리는 까닭은 무엇인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">답변 지표: exact match와 F1</h3>
+        <p>답변 지표는 생성한 답을 정답 문자열과 견준다. 표준은 <a href="https://arxiv.org/abs/1606.05250" target="_blank" rel="noopener">SQuAD(Rajpurkar et al., 2016)</a>가 쓴 두 지표이다. <span class="term" data-definition="exact match(완전 일치, EM): 예측한 답이 정답과 글자 그대로 같으면 1, 아니면 0으로 매기는 채점 방식.">exact match(완전 일치, EM)</span>는 글자가 모두 같아야 1점이고, 토큰 F1은 두 답을 토큰으로 나눠 겹친 토큰으로 precision과 recall을 구한다.</p>
+        <div class="with-figure">
+          <div>
+            <p>정답 “330 미터”, 예측 “약 330 미터”이면 문자열이 달라 EM은 0이다. 겹친 토큰은 2개이므로 precision은 $2/3\approx0.67$, recall은 $2/2=1$이다.</p>
+            $$F_1=\frac{2\times\frac{2}{3}\times1}{\frac{2}{3}+1}=0.8$$
+          </div>
+          <figure class="figure side" style="--figure-side-width:320px"><div class="svg-diagram" style="margin:0"><svg viewBox="0 0 328 92" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="예측 약 330 미터와 정답 330 미터를 토큰으로 나누면 330과 미터 두 토큰이 겹침"><text x="0" y="31" font-size="13" font-weight="700">예측</text><rect class="node-rect sq" x="48" y="8" width="88" height="36" rx="2"/><foreignObject x="51" y="10" width="82" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>약</span></div></foreignObject><rect class="node-rect sq accent" x="144" y="8" width="88" height="36" rx="2"/><foreignObject x="147" y="10" width="82" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>330</span></div></foreignObject><rect class="node-rect sq accent" x="240" y="8" width="88" height="36" rx="2"/><foreignObject x="243" y="10" width="82" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>미터</span></div></foreignObject><text x="0" y="79" font-size="13" font-weight="700">정답</text><rect class="node-rect sq accent" x="144" y="56" width="88" height="36" rx="2"/><foreignObject x="147" y="58" width="82" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>330</span></div></foreignObject><rect class="node-rect sq accent" x="240" y="56" width="88" height="36" rx="2"/><foreignObject x="243" y="58" width="82" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>미터</span></div></foreignObject></svg></div><figcaption class="figure-caption">교과 색 = 겹친 토큰 2개(예측 3개, 정답 2개)</figcaption></figure>
+        </div>
+        <div class="with-figure">
+          <div>
+            <p>한국어는 조사와 띄어쓰기 때문에 F1이 흔들린다. 예측이 “약 330미터”이면 겹친 토큰이 없어 F1이 0이 되고, “330 미터이다”이면 “미터이다”가 “미터”와 달라 F1이 0.5로 떨어진다. 그래서 공백·조사를 정리하는 정규화, 형태소 단위 비교, LLM 판정을 함께 쓴다.</p>
+          </div>
+          <figure class="figure side" style="--figure-side-width:320px"><div class="svg-diagram" style="margin:0"><svg viewBox="0 0 328 92" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="예측 약 330미터와 정답 330 미터는 띄어쓰기가 달라 겹치는 토큰이 없음"><text x="0" y="31" font-size="13" font-weight="700">예측</text><rect class="node-rect sq" x="48" y="8" width="88" height="36" rx="2"/><foreignObject x="51" y="10" width="82" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>약</span></div></foreignObject><rect class="node-rect sq" x="144" y="8" width="88" height="36" rx="2"/><foreignObject x="147" y="10" width="82" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>330미터</span></div></foreignObject><text x="0" y="79" font-size="13" font-weight="700">정답</text><rect class="node-rect sq" x="48" y="56" width="88" height="36" rx="2"/><foreignObject x="51" y="58" width="82" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>330</span></div></foreignObject><rect class="node-rect sq" x="144" y="56" width="88" height="36" rx="2"/><foreignObject x="147" y="58" width="82" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>미터</span></div></foreignObject></svg></div><figcaption class="figure-caption">겹친 토큰 0개, F1 = 0. 뜻은 같아도 띄어쓰기가 달라 토큰이 다름</figcaption></figure>
+        </div>
+        <p>표 3에서 EM은 negative rejection에, Accuracy는 일곱 측면 모두에 쓰인다. 토큰 F1은 표 3에 따로 나오지 않지만, 질의응답 평가에서 EM과 짝을 이루어 부분 점수를 준다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>EM은 글자가 모두 같아야 1점이고 토큰 F1은 겹친 토큰으로 부분 점수를 주며, 한국어는 정규화를 거쳐야 F1이 안정된다.</p></div>
+    </div>
+
+    <!-- 페이지 8: 평가 틀 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>벤치마크와 도구는 무엇을 다르게 재는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>평가 틀<span class="paper-ref">논문 6.4절, 표 4</span></h3>
+        <p>평가 틀은 정해진 문제를 푸는 <span class="term" data-definition="벤치마크(Benchmark): 모델의 성능을 같은 조건에서 견주기 위해 정해 둔 문제 모음과 채점 방식임.">벤치마크(Benchmark)</span>와 시스템에 점수를 매기는 자동 평가 도구로 나뉜다.</p>
+        <table class="data-table">
+          <thead><tr><th>이름</th><th>종류</th><th>평가 대상</th><th>평가 측면</th><th>정량 지표</th></tr></thead>
+          <tbody>
+            <tr><td><strong>RGB</strong></td><td>벤치마크</td><td>검색·생성</td><td>noise robustness, negative rejection, information integration, counterfactual robustness</td><td>Accuracy, EM</td></tr>
+            <tr><td><strong>RECALL</strong></td><td>벤치마크</td><td>생성</td><td>counterfactual robustness</td><td>R-Rate</td></tr>
+            <tr><td><strong>CRUD</strong></td><td>벤치마크</td><td>검색·생성</td><td>창작 생성, 지식 집약 QA, 오류 수정, 요약</td><td>BLEU, ROUGE-L, BertScore, RAGQuestEval</td></tr>
+            <tr><td><strong>Ragas</strong></td><td>도구</td><td>검색·생성</td><td>context relevance, faithfulness, answer relevance</td><td>맞춤 지표, Cosine Similarity</td></tr>
+            <tr><td><strong>ARES</strong></td><td>도구</td><td>검색·생성</td><td>context relevance, faithfulness, answer relevance</td><td>Accuracy</td></tr>
+            <tr><td><strong>TruLens</strong></td><td>도구</td><td>검색·생성</td><td>context relevance, faithfulness, answer relevance</td><td>맞춤 지표</td></tr>
+          </tbody>
+          <caption>표는 논문 표 4의 평가 틀 6개를 정리한 것이다. Ragas와 TruLens의 맞춤 지표는 전통 지표와 달라 점수를 곧바로 비교하기 어렵다.</caption>
+        </table>
+        <p class="diff-line"><strong>핵심 비교</strong> 벤치마크(RGB·RECALL·CRUD)는 정해진 문제로 능력이나 과제별 점수를 재고, 도구(Ragas·ARES·TruLens)는 RAG 시스템에 context relevance·faithfulness·answer relevance 점수를 매긴다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>RGB·RECALL·CRUD는 능력과 과제별 점수를, Ragas·ARES·TruLens는 질 점수를 재며 지표가 서로 다르다.</p></div>
+    </div>
+
+    <!-- 페이지 9: 핵심 정리 + 확인 문제 1 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-accent animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">핵심 정리</strong>
+            <ul>
+              <li>평가 대상은 검색 품질과 생성 품질이다.</li>
+              <li>측면은 질 점수 3개(context relevance, faithfulness, answer relevance)와 필요 능력 4개이다.</li>
+              <li>지표와 평가 틀은 아직 표준화되지 않았다.</li>
+              <li>$k$를 늘리면 recall은 오르고 precision은 내려가며, MRR·nDCG는 정답의 순위를, EM·F1은 답 문자열의 일치를 잰다.</li>
+              <li>평가 문항은 측면이 query·context·answer 중 어느 쌍을 재는지부터 가려라.</li>
+            </ul>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag outline">확인 문제</span>측면과 지표</h3>
+        <div class="quiz-container animate-in" id="quiz-module4a">
+          <div class="quiz-question-block" data-correct="option-b"
+               data-explanation-right="② | 검색 문서에 답이 없을 때 답을 삼가는 능력은 negative rejection이다."
+               data-explanation-wrong="| 정답은 ②이다. 답을 삼가는 능력은 negative rejection이다. ①의 noise robustness는 쓸모없는 문서에 흔들리지 않는 능력이므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">1</span>검색한 문서에 질문의 답이 없을 때 “제공된 문서로는 답할 수 없다”고 답하는 능력은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① noise robustness</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② negative rejection</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ information integration</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ counterfactual robustness</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ context relevance</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <div class="quiz-question-block" data-correct="option-e"
+               data-explanation-right="⑤ | 표 3에서 R-Rate는 counterfactual robustness에만 쓰이므로 context relevance 지표가 아니다."
+               data-explanation-wrong="| 정답은 ⑤이다. R-Rate는 counterfactual robustness 지표이다. ③의 nDCG는 context relevance에 쓰이므로 옳다.">
+            <h3 class="quiz-question"><span class="q-num">2</span>논문 표 3에서 context relevance를 재는 지표로 옳지 <u>않은</u> 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① Hit Rate</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② MRR</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ nDCG</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ Precision</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ R-Rate</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4a')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4a')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>답을 삼가는 능력은 negative rejection이고, R-Rate는 counterfactual robustness 지표이다.</p></div>
+    </div>
+
+    <!-- 페이지 10: 확인 문제 2 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>평가 자료로 타당한 결론을 이끌 수 있는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag outline">확인 문제</span>과제와 평가 틀</h3>
+        <div class="quiz-container animate-in" id="quiz-module4b">
+          <div class="quiz-question-block" data-correct="option-d"
+               data-explanation-right="④ | 표 2는 데이터셋의 수를 셀 뿐 RAG가 질의응답에서 가장 잘한다는 성능 정보를 담지 않는다."
+               data-explanation-wrong="| 정답은 ④이다. 데이터셋의 수는 성능을 말해 주지 않는다. ①은 21개로 가장 많으므로 옳은 해석이다.">
+            <h3 class="quiz-question"><span class="q-num">3</span>표 2의 과제 묶음별 데이터셋 수에 대한 해석으로 옳지 <u>않은</u> 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 질의응답 데이터셋이 가장 많다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 추천 데이터셋은 1개이다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 데이터셋은 모두 48개이다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ RAG는 질의응답에서 성능이 가장 높다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 기타 묶음이 두 번째로 많다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <div class="quiz-question-block" data-correct="option-c"
+               data-explanation-right="③ | RGB는 필요 능력 4개를 재는 벤치마크(ㄱ)이고, Ragas는 질 점수 3개를 재는 도구(ㄷ)이다."
+               data-explanation-wrong="| 정답은 ③이다. RECALL은 생성 품질만 대상으로 하므로 ㄴ은 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">4</span>표 4의 평가 틀에 대한 설명으로 옳은 것만을 <span class="nobr">&lt;보기&gt;에서</span> 있는 대로 고른 것은?</h3>
+            <div class="bogi">
+              <p>ㄱ. RGB는 필요 능력 4개를 잰다.</p>
+              <p>ㄴ. RECALL은 검색 품질도 잰다.</p>
+              <p>ㄷ. Ragas는 질 점수 3개를 잰다.</p>
+            </div>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① ㄱ</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② ㄴ</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ ㄱ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ ㄴ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ ㄱ, ㄴ, ㄷ</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('quiz-module4b')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-module4b')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>데이터셋의 수는 성능이 아니라 평가의 치우침을 보여 주며, 평가 틀마다 재는 측면이 다르다.</p></div>
+    </div>
+
+    <!-- 페이지 11: 확인 문제 3 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>top-$k$를 바꿀 때 지표의 움직임을 해석할 수 있는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag outline">확인 문제</span>지표 해석</h3>
+        <div class="quiz-container animate-in" id="ev-quiz-c">
+          <div class="quiz-question-block" data-correct="option-b"
+               data-explanation-right="② | k를 늘리면 이미 가져온 정답은 그대로 남으므로 recall은 줄지 않고, 정답이 아닌 문서도 함께 들어오므로 precision은 내려가기 쉽다. 예시에서 recall은 0.67에서 1.00으로 오르고 precision은 0.40에서 0.30으로 내려갔다."
+               data-explanation-wrong="| 정답은 ②이다. k를 늘려도 이미 가져온 정답은 남으므로 recall은 줄지 않고, precision은 내려가기 쉽다. ⑤는 예시에서 F1이 0.50에서 0.46으로 내려갔으므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">5</span>정답 문서가 3개인 query에서 top-$k$의 $k$를 5에서 10으로 늘렸을 때 일반적으로 나타나는 변화로 옳은 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① precision과 recall이 함께 오른다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② recall은 그대로이거나 오르고, precision은 내려가기 쉽다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ recall은 내려가고 precision은 오른다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 첫 정답의 순위가 바뀌므로 MRR이 반드시 달라진다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ F1은 언제나 오른다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('ev-quiz-c')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('ev-quiz-c')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>$k$를 늘리면 recall은 줄지 않고 precision은 내려가기 쉬우며, F1은 오를 수도 내릴 수도 있다.</p></div>
+    </div>
+
+  </div>
+</section>

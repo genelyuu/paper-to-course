@@ -1,0 +1,557 @@
+<section class="module" id="module-4">
+  <div class="module-content">
+
+    <div class="module-header">
+      <span class="module-number">5</span>
+      <h2 class="module-title">실험 설계</h2>
+      <p class="module-subtitle">네 갈래 과제, 데이터, 평가 지표, 비교 대상을 정리한다</p>
+    </div>
+
+    <!-- 페이지 1: 공통 설정 -->
+    <div class="screen cornell dense">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">학습 목표</strong>
+            <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
+            <ol>
+              <li>네 갈래 과제의 입력과 출력 형식을 구분할 수 있다.</li>
+              <li>EM, BLEU-1, ROUGE-L, Q-BLEU-1, 레이블 정확도를 작은 예로 계산할 수 있다.</li>
+              <li>비교 대상마다 무엇을 보고 답하는지 비교할 수 있다.</li>
+            </ol>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">공통 설정<span class="paper-ref">논문 3절</span></h3>
+        <p>이 단원은 <span class="term" data-definition="검색 증강 생성(Retrieval-Augmented Generation, RAG): 질문으로 외부 문서를 검색하고, 검색한 문서와 질문을 함께 넣어 답을 생성하는 방법.">검색 증강 생성(Retrieval-Augmented Generation, RAG)</span>을 어떤 <span class="term" data-definition="지식 집약 과제(Knowledge-Intensive Task): 사람도 외부 지식원 없이는 합리적으로 해내기 어려운 과제.">지식 집약 과제(Knowledge-Intensive Task)</span>에서 어떤 잣대로 시험했는지 다룬다. 모든 실험은 같은 외부 기억 하나, 곧 <span class="term" data-definition="non-parametric memory(외부 문서 색인에 있는 기억): 모델 파라미터 밖의 문서 색인에 저장된 지식. 색인을 바꾸면 지식도 바뀜.">non-parametric memory(외부 문서 색인에 있는 기억)</span>를 쓴다.</p>
+        <figure class="svg-diagram fit animate-in" style="--diagram-max:680px">
+<svg viewBox="0 0 800 176" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="위키백과 2018년 12월 덤프를 100단어 청크 2,100만 개로 자르고 문서 인코더로 MIPS 색인을 만든 뒤, 질문마다 상위 k개(5 또는 10) 문서를 검색한다">
+<rect class="node-rect" x="16" y="8" width="164" height="64" rx="8"/>
+<foreignObject x="24" y="12" width="148" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>위키백과 덤프<br/>2018년 12월</span></div></foreignObject>
+<rect class="node-rect" x="216" y="8" width="164" height="64" rx="8"/>
+<foreignObject x="224" y="12" width="148" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>100단어 청크<br/>문서 2,100만 개</span></div></foreignObject>
+<rect class="node-rect" x="416" y="8" width="164" height="64" rx="8"/>
+<foreignObject x="424" y="12" width="148" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>document encoder<br/>BERT<sub>d</sub>, 고정</span></div></foreignObject>
+<rect class="node-rect" x="616" y="8" width="164" height="64" rx="8"/>
+<foreignObject x="624" y="12" width="148" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>MIPS 색인<br/>FAISS · HNSW</span></div></foreignObject>
+<path class="edge-line" d="M180,40 H206"/><polygon class="edge-arrow" points="206,35 216,40 206,45"/>
+<path class="edge-line" d="M380,40 H406"/><polygon class="edge-arrow" points="406,35 416,40 406,45"/>
+<path class="edge-line" d="M580,40 H606"/><polygon class="edge-arrow" points="606,35 616,40 606,45"/>
+<foreignObject x="16" y="112" width="380" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; color:var(--color-text-secondary)"><span>모든 과제가 이 색인 하나를 함께 쓴다</span></div></foreignObject>
+<rect class="node-rect" x="416" y="112" width="164" height="56" rx="8"/>
+<foreignObject x="424" y="116" width="148" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>질문 <i class="mi">x</i></span></div></foreignObject>
+<rect class="node-rect accent" x="616" y="112" width="164" height="56" rx="8"/>
+<foreignObject x="624" y="116" width="148" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>top-<i class="mi">k</i> 문서<br/><i class="mi">k</i> = 5 또는 10</span></div></foreignObject>
+<path class="edge-line accent" d="M580,140 H606"/><polygon class="edge-arrow accent" points="606,135 616,140 606,145"/>
+<path class="edge-line" d="M698,72 V102"/><polygon class="edge-arrow" points="693,102 703,102 698,112"/>
+</svg>
+          <figcaption class="figure-caption">그림은 모든 과제가 함께 쓰는 문서 색인과 학습 때의 검색 설정을 나타낸 것이다. (논문 3절)</figcaption>
+        </figure>
+        <p>위키백과 2018년 12월 덤프를 겹치지 않는 100단어 <span class="term" data-definition="청크(Chunk): 긴 문서를 일정한 길이로 잘라 만든 조각. 이 논문은 100단어 단위로 자름.">청크(Chunk)</span>로 잘라 문서 2,100만 개(21M)를 만든다. <span class="term" data-definition="document encoder(문서 인코더): 문서를 임베딩 벡터로 바꾸는 BERT 모델. RAG는 학습 중 이 인코더를 고정함.">document encoder(문서 인코더)</span>로 문서마다 임베딩을 구하고, <span class="term" data-definition="FAISS(벡터 검색 라이브러리): 많은 벡터 가운데 질의 벡터와 가까운 것을 빠르게 찾는 라이브러리.">FAISS(벡터 검색 라이브러리)</span>의 <span class="term" data-definition="HNSW(Hierarchical Navigable Small World, 그래프 기반 근사 최근접 탐색): 벡터를 여러 층의 그래프로 이어 두고 가까운 이웃을 따라가며 빠르게 찾는 방법.">HNSW(Hierarchical Navigable Small World, 그래프 기반 근사 최근접 탐색)</span> 근사로 <span class="term" data-definition="MIPS(Maximum Inner Product Search, 최대 내적 검색): 질의 벡터와 내적이 가장 큰 벡터를 찾는 검색 문제.">MIPS(Maximum Inner Product Search, 최대 내적 검색)</span> 색인 하나를 만든다(4단원).</p>
+        <p>학습할 때는 질문마다 <span class="term" data-definition="top-k(상위 k개): 점수가 높은 순서로 고른 처음 k개.">top-<i class="mi">k</i>(상위 $k$개)</span> 문서를 검색하며, $k$는 5 또는 10을 쓴다. 테스트 때의 $k$는 검증용(dev) 데이터로 정한다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>모든 과제는 위키백과 2018년 12월 덤프로 만든 문서 2,100만 개의 색인 하나를 쓰고, 학습 때 문서 5개 또는 10개를 검색한다.</p></div>
+    </div>
+
+    <!-- 페이지 2: 과제 네 갈래 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>네 과제는 출력 형식이 어떻게 다른가?</li>
+          <li>문장을 만드는 모델로 분류 과제도 풀 수 있는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">과제 네 갈래<span class="paper-ref">논문 3.1~3.4절</span></h3>
+        <p>RAG의 generator는 입력 문장을 출력 문장으로 바꾸는 <span class="term" data-definition="seq2seq(Sequence-to-Sequence, 입력 문장을 출력 문장으로 바꾸는 모델): 인코더가 입력을 읽고 디코더가 출력 토큰을 하나씩 만드는 모델 구조.">seq2seq(Sequence-to-Sequence, 입력 문장을 출력 문장으로 바꾸는 모델)</span> 모델이다. 그래서 과제가 달라도 “입력 → 출력” 문장 쌍으로 바꾸면 같은 구조로 학습할 수 있다.</p>
+        <table class="data-table animate-in">
+          <thead><tr><th>과제</th><th>데이터셋</th><th>입력 예</th><th>출력 예</th><th>지표</th></tr></thead>
+          <tbody>
+            <tr><td><span class="term" data-definition="오픈 도메인 질의응답(Open-Domain QA): 정답이 든 문서를 주지 않고, 넓은 자료에서 스스로 찾아 질문에 답하는 과제.">오픈 도메인 질의응답(Open-Domain QA)</span></td><td>NQ, TriviaQA, WebQuestions, CuratedTrec</td><td><span lang="en">“Who is the President of Peru?”</span></td><td>짧은 답(사람 이름 같은 개체)</td><td>EM</td></tr>
+            <tr><td><span class="term" data-definition="생성형(Abstractive, 답을 새로 써냄): 문서의 구간을 그대로 잘라 오지 않고 답 문장을 새로 쓰는 방식.">생성형(Abstractive, 답을 새로 써냄)</span> QA</td><td>MS MARCO NLG v2.1</td><td><span lang="en">“define middle ear”</span></td><td><span lang="en">“The middle ear includes the tympanic cavity and the three ossicles.”</span></td><td>BLEU-1, ROUGE-L</td></tr>
+            <tr><td><span class="term" data-definition="질문 생성(Question Generation): 답이나 문맥을 주고 그에 맞는 질문 문장을 만드는 과제.">질문 생성(Question Generation)</span></td><td>Jeopardy(SearchQA 분할)</td><td><span lang="en">“The World Cup”</span></td><td><span lang="en">“In 1986 Mexico scored as the first country to host this international sports competition twice.”</span></td><td>Q-BLEU-1, 사람 평가</td></tr>
+            <tr><td><span class="term" data-definition="사실 검증(Fact Verification): 주장 문장이 근거 자료로 뒷받침되는지, 반박되는지, 판단할 정보가 부족한지 가리는 과제.">사실 검증(Fact Verification)</span></td><td>FEVER</td><td>주장 문장 하나</td><td>지지, 반박, 정보 부족 중 하나(토큰 1개)</td><td>레이블 정확도</td></tr>
+          </tbody>
+          <caption>표는 네 갈래 과제의 입력·출력 예와 지표를 나타낸 것이다. 출력 예는 논문 표 3과 3.3절에서 가져왔다.</caption>
+        </table>
+        <p class="diff-line"><strong>핵심 비교</strong> 네 과제는 같은 RAG 모델과 같은 색인을 쓰고, 출력만 짧은 답 → 문장 → 질문 → 레이블 토큰 하나로 달라진다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>오픈 도메인 QA, 생성형 QA, 질문 생성, 사실 검증을 모두 입력과 출력 문장의 쌍으로 바꾸어 같은 모델로 학습한다.</p></div>
+    </div>
+
+    <!-- 페이지 3: 데이터 규모 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>과제마다 학습 데이터는 얼마나 되는가?</li>
+          <li>학습 데이터가 작은 과제는 어떻게 학습하는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>데이터 규모<span class="paper-ref">논문 부록 I, 표 7</span></h3>
+        <div class="with-figure" style="--figure-side-width:248px">
+          <div>
+            <table class="data-table animate-in">
+              <thead><tr><th>데이터셋</th><th class="num">학습</th><th class="num">검증</th><th class="num">테스트</th></tr></thead>
+              <tbody>
+                <tr><td>Natural Questions(NQ)</td><td class="num">79,169</td><td class="num">8,758</td><td class="num">3,611</td></tr>
+                <tr><td>TriviaQA(TQA)</td><td class="num">78,786</td><td class="num">8,838</td><td class="num">11,314</td></tr>
+                <tr class="hl"><td>WebQuestions(WQ)</td><td class="num">3,418</td><td class="num">362</td><td class="num">2,033</td></tr>
+                <tr class="hl"><td>CuratedTrec(CT)</td><td class="num">635</td><td class="num">134</td><td class="num">635</td></tr>
+                <tr><td>Jeopardy 질문 생성</td><td class="num">97,392</td><td class="num">13,714</td><td class="num">26,849</td></tr>
+                <tr><td>MS MARCO</td><td class="num">153,726</td><td class="num">12,468</td><td class="num">101,093*</td></tr>
+                <tr><td>FEVER 3-way</td><td class="num">145,450</td><td class="num">10,000</td><td class="num">10,000</td></tr>
+                <tr><td>FEVER 2-way</td><td class="num">96,966</td><td class="num">6,666</td><td class="num">6,666</td></tr>
+              </tbody>
+              <caption>표는 데이터셋별 문항 수를 나타낸 것이다. *는 공개되지 않은 일부로 평가한다. (논문 표 7)</caption>
+            </table>
+          </div>
+          <figure class="figure side">
+<svg viewBox="0 0 248 236" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="데이터셋별 학습 문항 수 막대. MS MARCO 153,726개가 가장 많고 CuratedTrec 635개, WebQuestions 3,418개가 가장 적다">
+<text x="76" y="21" text-anchor="end" font-size="11">NQ</text>
+<rect class="ink-fill" x="80" y="10" width="55.4" height="14" fill-opacity="0.35"/>
+<text x="139.4" y="21" class="muted" text-anchor="start" font-size="11">79,169</text>
+<text x="76" y="47" text-anchor="end" font-size="11">TQA</text>
+<rect class="ink-fill" x="80" y="36" width="55.2" height="14" fill-opacity="0.35"/>
+<text x="139.2" y="47" class="muted" text-anchor="start" font-size="11">78,786</text>
+<text x="76" y="73" text-anchor="end" font-size="11">WQ</text>
+<rect class="accent-fill" x="80" y="62" width="2.4" height="14"/>
+<text x="86.4" y="73" class="accent-text" text-anchor="start" font-size="11">3,418</text>
+<text x="76" y="99" text-anchor="end" font-size="11">CT</text>
+<rect class="accent-fill" x="80" y="88" width="1.0" height="14"/>
+<text x="85.0" y="99" class="accent-text" text-anchor="start" font-size="11">635</text>
+<text x="76" y="125" text-anchor="end" font-size="11">Jeopardy</text>
+<rect class="ink-fill" x="80" y="114" width="68.2" height="14" fill-opacity="0.35"/>
+<text x="152.2" y="125" class="muted" text-anchor="start" font-size="11">97,392</text>
+<text x="76" y="151" text-anchor="end" font-size="11">MS MARCO</text>
+<rect class="ink-fill" x="80" y="140" width="107.6" height="14" fill-opacity="0.35"/>
+<text x="191.6" y="151" class="muted" text-anchor="start" font-size="11">153,726</text>
+<text x="76" y="177" text-anchor="end" font-size="11">FEVER-3</text>
+<rect class="ink-fill" x="80" y="166" width="101.8" height="14" fill-opacity="0.35"/>
+<text x="185.8" y="177" class="muted" text-anchor="start" font-size="11">145,450</text>
+<text x="76" y="203" text-anchor="end" font-size="11">FEVER-2</text>
+<rect class="ink-fill" x="80" y="192" width="67.9" height="14" fill-opacity="0.35"/>
+<text x="151.9" y="203" class="muted" text-anchor="start" font-size="11">96,966</text>
+<path class="guide-axis" d="M80,4 V214" fill="none"/>
+<text x="80" y="228" class="muted" text-anchor="start" font-size="11">학습 문항 수</text>
+</svg>
+            <figcaption class="figure-caption">그림은 학습 문항 수를 막대로 나타낸 것이다. 색칠한 두 데이터셋이 가장 작다.</figcaption>
+          </figure>
+        </div>
+        <p>WebQuestions와 CuratedTrec은 학습 문항이 각각 3,418개, 635개로 작다. 그래서 논문은 <span class="term" data-definition="DPR(Dense Passage Retriever): 질문과 문서를 BERT 두 개로 따로 임베딩하고 내적으로 문서를 찾는 검색기.">DPR(Dense Passage Retriever)</span>을 따라, NQ로 학습한 RAG 모델에서 출발해 이 두 데이터셋을 이어서 학습한다. 데이터가 작은 과제에서는 큰 과제에서 배운 것을 물려받는 셈이다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>데이터셋 크기는 635개에서 15만 개 넘게까지 다르며, 작은 WebQuestions와 CuratedTrec은 NQ 모델에서 출발해 학습한다.</p></div>
+    </div>
+
+    <!-- 페이지 4: EM -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>EM은 무엇이 같아야 1점을 주는가?</li>
+          <li>정답을 담은 답도 0점이 될 수 있는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>지표 계산 1: EM<span class="paper-ref">논문 3.1절</span></h3>
+        <p>오픈 도메인 QA는 <span class="term" data-definition="exact match(완전 일치, EM): 예측 답이 정답과 글자 그대로 같으면 1점, 아니면 0점을 주고 문항 수로 평균한 값.">exact match(완전 일치, EM)</span>로 잰다. 예측이 정답 가운데 하나와 똑같으면 1점, 아니면 0점이고, 이 점수를 문항 수로 평균한다. 비교하기 전에 흔히 소문자로 바꾸고 관사(a, an, the)와 문장 부호를 지운다.</p>
+        <p>표는 세 문항으로 EM을 계산한 예시이다.</p>
+        <table class="data-table animate-in">
+          <thead><tr><th>문항</th><th>정답</th><th>예측</th><th>정규화한 뒤(정답 / 예측)</th><th class="num">점수</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td lang="en">Lima</td><td lang="en">Lima</td><td lang="en">lima / lima</td><td class="num">1</td></tr>
+            <tr><td>2</td><td lang="en">1986</td><td lang="en">in 1986</td><td lang="en">1986 / in 1986</td><td class="num">0</td></tr>
+            <tr><td>3</td><td lang="en">the pound sterling</td><td lang="en">Pound sterling.</td><td lang="en">pound sterling / pound sterling</td><td class="num">1</td></tr>
+          </tbody>
+          <caption>표는 정답과 예측을 정규화한 뒤 비교해 EM 점수를 매긴 예시를 나타낸 것이다.</caption>
+        </table>
+        $$\mathit{EM} = \frac{1 + 0 + 1}{3} \approx 0.667 \;(66.7\%)$$
+        <p>2번 예측은 정답 1986을 담고 있지만 “in”이 붙어 0점이다. EM은 이렇게 엄격하므로, 답을 새로 써내는 RAG는 정답 구간만 정확히 끊어 내야 점수를 얻는다. 반대로 정답 구간을 문서에서 잘라 오는 방식은 문서에 답이 그대로 있어야만 점수를 얻는다(6단원).</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>EM은 정규화한 답이 정답과 똑같을 때만 1점을 주는 엄격한 지표이며 예시의 EM은 3문항 중 2문항이 맞아 66.7%이다.</p></div>
+    </div>
+
+    <!-- 페이지 5: BLEU-1, ROUGE-L -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>BLEU-1은 무엇의 비율인가?</li>
+          <li>ROUGE-L은 단어 순서를 어떻게 반영하는가?</li>
+          <li>MS MARCO에서 RAG의 점수가 낮게 나오는 까닭은 무엇인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>지표 계산 2: BLEU-1과 ROUGE-L<span class="paper-ref">논문 3.2절</span></h3>
+        <p>MS MARCO의 답은 문장이므로 EM 대신 겹치는 단어로 잰다. <span class="term" data-definition="BLEU-1(겹치는 단어 비율 기반 지표): 생성 문장의 단어 가운데 참조 문장에도 있는 단어의 비율에, 생성 문장이 짧을 때 주는 벌점을 곱한 값.">BLEU-1(겹치는 단어 비율 기반 지표)</span>은 생성 문장의 단어 가운데 참조 문장에도 있는 단어의 비율이다. 같은 단어는 참조에 나온 횟수까지만 세고, 생성 문장이 참조보다 짧으면 짧은 문장 벌점 $e^{1-r/c}$를 곱한다.</p>
+        <p><span class="term" data-definition="ROUGE-L(최장 공통 부분열 기반 지표): 두 문장에서 순서를 지키며 고를 수 있는 가장 긴 공통 단어열의 길이로 정밀도와 재현율을 구해 합친 값.">ROUGE-L(최장 공통 부분열 기반 지표)</span>은 두 문장에서 순서를 지키며 고를 수 있는 가장 긴 공통 단어열의 길이로 잰다. 그림은 참조 문장($r=7$단어)과 생성 문장($c=6$단어)의 예시이다.</p>
+        <figure class="svg-diagram fit animate-in" style="--diagram-max:760px">
+<svg viewBox="0 0 800 88" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="참조 문장 7단어와 생성 문장 6단어에서 겹치는 단어와 최장 공통 부분열 5단어를 색칠함">
+<text x="16" y="27" text-anchor="start" font-size="13" font-weight="700">참조</text>
+<text x="16" y="71" text-anchor="start" font-size="13" font-weight="700">생성</text>
+<rect class="node-rect accent" x="64.0" y="8" width="41.2" height="28" rx="6"/>
+<text x="84.6" y="27" class="mono" text-anchor="middle" font-size="14">the</text>
+<rect class="node-rect" x="111.2" y="8" width="66.4" height="28" rx="6"/>
+<text x="144.4" y="27" class="mono" text-anchor="middle" font-size="14">middle</text>
+<rect class="node-rect accent" x="183.6" y="8" width="41.2" height="28" rx="6"/>
+<text x="204.2" y="27" class="mono" text-anchor="middle" font-size="14">ear</text>
+<rect class="node-rect" x="230.8" y="8" width="32.8" height="28" rx="6"/>
+<text x="247.2" y="27" class="mono" text-anchor="middle" font-size="14">is</text>
+<rect class="node-rect accent" x="269.6" y="8" width="66.4" height="28" rx="6"/>
+<text x="302.8" y="27" class="mono" text-anchor="middle" font-size="14">behind</text>
+<rect class="node-rect accent" x="342.0" y="8" width="41.2" height="28" rx="6"/>
+<text x="362.6" y="27" class="mono" text-anchor="middle" font-size="14">the</text>
+<rect class="node-rect accent" x="389.2" y="8" width="74.8" height="28" rx="6"/>
+<text x="426.6" y="27" class="mono" text-anchor="middle" font-size="14">eardrum</text>
+<rect class="node-rect accent" x="64.0" y="52" width="41.2" height="28" rx="6"/>
+<text x="84.6" y="71" class="mono" text-anchor="middle" font-size="14">the</text>
+<rect class="node-rect accent" x="111.2" y="52" width="41.2" height="28" rx="6"/>
+<text x="131.8" y="71" class="mono" text-anchor="middle" font-size="14">ear</text>
+<rect class="node-rect" x="158.4" y="52" width="49.6" height="28" rx="6"/>
+<text x="183.2" y="71" class="mono" text-anchor="middle" font-size="14">part</text>
+<rect class="node-rect accent" x="214.0" y="52" width="66.4" height="28" rx="6"/>
+<text x="247.2" y="71" class="mono" text-anchor="middle" font-size="14">behind</text>
+<rect class="node-rect accent" x="286.4" y="52" width="41.2" height="28" rx="6"/>
+<text x="307.0" y="71" class="mono" text-anchor="middle" font-size="14">the</text>
+<rect class="node-rect accent" x="333.6" y="52" width="74.8" height="28" rx="6"/>
+<text x="371.0" y="71" class="mono" text-anchor="middle" font-size="14">eardrum</text>
+<text x="512" y="27" class="accent-text" text-anchor="start" font-size="13">BLEU-1: 겹친 단어 5/6, 짧은 문장 벌점 0.846</text>
+<text x="512" y="71" class="accent-text" text-anchor="start" font-size="13">ROUGE-L: 공통 부분열 5단어</text>
+</svg>
+          <figcaption class="figure-caption">그림은 겹치는 단어(색칠한 칸)와 최장 공통 부분열 “the ear behind the eardrum”을 나타낸 예시이다.</figcaption>
+        </figure>
+        $$\begin{aligned}\mathit{BLEU}_1 &= \tfrac{5}{6}\times e^{1-7/6} \approx 0.833\times 0.846 \approx 0.705\\ \mathit{ROUGE}_L &:\; P=\tfrac{5}{6},\; R=\tfrac{5}{7},\; F=\tfrac{2PR}{P+R}\approx 0.769\end{aligned}$$
+        <p>MS MARCO에는 제공된 gold 문단 없이는 참조 답과 맞출 수 없는 질문(<span lang="en">“What is the weather in Volcano, CA?”</span>)과 위키백과만으로는 답할 수 없는 질문이 섞여 있다. RAG는 gold 문단을 쓰지 않고 위키백과에서 검색하므로, gold 문단을 쓰는 모델보다 점수가 낮게 나온다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>예시에서 BLEU-1은 겹친 단어 비율 5/6에 짧은 문장 벌점을 곱해 0.705, ROUGE-L은 공통 부분열 5단어로 구한 F가 0.769이다.</p></div>
+    </div>
+
+    <!-- 페이지 6: Jeopardy, Q-BLEU-1 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>Jeopardy 과제는 보통의 QA와 무엇이 반대인가?</li>
+          <li>Q-BLEU-1은 왜 개체에 가중치를 두는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>Jeopardy 질문 생성과 Q-BLEU-1<span class="paper-ref">논문 3.3절</span></h3>
+        <div class="with-figure" style="--figure-side-width:150px">
+          <div>
+            <p>Jeopardy는 어떤 개체에 대한 사실 문장을 듣고 그 개체를 맞히는 퀴즈 형식이다. 논문은 이를 뒤집어, 답 개체 <span lang="en">“The World Cup”</span>을 입력으로 주고 그 개체를 가리키는 사실 문장형 질문을 만들게 한다. 사실이 정확해야 하는 생성이므로 지식 집약 과제가 된다.</p>
+            <p>새 과제이므로 논문은 비교용 BART를 직접 학습했다. 지표는 SQuAD로 조정한 <span class="term" data-definition="Q-BLEU-1(개체 일치에 가중치를 둔 BLEU): 질문 생성용 BLEU 변형. 개체 이름 같은 핵심 단어가 맞는지에 더 큰 가중치를 두어 사람 판단과 상관이 높음.">Q-BLEU-1(개체 일치에 가중치를 둔 BLEU)</span>이다. 개체 일치에 더 큰 가중치를 두어 질문 생성에서 사람 판단과 상관이 높고, 사실성·구체성의 <span class="term" data-definition="사람 평가(Human Evaluation): 사람 평가자가 모델 출력을 직접 읽고 판단하는 평가.">사람 평가(Human Evaluation)</span>도 함께 한다(6단원).</p>
+          </div>
+          <figure class="figure side"><img src="assets/fig-buzzer.svg" alt="퀴즈 대회의 버저: 답을 먼저 알고 질문을 맞히는 Jeopardy 형식에 빗댐"><figcaption class="figure-caption">Jeopardy는 답에서 질문으로 간다</figcaption></figure>
+        </div>
+        <p>그림은 답 <span lang="en">“The Divine Comedy”</span>에 대한 참조 질문과 후보 두 개를 비교한 개념 예시이다. 개체 단어(밑줄)에 가중치 3, 나머지에 1을 주었다.</p>
+        <figure class="svg-diagram fit animate-in" style="--diagram-max:760px">
+<svg viewBox="0 0 800 128" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="참조 질문과 후보 질문 두 개. 후보 A는 단어가 더 많이 겹치지만 개체가 틀리고, 개체에 가중치를 주면 개체가 맞은 후보 B가 더 높다">
+<text x="16" y="27" text-anchor="start" font-size="13" font-weight="700">참조</text>
+<text x="16" y="67" text-anchor="start" font-size="13" font-weight="700">후보 A</text>
+<text x="16" y="107" text-anchor="start" font-size="13" font-weight="700">후보 B</text>
+<rect class="node-rect" x="72.0" y="8" width="49.6" height="28" rx="6"/>
+<text x="96.8" y="27" class="mono" text-anchor="middle" font-size="14">this</text>
+<rect class="node-rect" x="127.6" y="8" width="49.6" height="28" rx="6"/>
+<text x="152.4" y="27" class="mono" text-anchor="middle" font-size="14">epic</text>
+<rect class="node-rect" x="183.2" y="8" width="49.6" height="28" rx="6"/>
+<text x="208.0" y="27" class="mono" text-anchor="middle" font-size="14">poem</text>
+<rect class="node-rect" x="238.8" y="8" width="32.8" height="28" rx="6"/>
+<text x="255.2" y="27" class="mono" text-anchor="middle" font-size="14">by</text>
+<rect class="node-rect" x="277.6" y="8" width="58.0" height="28" rx="6"/>
+<text x="306.6" y="27" class="mono" text-anchor="middle" font-size="14">Dante</text>
+<rect class="node-rect" x="341.6" y="8" width="41.2" height="28" rx="6"/>
+<text x="362.2" y="27" class="mono" text-anchor="middle" font-size="14">has</text>
+<rect class="node-rect" x="388.8" y="8" width="24.4" height="28" rx="6"/>
+<text x="401.0" y="27" class="mono" text-anchor="middle" font-size="14">3</text>
+<rect class="node-rect" x="419.2" y="8" width="58.0" height="28" rx="6"/>
+<text x="448.2" y="27" class="mono" text-anchor="middle" font-size="14">parts</text>
+<rect class="node-rect accent" x="72.0" y="48" width="49.6" height="28" rx="6"/>
+<text x="96.8" y="67" class="mono" text-anchor="middle" font-size="14">this</text>
+<rect class="node-rect accent" x="127.6" y="48" width="49.6" height="28" rx="6"/>
+<text x="152.4" y="67" class="mono" text-anchor="middle" font-size="14">epic</text>
+<rect class="node-rect accent" x="183.2" y="48" width="49.6" height="28" rx="6"/>
+<text x="208.0" y="67" class="mono" text-anchor="middle" font-size="14">poem</text>
+<rect class="node-rect accent" x="238.8" y="48" width="32.8" height="28" rx="6"/>
+<text x="255.2" y="67" class="mono" text-anchor="middle" font-size="14">by</text>
+<rect class="node-rect" x="277.6" y="48" width="58.0" height="28" rx="6"/>
+<text x="306.6" y="67" class="mono" text-anchor="middle" font-size="14">Homer</text>
+<rect class="node-rect accent" x="341.6" y="48" width="41.2" height="28" rx="6"/>
+<text x="362.2" y="67" class="mono" text-anchor="middle" font-size="14">has</text>
+<rect class="node-rect accent" x="388.8" y="48" width="24.4" height="28" rx="6"/>
+<text x="401.0" y="67" class="mono" text-anchor="middle" font-size="14">3</text>
+<rect class="node-rect accent" x="419.2" y="48" width="58.0" height="28" rx="6"/>
+<text x="448.2" y="67" class="mono" text-anchor="middle" font-size="14">parts</text>
+<rect class="node-rect accent" x="72.0" y="88" width="49.6" height="28" rx="6"/>
+<text x="96.8" y="107" class="mono" text-anchor="middle" font-size="14">this</text>
+<rect class="node-rect accent" x="127.6" y="88" width="49.6" height="28" rx="6"/>
+<text x="152.4" y="107" class="mono" text-anchor="middle" font-size="14">poem</text>
+<rect class="node-rect accent" x="183.2" y="88" width="32.8" height="28" rx="6"/>
+<text x="199.6" y="107" class="mono" text-anchor="middle" font-size="14">by</text>
+<rect class="node-rect accent" x="222.0" y="88" width="58.0" height="28" rx="6"/>
+<text x="251.0" y="107" class="mono" text-anchor="middle" font-size="14">Dante</text>
+<rect class="node-rect" x="286.0" y="88" width="32.8" height="28" rx="6"/>
+<text x="302.4" y="107" class="mono" text-anchor="middle" font-size="14">is</text>
+<rect class="node-rect" x="324.8" y="88" width="66.4" height="28" rx="6"/>
+<text x="358.0" y="107" class="mono" text-anchor="middle" font-size="14">famous</text>
+<path class="ink strong" d="M277.6,40 H335.6" fill="none"/>
+<path class="ink strong" d="M277.6,80 H335.6" fill="none"/>
+<path class="ink strong" d="M222.0,120 H280.0" fill="none"/>
+<text x="600" y="20" class="muted" text-anchor="middle" font-size="12">BLEU-1</text>
+<text x="720" y="20" class="muted" text-anchor="middle" font-size="12">개체 가중</text>
+<text x="600" y="67" text-anchor="middle" font-size="13">7/8 = 0.875</text>
+<text x="720" y="67" text-anchor="middle" font-size="13">7/10 = 0.70</text>
+<text x="600" y="107" text-anchor="middle" font-size="13">4/6 ≈ 0.667</text>
+<text x="720" y="107" class="accent-text" text-anchor="middle" font-size="13" font-weight="700">6/8 = 0.75</text>
+</svg>
+          <figcaption class="figure-caption">그림은 개체 가중의 효과를 보이려고 Q-BLEU를 단순화한 계산이며 실제 Q-BLEU 식과 같지 않다(짧은 문장 벌점 생략).</figcaption>
+        </figure>
+        <p>후보 A는 겹치는 단어가 많지만 시인을 틀렸고, 후보 B는 단어는 덜 겹쳐도 핵심 개체가 맞다. 개체에 가중치를 주면 순위가 뒤집힌다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>Jeopardy 과제는 답 개체에서 사실 문장형 질문을 생성하며, Q-BLEU-1은 개체가 맞는 질문을 더 높게 평가한다.</p></div>
+    </div>
+
+    <!-- 페이지 7: FEVER, 레이블 정확도 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>생성 모델이 분류 과제를 어떻게 푸는가?</li>
+          <li>이 실험은 어떤 감독 신호를 쓰지 않는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>FEVER 사실 검증과 레이블 정확도<span class="paper-ref">논문 3.4절</span></h3>
+        <div class="with-figure" style="--figure-side-width:150px">
+          <div>
+            <p>FEVER 과제는 주장 문장이 위키백과로 지지되는지(supports), 반박되는지(refutes), 판단할 정보가 부족한지(not enough info) 가리는 분류 과제이다. RAG는 세 레이블을 출력 토큰 하나로 바꾸어 “주장 → 레이블 토큰” 쌍으로 학습한다. 출력이 한 토큰이므로 <span class="term" data-definition="RAG-Sequence(답 전체에 같은 문서를 씀), RAG-Token(토큰마다 다른 문서를 쓸 수 있음): 검색 문서를 주변화하는 두 방식. 출력이 한 토큰이면 두 식이 같아짐.">RAG-Sequence(답 전체에 같은 문서를 씀)와 RAG-Token(토큰마다 다른 문서를 쓸 수 있음)</span>은 같은 모델이 된다(3단원).</p>
+            <p>대부분의 FEVER 방법과 달리, 어떤 문서가 증거인지 알려 주는 검색 감독을 쓰지 않는다. 실제 응용에서는 이런 감독 신호가 없는 경우가 많기 때문이다. 세 레이블(3-way)과 지지·반박 두 레이블(2-way)을 모두 실험한다.</p>
+          </div>
+          <figure class="figure side"><img src="assets/fig-gavel.svg" alt="판사봉: 주장이 참인지 거짓인지 판정하는 사실 검증에 빗댐"><figcaption class="figure-caption">주장마다 판정을 하나 내린다</figcaption></figure>
+        </div>
+        <p>지표는 <span class="term" data-definition="레이블 정확도(Label Accuracy): 전체 주장 가운데 레이블을 맞힌 주장의 비율.">레이블 정확도(Label Accuracy)</span>이다. 그림은 주장 5개의 정답과 예측을 비교한 예시이다.</p>
+        <figure class="svg-diagram fit animate-in" style="--diagram-max:720px">
+<svg viewBox="0 0 800 140" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="주장 5개 가운데 4개의 레이블을 맞혀 레이블 정확도가 80%인 예시">
+<text x="16" y="53" text-anchor="start" font-size="13" font-weight="700">정답</text>
+<text x="16" y="93" text-anchor="start" font-size="13" font-weight="700">예측</text>
+<text x="158" y="20" class="muted" text-anchor="middle" font-size="12">주장 1</text>
+<rect class="node-rect" x="96" y="32" width="124" height="32" rx="8"/>
+<foreignObject x="104" y="36" width="108" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>지지</span></div></foreignObject>
+<rect class="node-rect accent" x="96" y="72" width="124" height="32" rx="8"/>
+<foreignObject x="104" y="76" width="108" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>지지</span></div></foreignObject>
+<text x="158" y="128" class="accent-text" text-anchor="middle" font-size="13" font-weight="700">맞음</text>
+<text x="294" y="20" class="muted" text-anchor="middle" font-size="12">주장 2</text>
+<rect class="node-rect" x="232" y="32" width="124" height="32" rx="8"/>
+<foreignObject x="240" y="36" width="108" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>반박</span></div></foreignObject>
+<rect class="node-rect accent" x="232" y="72" width="124" height="32" rx="8"/>
+<foreignObject x="240" y="76" width="108" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>반박</span></div></foreignObject>
+<text x="294" y="128" class="accent-text" text-anchor="middle" font-size="13" font-weight="700">맞음</text>
+<text x="430" y="20" class="muted" text-anchor="middle" font-size="12">주장 3</text>
+<rect class="node-rect" x="368" y="32" width="124" height="32" rx="8"/>
+<foreignObject x="376" y="36" width="108" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>정보 부족</span></div></foreignObject>
+<rect class="node-rect" x="368" y="72" width="124" height="32" rx="8"/>
+<foreignObject x="376" y="76" width="108" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>지지</span></div></foreignObject>
+<text x="430" y="128" text-anchor="middle" font-size="13" font-weight="700">틀림</text>
+<text x="566" y="20" class="muted" text-anchor="middle" font-size="12">주장 4</text>
+<rect class="node-rect" x="504" y="32" width="124" height="32" rx="8"/>
+<foreignObject x="512" y="36" width="108" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>지지</span></div></foreignObject>
+<rect class="node-rect accent" x="504" y="72" width="124" height="32" rx="8"/>
+<foreignObject x="512" y="76" width="108" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>지지</span></div></foreignObject>
+<text x="566" y="128" class="accent-text" text-anchor="middle" font-size="13" font-weight="700">맞음</text>
+<text x="702" y="20" class="muted" text-anchor="middle" font-size="12">주장 5</text>
+<rect class="node-rect" x="640" y="32" width="124" height="32" rx="8"/>
+<foreignObject x="648" y="36" width="108" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>반박</span></div></foreignObject>
+<rect class="node-rect accent" x="640" y="72" width="124" height="32" rx="8"/>
+<foreignObject x="648" y="76" width="108" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>반박</span></div></foreignObject>
+<text x="702" y="128" class="accent-text" text-anchor="middle" font-size="13" font-weight="700">맞음</text>
+</svg>
+          <figcaption class="figure-caption">그림은 주장 5개 중 4개를 맞힌 예시이며, 레이블 정확도는 4/5 = 80%이다.</figcaption>
+        </figure>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>FEVER 과제는 레이블을 토큰 하나로 생성하는 분류 과제이며 검색 감독 없이 학습하고, 맞힌 주장의 비율로 평가한다.</p></div>
+    </div>
+
+    <!-- 페이지 8: 비교 대상 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>비교 대상은 각각 무엇을 보고 답하는가?</li>
+          <li>gold 문맥을 쓴 최고 성능과의 비교는 같은 출발선인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">비교 대상<span class="paper-ref">논문 3절, 4절</span></h3>
+        <p>그림은 같은 질문 하나에 대해 다섯 모델이 쓰는 정보의 경로를 나타낸 것이다.</p>
+        <figure class="svg-diagram fit animate-in" style="--diagram-max:700px">
+<svg viewBox="0 0 800 232" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="같은 질문에 대해 closed-book T5는 파라미터만, REALM과 DPR은 검색 문서에서 답 구간 추출, RAG는 검색 문서로 답 생성, BART 기준선은 검색 없이 생성, gold 문맥 최고 성능은 정답 문서를 받는다">
+<foreignObject x="20" y="4" width="136" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span><strong>closed-book<br/>T5</strong></span></div></foreignObject>
+<rect class="node-rect" x="20" y="56" width="136" height="36" rx="8"/>
+<foreignObject x="28" y="60" width="120" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>질문 <i class="mi">x</i></span></div></foreignObject>
+<path class="edge-line" d="M88,92 V106"/><polygon class="edge-arrow" points="83,106 93,106 88,116"/>
+<rect class="node-rect" x="20" y="116" width="136" height="48" rx="8"/>
+<foreignObject x="28" y="120" width="120" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span>파라미터만<br/>(검색 없음)</span></div></foreignObject>
+<path class="edge-line" d="M88,164 V178"/><polygon class="edge-arrow" points="83,178 93,178 88,188"/>
+<rect class="node-rect" x="20" y="188" width="136" height="36" rx="8"/>
+<foreignObject x="28" y="192" width="120" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>답 생성</span></div></foreignObject>
+<foreignObject x="176" y="4" width="136" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span><strong>open-book<br/>REALM · DPR</strong></span></div></foreignObject>
+<rect class="node-rect" x="176" y="56" width="136" height="36" rx="8"/>
+<foreignObject x="184" y="60" width="120" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>질문 <i class="mi">x</i></span></div></foreignObject>
+<path class="edge-line" d="M244,92 V106"/><polygon class="edge-arrow" points="239,106 249,106 244,116"/>
+<rect class="node-rect" x="176" y="116" width="136" height="48" rx="8"/>
+<foreignObject x="184" y="120" width="120" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span>검색 문서</span></div></foreignObject>
+<path class="edge-line" d="M244,164 V178"/><polygon class="edge-arrow" points="239,178 249,178 244,188"/>
+<rect class="node-rect" x="176" y="188" width="136" height="36" rx="8"/>
+<foreignObject x="184" y="192" width="120" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>답 구간 추출</span></div></foreignObject>
+<foreignObject x="332" y="4" width="136" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span><strong>RAG<br/>(본 논문)</strong></span></div></foreignObject>
+<rect class="node-rect accent" x="332" y="56" width="136" height="36" rx="8"/>
+<foreignObject x="340" y="60" width="120" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>질문 <i class="mi">x</i></span></div></foreignObject>
+<path class="edge-line accent" d="M400,92 V106"/><polygon class="edge-arrow accent" points="395,106 405,106 400,116"/>
+<rect class="node-rect accent" x="332" y="116" width="136" height="48" rx="8"/>
+<foreignObject x="340" y="120" width="120" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span>검색 문서</span></div></foreignObject>
+<path class="edge-line accent" d="M400,164 V178"/><polygon class="edge-arrow accent" points="395,178 405,178 400,188"/>
+<rect class="node-rect accent" x="332" y="188" width="136" height="36" rx="8"/>
+<foreignObject x="340" y="192" width="120" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>답 생성</span></div></foreignObject>
+<foreignObject x="488" y="4" width="136" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span><strong>BART<br/>기준선</strong></span></div></foreignObject>
+<rect class="node-rect" x="488" y="56" width="136" height="36" rx="8"/>
+<foreignObject x="496" y="60" width="120" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>질문 <i class="mi">x</i></span></div></foreignObject>
+<path class="edge-line" d="M556,92 V106"/><polygon class="edge-arrow" points="551,106 561,106 556,116"/>
+<rect class="node-rect" x="488" y="116" width="136" height="48" rx="8"/>
+<foreignObject x="496" y="120" width="120" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span>파라미터만<br/>(검색 없음)</span></div></foreignObject>
+<path class="edge-line" d="M556,164 V178"/><polygon class="edge-arrow" points="551,178 561,178 556,188"/>
+<rect class="node-rect" x="488" y="188" width="136" height="36" rx="8"/>
+<foreignObject x="496" y="192" width="120" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>생성</span></div></foreignObject>
+<foreignObject x="644" y="4" width="136" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span><strong>gold 문맥<br/>최고 성능</strong></span></div></foreignObject>
+<rect class="node-rect" x="644" y="56" width="136" height="36" rx="8"/>
+<foreignObject x="652" y="60" width="120" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>질문 <i class="mi">x</i></span></div></foreignObject>
+<path class="edge-line" d="M712,92 V106"/><polygon class="edge-arrow" points="707,106 717,106 712,116"/>
+<rect class="node-rect" x="644" y="116" width="136" height="48" rx="8"/>
+<foreignObject x="652" y="120" width="120" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span>사람이 고른<br/>정답 문서</span></div></foreignObject>
+<path class="edge-line" d="M712,164 V178"/><polygon class="edge-arrow" points="707,178 717,178 712,188"/>
+<rect class="node-rect" x="644" y="188" width="136" height="36" rx="8"/>
+<foreignObject x="652" y="192" width="120" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>답</span></div></foreignObject>
+</svg>
+          <figcaption class="figure-caption">그림은 비교 대상마다 답을 만들 때 쓰는 정보를 나타낸 것이다.</figcaption>
+        </figure>
+        <p><span class="term" data-definition="closed-book(클로즈드북, 외운 지식만으로 답하기): 외부 자료를 찾지 않고 모델 파라미터에 든 지식만으로 답하는 방식.">closed-book(클로즈드북, 외운 지식만으로 답하기)</span> 방식인 <span class="term" data-definition="T5(Text-to-Text Transfer Transformer): 모든 과제를 텍스트 입력, 텍스트 출력으로 바꾸어 푸는 Google의 seq2seq 모델.">T5(Text-to-Text Transfer Transformer)</span>는 <span class="term" data-definition="parametric memory(모델 파라미터에 저장된 기억): 학습으로 모델 가중치 안에 들어간 지식.">parametric memory(모델 파라미터에 저장된 기억)</span>만 쓴다. <span class="term" data-definition="open-book(오픈북, 자료를 찾아 읽고 답하기): 외부 자료를 검색해 읽고 답하는 방식.">open-book(오픈북, 자료를 찾아 읽고 답하기)</span> 방식인 REALM과 DPR은 문서를 검색한 뒤 답 구간을 <span class="term" data-definition="추출형(Extractive, 문서에서 답 구간을 골라냄): 문서 속 단어 구간을 그대로 잘라 답으로 내는 방식.">추출형(Extractive, 문서에서 답 구간을 골라냄)</span>으로 골라낸다.</p>
+        <p>생성·분류 과제에서는 검색 없이 학습한 BART를 <span class="term" data-definition="기준선(Baseline): 새 방법의 효과를 판단하려고 비교 대상으로 두는 기존 방법이나 모델.">기준선(Baseline)</span>으로 두므로, RAG와의 차이를 주로 검색의 효과로 읽는다. 표 2의 <span class="term" data-definition="최고 성능(State of the Art): 비교 시점에 그 과제에서 보고된 가장 좋은 결과.">최고 성능(State of the Art)</span> 일부는 사람이 고른 gold 문맥을 입력으로 받으므로, 증거를 스스로 찾는 RAG와 같은 출발선이 아니다.</p>
+        <p class="diff-line"><strong>핵심 비교</strong> T5는 외운 것만, REALM·DPR은 찾아서 골라내기, RAG는 찾아서 새로 쓰기, BART 기준선은 검색 없이 쓰기, gold 문맥 최고 성능은 정답 문서를 받고 시작한다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>비교 대상은 검색 여부와 답을 만드는 방식이 달라, 결과의 차이를 읽을 때 무엇을 보고 답했는지 함께 따져야 한다.</p></div>
+    </div>
+
+    <!-- 페이지 9: 핵심 정리 + 확인 문제 1, 2 -->
+    <div class="screen cornell dense">
+      <aside class="cue">
+        <div class="callout callout-accent animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">핵심 정리</strong>
+            <ol>
+              <li>모든 과제가 위키백과 2018년 12월 덤프의 문서 2,100만 개 색인 하나를 쓴다.</li>
+              <li>네 과제는 모두 입력·출력 문장 쌍으로 바뀌며 출력 형식만 다르다.</li>
+              <li>EM은 완전 일치, BLEU-1과 ROUGE-L은 단어 겹침, Q-BLEU-1은 개체 가중, 레이블 정확도는 맞힌 비율이다.</li>
+              <li>gold 문맥을 받는 최고 성능은 RAG와 출발선이 다르다.</li>
+            </ol>
+            <p>지표 계산 문항은 정규화와 중복 단어 처리부터 확인하라.</p>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>설정과 지표</h3>
+        <div class="quiz-container animate-in" id="st-quiz-a">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="② | 정규화하면 1번과 3번만 같으므로 EM은 2/4 = 50%이다."
+               data-explanation-wrong="| 정답은 ②이다. 1번과 3번만 정규화 뒤 같아 EM은 2/4이다. ③은 답을 담은 4번도 맞은 것으로 센 값이므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">1</span>정규화 뒤 다음 네 (정답, 예측) 쌍의 EM은?<br><span lang="en">(Paris, paris) / (Mount Everest, Everest) / (the Beatles, The Beatles.) / (1969, in 1969)</span></h3>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 25%</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 50%</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 75%</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 100%</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 0%</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="③ | RAG는 MS MARCO의 gold 문단을 쓰지 않으므로 ③은 옳지 않다."
+               data-explanation-wrong="| 정답은 ③이다. RAG는 gold 문단 없이 위키백과에서 검색한다. ②는 논문이 FEVER에서 증거 감독을 쓰지 않으므로 옳다.">
+            <h3 class="quiz-question"><span class="q-num">2</span>논문의 실험 설정에 대한 설명으로 옳지 <u>않은</u> 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 모든 과제가 위키백과 2018년 12월 덤프로 만든 색인 하나를 쓴다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② FEVER에서 어떤 문서가 증거인지 알려 주는 감독을 쓰지 않는다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ MS MARCO에서는 제공된 gold 문단을 입력에 넣어 답을 생성한다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ Jeopardy 과제에서는 답 개체를 주고 질문을 생성한다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ WebQuestions와 CuratedTrec 모델은 NQ로 학습한 RAG 모델에서 출발한다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('st-quiz-a')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('st-quiz-a')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>EM은 정규화한 뒤의 완전 일치만 세고, RAG는 모든 과제에서 증거를 위키백과에서 스스로 검색한다.</p></div>
+    </div>
+
+    <!-- 페이지 10: 확인 문제 3, 4 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>BLEU-1과 ROUGE-L은 무엇이 다른가?</li>
+          <li>기준선과의 차이는 무엇을 보여 주는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>지표와 비교 대상</h3>
+        <div class="quiz-container animate-in" id="st-quiz-b">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="③ | ㄱ과 ㄷ은 옳고, ROUGE-L은 단어 순서를 지키므로 ㄴ은 옳지 않다."
+               data-explanation-wrong="| 정답은 ③이다. ROUGE-L은 단어 순서를 지키므로 ㄴ은 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">3</span>BLEU-1과 ROUGE-L에 대한 설명으로 옳은 것만을 <span class="nobr">&lt;보기&gt;에서</span> 있는 대로 고른 것은?</h3>
+            <div class="bogi">
+              <p>ㄱ. BLEU-1은 짧은 문장에 벌점을 준다.</p>
+              <p>ㄴ. ROUGE-L은 단어 순서를 무시한다.</p>
+              <p>ㄷ. BLEU-1은 같은 단어를 참조 횟수까지만 센다.</p>
+            </div>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① ㄱ</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② ㄴ</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ ㄱ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ ㄴ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ ㄱ, ㄴ, ㄷ</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="① | 같은 BART를 검색 없이 학습했으므로 차이는 주로 검색의 효과이다."
+               data-explanation-wrong="| 정답은 ①이다. ③은 gold 문맥을 받는 쪽이 최고 성능 모델이므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">4</span>RAG와 BART 기준선의 차이가 주로 보여 주는 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 검색한 문서를 함께 쓰는 효과</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 모델 파라미터를 10배 늘린 효과</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 사람이 고른 gold 문맥을 받는 효과</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 서로 다른 학습 데이터를 쓴 효과</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 답 구간을 추출하는 reader의 효과</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('st-quiz-b')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('st-quiz-b')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>BLEU-1은 겹친 단어 비율, ROUGE-L은 순서를 지킨 공통 부분열로 재며, BART 기준선과의 차이는 검색의 효과를 보여 준다.</p></div>
+    </div>
+
+  </div>
+</section>

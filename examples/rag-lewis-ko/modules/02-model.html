@@ -1,0 +1,275 @@
+<section class="module" id="module-2">
+  <div class="module-content">
+
+    <div class="module-header">
+      <span class="module-number">3</span>
+      <h2 class="module-title">RAG 모델</h2>
+      <p class="module-subtitle">검색한 문서를 잠재 변수로 보고 두 가지 방식으로 주변화하는 확률 모델을 익힌다</p>
+    </div>
+
+    <!-- 쪽 1: 학습 목표와 전체 구조도 -->
+    <div class="screen cornell dense">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">학습 목표</strong>
+            <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
+            <ol>
+              <li>RAG 구조도에서 질문이 답이 되기까지 거치는 단계와 학습되는 범위를 설명할 수 있다.</li>
+              <li>RAG-Sequence와 RAG-Token의 확률을 예시 값으로 계산할 수 있다.</li>
+              <li>두 방식의 차이와 잘 맞는 과제를 비교할 수 있다.</li>
+            </ol>
+          </div>
+        </div>
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>RAG는 어떤 두 기억을 하나로 묶는가?</li>
+          <li>학습할 때 갱신되는 부분은 어디인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">RAG의 전체 구조<span class="paper-ref">논문 2절, 그림 1</span></h3>
+        <p><span class="term" data-definition="검색 증강 생성(Retrieval-Augmented Generation, RAG): 질문에 맞는 문서를 먼저 검색하고, 그 문서를 함께 읽혀 답을 생성하는 방법.">검색 증강 생성(Retrieval-Augmented Generation, RAG)</span>는 두 부품을 하나의 확률 모델로 묶는다. <span class="term" data-definition="retriever(검색기): 질문을 받아 관련 문서를 찾아 오는 구성 요소.">retriever(검색기)</span> $p_\eta(z|x)$는 질문 $x$에 맞는 문서 $z$를 찾고, <span class="term" data-definition="generator(생성기): 질문과 문서를 읽고 답 문장을 만들어 내는 구성 요소.">generator(생성기)</span> $p_\theta(y_i|x,z,y_{1:i-1})$는 질문과 문서를 함께 읽고 답 $y$를 한 토큰씩 만든다.</p>
+        <p>오프라인에서는 <span class="term" data-definition="document encoder(문서 인코더): 문서를 임베딩 벡터 하나로 바꾸는 신경망. 기호는 d(z).">document encoder(문서 인코더)</span>가 위키백과 문서를 벡터로 바꿔 <span class="term" data-definition="문서 색인(Document Index): 모든 문서의 임베딩 벡터를 빠르게 찾을 수 있게 모아 둔 자료 구조.">문서 색인(Document Index)</span>을 만든다. 이 색인이 <span class="term" data-definition="non-parametric memory(외부 문서 색인에 있는 기억): 모델 밖 문서 모음에 들어 있는 지식. 색인을 바꾸면 지식도 바뀜.">non-parametric memory(외부 문서 색인에 있는 기억)</span>이고, generator의 파라미터 $\theta$가 <span class="term" data-definition="parametric memory(모델 파라미터에 저장된 기억): 학습으로 모델 가중치 안에 들어간 지식. 직접 읽거나 고치기 어려움.">parametric memory(모델 파라미터에 저장된 기억)</span>이다. 온라인에서는 <span class="term" data-definition="query encoder(질의 인코더): 질문을 임베딩 벡터 하나로 바꾸는 신경망. 기호는 q(x).">query encoder(질의 인코더)</span>가 질문을 벡터로 바꾸고 <span class="term" data-definition="MIPS(Maximum Inner Product Search, 최대 내적 검색): 질의 벡터와 내적이 가장 큰 벡터를 찾는 문제. 보통 근사적으로 빠르게 풂.">MIPS(Maximum Inner Product Search, 최대 내적 검색)</span>로 문서를 고른다.</p>
+        <figure class="svg-diagram animate-in" style="margin:var(--space-3) auto 0">
+          <svg viewBox="0 0 800 244" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RAG 전체 구조도: 오프라인에서 위키백과 문서를 document encoder로 임베딩해 문서 색인을 만들고, 온라인에서 질문을 query encoder로 벡터로 바꾼 뒤 MIPS로 top-K 문서를 찾아 generator가 문서마다 답 확률을 계산하고 주변화해 답을 낸다. 역전파는 query encoder와 generator에만 간다"><rect class="guide-fill" x="0" y="0" width="800" height="96" rx="4"/><text class="muted" x="12" y="18" font-size="12">오프라인: 색인 구축(학습 전에 한 번)</text><rect class="guide-fill" x="0" y="104" width="800" height="140" rx="4"/><text class="muted" x="12" y="122" font-size="12">온라인: 질문 처리</text><path class="edge-line" d="M124,56 H138"/><polygon class="edge-arrow" points="138,51 148,56 138,61"/><path class="edge-line" d="M256,56 H270"/><polygon class="edge-arrow" points="270,51 280,56 270,61"/><path class="edge-line" d="M334,84 V122"/><polygon class="edge-arrow" points="329,122 339,122 334,132"/><path class="edge-line" d="M124,160 H138"/><polygon class="edge-arrow" points="138,155 148,160 138,165"/><path class="edge-line" d="M256,160 H270"/><polygon class="edge-arrow" points="270,155 280,160 270,165"/><path class="edge-line" d="M388,160 H402"/><polygon class="edge-arrow" points="402,155 412,160 402,165"/><path class="edge-line" d="M520,160 H534"/><polygon class="edge-arrow" points="534,155 544,160 534,165"/><path class="edge-line" d="M652,160 H666"/><polygon class="edge-arrow" points="666,155 676,160 666,165"/><path class="edge-line dashed accent" d="M466,188 V212 H202 V198"/><polygon class="edge-arrow accent" points="197,198 207,198 202,188"/><text class="accent-text" x="334" y="234" text-anchor="middle" font-size="12">end-to-end 역전파: <tspan font-style="italic">q</tspan>와 <tspan font-style="italic">p</tspan><tspan font-size="9" dy="3">θ</tspan><tspan dy="-3">만 갱신</tspan></text><text class="muted" x="342" y="118" font-size="11"><tspan font-style="italic">d</tspan>(<tspan font-style="italic">z</tspan>) 벡터</text><rect class="node-rect sq" x="16" y="28" width="108" height="56"/><foreignObject x="24" y="32" width="92" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span>위키백과 문서<br/>2,100만 개</span></div></foreignObject><rect class="node-rect sq" x="148" y="28" width="108" height="56"/><foreignObject x="156" y="32" width="92" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span>document encoder <i class="mi">d</i>(<i class="mi">z</i>)</span></div></foreignObject><rect class="node-rect sq" x="280" y="28" width="108" height="56"/><foreignObject x="288" y="32" width="92" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span>문서 색인<br/>(MIPS 색인)</span></div></foreignObject><text class="muted" x="412" y="52" font-size="12">문서 인코더와 색인은 학습 중 고정</text><text class="muted" x="412" y="72" font-size="12">= non-parametric memory</text><rect class="node-rect sq" x="16" y="132" width="108" height="56"/><foreignObject x="24" y="136" width="92" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span>질문 <i class="mi">x</i><br/>define middle ear</span></div></foreignObject><rect class="node-rect sq accent" x="148" y="132" width="108" height="56"/><foreignObject x="156" y="136" width="92" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span>query encoder <i class="mi">q</i>(<i class="mi">x</i>)</span></div></foreignObject><rect class="node-rect sq" x="280" y="132" width="108" height="56"/><foreignObject x="288" y="136" width="92" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span>MIPS<br/>top-<i class="mi">K</i> 문서 <i class="mi">z</i></span></div></foreignObject><rect class="node-rect sq accent" x="412" y="132" width="108" height="56"/><foreignObject x="420" y="136" width="92" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span>generator <i class="mi">p</i><sub>θ</sub><br/>문서마다 실행</span></div></foreignObject><rect class="node-rect sq" x="544" y="132" width="108" height="56"/><foreignObject x="552" y="136" width="92" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span>주변화<br/>문서 확률로 가중합</span></div></foreignObject><rect class="node-rect sq" x="676" y="132" width="108" height="56"/><foreignObject x="684" y="136" width="92" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35; font-weight:700"><span>답 <i class="mi">y</i></span></div></foreignObject></svg>
+          <figcaption class="figure-caption">그림은 RAG의 구성 요소와 데이터 흐름을 나타낸 것이다. 색칠한 두 상자만 <span class="term" data-definition="end-to-end 학습(입력부터 출력까지 한 번에 학습): 여러 구성 요소를 하나의 손실로 함께 학습하는 방식. 중간 단계의 정답이 따로 필요 없음.">end-to-end 학습(입력부터 출력까지 한 번에 학습)</span>에서 갱신된다. 출처: 논문 그림 1을 참고해 다시 그림.</figcaption>
+        </figure>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>RAG는 문서 색인을 검색하는 retriever와 답을 쓰는 generator를 확률 모델 하나로 묶고, query encoder와 generator만 학습한다.</p></div>
+    </div>
+
+    <!-- 쪽 2: 따라가기 예시 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>질문 하나는 구조도를 지나며 어떤 값으로 바뀌는가?</li>
+          <li>문서 점수는 어떻게 확률이 되는가?</li>
+          <li>답을 보고 나면 문서 확률은 어떻게 달라지는가?</li>
+        </ul>
+        <figure class="figure side" style="--figure-side-width:216px; margin:var(--space-4) 0 0"><svg viewBox="0 0 228 104" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RAG 구조도 축소판: 오프라인 문서 색인과 온라인 query encoder, MIPS, generator, 주변화. 색칠한 칸이 이 쪽에서 다루는 부분"><path class="edge-line" d="M86,32 V46"/><polygon class="edge-arrow" points="81,46 91,46 86,56"/><path class="edge-line" d="M52,70 H54"/><polygon class="edge-arrow" points="54,65 64,70 54,75"/><path class="edge-line" d="M108,70 H110"/><polygon class="edge-arrow" points="110,65 120,70 110,75"/><path class="edge-line" d="M164,70 H166"/><polygon class="edge-arrow" points="166,65 176,70 166,75"/><rect class="node-rect sq accent" x="64" y="8" width="44" height="24"/><foreignObject x="72" y="12" width="28" height="16"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>색인</span></div></foreignObject><rect class="node-rect sq accent" x="8" y="56" width="44" height="28"/><foreignObject x="16" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span><i class="mi">q</i></span></div></foreignObject><rect class="node-rect sq accent" x="64" y="56" width="44" height="28"/><foreignObject x="72" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>MIPS</span></div></foreignObject><rect class="node-rect sq accent" x="120" y="56" width="44" height="28"/><foreignObject x="128" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span><i class="mi">p</i><sub>θ</sub></span></div></foreignObject><rect class="node-rect sq accent" x="176" y="56" width="44" height="28"/><foreignObject x="184" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>Σ</span></div></foreignObject><text class="muted" x="116" y="24" font-size="11">오프라인</text><text class="muted" x="8" y="100" font-size="11">온라인</text></svg><figcaption class="figure-caption">지도: 이 쪽은 전체 경로를 따라간다.</figcaption></figure>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>질문 하나 따라가기<span class="paper-ref">논문 2절, 표 3</span></h3>
+        <p>논문 표 3의 MS MARCO 질문 “define middle ear”가 구조도를 통과하는 과정을 따라간다. 문서 제목, 점수, 확률은 설명을 위한 <strong>예시 값</strong>이며 문서는 top-3만 쓴다.</p>
+        <div class="svg-diagram animate-in" style="margin:var(--space-2) auto">
+          <svg viewBox="0 0 800 112" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="질문 define middle ear가 질의 벡터, top-3 문서, 문서별 생성 확률, 주변화된 답 확률로 차례로 바뀌는 과정"><path class="edge-line" d="M148,56 H162"/><polygon class="edge-arrow" points="162,51 172,56 162,61"/><path class="edge-line" d="M308,56 H322"/><polygon class="edge-arrow" points="322,51 332,56 322,61"/><path class="edge-line" d="M468,56 H482"/><polygon class="edge-arrow" points="482,51 492,56 482,61"/><path class="edge-line accent" d="M628,56 H642"/><polygon class="edge-arrow accent" points="642,51 652,56 642,61"/><rect class="node-rect sq" x="12" y="8" width="136" height="96"/><foreignObject x="20" y="12" width="120" height="88"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span><b>① 질문 <i class="mi">x</i></b><br/>define middle ear</span></div></foreignObject><rect class="node-rect sq" x="172" y="8" width="136" height="96"/><foreignObject x="180" y="12" width="120" height="88"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span><b>② query encoder</b><br/><i class="mi">q</i>(<i class="mi">x</i>): 벡터 하나</span></div></foreignObject><rect class="node-rect sq" x="332" y="8" width="136" height="96"/><foreignObject x="340" y="12" width="120" height="88"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span><b>③ MIPS top-3</b><br/><i class="mi">z</i><sub>1</sub> Middle ear<br/><i class="mi">z</i><sub>2</sub> Eardrum<br/><i class="mi">z</i><sub>3</sub> Inner ear</span></div></foreignObject><rect class="node-rect sq" x="492" y="8" width="136" height="96"/><foreignObject x="500" y="12" width="120" height="88"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span><b>④ generator</b><br/>문서마다 [<i class="mi">x</i>; <i class="mi">z</i>]를 읽고 답 확률 계산</span></div></foreignObject><rect class="node-rect sq accent" x="652" y="8" width="136" height="96"/><foreignObject x="660" y="12" width="120" height="88"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span><b>⑤ 주변화</b><br/><i class="mi">p</i>(<i class="mi">y</i>|<i class="mi">x</i>) ≈ 0.0147</span></div></foreignObject></svg>
+        </div>
+        <table class="data-table animate-in">
+          <thead><tr><th>문서 <i class="mi">z</i></th><th class="num">내적 점수</th><th class="num">$p_\eta(z|x)$</th><th class="num">$p_\theta(y|x,z)$</th><th class="num">곱</th><th class="num">사후 확률</th></tr></thead>
+          <tbody>
+            <tr class="hl"><td>$z_1$ Middle ear</td><td class="num">14.2</td><td class="num">0.645</td><td class="num">0.020</td><td class="num">0.0129</td><td class="num">약 0.88</td></tr>
+            <tr><td>$z_2$ Eardrum</td><td class="num">13.4</td><td class="num">0.290</td><td class="num">0.006</td><td class="num">0.0017</td><td class="num">약 0.12</td></tr>
+            <tr><td>$z_3$ Inner ear</td><td class="num">11.9</td><td class="num">0.065</td><td class="num">0.001</td><td class="num">0.0001</td><td class="num">약 0.00</td></tr>
+          </tbody>
+          <caption>표는 예시 문서 3개의 점수, 확률, 곱을 나타낸 것이다. 곱의 합이 $p(y|x)\approx 0.0147$이다(예시 값).</caption>
+        </table>
+        <p>점수는 질의 벡터와 문서 벡터의 <span class="term" data-definition="내적(Inner Product): 두 벡터의 같은 자리 성분끼리 곱해 모두 더한 값. 클수록 두 벡터가 비슷한 방향임.">내적(Inner Product)</span>이고, 여기에 <span class="term" data-definition="softmax(소프트맥스): 실수 여러 개를 모두 양수이고 합이 1인 확률로 바꾸는 함수. 큰 값에 더 큰 몫을 줌.">softmax(소프트맥스)</span>를 적용하면 <span class="term" data-definition="사전 확률(Prior): 답을 보기 전에 매긴 확률. 여기서는 질문만 보고 retriever가 문서에 준 확률.">사전 확률(Prior)</span> $p_\eta(z|x)$가 된다. 답 $y$인 “The middle ear includes the tympanic cavity and the three ossicles.”(논문 표 3의 RAG-Sequence 출력)를 본 뒤 곱을 다시 정규화한 값이 <span class="term" data-definition="사후 확률(Posterior): 답까지 본 뒤 고쳐 매긴 확률. 답을 잘 설명하는 문서일수록 커짐.">사후 확률(Posterior)</span>이며, 답을 잘 설명하는 $z_1$의 몫이 0.645에서 약 0.88로 커진다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>질문은 벡터, top-<i class="mi">k</i> 문서, 문서별 답 확률을 거쳐 문서 확률로 가중합된 답 확률 하나가 된다.</p></div>
+    </div>
+
+    <!-- 쪽 3: 수식 유도 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>어떤 문서를 읽었는지 모를 때 답의 확률은 어떻게 구하는가?</li>
+          <li>두 방식에서 합과 곱의 순서는 어떻게 다른가?</li>
+        </ul>
+        <figure class="figure side" style="--figure-side-width:216px; margin:var(--space-4) 0 0"><svg viewBox="0 0 228 104" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RAG 구조도 축소판: 오프라인 문서 색인과 온라인 query encoder, MIPS, generator, 주변화. 색칠한 칸이 이 쪽에서 다루는 부분"><path class="edge-line" d="M86,32 V46"/><polygon class="edge-arrow" points="81,46 91,46 86,56"/><path class="edge-line" d="M52,70 H54"/><polygon class="edge-arrow" points="54,65 64,70 54,75"/><path class="edge-line" d="M108,70 H110"/><polygon class="edge-arrow" points="110,65 120,70 110,75"/><path class="edge-line" d="M164,70 H166"/><polygon class="edge-arrow" points="166,65 176,70 166,75"/><rect class="node-rect sq" x="64" y="8" width="44" height="24"/><foreignObject x="72" y="12" width="28" height="16"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>색인</span></div></foreignObject><rect class="node-rect sq" x="8" y="56" width="44" height="28"/><foreignObject x="16" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span><i class="mi">q</i></span></div></foreignObject><rect class="node-rect sq" x="64" y="56" width="44" height="28"/><foreignObject x="72" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>MIPS</span></div></foreignObject><rect class="node-rect sq" x="120" y="56" width="44" height="28"/><foreignObject x="128" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span><i class="mi">p</i><sub>θ</sub></span></div></foreignObject><rect class="node-rect sq accent" x="176" y="56" width="44" height="28"/><foreignObject x="184" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>Σ</span></div></foreignObject><text class="muted" x="116" y="24" font-size="11">오프라인</text><text class="muted" x="8" y="100" font-size="11">온라인</text></svg><figcaption class="figure-caption">지도: 색칠한 칸이 이 쪽에서 다루는 주변화이다.</figcaption></figure>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>수식 유도 단계별 풀이<span class="paper-ref">논문 2.1절</span></h3>
+        <p>정답 문서가 무엇인지는 학습 데이터에 없다. 그래서 RAG는 검색 문서를 <span class="term" data-definition="잠재 변수(Latent Variable): 결과에 영향을 주지만 관측되지 않는 변수. 여기서는 어떤 문서를 읽었는지가 이에 해당함.">잠재 변수(Latent Variable)</span>로 보고, 모든 후보 문서에 대해 확률을 가중합하는 <span class="term" data-definition="주변화(Marginalization): 모르는 변수의 모든 경우에 대해 확률을 가중합해 그 변수를 식에서 없애는 계산.">주변화(Marginalization)</span>로 답의 <span class="term" data-definition="가능도(Likelihood): 모델이 실제로 관측된 정답에 주는 확률. 우도라고도 함.">가능도(Likelihood)</span>를 구한다. 버튼을 눌러 다음 단계를 보시오.</p>
+        <div class="math-derivation animate-in" id="md-deriv">
+          <div class="math-step" data-step="0">
+            <div class="math-equation">$$p(y|x) = \sum_{z} p(z|x)\, p(y|x,z)$$</div>
+            <div class="math-explanation"><p>문서 $z$를 모르므로 “문서 $z$를 고를 확률 × 그 문서로 답 $y$를 쓸 확률”을 모든 문서에 대해 더한다. 합은 원래 2,100만 개 문서 전체에 걸쳐 있다.</p></div>
+          </div>
+          <div class="math-step" data-step="1" style="display:none">
+            <div class="math-equation">$$p(y|x) \approx \sum_{z \in \mathit{top}\mbox{-}k(x)} p_\eta(z|x)\, p_\theta(y|x,z)$$</div>
+            <div class="math-explanation"><p>2,100만 항을 모두 더할 수는 없으므로 retriever가 고른 <span class="term" data-definition="top-k(상위 k개): 점수가 가장 높은 k개만 골라 쓰는 것.">top-<i class="mi">k</i>(상위 $k$개)</span> 문서만 남긴다. 나머지 문서는 확률이 작다고 보고 버리는 근사이다.</p></div>
+          </div>
+          <div class="math-step" data-step="2" style="display:none">
+            <div class="math-equation">$$p_\theta(y|x,z) = \prod_{i=1}^{N} p_\theta(y_i|x,z,y_{1:i-1})$$</div>
+            <div class="math-explanation"><p>generator는 <span class="term" data-definition="자기회귀(Autoregressive): 앞에서 만든 토큰을 다시 입력으로 받아 다음 토큰을 하나씩 만드는 방식.">자기회귀(Autoregressive)</span> 방식으로 토큰을 하나씩 만들므로, 답 전체의 확률은 토큰 $N$개의 확률을 곱한 값이다. 여기서 $y_{1:i-1}$은 앞서 만든 토큰들이다.</p></div>
+          </div>
+          <div class="math-step" data-step="3" style="display:none">
+            <div class="math-equation">$$p_{\mathit{Seq}}(y|x) \approx \sum_{z \in \mathit{top}\mbox{-}k(x)} p_\eta(z|x) \prod_{i=1}^{N} p_\theta(y_i|x,z,y_{1:i-1})$$</div>
+            <div class="math-explanation"><p>두 식을 합치면 <span class="term" data-definition="RAG-Sequence(답 전체에 같은 문서를 씀): 문서 하나로 답 전체의 확률을 구한 뒤 문서끼리 가중합하는 RAG 모델.">RAG-Sequence(답 전체에 같은 문서를 씀)</span>의 식이다. 문서 하나로 답 전체를 쓴 확률(곱)을 먼저 구하고, 그다음 문서끼리 가중합한다.</p></div>
+          </div>
+          <div class="math-step" data-step="4" style="display:none">
+            <div class="math-equation">$$p_{\mathit{Tok}}(y|x) \approx \prod_{i=1}^{N} \sum_{z \in \mathit{top}\mbox{-}k(x)} p_\eta(z|x)\, p_\theta(y_i|x,z,y_{1:i-1})$$</div>
+            <div class="math-explanation"><p><span class="term" data-definition="RAG-Token(토큰마다 다른 문서를 쓸 수 있음): 토큰 하나를 만들 때마다 문서끼리 가중합하는 RAG 모델.">RAG-Token(토큰마다 다른 문서를 쓸 수 있음)</span>은 토큰을 하나 만들 때마다 문서를 다시 고른다고 본다. 그래서 토큰마다 먼저 문서끼리 가중합하고, 그 결과를 토큰 수만큼 곱한다.</p></div>
+          </div>
+          <div class="math-step" data-step="5" style="display:none">
+            <div class="math-equation">$$N=1:\quad p_{\mathit{Seq}}(y|x) = p_{\mathit{Tok}}(y|x) = \sum_{z} p_\eta(z|x)\, p_\theta(y_1|x,z)$$</div>
+            <div class="math-explanation"><p>두 식은 합(Σ)과 곱(Π)의 순서만 다르다. 출력이 토큰 하나뿐인 분류 과제(예: <span class="term" data-definition="사실 검증(Fact Verification): 주장이 근거 문서로 지지되는지, 반박되는지, 정보가 부족한지 판정하는 과제.">사실 검증(Fact Verification)</span>)에서는 곱할 것이 하나뿐이므로 두 모델이 같아진다.</p></div>
+          </div>
+          <div class="math-controls">
+            <button class="btn math-prev-btn">이전 단계</button>
+            <button class="btn math-next-btn">다음 단계</button>
+            <button class="btn math-reset-btn">처음부터</button>
+            <span class="math-progress"></span>
+          </div>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>RAG-Sequence는 문서마다 곱한 뒤 가중합하고, RAG-Token은 토큰마다 가중합한 뒤 곱하며, 분류에서는 둘이 같다.</p></div>
+    </div>
+
+    <!-- 쪽 4: 같은 입력 비교 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>같은 문서와 같은 토큰 확률에서 두 방식의 답 확률은 왜 다른가?</li>
+          <li>두 문서의 내용을 섞어야 하는 답에는 어느 방식이 유리한가?</li>
+        </ul>
+        <figure class="figure side" style="--figure-side-width:216px; margin:var(--space-4) 0 0"><svg viewBox="0 0 228 104" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RAG 구조도 축소판: 오프라인 문서 색인과 온라인 query encoder, MIPS, generator, 주변화. 색칠한 칸이 이 쪽에서 다루는 부분"><path class="edge-line" d="M86,32 V46"/><polygon class="edge-arrow" points="81,46 91,46 86,56"/><path class="edge-line" d="M52,70 H54"/><polygon class="edge-arrow" points="54,65 64,70 54,75"/><path class="edge-line" d="M108,70 H110"/><polygon class="edge-arrow" points="110,65 120,70 110,75"/><path class="edge-line" d="M164,70 H166"/><polygon class="edge-arrow" points="166,65 176,70 166,75"/><rect class="node-rect sq" x="64" y="8" width="44" height="24"/><foreignObject x="72" y="12" width="28" height="16"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>색인</span></div></foreignObject><rect class="node-rect sq" x="8" y="56" width="44" height="28"/><foreignObject x="16" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span><i class="mi">q</i></span></div></foreignObject><rect class="node-rect sq" x="64" y="56" width="44" height="28"/><foreignObject x="72" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>MIPS</span></div></foreignObject><rect class="node-rect sq" x="120" y="56" width="44" height="28"/><foreignObject x="128" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span><i class="mi">p</i><sub>θ</sub></span></div></foreignObject><rect class="node-rect sq accent" x="176" y="56" width="44" height="28"/><foreignObject x="184" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>Σ</span></div></foreignObject><text class="muted" x="116" y="24" font-size="11">오프라인</text><text class="muted" x="8" y="100" font-size="11">온라인</text></svg><figcaption class="figure-caption">지도: 색칠한 칸이 이 쪽에서 다루는 주변화이다.</figcaption></figure>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>같은 입력, 두 가지 계산<span class="paper-ref">논문 2.1절</span></h3>
+        <p>Jeopardy 질문 생성에서 답 “The Divine Comedy”를 받았다고 하자. 문서 $z_1$은 Dante 문서, $z_2$는 14세기 작품 문서이고, 만들 토큰은 Dante, 14th, century의 3개이다. 그림은 두 문서와 토큰 3개에 같은 <strong>예시 확률</strong>을 넣고 두 방식으로 계산한 것이다.</p>
+        <div class="svg-diagram animate-in" style="margin:var(--space-3) auto">
+          <svg viewBox="0 0 800 212" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="같은 문서 2개와 토큰 3개에서 RAG-Sequence는 행마다 곱한 뒤 문서 확률로 가중합해 0.184, RAG-Token은 열마다 가중합한 뒤 곱해 0.266을 얻는다"><text x="196" y="16" text-anchor="middle" font-size="13" font-weight="700">RAG-Sequence: 행마다 곱 → 가중합</text><text x="128" y="42" text-anchor="middle" font-size="12" class="mono">Dante</text><text x="200" y="42" text-anchor="middle" font-size="12" class="mono">14th</text><text x="272" y="42" text-anchor="middle" font-size="12" class="mono">century</text><text x="16" y="75" font-size="12"><tspan font-style="italic">z</tspan><tspan font-size="9" dy="3">1</tspan><tspan dy="-3"> (0.6)</tspan></text><rect class="node-rect sq" x="96" y="52" width="64" height="36"/><text x="128" y="75" text-anchor="middle" font-size="13">0.9</text><rect class="node-rect sq" x="168" y="52" width="64" height="36"/><text x="200" y="75" text-anchor="middle" font-size="13">0.2</text><rect class="node-rect sq" x="240" y="52" width="64" height="36"/><text x="272" y="75" text-anchor="middle" font-size="13">0.8</text><text x="16" y="119" font-size="12"><tspan font-style="italic">z</tspan><tspan font-size="9" dy="3">2</tspan><tspan dy="-3"> (0.4)</tspan></text><rect class="node-rect sq" x="96" y="96" width="64" height="36"/><text x="128" y="119" text-anchor="middle" font-size="13">0.3</text><rect class="node-rect sq" x="168" y="96" width="64" height="36"/><text x="200" y="119" text-anchor="middle" font-size="13">0.9</text><rect class="node-rect sq" x="240" y="96" width="64" height="36"/><text x="272" y="119" text-anchor="middle" font-size="13">0.9</text><path class="edge-line accent" d="M304,70 H318"/><polygon class="edge-arrow accent" points="318,65 328,70 318,75"/><rect class="node-rect sq accent" x="328" y="52" width="56" height="36"/><text x="356" y="75" text-anchor="middle" font-size="13">0.144</text><path class="edge-line accent" d="M304,114 H318"/><polygon class="edge-arrow accent" points="318,109 328,114 318,119"/><rect class="node-rect sq accent" x="328" y="96" width="56" height="36"/><text x="356" y="119" text-anchor="middle" font-size="13">0.243</text><text x="196" y="172" text-anchor="middle" font-size="13">0.6×0.144 + 0.4×0.243</text><text class="accent-text" x="196" y="196" text-anchor="middle" font-size="14">= 0.184</text><text x="604" y="16" text-anchor="middle" font-size="13" font-weight="700">RAG-Token: 열마다 가중합 → 곱</text><text x="536" y="42" text-anchor="middle" font-size="12" class="mono">Dante</text><text x="608" y="42" text-anchor="middle" font-size="12" class="mono">14th</text><text x="680" y="42" text-anchor="middle" font-size="12" class="mono">century</text><text x="424" y="75" font-size="12"><tspan font-style="italic">z</tspan><tspan font-size="9" dy="3">1</tspan><tspan dy="-3"> (0.6)</tspan></text><rect class="node-rect sq" x="504" y="52" width="64" height="36"/><text x="536" y="75" text-anchor="middle" font-size="13">0.9</text><rect class="node-rect sq" x="576" y="52" width="64" height="36"/><text x="608" y="75" text-anchor="middle" font-size="13">0.2</text><rect class="node-rect sq" x="648" y="52" width="64" height="36"/><text x="680" y="75" text-anchor="middle" font-size="13">0.8</text><text x="424" y="119" font-size="12"><tspan font-style="italic">z</tspan><tspan font-size="9" dy="3">2</tspan><tspan dy="-3"> (0.4)</tspan></text><rect class="node-rect sq" x="504" y="96" width="64" height="36"/><text x="536" y="119" text-anchor="middle" font-size="13">0.3</text><rect class="node-rect sq" x="576" y="96" width="64" height="36"/><text x="608" y="119" text-anchor="middle" font-size="13">0.9</text><rect class="node-rect sq" x="648" y="96" width="64" height="36"/><text x="680" y="119" text-anchor="middle" font-size="13">0.9</text><text x="424" y="167" font-size="12">가중합</text><path class="edge-line accent" d="M536,132 V138"/><polygon class="edge-arrow accent" points="531,138 541,138 536,148"/><rect class="node-rect sq accent" x="504" y="148" width="64" height="28"/><text x="536" y="167" text-anchor="middle" font-size="13">0.66</text><path class="edge-line accent" d="M608,132 V138"/><polygon class="edge-arrow accent" points="603,138 613,138 608,148"/><rect class="node-rect sq accent" x="576" y="148" width="64" height="28"/><text x="608" y="167" text-anchor="middle" font-size="13">0.48</text><path class="edge-line accent" d="M680,132 V138"/><polygon class="edge-arrow accent" points="675,138 685,138 680,148"/><rect class="node-rect sq accent" x="648" y="148" width="64" height="28"/><text x="680" y="167" text-anchor="middle" font-size="13">0.84</text><text class="accent-text" x="604" y="200" text-anchor="middle" font-size="14">0.66×0.48×0.84 = 0.266</text><path class="guide" d="M400,8 V204"/></svg>
+        </div>
+        <p>칸의 값은 문서를 읽고 그 토큰을 쓸 확률 $p_\theta(y_i|x,z,y_{1:i-1})$이고, 괄호 안은 $p_\eta(z|x)$이다. $z_1$은 Dante에 강하고 $z_2$는 14th에 강하다. RAG-Sequence는 문서 하나로 세 토큰을 모두 써야 하므로 각 문서의 약점(0.2, 0.3)이 그대로 곱해진다.</p>
+        <p>RAG-Token은 토큰마다 더 잘 아는 문서의 확률을 빌려 오므로 약점이 묽어져 0.266으로 더 높다. 이 차이는 여러 문서의 내용을 한 답에 섞을 수 있느냐로 해석할 수 있다. 논문 표 3에서 RAG-Sequence는 이 질문에 “This 14th century work is divided into 3 sections …”를 만들었다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>같은 예시 값에서 RAG-Sequence는 0.184, RAG-Token은 0.266이며, 토큰마다 다른 문서를 쓸 수 있는 RAG-Token이 여러 문서의 강점을 섞는다.</p></div>
+    </div>
+
+    <!-- 쪽 5: 비교표와 개념 체크 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>두 방식은 문서 선택 단위, 디코딩, 비용에서 어떻게 다른가?</li>
+          <li>어느 과제에서 어느 방식이 나았는가?</li>
+        </ul>
+        <figure class="figure side" style="--figure-side-width:216px; margin:var(--space-4) 0 0"><svg viewBox="0 0 228 104" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RAG 구조도 축소판: 오프라인 문서 색인과 온라인 query encoder, MIPS, generator, 주변화. 색칠한 칸이 이 쪽에서 다루는 부분"><path class="edge-line" d="M86,32 V46"/><polygon class="edge-arrow" points="81,46 91,46 86,56"/><path class="edge-line" d="M52,70 H54"/><polygon class="edge-arrow" points="54,65 64,70 54,75"/><path class="edge-line" d="M108,70 H110"/><polygon class="edge-arrow" points="110,65 120,70 110,75"/><path class="edge-line" d="M164,70 H166"/><polygon class="edge-arrow" points="166,65 176,70 166,75"/><rect class="node-rect sq" x="64" y="8" width="44" height="24"/><foreignObject x="72" y="12" width="28" height="16"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>색인</span></div></foreignObject><rect class="node-rect sq" x="8" y="56" width="44" height="28"/><foreignObject x="16" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span><i class="mi">q</i></span></div></foreignObject><rect class="node-rect sq" x="64" y="56" width="44" height="28"/><foreignObject x="72" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>MIPS</span></div></foreignObject><rect class="node-rect sq accent" x="120" y="56" width="44" height="28"/><foreignObject x="128" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span><i class="mi">p</i><sub>θ</sub></span></div></foreignObject><rect class="node-rect sq accent" x="176" y="56" width="44" height="28"/><foreignObject x="184" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>Σ</span></div></foreignObject><text class="muted" x="116" y="24" font-size="11">오프라인</text><text class="muted" x="8" y="100" font-size="11">온라인</text></svg><figcaption class="figure-caption">지도: 색칠한 칸이 두 방식이 갈리는 부분이다.</figcaption></figure>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">RAG-Sequence와 RAG-Token 비교<span class="paper-ref">논문 2.1, 2.5절, 표 2</span></h3>
+        <table class="data-table animate-in">
+          <thead><tr><th>기준</th><th>RAG-Sequence</th><th>RAG-Token</th></tr></thead>
+          <tbody>
+            <tr><td>문서 선택 단위</td><td>답 전체에 문서 하나</td><td>토큰마다 다시 고름</td></tr>
+            <tr><td>여러 문서 조합</td><td>한 답 안에서는 섞지 못함</td><td>토큰마다 다른 문서 내용을 섞음</td></tr>
+            <tr><td>디코딩</td><td>문서마다 <span class="term" data-definition="beam search(빔 탐색): 매 단계 점수가 높은 후보 문장 몇 개만 남기며 출력을 만드는 디코딩 방법.">beam search(빔 탐색)</span> 후 합산(Thorough·Fast, 4단원)</td><td>토큰별 가중합 확률을 일반 beam search에 넣음</td></tr>
+            <tr><td>나은 결과(논문 표 2)</td><td>MS MARCO BLEU-1 44.2 대 41.5</td><td>Jeopardy BLEU-1 17.3 대 14.7</td></tr>
+            <tr><td>비용</td><td>beam에 없던 후보마다 추가 계산이 생김</td><td>매 토큰 $k$개 문서의 분포를 합침</td></tr>
+          </tbody>
+          <caption>표는 두 RAG 모델의 차이를 기준별로 나타낸 것이다. 출력이 한 토큰인 분류 과제에서는 두 모델이 같다.</caption>
+        </table>
+        <p class="diff-line"><strong>핵심 비교</strong> RAG-Sequence는 문서 하나로 답 전체를, RAG-Token은 토큰마다 다른 문서로 답을 쓴다.</p>
+        <p>토큰마다 문서의 사후 확률이 어떻게 바뀌는지는 논문 그림 2(Hemingway 예)로 6단원에서 다룬다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>두 방식은 문서를 고르는 단위가 다르고, 그 차이가 디코딩 방법, 비용, 잘 맞는 과제의 차이로 이어진다.</p></div>
+    </div>
+
+    <!-- 쪽 6: 핵심 정리와 확인 문제 1, 2 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-accent animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">핵심 정리</strong>
+            <ol>
+              <li>RAG는 retriever $p_\eta(z|x)$와 generator $p_\theta$를 묶고, 문서를 잠재 변수로 보아 top-<i class="mi">k</i> 문서에 대해 주변화한다.</li>
+              <li>RAG-Sequence는 문서마다 곱한 뒤 가중합하고, RAG-Token은 토큰마다 가중합한 뒤 곱한다.</li>
+              <li>학습은 query encoder와 generator만 갱신하고, 문서 인코더와 색인은 고정한다.</li>
+              <li>확률을 구하는 문항은 합(Σ)과 곱(Π) 가운데 무엇을 먼저 하는지부터 확인하라.</li>
+            </ol>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>RAG 확률 계산과 구조</h3>
+        <div class="quiz-container animate-in" id="md-quiz-1">
+          <div class="quiz-question-block" data-correct="option-c"
+               data-explanation-right="③ | 0.7×0.2 + 0.3×0.5 = 0.14 + 0.15 = 0.29이다."
+               data-explanation-wrong="| 정답은 ③이다. 문서별로 $p_\eta(z|x)\,p_\theta(y|x,z)$를 구해 더하면 0.7×0.2 + 0.3×0.5 = 0.29이다. ②는 두 생성 확률을 단순 평균한 값이므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">1</span>문서가 2개이고 $p_\eta(z_1|x)=0.7$, $p_\eta(z_2|x)=0.3$, $p_\theta(y|x,z_1)=0.2$, $p_\theta(y|x,z_2)=0.5$이다. RAG-Sequence의 $p(y|x)$는?</h3>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 0.10</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 0.35</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 0.29</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 0.50</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 0.70</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <div class="quiz-question-block" data-correct="option-d"
+               data-explanation-right="④ | RAG는 학습 중 문서 인코더와 색인을 고정하므로 색인을 다시 만들지 않는다. 따라서 ④는 옳지 않다."
+               data-explanation-wrong="| 정답은 ④이다. 논문은 문서 인코더를 갱신하면 색인을 주기적으로 다시 만들어야 해 비싸므로 문서 인코더와 색인을 고정한다. ②는 query encoder가 학습되므로 옳다.">
+            <h3 class="quiz-question"><span class="q-num">2</span>RAG의 구조에 대한 설명으로 옳지 <u>않은</u> 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① generator의 파라미터가 parametric memory이다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 학습 중 query encoder가 갱신된다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 문서 색인이 non-parametric memory이다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 학습 중 문서 색인을 주기적으로 다시 만든다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 어떤 문서를 읽었는지는 잠재 변수로 다룬다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('md-quiz-1')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('md-quiz-1')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>RAG-Sequence의 답 확률은 문서별 곱을 문서 확률로 가중합한 값이고, 학습 중 색인은 고정된다.</p></div>
+    </div>
+
+    <!-- 쪽 7: 확인 문제 3, 4 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>합과 곱의 순서를 바꾸면 답 확률이 어떻게 달라지는가?</li>
+          <li>분류 과제에서 두 방식은 왜 같은가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>RAG-Sequence와 RAG-Token</h3>
+        <div class="quiz-container animate-in" id="md-quiz-2">
+          <div class="quiz-question-block" data-correct="option-c"
+               data-explanation-right="③ | ㄱ, ㄴ은 옳고, ㄷ은 RAG-Sequence가 곱을 먼저 하므로 옳지 않다."
+               data-explanation-wrong="| 정답은 ③이다. ㄷ은 RAG-Sequence가 곱을 먼저 하고 가중합을 나중에 하므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">3</span>두 RAG 모델에 대한 설명으로 옳은 것만을 <span class="nobr">&lt;보기&gt;에서</span> 있는 대로 고른 것은?</h3>
+            <div class="bogi">
+              <p>ㄱ. RAG-Token은 토큰마다 문서를 바꿀 수 있다.</p>
+              <p>ㄴ. 분류 과제에서는 두 모델이 같다.</p>
+              <p>ㄷ. RAG-Sequence는 가중합한 뒤 곱한다.</p>
+            </div>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① ㄱ</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② ㄴ</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ ㄱ, ㄴ</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ ㄴ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ ㄱ, ㄴ, ㄷ</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <div class="quiz-question-block" data-correct="option-b"
+               data-explanation-right="② | RAG-Token은 (0.5×0.8 + 0.5×0.2)×(0.5×0.2 + 0.5×0.8) = 0.5×0.5 = 0.25, RAG-Sequence는 0.5×0.16 + 0.5×0.16 = 0.16이다."
+               data-explanation-wrong="| 정답은 ②이다. RAG-Token은 토큰마다 가중합하면 0.5, 0.5이므로 0.25이고, RAG-Sequence는 문서마다 곱하면 0.16, 0.16이므로 0.16이다. ①은 두 값을 서로 바꾸었으므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">4</span>$p_\eta(z_1|x)=p_\eta(z_2|x)=0.5$이고 토큰 2개의 확률이 $z_1$에서 0.8, 0.2, $z_2$에서 0.2, 0.8일 때 두 모델의 답 확률은? <span class="q-points">[3점]</span></h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① RAG-Sequence 0.25, RAG-Token 0.16</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② RAG-Sequence 0.16, RAG-Token 0.25</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 두 모델 모두 0.16</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 두 모델 모두 0.25</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ RAG-Sequence 0.32, RAG-Token 0.50</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('md-quiz-2')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('md-quiz-2')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>두 문서가 서로 다른 토큰에 강하면 토큰마다 문서를 고르는 RAG-Token의 답 확률이 더 크다.</p></div>
+    </div>
+
+  </div>
+</section>

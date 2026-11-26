@@ -1,0 +1,13 @@
+{
+  "model": "Efficient-Large-Model/Sana_Sprint_0.6B_1024px_diffusers",
+  "device": "mps",
+  "dtype": "torch.bfloat16",
+  "steps": 2,
+  "size": 1024,
+  "seed": 23,
+  "prompt": "a fountain pen writing on a sheet of paper",
+  "style": ", simple black line drawing, textbook illustration, flat, no shading, no gradient, white background, clean closed outlines, no text, no letters",
+  "seconds": 1.37,
+  "paths": 9,
+  "bytes": 30370
+}

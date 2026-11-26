@@ -1,8 +1,8 @@
-<section class="module" id="module-1">
+<section class="module" id="module-2">
   <div class="module-content">
 
     <div class="module-header">
-      <span class="module-number">2</span>
+      <span class="module-number">3</span>
       <h2 class="module-title">어텐션</h2>
       <p class="module-subtitle">스케일드 내적 어텐션과 멀티헤드 어텐션의 계산 과정을 따라간다</p>
     </div>
@@ -11,6 +11,7 @@
     <div class="screen cornell">
       <aside class="cue">
         <div class="callout callout-info animate-in">
+          <div class="callout-icon">&#127919;</div>
           <div class="callout-content">
             <strong class="callout-title">학습 목표</strong>
             <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
@@ -24,7 +25,7 @@
       </aside>
       <div class="notes">
         <h3 class="screen-heading">스케일드 내적 어텐션<span class="paper-ref">논문 3.2.1절</span></h3>
-        <p>각 위치는 다른 위치의 정보를 어떻게 가져올까? 트랜스포머의 핵심은 <span class="term" data-definition="스케일드 내적 어텐션(scaled dot-product attention): 쿼리와 키의 내적을 키 차원의 제곱근으로 나눈 뒤 소프트맥스를 적용하고, 그 비중으로 값을 섞는 어텐션.">스케일드 내적 어텐션</span>(scaled dot-product attention)이다. 각 위치가 쿼리를 던지고, 모든 위치의 키와 비교하여 얻은 비중으로 값을 섞는다.</p>
+        <p>각 위치는 다른 위치의 정보를 어떻게 가져올까? <span class="term" data-definition="트랜스포머(Transformer): 순환과 합성곱 없이 어텐션만으로 인코더와 디코더를 구성한 모델.">트랜스포머</span>(Transformer)의 핵심은 <span class="term" data-definition="스케일드 내적 어텐션(scaled dot-product attention): 쿼리와 키의 내적을 키 차원의 제곱근으로 나눈 뒤 소프트맥스를 적용하고, 그 비중으로 값을 섞는 어텐션.">스케일드 내적 어텐션</span>(scaled dot-product attention)이다. 각 위치가 <span class="term" data-definition="쿼리(query): 지금 찾고 있는 정보를 나타내는 벡터.">쿼리</span>(query)를 던지고, 모든 위치의 <span class="term" data-definition="키(key): 각 위치가 어떤 정보를 담고 있는지 알리는 이름표 벡터.">키</span>(key)와 비교하여 얻은 비중으로 <span class="term" data-definition="값(value): 각 위치가 실제로 전달하는 정보 벡터.">값</span>(value)을 섞는다.</p>
         <div class="svg-diagram animate-in">
           <svg viewBox="0 0 800 136" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="쿼리와 키의 내적, 크기 조정, 소프트맥스, 값과의 곱을 거쳐 출력이 만들어지는 흐름">
             <rect class="node-rect" x="16" y="8" width="128" height="72" rx="12"/>
@@ -32,7 +33,7 @@
             <line class="edge-line" x1="144" y1="44" x2="166" y2="44"/>
             <polygon class="edge-arrow" points="166,49 176,44 166,39"/>
             <rect class="node-rect" x="176" y="8" width="128" height="72" rx="12"/>
-            <foreignObject x="184" y="12" width="112" height="64"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span>크기 조정: <i class="mi">d</i><sub>k</sub>의 제곱근으로 나누기</span></div></foreignObject>
+            <foreignObject x="184" y="12" width="112" height="64"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span>크기 조정: <i class="mi">d</i><sub class="mi">k</sub>의 제곱근으로 나누기</span></div></foreignObject>
             <line class="edge-line" x1="304" y1="44" x2="326" y2="44"/>
             <polygon class="edge-arrow" points="326,49 336,44 326,39"/>
             <rect class="node-rect" x="336" y="8" width="128" height="72" rx="12"/>
@@ -127,7 +128,7 @@
               $$\frac{S}{\sqrt{d_k}} \;\Rightarrow\; \mathit{Var}\!\left(\frac{\boldsymbol{q}\cdot\boldsymbol{k}}{\sqrt{d_k}}\right) = \frac{d_k}{d_k} = 1$$
             </div>
             <div class="math-explanation">
-              <p>점수를 $\sqrt{d_k}$로 나누면 분산이 다시 1이 된다. 점수가 너무 커지면 소프트맥스가 한 위치로 쏠려 기울기가 매우 작아지므로, 이 조정으로 학습이 안정된다.</p>
+              <p>점수를 $\sqrt{d_k}$로 나누면 분산이 다시 1이 된다. 점수가 너무 커지면 <span class="term" data-definition="소프트맥스(softmax): 실수 여러 개를 모두 양수이고 합이 1인 값으로 바꾸는 함수. 큰 값에 더 큰 비중을 줌.">소프트맥스</span>(softmax)가 한 위치로 쏠려 기울기가 매우 작아지므로, 이 조정으로 학습이 안정된다.</p>
             </div>
           </div>
           <div class="math-step" data-step="4" style="display:none">
@@ -199,12 +200,12 @@
 </svg>
           </figure>
         </div>
-        <div class="quiz-container animate-in" id="quiz-m1-check">
+        <div class="quiz-container animate-in" id="at-quiz-check">
           <div class="quiz-question-block"
                data-correct="option-c"
                data-explanation-right="③ | 점수가 지나치게 크면 소프트맥스가 한 위치로 쏠려 기울기가 매우 작아지므로 학습이 어려워진다."
                data-explanation-wrong="| 정답은 ③이다. 내적의 분산이 키 차원에 비례해 커지면 소프트맥스가 한 위치로 쏠리고 기울기가 매우 작아진다. ①은 점수가 커질수록 비중이 고르게 퍼지지 않고 한 위치로 쏠리므로 옳지 않다.">
-            <h3 class="quiz-question"><span class="q-num">1</span>다음 중 내적을 나누지 않고 키 차원 $d_k$를 크게 할 때 나타날 결과로 가장 타당한 것은?</h3>
+            <h3 class="quiz-question"><span class="q-num">1</span>다음 중 내적을 나누지 않고 키 차원 $d_k$를 크게 할 때 나타나는 결과로 옳은 것은?</h3>
             <div class="quiz-options">
               <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 비중이 모든 위치에 고르게 퍼진다.</span></button>
               <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 소프트맥스의 출력 합이 1보다 커진다.</span></button>
@@ -212,8 +213,8 @@
             </div>
             <div class="quiz-feedback"></div>
           </div>
-          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m1-check')">정답 확인</button>
-          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m1-check')">다시 풀기</button>
+          <button class="quiz-check-btn" onclick="checkQuiz('at-quiz-check')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('at-quiz-check')">다시 풀기</button>
         </div>
       </div>
       <div class="summary"><span class="summary-label">요약</span><p>내적을 $\sqrt{d_k}$로 나누면 분산이 1로 돌아와 소프트맥스가 한 위치로 쏠리지 않는다.</p></div>
@@ -269,6 +270,7 @@
     <div class="screen cornell">
       <aside class="cue">
         <div class="callout callout-info animate-in">
+          <div class="callout-icon">&#128161;</div>
           <div class="callout-content">
             <strong class="callout-title">보충 설명</strong>
             <p>논문은 어텐션을 세 곳에 쓴다. 인코더의 <span class="term" data-definition="셀프 어텐션(self-attention): 같은 시퀀스 안의 토큰끼리 서로 참고하는 어텐션. 쿼리, 키, 값이 모두 같은 시퀀스에서 나옴.">셀프 어텐션</span>(self-attention), 디코더의 셀프 어텐션, 디코더가 인코더 출력을 참고하는 인코더-디코더 어텐션이다.</p>
@@ -285,7 +287,8 @@
         <div class="svg-diagram animate-in">
 <svg viewBox="0 0 800 216" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="차원 512를 헤드 8개가 차원 64로 투영하고, 각자 어텐션을 계산한 뒤 이어 붙여 512로 되돌린다">
 <path class="edge-line thin" d="M76,108 H120 M120,38 V178"/>
-<text x="64" y="14" text-anchor="middle" font-size="13" font-weight="700">① 투영</text>
+<text x="64" y="14" text-anchor="middle" font-size="13" font-weight="700">입력</text>
+<text x="216" y="14" text-anchor="middle" font-size="13" font-weight="700">① 투영</text>
 <text x="300" y="14" text-anchor="middle" font-size="13" font-weight="700">② 병렬 어텐션</text>
 <text x="560" y="14" text-anchor="middle" font-size="13" font-weight="700">③ 이어 붙이기</text>
 <text x="720" y="14" text-anchor="middle" font-size="13" font-weight="700">출력</text>
@@ -367,7 +370,7 @@
 <text x="384" y="208" text-anchor="middle" font-size="12" class="muted">64 × 8</text>
 <text x="560" y="208" text-anchor="middle" font-size="12" class="muted">512</text>
 <text x="720" y="208" text-anchor="middle" font-size="12" class="muted">512</text>
-<line class="edge-line" x1="572" y1="108" x2="610" y2="108"/>
+<line class="edge-line" x1="572" y1="108" x2="600" y2="108"/><polygon class="edge-arrow" points="600,113 610,108 600,103"/>
 <rect class="node-rect" x="610" y="90" width="56" height="36" rx="6"/>
 <text x="638" y="113" text-anchor="middle" font-size="14" font-weight="700" font-style="italic">W<tspan font-size="9" dy="-6">O</tspan></text>
 <line class="edge-line accent" x1="666" y1="108" x2="698" y2="108"/><polygon class="edge-arrow accent" points="698,113 708,108 698,103"/>
@@ -379,28 +382,241 @@
       <div class="summary"><span class="summary-label">요약</span><p>멀티헤드 어텐션은 차원 512를 헤드 8개로 나누어 차원 64의 어텐션을 병렬로 계산한다.</p></div>
     </div>
 
-    <!-- 페이지 6: 핵심 정리와 확인 문제 -->
+    <!-- 페이지 6: 셀프와 크로스, 이름의 이유 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>셀프 어텐션은 왜 ‘셀프’라 부르는가?</li>
+          <li>크로스 어텐션은 무엇과 무엇을 가로지르는가?</li>
+          <li>두 어텐션의 점수 행렬 모양은 어떻게 다른가?</li>
+        </ul>
+        <figure class="figure side" style="--figure-side-width:200px; margin:var(--space-4) 0 0"><img src="assets/fig-lamp.svg" alt="펼친 책의 한 부분을 비추는 스탠드"><figcaption class="figure-caption">어디를 비출지 고르는 것이 어텐션이다.</figcaption></figure>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">셀프와 크로스, 이름의 이유<span class="paper-ref">논문 3.2.3절</span></h3>
+        <p>어텐션 식은 하나이지만 쿼리, 키, 값을 <strong>어디에서 가져오는가</strong>에 따라 이름이 갈린다. 쿼리, 키, 값이 모두 같은 시퀀스에서 나오면 시퀀스가 자기 자신을 참조하므로 셀프 어텐션이다. 쿼리는 디코더에서, 키와 값은 인코더 출력에서 나오면 두 시퀀스를 가로지르므로 <span class="term" data-definition="크로스 어텐션(cross-attention): 쿼리는 한 시퀀스에서, 키와 값은 다른 시퀀스에서 가져오는 어텐션. 논문은 인코더-디코더 어텐션(encoder-decoder attention)이라 부름.">크로스 어텐션</span>(cross-attention)이다.</p>
+        <p>논문은 크로스 어텐션을 <strong>인코더-디코더 어텐션</strong>(encoder-decoder attention)이라 부른다. 그림은 “나는 학교에 간다”를 “I go to school”로 옮길 때 두 어텐션의 재료와 점수 행렬을 나타낸 것이다. 문장과 어절 단위 <span class="term" data-definition="토큰(token): 모델이 한 번에 처리하는 글자 묶음의 단위. 단어나 단어 조각이 됨.">토큰</span>(token)은 설명을 위한 예시이다.</p>
+        <div class="with-figure" style="--figure-side-width:376px">
+          <figure class="svg-diagram animate-in" style="margin:0">
+<svg viewBox="0 0 376 296" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="셀프 어텐션은 인코더 입력 하나에서 Q, K, V를 모두 만들어 3×3 점수 행렬을 얻는다">
+<path class="edge-line" d="M188,76 V96 M96,96 H280"/>
+<path class="edge-line" d="M96,96 L96,110"/><polygon class="edge-arrow" points="91,110 96,120 101,110"/>
+<path class="edge-line" d="M188,96 L188,110"/><polygon class="edge-arrow" points="183,110 188,120 193,110"/>
+<path class="edge-line" d="M280,96 L280,110"/><polygon class="edge-arrow" points="275,110 280,120 285,110"/>
+<path class="edge-line" d="M96,152 L96,162 Q96,168 102,168 L188,168 M188,152 V168"/>
+<path class="edge-line" d="M142,168 L142,182"/><polygon class="edge-arrow" points="137,182 142,192 147,182"/>
+<text x="188" y="14" text-anchor="middle" font-size="13" font-weight="700">셀프 어텐션: 한 시퀀스에서 Q·K·V</text>
+<text x="188" y="32" text-anchor="middle" font-size="11" class="muted">인코더 입력(예시)</text>
+<rect class="node-rect" x="48" y="40" width="280" height="36"/><foreignObject x="52" y="42" width="272" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span>나는 · 학교에 · 간다</span></div></foreignObject>
+<rect class="node-rect sq" x="68" y="120" width="56" height="32"/><foreignObject x="72" y="122" width="48" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.3"><span><i class="mi">Q</i></span></div></foreignObject>
+<rect class="node-rect sq" x="160" y="120" width="56" height="32"/><foreignObject x="164" y="122" width="48" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.3"><span><i class="mi">K</i></span></div></foreignObject>
+<rect class="node-rect sq" x="252" y="120" width="56" height="32"/><foreignObject x="256" y="122" width="48" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.3"><span><i class="mi">V</i></span></div></foreignObject>
+<text x="280" y="172" text-anchor="middle" font-size="11" class="muted">가중합에 쓰임</text>
+<rect class="node-rect sq" x="112" y="192" width="60" height="60"/>
+<path class="guide" d="M132,192 V252 M152,192 V252 M112,212 H172 M112,232 H172"/>
+<text x="106" y="206" text-anchor="end" font-size="11">나는</text>
+<text x="106" y="226" text-anchor="end" font-size="11">학교에</text>
+<text x="106" y="246" text-anchor="end" font-size="11">간다</text>
+<text x="184" y="226" font-size="13" font-weight="700">3 × 3</text>
+<text x="188" y="284" text-anchor="middle" font-size="12">점수 행렬 <tspan font-style="italic">n</tspan> × <tspan font-style="italic">n</tspan> (행: 쿼리, 열: 키)</text>
+</svg>
+            <figcaption class="figure-caption">그림은 Q·K·V가 모두 한 시퀀스에서 나오는 셀프 어텐션을 나타낸 것이다.</figcaption>
+          </figure>
+          <figure class="figure side">
+<svg viewBox="0 0 376 296" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="크로스 어텐션은 디코더 입력에서 Q, 인코더 출력에서 K와 V를 만들어 4×3 점수 행렬을 얻는다">
+<path class="edge-line" d="M92,76 L92,110"/><polygon class="edge-arrow" points="87,110 92,120 97,110"/>
+<path class="edge-line accent" d="M284,76 V96 M240,96 H328"/>
+<path class="edge-line accent" d="M240,96 L240,110"/><polygon class="edge-arrow accent" points="235,110 240,120 245,110"/>
+<path class="edge-line accent" d="M328,96 L328,110"/><polygon class="edge-arrow accent" points="323,110 328,120 333,110"/>
+<path class="edge-line" d="M92,152 L92,162 Q92,168 98,168 L234,168 Q240,168 240,162 L240,152"/>
+<path class="edge-line" d="M166,168 L166,182"/><polygon class="edge-arrow" points="161,182 166,192 171,182"/>
+<text x="188" y="14" text-anchor="middle" font-size="13" font-weight="700">크로스 어텐션: Q는 디코더, K·V는 인코더</text>
+<text x="92" y="32" text-anchor="middle" font-size="11" class="muted">디코더 입력(예시)</text>
+<text x="284" y="32" text-anchor="middle" font-size="11" class="muted">인코더 출력</text>
+<rect class="node-rect" x="8" y="40" width="168" height="36"/><foreignObject x="12" y="42" width="160" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span>I · go · to · school</span></div></foreignObject>
+<rect class="node-rect" x="196" y="40" width="176" height="36"/><foreignObject x="200" y="42" width="168" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span>나는 · 학교에 · 간다</span></div></foreignObject>
+<rect class="node-rect sq" x="64" y="120" width="56" height="32"/><foreignObject x="68" y="122" width="48" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.3"><span><i class="mi">Q</i></span></div></foreignObject>
+<rect class="node-rect sq accent" x="212" y="120" width="56" height="32"/><foreignObject x="216" y="122" width="48" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.3"><span><i class="mi">K</i></span></div></foreignObject>
+<rect class="node-rect sq accent" x="300" y="120" width="56" height="32"/><foreignObject x="304" y="122" width="48" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.3"><span><i class="mi">V</i></span></div></foreignObject>
+<text x="328" y="172" text-anchor="middle" font-size="11" class="muted">가중합에 쓰임</text>
+<rect class="node-rect sq" x="136" y="192" width="60" height="80"/>
+<path class="guide" d="M156,192 V272 M176,192 V272 M136,212 H196 M136,232 H196 M136,252 H196"/>
+<text x="130" y="206" text-anchor="end" font-size="11">I</text>
+<text x="130" y="226" text-anchor="end" font-size="11">go</text>
+<text x="130" y="246" text-anchor="end" font-size="11">to</text>
+<text x="130" y="266" text-anchor="end" font-size="11">school</text>
+<text x="208" y="236" font-size="13" font-weight="700">4 × 3</text>
+<text x="188" y="284" text-anchor="middle" font-size="12">점수 행렬 <tspan font-style="italic">n</tspan><tspan font-size="9" dy="3" font-style="italic">tgt</tspan><tspan dy="-3"> × </tspan><tspan font-style="italic">n</tspan><tspan font-size="9" dy="3" font-style="italic">src</tspan><tspan dy="-3"> (행: 디코더, 열: 인코더)</tspan></text>
+</svg>
+            <figcaption class="figure-caption">그림은 K·V가 인코더에서 건너오는 크로스 어텐션을 나타낸 것이다.</figcaption>
+          </figure>
+        </div>
+        <p>셀프 어텐션의 점수 행렬은 $n \times n$이다. 크로스 어텐션의 점수 행렬은 (출력 길이) × (입력 길이), 곧 $n_{\mathit{tgt}} \times n_{\mathit{src}}$이므로 두 길이가 다르면 정사각 행렬이 아니다. 디코더의 각 위치는 이 행렬의 한 행으로 입력 문장의 모든 위치를 본다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>Q·K·V가 같은 시퀀스에서 나오면 셀프 어텐션, Q는 디코더에서 K·V는 인코더 출력에서 나오면 크로스 어텐션이다.</p></div>
+    </div>
+
+    <!-- 페이지 7: 마스크드 셀프 어텐션 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>디코더는 왜 뒤 위치를 보면 안 되는가?</li>
+          <li>$-\infty$를 더하면 비중이 어떻게 되는가?</li>
+          <li>학습할 때 디코더 입력을 한 칸 미는 이유는 무엇인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">마스크드 셀프 어텐션<span class="paper-ref">논문 3.1, 3.2.3절</span></h3>
+        <div class="with-figure" style="--figure-side-width:300px">
+          <div>
+            <p>디코더는 번역문을 왼쪽부터 한 토큰씩 만든다. 앞서 만든 출력을 다시 입력으로 받아 다음 출력을 만드는 이 방식을 <span class="term" data-definition="자기회귀(auto-regressive): 앞에서 만든 출력을 다시 입력으로 넣어 다음 출력을 하나씩 만드는 방식.">자기회귀</span>(auto-regressive)라 한다. 위치 $i$가 아직 만들지 않은 뒤 위치를 보면 정답을 미리 보는 셈이므로, 디코더의 셀프 어텐션은 뒤 위치를 가린 <span class="term" data-definition="마스크드 셀프 어텐션(masked self-attention): 각 위치가 자기 위치와 그 앞 위치만 참고하도록 뒤 위치를 가린 셀프 어텐션. 디코더에서 씀.">마스크드 셀프 어텐션</span>(masked self-attention)으로 계산한다.</p>
+            <div class="math-equation">
+              $$\mathit{softmax}\!\left(\frac{QK^{\top}}{\sqrt{d_k}} + M\right), \qquad M_{ij} = \begin{cases} 0 & j \le i \\ -\infty & j > i \end{cases}$$
+            </div>
+            <p>소프트맥스 전에 위쪽 삼각형 칸에 $-\infty$를 더하면 $e^{-\infty} = 0$이므로 그 칸의 비중이 0이 된다. 이 삼각형 모양의 가림을 <span class="term" data-definition="인과 마스크(causal mask): 각 위치가 뒤 위치를 보지 못하도록 점수 행렬의 위쪽 삼각형을 음의 무한대로 가리는 행렬.">인과 마스크</span>(causal mask)라 한다.</p>
+            <p>학습할 때는 정답 번역문 전체를 한꺼번에 넣는다. 디코더 입력을 한 칸 오른쪽으로 밀어 맨 앞에 시작 기호 &lt;s&gt;를 두면 위치 $i$가 정답의 $i$번째 토큰을 예측한다. 마스크와 한 칸 밀기를 함께 쓰므로 모든 위치의 예측을 병렬로 계산하면서도 위치 $i$의 예측은 $i$보다 앞선 출력에만 의존한다.</p>
+          </div>
+          <figure class="figure side">
+<svg viewBox="0 0 300 228" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="디코더 입력 &lt;s&gt;, I, go, to의 4×4 마스크. 대각선과 그 아래는 0, 위쪽 삼각형은 음의 무한대이며, 각 행은 다음 토큰 I, go, to, school을 예측한다">
+<text x="152" y="14" text-anchor="middle" font-size="12" font-weight="700">마스크 <tspan font-style="italic">M</tspan> (행: 쿼리, 열: 키)</text>
+<text x="92" y="38" text-anchor="middle" font-size="12">&lt;s&gt;</text>
+<text x="132" y="38" text-anchor="middle" font-size="12">I</text>
+<text x="172" y="38" text-anchor="middle" font-size="12">go</text>
+<text x="212" y="38" text-anchor="middle" font-size="12">to</text>
+<text x="266" y="38" text-anchor="middle" font-size="11" class="muted">예측</text>
+<text x="66" y="68" text-anchor="end" font-size="12">&lt;s&gt;</text>
+<text x="66" y="108" text-anchor="end" font-size="12">I</text>
+<text x="66" y="148" text-anchor="end" font-size="12">go</text>
+<text x="66" y="188" text-anchor="end" font-size="12">to</text>
+<rect class="node-rect sq accent" x="73" y="45" width="38" height="38"/><text x="92" y="68" text-anchor="middle" font-size="12">0</text>
+<rect class="guide-fill" x="113" y="45" width="38" height="38"/><text x="132" y="68" text-anchor="middle" font-size="12" class="muted">−∞</text>
+<rect class="guide-fill" x="153" y="45" width="38" height="38"/><text x="172" y="68" text-anchor="middle" font-size="12" class="muted">−∞</text>
+<rect class="guide-fill" x="193" y="45" width="38" height="38"/><text x="212" y="68" text-anchor="middle" font-size="12" class="muted">−∞</text>
+<rect class="node-rect sq accent" x="73" y="85" width="38" height="38"/><text x="92" y="108" text-anchor="middle" font-size="12">0</text>
+<rect class="node-rect sq accent" x="113" y="85" width="38" height="38"/><text x="132" y="108" text-anchor="middle" font-size="12">0</text>
+<rect class="guide-fill" x="153" y="85" width="38" height="38"/><text x="172" y="108" text-anchor="middle" font-size="12" class="muted">−∞</text>
+<rect class="guide-fill" x="193" y="85" width="38" height="38"/><text x="212" y="108" text-anchor="middle" font-size="12" class="muted">−∞</text>
+<rect class="node-rect sq accent" x="73" y="125" width="38" height="38"/><text x="92" y="148" text-anchor="middle" font-size="12">0</text>
+<rect class="node-rect sq accent" x="113" y="125" width="38" height="38"/><text x="132" y="148" text-anchor="middle" font-size="12">0</text>
+<rect class="node-rect sq accent" x="153" y="125" width="38" height="38"/><text x="172" y="148" text-anchor="middle" font-size="12">0</text>
+<rect class="guide-fill" x="193" y="125" width="38" height="38"/><text x="212" y="148" text-anchor="middle" font-size="12" class="muted">−∞</text>
+<rect class="node-rect sq accent" x="73" y="165" width="38" height="38"/><text x="92" y="188" text-anchor="middle" font-size="12">0</text>
+<rect class="node-rect sq accent" x="113" y="165" width="38" height="38"/><text x="132" y="188" text-anchor="middle" font-size="12">0</text>
+<rect class="node-rect sq accent" x="153" y="165" width="38" height="38"/><text x="172" y="188" text-anchor="middle" font-size="12">0</text>
+<rect class="node-rect sq accent" x="193" y="165" width="38" height="38"/><text x="212" y="188" text-anchor="middle" font-size="12">0</text>
+<text x="244" y="68" font-size="12">→ I</text>
+<text x="244" y="108" font-size="12">→ go</text>
+<text x="244" y="148" font-size="12">→ to</text>
+<text x="244" y="188" font-size="12">→ school</text>
+<text x="152" y="222" text-anchor="middle" font-size="11" class="muted">−∞ 칸은 소프트맥스 뒤 비중 0</text>
+</svg>
+<svg viewBox="0 0 300 148" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="예시 점수 1, 2, 0.5, 1.5에서 마스크 전 비중은 0.17, 0.46, 0.10, 0.28이고, 마스크 후에는 0.27, 0.73, 0, 0이다">
+<text x="150" y="12" text-anchor="middle" font-size="12" font-weight="700">행 “I”의 비중(예시 점수 1, 2, 0.5, 1.5)</text>
+<line class="guide-axis" x1="20" y1="112" x2="140" y2="112"/>
+<rect class="ink-fill" x="26" y="97.3" width="20" height="14.7"/>
+<text x="36" y="93.3" text-anchor="middle" font-size="10">0.17</text>
+<text x="36" y="126" text-anchor="middle" font-size="10" class="muted">&lt;s&gt;</text>
+<rect class="ink-fill" x="54" y="72.0" width="20" height="40.0"/>
+<text x="64" y="68.0" text-anchor="middle" font-size="10">0.46</text>
+<text x="64" y="126" text-anchor="middle" font-size="10" class="muted">I</text>
+<rect class="ink-fill" x="82" y="103.1" width="20" height="8.9"/>
+<text x="92" y="99.1" text-anchor="middle" font-size="10">0.10</text>
+<text x="92" y="126" text-anchor="middle" font-size="10" class="muted">go</text>
+<rect class="ink-fill" x="110" y="87.7" width="20" height="24.3"/>
+<text x="120" y="83.7" text-anchor="middle" font-size="10">0.28</text>
+<text x="120" y="126" text-anchor="middle" font-size="10" class="muted">to</text>
+<text x="80" y="142" text-anchor="middle" font-size="11">마스크 전</text>
+<line class="guide-axis" x1="168" y1="112" x2="288" y2="112"/>
+<rect class="accent-fill" x="174" y="88.3" width="20" height="23.7"/>
+<text x="184" y="84.3" text-anchor="middle" font-size="10">0.27</text>
+<text x="184" y="126" text-anchor="middle" font-size="10" class="muted">&lt;s&gt;</text>
+<rect class="accent-fill" x="202" y="47.7" width="20" height="64.3"/>
+<text x="212" y="43.7" text-anchor="middle" font-size="10">0.73</text>
+<text x="212" y="126" text-anchor="middle" font-size="10" class="muted">I</text>
+<text x="240" y="108.0" text-anchor="middle" font-size="10">0.00</text>
+<text x="240" y="126" text-anchor="middle" font-size="10" class="muted">go</text>
+<text x="268" y="108.0" text-anchor="middle" font-size="10">0.00</text>
+<text x="268" y="126" text-anchor="middle" font-size="10" class="muted">to</text>
+<text x="228" y="142" text-anchor="middle" font-size="11">마스크 후</text>
+</svg>
+            <figcaption class="figure-caption">그림은 인과 마스크와, 마스크 전후 한 행의 소프트맥스 비중을 나타낸 것이다(예시 값).</figcaption>
+          </figure>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>디코더 셀프 어텐션은 소프트맥스 전에 위쪽 삼각형을 $-\infty$로 가려 각 위치가 자기와 앞 위치만 보게 한다.</p></div>
+    </div>
+
+    <!-- 페이지 8: 세 가지 쓰임 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>트랜스포머는 어텐션을 어디에 몇 종류로 쓰는가?</li>
+          <li>세 쓰임은 무엇으로 구별하는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>어텐션의 세 가지 쓰임<span class="paper-ref">논문 3.2.3절</span></h3>
+        <p>논문은 멀티헤드 어텐션을 세 곳에 쓴다. 그림은 인코더 <span class="term" data-definition="층(layer): 같은 계산 묶음을 한 단위로 본 것. 트랜스포머는 같은 모양의 층을 여러 번 쌓음.">층</span>(layer)과 디코더 층 하나씩에서 세 어텐션의 자리를 나타낸 것이다(Add&nbsp;&amp;&nbsp;Norm은 생략). 층의 개수와 전체 배치는 4단원에서 구조도로 다룬다.</p>
+        <figure class="svg-diagram animate-in" style="margin:var(--space-2) auto">
+<svg viewBox="0 0 800 132" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="인코더 층에는 셀프 어텐션과 FFN, 디코더 층에는 마스크드 셀프 어텐션, 크로스 어텐션, FFN이 있고, 인코더 출력이 크로스 어텐션의 키와 값으로 들어간다">
+<path class="edge-line accent" d="M256,80 L256,102 Q256,108 262,108 L608,108 Q614,108 614,102 L614,90"/><polygon class="edge-arrow accent" points="609,90 614,80 619,90"/>
+<path class="edge-line" d="M164,60 H178"/><polygon class="edge-arrow" points="178,55 188,60 178,65"/>
+<path class="edge-line" d="M540,60 H552"/><polygon class="edge-arrow" points="552,55 562,60 552,65"/>
+<path class="edge-line" d="M666,60 H678"/><polygon class="edge-arrow" points="678,55 688,60 678,65"/>
+<text x="16" y="14" font-size="12" font-weight="700">인코더 층(6개 반복)</text>
+<text x="400" y="14" font-size="12" font-weight="700">디코더 층(6개 반복)</text>
+<rect class="node-rect sq" x="16" y="24" width="320" height="72" style="fill:none; stroke-dasharray:4 4"/>
+<rect class="node-rect sq" x="400" y="24" width="384" height="72" style="fill:none; stroke-dasharray:4 4"/>
+<rect class="node-rect sq" x="28" y="40" width="136" height="40"/><foreignObject x="32" y="42" width="128" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span>① 셀프 어텐션</span></div></foreignObject>
+<rect class="node-rect sq" x="188" y="40" width="136" height="40"/><foreignObject x="192" y="42" width="128" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span>FFN</span></div></foreignObject>
+<rect class="node-rect sq" x="412" y="40" width="128" height="40"/><foreignObject x="416" y="42" width="120" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span>② 마스크드 셀프</span></div></foreignObject>
+<rect class="node-rect sq accent" x="562" y="40" width="104" height="40"/><foreignObject x="566" y="42" width="96" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span>③ 크로스</span></div></foreignObject>
+<rect class="node-rect sq" x="688" y="40" width="84" height="40"/><foreignObject x="692" y="42" width="76" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span>FFN</span></div></foreignObject>
+<text x="435" y="126" text-anchor="middle" font-size="12" class="accent-text">인코더 출력 → <tspan font-style="italic">K</tspan>, <tspan font-style="italic">V</tspan></text>
+</svg>
+          <figcaption class="figure-caption">그림은 인코더 층과 디코더 층에서 세 어텐션의 자리를 나타낸 것이다.</figcaption>
+        </figure>
+        <table class="data-table animate-in">
+          <thead><tr><th>쓰임</th><th>자리</th><th>Q 출처</th><th>K·V 출처</th><th>마스크</th><th>점수 행렬</th></tr></thead>
+          <tbody>
+            <tr><td>① 인코더 셀프</td><td>인코더 하위 층 1</td><td>이전 인코더 층의 출력</td><td>Q와 같은 곳</td><td>없음</td><td style="white-space:nowrap">$n_{\mathit{src}} \times n_{\mathit{src}}$</td></tr>
+            <tr><td>② 디코더 마스크드 셀프</td><td>디코더 하위 층 1</td><td>이전 디코더 층의 출력</td><td>Q와 같은 곳</td><td>인과 마스크</td><td style="white-space:nowrap">$n_{\mathit{tgt}} \times n_{\mathit{tgt}}$</td></tr>
+            <tr class="hl"><td>③ 크로스</td><td>디코더 하위 층 2</td><td>디코더 하위 층 1의 출력</td><td>인코더 마지막 층의 출력</td><td>없음</td><td style="white-space:nowrap">$n_{\mathit{tgt}} \times n_{\mathit{src}}$</td></tr>
+          </tbody>
+          <caption>표는 어텐션의 세 가지 쓰임을 자리, 재료, 마스크로 나눈 것이다. ③은 논문의 인코더-디코더 어텐션이고, 첫 층의 입력은 <span class="term" data-definition="임베딩(embedding): 토큰 번호를 학습된 실수 벡터로 바꾼 것.">임베딩</span>(embedding)이다(논문 3.2.3절).</caption>
+        </table>
+        <p class="diff-line"><strong>핵심 비교</strong> ①은 입력 문장이 자신을, ②는 출력 문장이 자신의 앞부분을, ③은 출력 문장이 입력 문장을 본다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>어텐션은 인코더 셀프, 디코더 마스크드 셀프, 디코더 크로스의 세 가지로 쓰이며 Q와 K·V의 출처와 마스크 여부로 구별된다.</p></div>
+    </div>
+
+    <!-- 페이지 9: 핵심 정리와 확인 문제 -->
     <div class="screen cornell">
       <aside class="cue">
         <div class="callout callout-accent animate-in">
+          <div class="callout-icon">&#128161;</div>
           <div class="callout-content">
             <strong class="callout-title">핵심 정리</strong>
             <ol>
               <li>어텐션은 쿼리와 키의 내적으로 비중을 만들고 그 비중으로 값을 섞는다.</li>
               <li>내적을 $\sqrt{d_k}$로 나누면 분산이 1로 유지되어 소프트맥스가 한쪽으로 쏠리지 않는다.</li>
               <li>멀티헤드 어텐션은 $d_{\mathit{model}}$을 $h$개 헤드로 나누어 서로 다른 관점을 병렬로 학습한다.</li>
-              <li>나누는 값은 분산이 아니라 분산의 제곱근이다.</li>
+              <li>Q·K·V가 같은 시퀀스에서 나오면 셀프, Q는 디코더에서, K·V는 인코더 출력에서 나오면 크로스이며, 디코더 셀프 어텐션은 뒤 위치를 가린다.</li>
+              <li>나누는 값을 묻는 문항은 분산이 아니라 분산의 제곱근을 구하라.</li>
             </ol>
           </div>
         </div>
       </aside>
       <div class="notes">
         <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>크기 조정과 계산 과정</h3>
-        <div class="quiz-container animate-in" id="quiz-m1">
+        <div class="quiz-container animate-in" id="at-quiz-1">
           <div class="quiz-question-block"
                data-correct="option-c"
                data-explanation-right="③ | 키 차원이 64이면 내적의 분산이 64이고 표준편차가 8이므로 8로 나누어 분산을 1로 되돌린다."
-               data-explanation-wrong="| 정답은 ③이다. 키 차원이 64이면 내적의 분산이 64이고 표준편차가 8이므로 제곱근 8로 나눈다. ⑤는 분산 64를 그대로 쓴 값이므로 옳지 않다.">
+               data-explanation-wrong="| 정답은 ③이다. 키 차원이 64이면 내적의 분산이 64이므로 그 제곱근인 표준편차 8로 나눈다. ⑤는 분산 64를 그대로 쓴 값이므로 옳지 않다.">
             <h3 class="quiz-question"><span class="q-num">1</span>키 차원이 $d_k = 64$일 때 내적 점수를 나누는 값은?</h3>
             <div class="quiz-options row">
               <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 4</span></button>
@@ -414,7 +630,7 @@
 
           <div class="quiz-question-block"
                data-correct="option-d"
-               data-explanation-right="④ | 비중은 행마다 소프트맥스로 만들어지므로 한 행의 합이 1이다. 합이 쿼리 수라는 서술은 옳지 않다."
+               data-explanation-right="④ | 비중은 행마다 소프트맥스로 만들어지므로 한 행의 합이 1이다. 따라서 합이 쿼리의 개수와 같다는 ④는 옳지 않다."
                data-explanation-wrong="| 정답은 ④이다. 비중 행렬의 각 행은 소프트맥스의 출력이므로 합이 1이다. 그러므로 ④는 옳지 않다. ⑤는 내적의 분산이 키 차원과 같아 그 제곱근으로 나누므로 옳다.">
             <h3 class="quiz-question"><span class="q-num">2</span>스케일드 내적 어텐션의 계산 과정에 대한 설명으로 옳지 <u>않은</u> 것은?</h3>
             <div class="quiz-options">
@@ -427,14 +643,14 @@
             <div class="quiz-feedback"></div>
           </div>
 
-          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m1')">정답 확인</button>
-          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m1')">다시 풀기</button>
+          <button class="quiz-check-btn" onclick="checkQuiz('at-quiz-1')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('at-quiz-1')">다시 풀기</button>
         </div>
       </div>
       <div class="summary"><span class="summary-label">요약</span><p>키 차원이 64이면 점수를 8로 나누고, 비중 행렬의 각 행은 합이 1이다.</p></div>
     </div>
 
-    <!-- 페이지 7: 확인 문제 (계속, 보기형 [3점]) -->
+    <!-- 페이지 10: 확인 문제 (계속, 보기형 [3점]) -->
     <div class="screen cornell">
       <aside class="cue">
         <span class="cue-label">핵심 질문</span>
@@ -445,7 +661,7 @@
       </aside>
       <div class="notes">
         <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>멀티헤드 어텐션</h3>
-        <div class="quiz-container animate-in" id="quiz-m1-2">
+        <div class="quiz-container animate-in" id="at-quiz-2">
           <div class="quiz-question-block"
                data-correct="option-c"
                data-explanation-right="③ | ㄱ은 나눗셈의 목적을 옳게 설명하고 ㄷ은 512를 8로 나눈 64를 옳게 제시하므로 ㄱ, ㄷ이 옳다. ㄴ은 헤드마다 서로 다른 투영 행렬을 쓰므로 옳지 않다."
@@ -466,11 +682,45 @@
             <div class="quiz-feedback"></div>
           </div>
 
-          <button class="quiz-check-btn" onclick="checkQuiz('quiz-m1-2')">정답 확인</button>
-          <button class="quiz-reset-btn" onclick="resetQuiz('quiz-m1-2')">다시 풀기</button>
+          <button class="quiz-check-btn" onclick="checkQuiz('at-quiz-2')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('at-quiz-2')">다시 풀기</button>
         </div>
       </div>
       <div class="summary"><span class="summary-label">요약</span><p>멀티헤드 어텐션은 헤드마다 서로 다른 투영 행렬을 쓰고, 헤드 하나의 차원은 $d_{\mathit{model}}/h$이다.</p></div>
+    </div>
+
+    <!-- 페이지 11: 확인 문제 (셀프와 크로스) -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>크로스 어텐션의 쿼리와 키·값은 어디에서 오는가?</li>
+          <li>크로스 어텐션의 점수 행렬은 정사각 행렬인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>셀프 어텐션과 크로스 어텐션</h3>
+        <div class="quiz-container animate-in" id="at-quiz-cross">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="③ | 크로스 어텐션의 쿼리는 디코더에서, 키와 값은 인코더 출력에서 오므로 점수 행렬의 행 수는 출력 길이, 열 수는 입력 길이이다."
+               data-explanation-wrong="| 정답은 ③이다. 쿼리는 디코더, 키와 값은 인코더 출력에서 오므로 점수 행렬이 $n_{\mathit{tgt}} \times n_{\mathit{src}}$이다. ②는 출처를 서로 바꾸었으므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">4</span>다음 중 트랜스포머의 크로스 어텐션에 대한 설명으로 옳은 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 쿼리, 키, 값이 모두 디코더에서 나온다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 쿼리는 인코더, 키와 값은 디코더에서 나온다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 점수 행렬은 (출력 길이) × (입력 길이)이다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 인과 마스크로 뒤 위치를 가린다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 점수 행렬은 언제나 정사각 행렬이다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('at-quiz-cross')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('at-quiz-cross')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>크로스 어텐션은 디코더의 쿼리로 인코더 출력의 키와 값을 참조하므로 점수 행렬이 (출력 길이) × (입력 길이)이다.</p></div>
     </div>
 
   </div>

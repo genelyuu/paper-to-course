@@ -1,0 +1,651 @@
+<section class="module" id="module-3">
+  <div class="module-content">
+
+    <div class="module-header">
+      <span class="module-number">4</span>
+      <h2 class="module-title">트랜스포머 구조</h2>
+      <p class="module-subtitle">층의 배치와 부품을 살피고 텐서 모양이 바뀌는 과정을 따라간다</p>
+    </div>
+
+    <!-- 페이지 1: 학습 목표와 전체 구조도 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-icon">&#127919;</div>
+          <div class="callout-content">
+            <strong class="callout-title">학습 목표</strong>
+            <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
+            <ol>
+              <li>인코더와 디코더 층의 개수, 순서, 연결을 구조도로 설명할 수 있다.</li>
+              <li>입력이 어텐션과 FFN을 지날 때 텐서 모양의 변화를 단계별로 구할 수 있다.</li>
+              <li>셀프 어텐션 층의 계산 비용을 순환 층과 비교할 수 있다.</li>
+            </ol>
+          </div>
+        </div>
+        <figure class="figure side" style="--figure-side-width:200px; margin:var(--space-4) 0 0"><img src="assets/fig-stack.svg" alt="똑같이 생긴 쟁반 여섯 개를 차곡차곡 쌓은 모습"><figcaption class="figure-caption">같은 모양의 층을 여섯 번 쌓는다.</figcaption></figure>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">전체 구조와 층 쌓기<span class="paper-ref">논문 3.1절, 그림 1</span></h3>
+        <p><span class="term" data-definition="트랜스포머(Transformer): 순환과 합성곱 없이 어텐션과 FFN만으로 층을 쌓은 시퀀스 변환 모델.">트랜스포머</span>(Transformer)는 <span class="term" data-definition="인코더(encoder): 입력 시퀀스를 읽어 위치마다 문맥이 담긴 벡터로 바꾸는 부분.">인코더</span>(encoder)가 입력 문장을 읽고 <span class="term" data-definition="디코더(decoder): 인코더 출력을 참고하여 출력 시퀀스를 한 토큰씩 만드는 부분.">디코더</span>(decoder)가 번역문을 한 토큰씩 만드는 구조이다. 양쪽 모두 같은 모양의 <span class="term" data-definition="층(layer): 같은 계산 묶음을 한 단위로 본 것. 트랜스포머는 같은 모양의 층을 여러 번 쌓음.">층</span>(layer)을 $N = 6$개 쌓는다.</p>
+        <p>입력은 인코더 층 1부터 층 6까지 차례로 지나고, <strong>층 6의 출력 하나</strong>가 디코더 층 6개 <strong>모두</strong>의 <span class="term" data-definition="크로스 어텐션(cross-attention): 쿼리는 디코더에서, 키와 값은 인코더 출력에서 가져오는 어텐션. 논문은 인코더-디코더 어텐션이라 부름.">크로스 어텐션</span>(cross-attention)에 키(key)와 값(value)으로 들어간다. 인코더 중간 층의 출력은 디코더로 가지 않는다.</p>
+        <figure class="svg-diagram animate-in" style="margin:var(--space-2) auto">
+<svg viewBox="0 0 800 200" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="인코더는 임베딩 뒤 층 1~6을 차례로 지나고, 층 6의 출력 하나가 디코더 층 1~6 모두의 크로스 어텐션으로 들어가며 디코더는 층 1~6을 차례로 지난다">
+<path class="edge-line accent" d="M598,64 V96 M166,96 H646"/>
+<path class="edge-line accent" d="M166,96 L166,106"/><polygon class="edge-arrow accent" points="161,106 166,116 171,106"/>
+<path class="edge-line accent" d="M262,96 L262,106"/><polygon class="edge-arrow accent" points="257,106 262,116 267,106"/>
+<path class="edge-line accent" d="M358,96 L358,106"/><polygon class="edge-arrow accent" points="353,106 358,116 363,106"/>
+<path class="edge-line accent" d="M454,96 L454,106"/><polygon class="edge-arrow accent" points="449,106 454,116 459,106"/>
+<path class="edge-line accent" d="M550,96 L550,106"/><polygon class="edge-arrow accent" points="545,106 550,116 555,106"/>
+<path class="edge-line accent" d="M646,96 L646,106"/><polygon class="edge-arrow accent" points="641,106 646,116 651,106"/>
+<path class="edge-line" d="M204,140 L214,140"/><polygon class="edge-arrow" points="214,135 224,140 214,145"/>
+<path class="edge-line" d="M300,140 L310,140"/><polygon class="edge-arrow" points="310,135 320,140 310,145"/>
+<path class="edge-line" d="M396,140 L406,140"/><polygon class="edge-arrow" points="406,135 416,140 406,145"/>
+<path class="edge-line" d="M492,140 L502,140"/><polygon class="edge-arrow" points="502,135 512,140 502,145"/>
+<path class="edge-line" d="M588,140 L598,140"/><polygon class="edge-arrow" points="598,135 608,140 598,145"/>
+<path class="edge-line" d="M104,140 L118,140"/><polygon class="edge-arrow" points="118,135 128,140 118,145"/>
+<text x="62" y="14" font-size="12" font-weight="700">인코더: 입력 → 층 1 → … → 층 6</text>
+<rect class="node-rect sq" x="62" y="24" width="576" height="40"/>
+<rect class="node-rect sq accent" x="558" y="24" width="80" height="40"/>
+<path class="guide" d="M158,28 V60 M238,28 V60 M318,28 V60 M398,28 V60 M478,28 V60"/>
+<text x="110" y="48" text-anchor="middle" font-size="12">임베딩+위치</text>
+<text x="198" y="48" text-anchor="middle" font-size="12">층 1</text>
+<text x="278" y="48" text-anchor="middle" font-size="12">층 2</text>
+<text x="358" y="48" text-anchor="middle" font-size="12">층 3</text>
+<text x="438" y="48" text-anchor="middle" font-size="12">층 4</text>
+<text x="518" y="48" text-anchor="middle" font-size="12">층 5</text>
+<text x="598" y="48" text-anchor="middle" font-size="12" font-weight="700">층 6</text>
+<text x="176" y="86" font-size="12" class="accent-text">층 6의 출력 하나 → 디코더 층 1~6의 크로스 어텐션(<tspan font-style="italic">K</tspan>, <tspan font-style="italic">V</tspan>)</text>
+<rect class="node-rect sq" x="16" y="116" width="88" height="48"/><foreignObject x="20" y="118" width="80" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.25"><span>출력 임베딩+위치(한 칸 밀림)</span></div></foreignObject>
+<rect class="node-rect sq" x="128" y="116" width="76" height="48"/><foreignObject x="132" y="118" width="68" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>디코더 층 1</span></div></foreignObject>
+<rect class="node-rect sq" x="224" y="116" width="76" height="48"/><foreignObject x="228" y="118" width="68" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>디코더 층 2</span></div></foreignObject>
+<rect class="node-rect sq" x="320" y="116" width="76" height="48"/><foreignObject x="324" y="118" width="68" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>디코더 층 3</span></div></foreignObject>
+<rect class="node-rect sq" x="416" y="116" width="76" height="48"/><foreignObject x="420" y="118" width="68" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>디코더 층 4</span></div></foreignObject>
+<rect class="node-rect sq" x="512" y="116" width="76" height="48"/><foreignObject x="516" y="118" width="68" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>디코더 층 5</span></div></foreignObject>
+<rect class="node-rect sq" x="608" y="116" width="76" height="48"/><foreignObject x="612" y="118" width="68" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>디코더 층 6</span></div></foreignObject>
+<text x="128" y="188" font-size="12" font-weight="700">디코더: 층 1 → … → 층 6 → 선형 + 소프트맥스(다음 토큰 확률)</text>
+</svg>
+          <figcaption class="figure-caption">그림은 6개씩 쌓은 인코더 층과 디코더 층의 연결을 나타낸 것이다. 출처: <a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener">논문 그림 1</a>을 참고해 펼쳐 다시 그림.</figcaption>
+        </figure>
+        <p>층 하나 안의 부품은 다음 쪽에서 본다. 디코더 층 6의 출력은 선형 변환과 <span class="term" data-definition="소프트맥스(softmax): 실수 여러 개를 합이 1인 양수로 바꾸는 함수. 큰 값에 더 큰 비중을 줌.">소프트맥스</span>(softmax)를 거쳐 다음 토큰의 확률이 된다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>트랜스포머는 인코더 층과 디코더 층을 각각 6개 쌓고, 인코더 층 6의 출력을 디코더 6개 층 모두의 크로스 어텐션에 넣는다.</p></div>
+    </div>
+
+    <!-- 페이지 2: 층의 개수와 위치 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>인코더 층과 디코더 층은 어떤 하위 층으로 이루어지는가?</li>
+          <li>인코더 출력은 디코더 층의 어디로 들어가는가?</li>
+          <li>어텐션 블록은 모두 몇 개인가?</li>
+        </ul>
+        <div class="callout callout-warning animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">더 알아보기</strong>
+            <p>구조를 코드와 함께 따라가려면 <a href="https://nlp.seas.harvard.edu/annotated-transformer" target="_blank" rel="noopener">The Annotated Transformer</a>, <a href="https://d2l.ai/chapter_attention-mechanisms-and-transformers/transformer.html" target="_blank" rel="noopener">Dive into Deep Learning 11.7절</a>, <a href="https://jalammar.github.io/illustrated-transformer/" target="_blank" rel="noopener">The Illustrated Transformer</a>를 참고할 수 있다.</p>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">층 안의 하위 층<span class="paper-ref">논문 3.1, 3.4절</span></h3>
+        <p>층은 <span class="term" data-definition="하위 층(sub-layer): 층 안의 부품 하나. 어텐션 하나 또는 FFN 하나를 가리킴.">하위 층</span>(sub-layer)으로 이루어진다. 인코더 층은 하위 층 2개, 디코더 층은 3개이고, 하위 층마다 Add &amp; Norm(잔차 연결 + LayerNorm, 다음 쪽)이 붙는다.</p>
+        <figure class="svg-diagram animate-in" style="margin:var(--space-2) auto">
+<svg viewBox="0 0 800 100" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="인코더 층: 입력, 멀티헤드 셀프 어텐션, Add &amp; Norm, FFN, Add &amp; Norm, 출력 순서이며 잔차 연결이 두 하위 층을 건너뛴다">
+<path class="edge-line thin" d="M66,52 L66,38 Q66,32 72,32 L308,32 Q314,32 314,38 L314,42"/><polygon class="edge-arrow" points="309,42 314,52 319,42"/>
+<path class="edge-line thin" d="M346,52 L346,38 Q346,32 352,32 L572,32 Q578,32 578,38 L578,42"/><polygon class="edge-arrow" points="573,42 578,52 583,42"/>
+<path class="edge-line" d="M116,72 L138,72"/><polygon class="edge-arrow" points="138,67 148,72 138,77"/>
+<path class="edge-line" d="M248,72 L270,72"/><polygon class="edge-arrow" points="270,67 280,72 270,77"/>
+<path class="edge-line" d="M380,72 L402,72"/><polygon class="edge-arrow" points="402,67 412,72 402,77"/>
+<path class="edge-line" d="M512,72 L534,72"/><polygon class="edge-arrow" points="534,67 544,72 534,77"/>
+<path class="edge-line" d="M644,72 L666,72"/><polygon class="edge-arrow" points="666,67 676,72 666,77"/>
+<text x="16" y="14" font-size="12" font-weight="700">인코더 층 하나</text>
+<text x="400" y="26" text-anchor="middle" font-size="11" class="muted">위쪽 가는 선 = 잔차 연결</text>
+<rect class="node-rect" x="16" y="52" width="100" height="40"/><foreignObject x="20" y="54" width="92" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.25"><span>입력 <i class="mi">n</i>×512</span></div></foreignObject>
+<rect class="node-rect sq accent" x="148" y="52" width="100" height="40"/><foreignObject x="152" y="54" width="92" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.25"><span>멀티헤드 셀프 어텐션</span></div></foreignObject>
+<rect class="node-rect sq" x="280" y="52" width="100" height="40"/><foreignObject x="284" y="54" width="92" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.25"><span>Add &amp; Norm</span></div></foreignObject>
+<rect class="node-rect sq" x="412" y="52" width="100" height="40"/><foreignObject x="416" y="54" width="92" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.25"><span>FFN</span></div></foreignObject>
+<rect class="node-rect sq" x="544" y="52" width="100" height="40"/><foreignObject x="548" y="54" width="92" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.25"><span>Add &amp; Norm</span></div></foreignObject>
+<rect class="node-rect" x="676" y="52" width="100" height="40"/><foreignObject x="680" y="54" width="92" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.25"><span>출력 <i class="mi">n</i>×512</span></div></foreignObject>
+</svg>
+          <figcaption class="figure-caption">그림은 인코더 층 하나의 하위 층 순서를 나타낸 것이다.</figcaption>
+        </figure>
+        <figure class="svg-diagram animate-in" style="margin:var(--space-2) auto">
+<svg viewBox="0 0 800 156" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="디코더 층: 입력, 마스크드 셀프 어텐션, Add &amp; Norm, 크로스 어텐션, Add &amp; Norm, FFN, Add &amp; Norm, 출력 순서이며 인코더 층 6의 출력이 크로스 어텐션의 K, V로 들어간다">
+<path class="edge-line thin" d="M55,48 L55,38 Q55,32 61,32 L233,32 Q239,32 239,38 L239,38"/><polygon class="edge-arrow" points="234,38 239,48 244,38"/>
+<path class="edge-line thin" d="M263,48 L263,38 Q263,32 269,32 L429,32 Q435,32 435,38 L435,38"/><polygon class="edge-arrow" points="430,38 435,48 440,38"/>
+<path class="edge-line thin" d="M459,48 L459,38 Q459,32 465,32 L625,32 Q631,32 631,38 L631,38"/><polygon class="edge-arrow" points="626,38 631,48 636,38"/>
+<path class="edge-line" d="M94,72 L104,72"/><polygon class="edge-arrow" points="104,67 114,72 104,77"/>
+<path class="edge-line" d="M192,72 L202,72"/><polygon class="edge-arrow" points="202,67 212,72 202,77"/>
+<path class="edge-line" d="M290,72 L300,72"/><polygon class="edge-arrow" points="300,67 310,72 300,77"/>
+<path class="edge-line" d="M388,72 L398,72"/><polygon class="edge-arrow" points="398,67 408,72 398,77"/>
+<path class="edge-line" d="M486,72 L496,72"/><polygon class="edge-arrow" points="496,67 506,72 496,77"/>
+<path class="edge-line" d="M584,72 L594,72"/><polygon class="edge-arrow" points="594,67 604,72 594,77"/>
+<path class="edge-line" d="M682,72 L692,72"/><polygon class="edge-arrow" points="692,67 702,72 692,77"/>
+<path class="edge-line accent" d="M349,120 L349,106"/><polygon class="edge-arrow accent" points="344,106 349,96 354,106"/>
+<text x="359" y="114" font-size="11" class="accent-text"><tspan font-style="italic">K</tspan>, <tspan font-style="italic">V</tspan></text>
+<text x="16" y="14" font-size="12" font-weight="700">디코더 층 하나</text>
+<rect class="node-rect" x="16" y="48" width="78" height="48"/><foreignObject x="19" y="50" width="72" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.25"><span>입력 <i class="mi">n</i>×512</span></div></foreignObject>
+<rect class="node-rect sq" x="114" y="48" width="78" height="48"/><foreignObject x="117" y="50" width="72" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.25"><span>마스크드 셀프 어텐션</span></div></foreignObject>
+<rect class="node-rect sq" x="212" y="48" width="78" height="48"/><foreignObject x="215" y="50" width="72" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.25"><span>Add &amp; Norm</span></div></foreignObject>
+<rect class="node-rect sq accent" x="310" y="48" width="78" height="48"/><foreignObject x="313" y="50" width="72" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.25"><span>크로스 어텐션</span></div></foreignObject>
+<rect class="node-rect sq" x="408" y="48" width="78" height="48"/><foreignObject x="411" y="50" width="72" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.25"><span>Add &amp; Norm</span></div></foreignObject>
+<rect class="node-rect sq" x="506" y="48" width="78" height="48"/><foreignObject x="509" y="50" width="72" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.25"><span>FFN</span></div></foreignObject>
+<rect class="node-rect sq" x="604" y="48" width="78" height="48"/><foreignObject x="607" y="50" width="72" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.25"><span>Add &amp; Norm</span></div></foreignObject>
+<rect class="node-rect" x="702" y="48" width="78" height="48"/><foreignObject x="705" y="50" width="72" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.25"><span>출력 <i class="mi">n</i>×512</span></div></foreignObject>
+<rect class="node-rect" x="279" y="120" width="140" height="28"/><foreignObject x="283" y="122" width="132" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.3"><span>인코더 층 6의 출력</span></div></foreignObject>
+<text x="477" y="140" font-size="11" class="muted"><tspan font-style="italic">Q</tspan>는 왼쪽(디코더)에서 온다</text>
+</svg>
+          <figcaption class="figure-caption">그림은 디코더 층 하나의 하위 층 순서와 인코더 출력이 들어가는 자리를 나타낸 것이다.</figcaption>
+        </figure>
+        <table class="data-table animate-in">
+          <thead><tr><th>자리</th><th>층 하나의 하위 층</th><th class="num">층 수</th><th class="num">하위 층 합계</th></tr></thead>
+          <tbody>
+            <tr><td>인코더</td><td><span class="term" data-definition="셀프 어텐션(self-attention): 쿼리, 키, 값이 모두 같은 시퀀스에서 나오는 어텐션. 시퀀스가 자기 자신을 참조함.">셀프 어텐션</span>(self-attention), FFN</td><td class="num">6</td><td class="num">12</td></tr>
+            <tr><td>디코더</td><td><span class="term" data-definition="마스크드 셀프 어텐션(masked self-attention): 각 위치가 자기와 앞 위치만 보도록 뒤 위치를 가린 셀프 어텐션.">마스크드 셀프 어텐션</span>(masked self-attention), 크로스 어텐션, FFN</td><td class="num">6</td><td class="num">18</td></tr>
+          </tbody>
+          <caption>표는 논문 3.1절의 값으로 하위 층의 개수를 센 것이다. <span class="term" data-definition="멀티헤드 어텐션(multi-head attention): 어텐션을 여러 헤드로 나누어 따로 계산한 뒤 결과를 이어 붙이는 방식.">멀티헤드 어텐션</span>(multi-head attention) 블록은 모두 18개이다. 맨 아래의 두 임베딩 층과 맨 위 소프트맥스 앞 선형 변환은 가중치 행렬을 공유한다(3.4절).</caption>
+        </table>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>인코더 층은 셀프 어텐션과 FFN, 디코더 층은 마스크드 셀프 어텐션, 크로스 어텐션, FFN으로 이루어지며 하위 층은 모두 30개이다.</p></div>
+    </div>
+
+    <!-- 페이지 3: 잔차 연결과 LayerNorm -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>하위 층의 출력은 어떻게 포장되어 다음으로 가는가?</li>
+          <li>모든 하위 층의 출력 차원을 512로 맞추는 이유는 무엇인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">잔차 연결과 LayerNorm<span class="paper-ref">논문 3.1절</span></h3>
+        <p>하위 층마다 같은 포장이 붙는다. 하위 층의 입력 $x$를 하위 층 출력에 그대로 더하는 <span class="term" data-definition="잔차 연결(residual connection): 어떤 부품의 입력을 그 부품의 출력에 그대로 더하는 지름길 연결.">잔차 연결</span>(residual connection)을 한 뒤 <span class="term" data-definition="LayerNorm(layer normalization, 층 정규화): 한 위치의 벡터 성분들을 평균 0, 분산 1이 되게 맞춘 뒤 학습된 배율과 이동을 적용하는 정규화.">LayerNorm</span>(layer normalization, 층 정규화)을 적용한다. 그림의 Add &amp; Norm 상자가 이 포장이며, 식으로 쓰면 $\mathit{LayerNorm}(x + \mathit{Sublayer}(x))$이다.</p>
+        <figure class="svg-diagram animate-in" style="margin:var(--space-2) auto">
+<svg viewBox="0 28 800 92" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="입력 x가 하위 층을 지난 출력과, 하위 층을 건너뛴 입력 x가 더해진 뒤 LayerNorm을 거쳐 출력이 되며 모든 화살표에서 모양은 n×512이다">
+<path class="edge-line accent" d="M150,60 L150,106 Q150,112 156,112 L442,112 Q448,112 448,106 L448,82"/><polygon class="edge-arrow accent" points="443,82 448,72 453,82"/>
+<path class="edge-line" d="M112,60 H190"/><polygon class="edge-arrow" points="190,55 200,60 190,65"/>
+<path class="edge-line" d="M376,60 H426"/><polygon class="edge-arrow" points="426,55 436,60 426,65"/>
+<path class="edge-line" d="M460,60 H498"/><polygon class="edge-arrow" points="498,55 508,60 498,65"/>
+<path class="edge-line" d="M636,60 H678"/><polygon class="edge-arrow" points="678,55 688,60 678,65"/>
+<rect class="node-rect" x="16" y="40" width="96" height="40"/><foreignObject x="20" y="42" width="88" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span>입력 <i class="mi">x</i></span></div></foreignObject>
+<rect class="node-rect sq" x="200" y="40" width="176" height="40"/><foreignObject x="204" y="42" width="168" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span>하위 층(어텐션 또는 FFN)</span></div></foreignObject>
+<circle class="node-rect" cx="448" cy="60" r="12"/><text x="448" y="65" text-anchor="middle" font-size="16">+</text>
+<rect class="node-rect sq" x="508" y="40" width="128" height="40"/><foreignObject x="512" y="42" width="120" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span>LayerNorm</span></div></foreignObject>
+<rect class="node-rect" x="688" y="40" width="96" height="40"/><foreignObject x="692" y="42" width="88" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3; font-weight:700"><span>출력</span></div></foreignObject>
+<text x="300" y="100" text-anchor="middle" font-size="12" class="accent-text">잔차 연결: 입력을 그대로 더함</text>
+<text x="156" y="46" text-anchor="middle" font-size="12" class="muted"><tspan font-style="italic">n</tspan> × 512</text>
+<text x="406" y="46" text-anchor="middle" font-size="12" class="muted"><tspan font-style="italic">n</tspan> × 512</text>
+<text x="662" y="46" text-anchor="middle" font-size="12" class="muted"><tspan font-style="italic">n</tspan> × 512</text>
+</svg>
+          <figcaption class="figure-caption">그림은 하위 층 하나를 감싼 잔차 연결과 LayerNorm을 나타낸 것이다.</figcaption>
+        </figure>
+        <p>덧셈 $x + \mathit{Sublayer}(x)$는 두 행렬의 모양이 같아야 성립한다. 그래서 논문은 임베딩과 모든 하위 층의 출력 차원을 $d_{\mathit{model}} = 512$로 맞춘다. 하위 층은 입력을 통째로 바꾸지 않고 입력에 더할 변화분만 만든다고 해석할 수 있다.</p>
+        <div class="quiz-container animate-in" id="ar-check-residual">
+          <div class="quiz-question-block" data-correct="option-b"
+               data-explanation-right="② | 잔차 연결은 입력과 하위 층 출력을 더하므로 두 행렬의 모양이 같아야 한다."
+               data-explanation-wrong="| 정답은 ②이다. 잔차 연결의 덧셈은 모양이 같은 두 행렬에서만 성립한다. ①은 소프트맥스의 합이 차원과 상관없이 1이므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">1</span>다음 중 모든 하위 층의 출력 차원을 512로 맞추는 이유로 옳은 것은?</h3>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 소프트맥스 합을 1로 맞추려고</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 잔차 덧셈의 모양을 맞추려고</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 헤드 수를 8개로 고정하려고</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('ar-check-residual')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('ar-check-residual')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>하위 층마다 LayerNorm(x + Sublayer(x))를 적용하므로, 덧셈이 성립하도록 모든 출력을 512차원으로 맞춘다.</p></div>
+    </div>
+
+    <!-- 페이지 4: FFN -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>FFN은 어떤 계산을 하는가?</li>
+          <li>‘위치마다 따로’ 적용한다는 것은 무슨 뜻인가?</li>
+          <li>층마다 FFN의 가중치가 같은가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">위치별 FFN<span class="paper-ref">논문 3.3절</span></h3>
+        <p>어텐션이 위치 사이에서 정보를 섞는다면, <span class="term" data-definition="FFN(feed-forward network, 피드포워드 신경망): 입력 벡터를 선형 변환, 음수 제거, 선형 변환의 순서로 바꾸는 작은 신경망. 트랜스포머에서는 위치마다 따로 적용함.">FFN</span>(feed-forward network, 피드포워드 신경망)은 각 위치의 벡터를 하나씩 따로 변환한다. 식은 선형 변환, 음수를 0으로 바꾸는 $\mathit{max}(0, \cdot)$, 선형 변환의 순서이다.</p>
+        <div class="math-equation">
+          $$\mathit{FFN}(x) = \mathit{max}(0,\, xW_1 + b_1)\,W_2 + b_2 \tag{2}$$
+        </div>
+        <p>여기서 $W_1$은 512×2048, $W_2$는 2048×512 행렬이고 $b_1$, $b_2$는 더하는 벡터이다. 입력과 출력은 $d_{\mathit{model}} = 512$, 안쪽은 $d_{\mathit{ff}} = 2048$이므로 벡터가 4배로 넓어졌다가 다시 512로 돌아온다.</p>
+        <div class="with-figure" style="--figure-side-width:300px">
+          <figure class="svg-diagram fit animate-in" style="--diagram-max:380px; margin:0 auto">
+<svg viewBox="0 0 380 176" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="한 위치의 벡터가 512에서 2048로 넓어졌다가 512로 돌아온다">
+<path class="edge-line" d="M190,48 L190,74"/><polygon class="edge-arrow" points="185,74 190,84 195,74"/>
+<path class="edge-line" d="M190,104 L190,130"/><polygon class="edge-arrow" points="185,130 190,140 195,130"/>
+<text x="190" y="14" text-anchor="middle" font-size="12" font-weight="700">한 위치 벡터의 폭</text>
+<rect class="node-rect sq" x="158" y="28" width="64" height="20"/>
+<rect class="node-rect sq accent" x="62" y="84" width="256" height="20"/>
+<rect class="node-rect sq" x="158" y="140" width="64" height="20"/>
+<text x="200" y="70" font-size="12"><tspan font-style="italic">W</tspan><tspan font-size="9" dy="3">1</tspan><tspan dy="-3">, </tspan><tspan font-style="italic">max</tspan>(0, ·)</text>
+<text x="200" y="126" font-size="12"><tspan font-style="italic">W</tspan><tspan font-size="9" dy="3">2</tspan></text>
+<text x="232" y="43" font-size="12" class="muted">512</text>
+<text x="328" y="99" font-size="12" class="accent-text">2048</text>
+<text x="232" y="155" font-size="12" class="muted">512</text>
+</svg>
+            <figcaption class="figure-caption">그림은 한 위치 벡터의 폭이 512 → 2048 → 512로 바뀌는 것을 나타낸 것이다.</figcaption>
+          </figure>
+          <figure class="figure side">
+<svg viewBox="0 0 300 176" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="위치 x1, x2, x3마다 같은 FFN이 따로 적용되어 y1, y2, y3가 나온다">
+<path class="edge-line" d="M54,52 L54,70"/><polygon class="edge-arrow" points="49,70 54,80 59,70"/>
+<path class="edge-line" d="M54,112 L54,130"/><polygon class="edge-arrow" points="49,130 54,140 59,130"/>
+<path class="edge-line" d="M150,52 L150,70"/><polygon class="edge-arrow" points="145,70 150,80 155,70"/>
+<path class="edge-line" d="M150,112 L150,130"/><polygon class="edge-arrow" points="145,130 150,140 155,130"/>
+<path class="edge-line" d="M246,52 L246,70"/><polygon class="edge-arrow" points="241,70 246,80 251,70"/>
+<path class="edge-line" d="M246,112 L246,130"/><polygon class="edge-arrow" points="241,130 246,140 251,130"/>
+<text x="150" y="14" text-anchor="middle" font-size="12" font-weight="700">위치마다 같은 FFN</text>
+<rect class="node-rect" x="16" y="24" width="76" height="28"/><foreignObject x="20" y="26" width="68" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span><i class="mi">x</i><sub>1</sub></span></div></foreignObject>
+<rect class="node-rect sq" x="16" y="80" width="76" height="32"/><foreignObject x="20" y="82" width="68" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span>FFN</span></div></foreignObject>
+<rect class="node-rect" x="16" y="140" width="76" height="28"/><foreignObject x="20" y="142" width="68" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span><i class="mi">y</i><sub>1</sub></span></div></foreignObject>
+<rect class="node-rect" x="112" y="24" width="76" height="28"/><foreignObject x="116" y="26" width="68" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span><i class="mi">x</i><sub>2</sub></span></div></foreignObject>
+<rect class="node-rect sq" x="112" y="80" width="76" height="32"/><foreignObject x="116" y="82" width="68" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span>FFN</span></div></foreignObject>
+<rect class="node-rect" x="112" y="140" width="76" height="28"/><foreignObject x="116" y="142" width="68" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span><i class="mi">y</i><sub>2</sub></span></div></foreignObject>
+<rect class="node-rect" x="208" y="24" width="76" height="28"/><foreignObject x="212" y="26" width="68" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span><i class="mi">x</i><sub>3</sub></span></div></foreignObject>
+<rect class="node-rect sq" x="208" y="80" width="76" height="32"/><foreignObject x="212" y="82" width="68" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span>FFN</span></div></foreignObject>
+<rect class="node-rect" x="208" y="140" width="76" height="28"/><foreignObject x="212" y="142" width="68" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span><i class="mi">y</i><sub>3</sub></span></div></foreignObject>
+</svg>
+            <figcaption class="figure-caption">그림은 위치마다 같은 FFN을 따로 적용하는 것을 나타낸 것이다.</figcaption>
+          </figure>
+        </div>
+        <p>한 층 안에서는 모든 위치가 같은 <span class="term" data-definition="파라미터(parameter): 학습으로 정해지는 모델 안의 값. 가중치 행렬의 성분 등.">파라미터</span>(parameter) $W_1$, $W_2$를 쓰고, 층이 바뀌면 파라미터도 다르다. 논문은 이를 커널 크기 1인 <span class="term" data-definition="합성곱(convolution): 작은 가중치 창을 시퀀스 위에서 옮겨 가며 같은 계산을 반복하는 연산.">합성곱</span>(convolution) 두 번과 같다고 설명한다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>FFN은 위치마다 같은 가중치로 512 → 2048 → 512 변환을 따로 적용하며, 가중치는 층마다 다르다.</p></div>
+    </div>
+
+    <!-- 페이지 5: 위치 인코딩 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>어텐션만으로는 왜 순서를 알 수 없는가?</li>
+          <li>위치 인코딩은 임베딩과 어떻게 합치는가?</li>
+          <li>학습형 위치 임베딩과 결과가 어떻게 다른가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">위치 인코딩<span class="paper-ref">논문 3.4, 3.5절</span></h3>
+        <div class="with-figure" style="--figure-side-width:300px">
+          <div>
+            <p>트랜스포머에는 순환도 합성곱도 없어 그대로는 순서를 모른다. 예시로 “나는 학교에 간다”와 “간다 학교에 나는”에서 ‘나는’이 받는 셀프 어텐션 결과는 같다. 그래서 인코더와 디코더 맨 아래에서 <span class="term" data-definition="위치 인코딩(positional encoding): 토큰의 위치를 나타내는 벡터. 임베딩에 더해 순서 정보를 넣음.">위치 인코딩</span>(positional encoding)을 <span class="term" data-definition="임베딩(embedding): 토큰 번호를 학습된 실수 벡터로 바꾼 것.">임베딩</span>(embedding)에 더한다.</p>
+            <div class="math-equation">
+              $$\begin{aligned}\mathit{PE}_{(\mathit{pos},\,2i)} &= \mathit{sin}\!\left(\mathit{pos}/10000^{2i/d_{\mathit{model}}}\right)\\ \mathit{PE}_{(\mathit{pos},\,2i+1)} &= \mathit{cos}\!\left(\mathit{pos}/10000^{2i/d_{\mathit{model}}}\right)\end{aligned}$$
+            </div>
+            <p>여기서 $\mathit{pos}$는 위치, $i$는 차원 번호이다. 차원 번호가 클수록 파장이 길어져 $2\pi$에서 $10000 \cdot 2\pi$까지 기하급수로 늘어나므로, 차원마다 다른 빠르기의 물결이 위치를 표시한다. 위치 인코딩도 512차원이라 $n \times 512$ 임베딩에 더해도 모양이 그대로이다.</p>
+            <p>학습형 위치 임베딩은 <span class="term" data-definition="BLEU(번역 품질 지표): 모델 번역과 사람 번역이 겹치는 단어 묶음의 비율로 번역 품질을 매기는 지표. 높을수록 좋음.">BLEU</span>(번역 품질 지표) 25.7로 사인형의 25.8과 거의 같았다(표 3 (E)). 논문은 학습 때보다 긴 문장으로 외삽할 수 있으리라 보고 사인형을 택했다. 또한 임베딩에는 $\sqrt{d_{\mathit{model}}}$을 곱한다(3.4절).</p>
+          </div>
+          <figure class="figure side">
+<svg viewBox="0 0 300 250" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="위치 0~24에서 짝수 차원 2i=0, 64, 128의 사인 값. 차원 번호가 클수록 파장이 길다">
+<text x="150" y="14" text-anchor="middle" font-size="12" font-weight="700">위치에 따른 사인 값(짝수 차원)</text>
+<line class="guide" x1="36" y1="50" x2="288" y2="50"/>
+<polyline class="ink accent" points="36.0,50.0 37.0,47.8 38.1,45.6 39.1,43.5 40.2,41.4 41.2,39.5 42.3,37.6 43.4,35.8 44.4,34.2 45.5,32.8 46.5,31.5 47.5,30.4 48.6,29.5 49.6,28.8 50.7,28.3 51.8,28.1 52.8,28.0 53.8,28.2 54.9,28.6 56.0,29.2 57.0,30.0 58.0,31.0 59.1,32.2 60.1,33.6 61.2,35.1 62.2,36.8 63.3,38.7 64.3,40.6 65.4,42.6 66.5,44.7 67.5,46.9 68.6,49.1 69.6,51.3 70.7,53.5 71.7,55.6 72.8,57.7 73.8,59.7 74.8,61.7 75.9,63.5 76.9,65.1 78.0,66.6 79.0,68.0 80.1,69.2 81.2,70.2 82.2,70.9 83.2,71.5 84.3,71.9 85.3,72.0 86.4,71.9 87.5,71.6 88.5,71.1 89.5,70.4 90.6,69.4 91.7,68.3 92.7,67.0 93.8,65.5 94.8,63.9 95.8,62.1 96.9,60.2 98.0,58.2 99.0,56.1 100.0,54.0 101.1,51.8 102.1,49.6 103.2,47.4 104.2,45.3 105.3,43.1 106.4,41.1 107.4,39.1 108.5,37.3 109.5,35.5 110.5,34.0 111.6,32.5 112.6,31.3 113.7,30.2 114.8,29.4 115.8,28.7 116.9,28.3 117.9,28.0 119.0,28.0 120.0,28.2 121.0,28.7 122.1,29.3 123.2,30.2 124.2,31.2 125.2,32.4 126.3,33.8 127.3,35.4 128.4,37.1 129.4,39.0 130.5,40.9 131.6,43.0 132.6,45.1 133.7,47.3 134.7,49.5 135.8,51.7 136.8,53.8 137.8,56.0 138.9,58.1 139.9,60.1 141.0,62.0 142.1,63.8 143.1,65.4 144.2,66.9 145.2,68.2 146.2,69.4 147.3,70.3 148.3,71.0 149.4,71.6 150.4,71.9 151.5,72.0 152.6,71.9 153.6,71.5 154.7,71.0 155.7,70.2 156.8,69.3 157.8,68.1 158.8,66.8 159.9,65.3 160.9,63.6 162.0,61.8 163.1,59.9 164.1,57.9 165.2,55.8 166.2,53.6 167.2,51.5 168.3,49.3 169.3,47.1 170.4,44.9 171.5,42.8 172.5,40.8 173.5,38.8 174.6,37.0 175.7,35.3 176.7,33.7 177.8,32.3 178.8,31.1 179.8,30.1 180.9,29.2 182.0,28.6 183.0,28.2 184.0,28.0 185.1,28.0 186.2,28.3 187.2,28.8 188.2,29.4 189.3,30.3 190.3,31.4 191.4,32.7 192.5,34.1 193.5,35.7 194.5,37.4 195.6,39.3 196.7,41.3 197.7,43.3 198.8,45.5 199.8,47.6 200.8,49.8 201.9,52.0 203.0,54.2 204.0,56.3 205.1,58.4 206.1,60.4 207.2,62.3 208.2,64.0 209.2,65.7 210.3,67.1 211.3,68.4 212.4,69.5 213.4,70.4 214.5,71.2 215.6,71.6 216.6,71.9 217.7,72.0 218.7,71.8 219.8,71.5 220.8,70.9 221.8,70.1 222.9,69.1 223.9,67.9 225.0,66.5 226.1,65.0 227.1,63.3 228.2,61.5 229.2,59.6 230.2,57.5 231.3,55.4 232.3,53.3 233.4,51.1 234.4,48.9 235.5,46.7 236.6,44.5 237.6,42.4 238.7,40.4 239.7,38.5 240.8,36.7 241.8,35.0 242.8,33.5 243.9,32.1 244.9,30.9 246.0,29.9 247.1,29.1 248.1,28.5 249.2,28.2 250.2,28.0 251.2,28.1 252.3,28.4 253.3,28.9 254.4,29.6 255.4,30.5 256.5,31.6 257.6,32.9 258.6,34.4 259.6,36.0 260.7,37.7 261.8,39.6 262.8,41.6 263.9,43.7 264.9,45.8 265.9,48.0 267.0,50.2 268.1,52.4 269.1,54.6 270.1,56.7 271.2,58.7 272.2,60.7 273.3,62.6 274.4,64.3 275.4,65.9 276.4,67.4 277.5,68.6 278.6,69.7 279.6,70.6 280.6,71.2 281.7,71.7 282.8,72.0 283.8,72.0 284.9,71.8 285.9,71.4 286.9,70.8 288.0,69.9" style="fill:none"/>
+
+<text x="288" y="26" text-anchor="end" font-size="11" class="muted">2<tspan font-style="italic">i</tspan> = 0</text>
+<text x="30" y="54" text-anchor="end" font-size="10" class="muted">0</text>
+<line class="guide" x1="36" y1="114" x2="288" y2="114"/>
+<polyline class="ink" points="36.0,114.0 37.0,113.3 38.1,112.6 39.1,111.9 40.2,111.2 41.2,110.5 42.3,109.9 43.4,109.2 44.4,108.5 45.5,107.8 46.5,107.2 47.5,106.5 48.6,105.9 49.6,105.2 50.7,104.6 51.8,104.0 52.8,103.3 53.8,102.7 54.9,102.1 56.0,101.6 57.0,101.0 58.0,100.4 59.1,99.9 60.1,99.4 61.2,98.9 62.2,98.4 63.3,97.9 64.3,97.4 65.4,97.0 66.5,96.5 67.5,96.1 68.6,95.7 69.6,95.3 70.7,95.0 71.7,94.6 72.8,94.3 73.8,94.0 74.8,93.7 75.9,93.5 76.9,93.2 78.0,93.0 79.0,92.8 80.1,92.6 81.2,92.5 82.2,92.4 83.2,92.2 84.3,92.1 85.3,92.1 86.4,92.0 87.5,92.0 88.5,92.0 89.5,92.0 90.6,92.1 91.7,92.1 92.7,92.2 93.8,92.3 94.8,92.4 95.8,92.6 96.9,92.8 98.0,93.0 99.0,93.2 100.0,93.4 101.1,93.7 102.1,93.9 103.2,94.2 104.2,94.5 105.3,94.9 106.4,95.2 107.4,95.6 108.5,96.0 109.5,96.4 110.5,96.8 111.6,97.3 112.6,97.7 113.7,98.2 114.8,98.7 115.8,99.2 116.9,99.7 117.9,100.3 119.0,100.8 120.0,101.4 121.0,101.9 122.1,102.5 123.2,103.1 124.2,103.7 125.2,104.4 126.3,105.0 127.3,105.6 128.4,106.3 129.4,106.9 130.5,107.6 131.6,108.3 132.6,108.9 133.7,109.6 134.7,110.3 135.8,111.0 136.8,111.7 137.8,112.4 138.9,113.1 139.9,113.8 141.0,114.5 142.1,115.2 143.1,115.8 144.2,116.5 145.2,117.2 146.2,117.9 147.3,118.6 148.3,119.3 149.4,119.9 150.4,120.6 151.5,121.3 152.6,121.9 153.6,122.6 154.7,123.2 155.7,123.8 156.8,124.5 157.8,125.1 158.8,125.7 159.9,126.2 160.9,126.8 162.0,127.4 163.1,127.9 164.1,128.4 165.2,129.0 166.2,129.5 167.2,130.0 168.3,130.4 169.3,130.9 170.4,131.3 171.5,131.7 172.5,132.1 173.5,132.5 174.6,132.9 175.7,133.2 176.7,133.6 177.8,133.9 178.8,134.2 179.8,134.4 180.9,134.7 182.0,134.9 183.0,135.1 184.0,135.3 185.1,135.5 186.2,135.6 187.2,135.7 188.2,135.8 189.3,135.9 190.3,136.0 191.4,136.0 192.5,136.0 193.5,136.0 194.5,136.0 195.6,135.9 196.7,135.8 197.7,135.7 198.8,135.6 199.8,135.5 200.8,135.3 201.9,135.1 203.0,134.9 204.0,134.7 205.1,134.4 206.1,134.2 207.2,133.9 208.2,133.6 209.2,133.2 210.3,132.9 211.3,132.5 212.4,132.2 213.4,131.8 214.5,131.3 215.6,130.9 216.6,130.4 217.7,130.0 218.7,129.5 219.8,129.0 220.8,128.5 221.8,127.9 222.9,127.4 223.9,126.8 225.0,126.3 226.1,125.7 227.1,125.1 228.2,124.5 229.2,123.9 230.2,123.2 231.3,122.6 232.3,121.9 233.4,121.3 234.4,120.6 235.5,120.0 236.6,119.3 237.6,118.6 238.7,117.9 239.7,117.3 240.8,116.6 241.8,115.9 242.8,115.2 243.9,114.5 244.9,113.8 246.0,113.1 247.1,112.4 248.1,111.7 249.2,111.0 250.2,110.3 251.2,109.6 252.3,109.0 253.3,108.3 254.4,107.6 255.4,107.0 256.5,106.3 257.6,105.7 258.6,105.0 259.6,104.4 260.7,103.8 261.8,103.2 262.8,102.6 263.9,102.0 264.9,101.4 265.9,100.8 267.0,100.3 268.1,99.7 269.1,99.2 270.1,98.7 271.2,98.2 272.2,97.7 273.3,97.3 274.4,96.8 275.4,96.4 276.4,96.0 277.5,95.6 278.6,95.2 279.6,94.9 280.6,94.5 281.7,94.2 282.8,93.9 283.8,93.7 284.9,93.4 285.9,93.2 286.9,93.0 288.0,92.8" style="fill:none"/>
+
+<text x="288" y="90" text-anchor="end" font-size="11" class="muted">2<tspan font-style="italic">i</tspan> = 64</text>
+<text x="30" y="118" text-anchor="end" font-size="10" class="muted">0</text>
+<line class="guide" x1="36" y1="178" x2="288" y2="178"/>
+<polyline class="ink" points="36.0,178.0 37.0,177.8 38.1,177.6 39.1,177.3 40.2,177.1 41.2,176.9 42.3,176.7 43.4,176.5 44.4,176.2 45.5,176.0 46.5,175.8 47.5,175.6 48.6,175.4 49.6,175.1 50.7,174.9 51.8,174.7 52.8,174.5 53.8,174.3 54.9,174.1 56.0,173.8 57.0,173.6 58.0,173.4 59.1,173.2 60.1,173.0 61.2,172.8 62.2,172.6 63.3,172.3 64.3,172.1 65.4,171.9 66.5,171.7 67.5,171.5 68.6,171.3 69.6,171.1 70.7,170.9 71.7,170.7 72.8,170.5 73.8,170.2 74.8,170.0 75.9,169.8 76.9,169.6 78.0,169.4 79.0,169.2 80.1,169.0 81.2,168.8 82.2,168.6 83.2,168.4 84.3,168.2 85.3,168.0 86.4,167.8 87.5,167.6 88.5,167.5 89.5,167.3 90.6,167.1 91.7,166.9 92.7,166.7 93.8,166.5 94.8,166.3 95.8,166.1 96.9,165.9 98.0,165.8 99.0,165.6 100.0,165.4 101.1,165.2 102.1,165.0 103.2,164.9 104.2,164.7 105.3,164.5 106.4,164.3 107.4,164.2 108.5,164.0 109.5,163.8 110.5,163.7 111.6,163.5 112.6,163.3 113.7,163.2 114.8,163.0 115.8,162.8 116.9,162.7 117.9,162.5 119.0,162.4 120.0,162.2 121.0,162.1 122.1,161.9 123.2,161.8 124.2,161.6 125.2,161.5 126.3,161.3 127.3,161.2 128.4,161.0 129.4,160.9 130.5,160.8 131.6,160.6 132.6,160.5 133.7,160.4 134.7,160.2 135.8,160.1 136.8,160.0 137.8,159.9 138.9,159.7 139.9,159.6 141.0,159.5 142.1,159.4 143.1,159.3 144.2,159.1 145.2,159.0 146.2,158.9 147.3,158.8 148.3,158.7 149.4,158.6 150.4,158.5 151.5,158.4 152.6,158.3 153.6,158.2 154.7,158.1 155.7,158.0 156.8,157.9 157.8,157.8 158.8,157.7 159.9,157.7 160.9,157.6 162.0,157.5 163.1,157.4 164.1,157.3 165.2,157.3 166.2,157.2 167.2,157.1 168.3,157.1 169.3,157.0 170.4,156.9 171.5,156.9 172.5,156.8 173.5,156.7 174.6,156.7 175.7,156.6 176.7,156.6 177.8,156.5 178.8,156.5 179.8,156.4 180.9,156.4 182.0,156.4 183.0,156.3 184.0,156.3 185.1,156.2 186.2,156.2 187.2,156.2 188.2,156.2 189.3,156.1 190.3,156.1 191.4,156.1 192.5,156.1 193.5,156.1 194.5,156.0 195.6,156.0 196.7,156.0 197.7,156.0 198.8,156.0 199.8,156.0 200.8,156.0 201.9,156.0 203.0,156.0 204.0,156.0 205.1,156.0 206.1,156.0 207.2,156.0 208.2,156.1 209.2,156.1 210.3,156.1 211.3,156.1 212.4,156.1 213.4,156.2 214.5,156.2 215.6,156.2 216.6,156.2 217.7,156.3 218.7,156.3 219.8,156.4 220.8,156.4 221.8,156.4 222.9,156.5 223.9,156.5 225.0,156.6 226.1,156.6 227.1,156.7 228.2,156.7 229.2,156.8 230.2,156.9 231.3,156.9 232.3,157.0 233.4,157.0 234.4,157.1 235.5,157.2 236.6,157.3 237.6,157.3 238.7,157.4 239.7,157.5 240.8,157.6 241.8,157.6 242.8,157.7 243.9,157.8 244.9,157.9 246.0,158.0 247.1,158.1 248.1,158.2 249.2,158.3 250.2,158.4 251.2,158.5 252.3,158.6 253.3,158.7 254.4,158.8 255.4,158.9 256.5,159.0 257.6,159.1 258.6,159.2 259.6,159.4 260.7,159.5 261.8,159.6 262.8,159.7 263.9,159.8 264.9,160.0 265.9,160.1 267.0,160.2 268.1,160.3 269.1,160.5 270.1,160.6 271.2,160.7 272.2,160.9 273.3,161.0 274.4,161.2 275.4,161.3 276.4,161.4 277.5,161.6 278.6,161.7 279.6,161.9 280.6,162.0 281.7,162.2 282.8,162.3 283.8,162.5 284.9,162.7 285.9,162.8 286.9,163.0 288.0,163.1" style="fill:none"/>
+
+<text x="288" y="154" text-anchor="end" font-size="11" class="muted">2<tspan font-style="italic">i</tspan> = 128</text>
+<text x="30" y="182" text-anchor="end" font-size="10" class="muted">0</text>
+<line class="guide-axis" x1="36" y1="212" x2="288" y2="212"/>
+<line class="guide-axis" x1="36.0" y1="212" x2="36.0" y2="216"/>
+<text x="36.0" y="228" text-anchor="middle" font-size="10" class="muted">0</text>
+<line class="guide-axis" x1="78.0" y1="212" x2="78.0" y2="216"/>
+<text x="78.0" y="228" text-anchor="middle" font-size="10" class="muted">4</text>
+<line class="guide-axis" x1="120.0" y1="212" x2="120.0" y2="216"/>
+<text x="120.0" y="228" text-anchor="middle" font-size="10" class="muted">8</text>
+<line class="guide-axis" x1="162.0" y1="212" x2="162.0" y2="216"/>
+<text x="162.0" y="228" text-anchor="middle" font-size="10" class="muted">12</text>
+<line class="guide-axis" x1="204.0" y1="212" x2="204.0" y2="216"/>
+<text x="204.0" y="228" text-anchor="middle" font-size="10" class="muted">16</text>
+<line class="guide-axis" x1="246.0" y1="212" x2="246.0" y2="216"/>
+<text x="246.0" y="228" text-anchor="middle" font-size="10" class="muted">20</text>
+<line class="guide-axis" x1="288.0" y1="212" x2="288.0" y2="216"/>
+<text x="288.0" y="228" text-anchor="middle" font-size="10" class="muted">24</text>
+<text x="162" y="244" text-anchor="middle" font-size="11" class="muted">위치 <tspan font-style="italic">pos</tspan></text>
+</svg>
+            <figcaption class="figure-caption">그림은 위 식으로 계산한 짝수 차원 세 개의 값을 나타낸 것이다.</figcaption>
+          </figure>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>위치 인코딩은 차원마다 파장이 다른 사인·코사인 값으로 순서를 표시하며, 임베딩과 같은 512차원이라 그대로 더한다.</p></div>
+    </div>
+
+    <!-- 페이지 6: 텐서 모양 따라가기 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">용어</span>
+        <dl>
+          <dt>$n$</dt><dd>문장 길이(토큰 수)</dd>
+          <dt>$d_{\mathit{model}}$</dt><dd>512, 하위 층 출력 차원</dd>
+          <dt>$h$</dt><dd>8, 헤드 수</dd>
+          <dt>$d_k = d_v$</dt><dd>64, 헤드 하나의 차원</dd>
+          <dt>$d_{\mathit{ff}}$</dt><dd>2048, FFN 안쪽 차원</dd>
+        </dl>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>텐서 모양 따라가기<span class="paper-ref">논문 3.1~3.4절</span></h3>
+        <p>기본 모델에 길이 $n$인 문장 하나가 들어갈 때 <span class="term" data-definition="텐서 모양(tensor shape): 행렬이나 다차원 배열의 각 축 길이. n×512는 행 n개, 열 512개를 뜻함.">텐서 모양</span>(tensor shape)이 어떻게 바뀌는지 따라간다(배치 생략). 그림의 번호는 아래 풀이의 단계 번호이다. 버튼을 눌러 다음 단계를 보시오.</p>
+        <figure class="svg-diagram animate-in" style="margin:var(--space-2) auto">
+<svg viewBox="0 0 800 196" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="텐서 모양 블록: 임베딩 n×512, 헤드별 n×64 여덟 개, 점수 n×n, 헤드 출력 n×64 여덟 개, 이어 붙인 n×512, Add &amp; Norm n×512, FFN 안 n×2048에서 n×512, 선형 n×37000">
+<text x="0" y="20" font-size="12" font-weight="700">1</text>
+<text x="16" y="20" font-size="12">임베딩 + 위치</text>
+<rect class="node-rect sq" x="150" y="8" width="92.16" height="16"/>
+<text x="250.16" y="20" font-size="12" class="muted"><tspan font-style="italic">n</tspan> × 512</text>
+<text x="0" y="42" font-size="12" font-weight="700">2</text>
+<text x="16" y="42" font-size="12">헤드별 <tspan font-style="italic">Q</tspan>·<tspan font-style="italic">K</tspan>·<tspan font-style="italic">V</tspan></text>
+<rect class="node-rect sq" x="150" y="30" width="11.52" height="16"/>
+<rect class="node-rect sq" x="165.52" y="30" width="11.52" height="16"/>
+<rect class="node-rect sq" x="181.04000000000002" y="30" width="11.52" height="16"/>
+<rect class="node-rect sq" x="196.56000000000003" y="30" width="11.52" height="16"/>
+<rect class="node-rect sq" x="212.08000000000004" y="30" width="11.52" height="16"/>
+<rect class="node-rect sq" x="227.60000000000005" y="30" width="11.52" height="16"/>
+<rect class="node-rect sq" x="243.12000000000006" y="30" width="11.52" height="16"/>
+<rect class="node-rect sq" x="258.64000000000004" y="30" width="11.52" height="16"/>
+<text x="278.16" y="42" font-size="12" class="muted"><tspan font-style="italic">n</tspan> × 64, 헤드 8개</text>
+<text x="0" y="64" font-size="12" font-weight="700">3</text>
+<text x="16" y="64" font-size="12">점수 <tspan font-style="italic">QK</tspan><tspan font-size="9" dy="-5">⊤</tspan></text>
+<rect class="node-rect sq accent" x="150" y="52" width="16" height="16"/>
+<text x="174" y="64" font-size="12" class="muted"><tspan font-style="italic">n</tspan> × <tspan font-style="italic">n</tspan></text>
+<text x="0" y="86" font-size="12" font-weight="700">4</text>
+<text x="16" y="86" font-size="12">헤드 출력</text>
+<rect class="node-rect sq" x="150" y="74" width="11.52" height="16"/>
+<rect class="node-rect sq" x="165.52" y="74" width="11.52" height="16"/>
+<rect class="node-rect sq" x="181.04000000000002" y="74" width="11.52" height="16"/>
+<rect class="node-rect sq" x="196.56000000000003" y="74" width="11.52" height="16"/>
+<rect class="node-rect sq" x="212.08000000000004" y="74" width="11.52" height="16"/>
+<rect class="node-rect sq" x="227.60000000000005" y="74" width="11.52" height="16"/>
+<rect class="node-rect sq" x="243.12000000000006" y="74" width="11.52" height="16"/>
+<rect class="node-rect sq" x="258.64000000000004" y="74" width="11.52" height="16"/>
+<text x="278.16" y="86" font-size="12" class="muted"><tspan font-style="italic">n</tspan> × 64, 헤드 8개</text>
+<text x="0" y="108" font-size="12" font-weight="700">5</text>
+<text x="16" y="108" font-size="12">이어 붙이고 <tspan font-style="italic">W</tspan><tspan font-size="9" dy="-5" font-style="italic">O</tspan></text>
+<rect class="node-rect sq" x="150" y="96" width="92.16" height="16"/>
+<text x="250.16" y="108" font-size="12" class="muted"><tspan font-style="italic">n</tspan> × 512</text>
+<text x="0" y="130" font-size="12" font-weight="700">6</text>
+<text x="16" y="130" font-size="12">Add &amp; Norm</text>
+<rect class="node-rect sq" x="150" y="118" width="92.16" height="16"/>
+<text x="250.16" y="130" font-size="12" class="muted"><tspan font-style="italic">n</tspan> × 512</text>
+<text x="0" y="152" font-size="12" font-weight="700">7</text>
+<text x="16" y="152" font-size="12">FFN 안쪽 → 바깥</text>
+<rect class="node-rect sq accent" x="150" y="140" width="368.64" height="16"/>
+<text x="528.64" y="152" text-anchor="middle" font-size="12">→</text>
+<rect class="node-rect sq" x="538.64" y="140" width="92.16" height="16"/>
+<text x="638.8" y="152" font-size="12" class="muted"><tspan font-style="italic">n</tspan> × 2048 → <tspan font-style="italic">n</tspan> × 512</text>
+<text x="0" y="174" font-size="12" font-weight="700">8</text>
+<text x="16" y="174" font-size="12">6층 뒤 선형</text>
+<rect class="node-rect sq" x="150" y="162" width="480" height="16" style="stroke-dasharray:4 4"/>
+<text x="638" y="174" font-size="12" class="muted"><tspan font-style="italic">n</tspan> × 37000</text>
+<text x="150" y="190" font-size="11" class="muted">폭은 차원에 비례한다. 8행의 점선 상자만 37000 차원을 줄여 그렸다</text>
+</svg>
+        </figure>
+        <div class="math-derivation animate-in" id="ar-deriv-shape">
+          <div class="math-step" data-step="0">
+            <div class="math-equation">$$X = \mathit{Embed} + \mathit{PE} :\; (n \times 512) + (n \times 512) = n \times 512$$</div>
+            <div class="math-explanation"><p>1단계. 토큰 $n$개가 임베딩을 거쳐 $n \times 512$ 행렬이 된다. 위치 인코딩도 $n \times 512$이므로 더해도 모양이 같다.</p></div>
+          </div>
+          <div class="math-step" data-step="1" style="display:none">
+            <div class="math-equation">$$Q_i = XW_i^Q :\; (n \times 512)(512 \times 64) = n \times 64, \quad i = 1, \ldots, 8$$</div>
+            <div class="math-explanation"><p>2단계. 헤드마다 투영 행렬로 쿼리, 키, 값을 만든다. 헤드 8개가 각각 $n \times 64$를 얻는다. 크로스 어텐션의 키와 값은 인코더 출력에서 오므로 $n_{\mathit{src}} \times 64$이다.</p></div>
+          </div>
+          <div class="math-step" data-step="2" style="display:none">
+            <div class="math-equation">$$Q_iK_i^{\top} :\; (n \times 64)(64 \times n) = n \times n$$</div>
+            <div class="math-explanation"><p>3단계. 점수 행렬은 $n \times n$이다. 예시로 $n = 10$이면 $10 \times 10$이다. 크로스 어텐션에서는 $n_{\mathit{tgt}} \times n_{\mathit{src}}$이다.</p></div>
+          </div>
+          <div class="math-step" data-step="3" style="display:none">
+            <div class="math-equation">$$\mathit{head}_i = \mathit{softmax}(\cdot)\,V_i :\; (n \times n)(n \times 64) = n \times 64$$</div>
+            <div class="math-explanation"><p>4단계. 비중 행렬에 값 행렬을 곱하면 헤드 하나의 출력은 다시 $n \times 64$이다.</p></div>
+          </div>
+          <div class="math-step" data-step="4" style="display:none">
+            <div class="math-equation">$$\mathit{Concat}(\mathit{head}_1, \ldots, \mathit{head}_8)\,W^O :\; (n \times 512)(512 \times 512) = n \times 512$$</div>
+            <div class="math-explanation"><p>5단계. 헤드 8개의 $n \times 64$를 이어 붙이면 $n \times 512$이고, $W^O$(512×512)를 곱해도 $n \times 512$이다.</p></div>
+          </div>
+          <div class="math-step" data-step="5" style="display:none">
+            <div class="math-equation">$$\mathit{LayerNorm}\big(X + \mathit{MultiHead}(X)\big) :\; n \times 512$$</div>
+            <div class="math-explanation"><p>6단계. 잔차 연결로 입력 $X$($n \times 512$)를 더하고 LayerNorm을 적용해도 $n \times 512$이다.</p></div>
+          </div>
+          <div class="math-step" data-step="6" style="display:none">
+            <div class="math-equation">$$(n \times 512)(512 \times 2048) = n \times 2048, \qquad (n \times 2048)(2048 \times 512) = n \times 512$$</div>
+            <div class="math-explanation"><p>7단계. FFN 안에서 $n \times 2048$로 넓어졌다가 $n \times 512$로 돌아온다. 다시 Add &amp; Norm을 지나도 $n \times 512$이다.</p></div>
+          </div>
+          <div class="math-step" data-step="7" style="display:none">
+            <div class="math-equation">$$\underbrace{n \times 512 \to \cdots \to n \times 512}_{\times 6}, \qquad (n_{\mathit{tgt}} \times 512)(512 \times 37000) = n_{\mathit{tgt}} \times 37000$$</div>
+            <div class="math-explanation"><p>8단계. 층을 지나도 $n \times 512$가 유지되므로 같은 층을 6번 쌓을 수 있다. 디코더 마지막 출력에 선형 변환을 곱하면 위치마다 어휘 약 37,000개의 점수가 나오고, 소프트맥스가 이를 다음 토큰 확률로 바꾼다.</p></div>
+          </div>
+          <div class="math-controls">
+            <button class="btn math-prev-btn">이전 단계</button>
+            <button class="btn math-next-btn">다음 단계</button>
+            <button class="btn math-reset-btn">처음부터</button>
+            <span class="math-progress"></span>
+          </div>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>텐서는 층 안에서 n×64, n×n, n×2048로 잠시 바뀌지만 층을 나올 때 n×512로 돌아오므로 같은 층을 6번 쌓을 수 있다.</p></div>
+    </div>
+
+    <!-- 페이지 7: 하이퍼파라미터 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>기본 모델과 큰 모델은 무엇이 다른가?</li>
+          <li>헤드 하나의 차원은 두 모델에서 같은가?</li>
+          <li>큰 모델은 학습에 얼마나 더 걸렸는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>기본 모델과 큰 모델<span class="paper-ref">논문 5.2절, 표 3</span></h3>
+        <p><span class="term" data-definition="하이퍼파라미터(hyperparameter): 학습 전에 사람이 정하는 구조와 학습 설정 값. 층 수, 차원, 헤드 수 등.">하이퍼파라미터</span>(hyperparameter)는 학습 전에 정하는 구조와 학습 설정 값이다. 표는 논문의 기본 모델과 큰 모델의 값을 나타낸 것이다.</p>
+        <table class="data-table animate-in">
+          <thead><tr><th>기호</th><th>뜻</th><th class="num">기본 모델</th><th class="num">큰 모델</th></tr></thead>
+          <tbody>
+            <tr><td>$N$</td><td>인코더, 디코더 각각의 층 수</td><td class="num">6</td><td class="num">6</td></tr>
+            <tr><td>$d_{\mathit{model}}$</td><td>하위 층 출력 차원</td><td class="num">512</td><td class="num">1024</td></tr>
+            <tr><td>$d_{\mathit{ff}}$</td><td>FFN 안쪽 차원</td><td class="num">2048</td><td class="num">4096</td></tr>
+            <tr><td>$h$</td><td>헤드 수</td><td class="num">8</td><td class="num">16</td></tr>
+            <tr><td>$d_k = d_v$</td><td>헤드 하나의 차원</td><td class="num">64</td><td class="num">64</td></tr>
+            <tr><td>$P_{\mathit{drop}}$</td><td><span class="term" data-definition="드롭아웃(dropout): 학습 중 일부 값을 무작위로 0으로 만들어 과적합을 줄이는 방법.">드롭아웃</span>(dropout) 비율</td><td class="num">0.1</td><td class="num">0.3</td></tr>
+            <tr class="hl"><td>파라미터</td><td>학습되는 값의 수</td><td class="num">6,500만(65M)</td><td class="num">2억 1,300만(213M)</td></tr>
+            <tr><td>학습</td><td>P100 GPU 8개</td><td class="num">10만 스텝, 12시간</td><td class="num">30만 스텝, 3.5일</td></tr>
+          </tbody>
+          <caption>표는 기본 모델과 큰 모델의 하이퍼파라미터, 파라미터 수, 학습 시간을 나타낸 것이다. (논문 표 3, 5.2절)</caption>
+        </table>
+        <p>두 모델 모두 $d_k = d_{\mathit{model}}/h = 64$이다. 큰 모델은 층 수를 그대로 두고 폭($d_{\mathit{model}}$, $d_{\mathit{ff}}$, $h$)을 두 배로 키웠으며, 스텝당 시간도 약 0.4초에서 1.0초로 늘었다. 층 수와 폭을 바꾼 실험 결과는 5단원에서 다룬다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>큰 모델은 층 수 6을 유지한 채 폭을 두 배로 키워 파라미터가 65M에서 213M으로 늘었고 학습도 12시간에서 3.5일로 길어졌다.</p></div>
+    </div>
+
+    <!-- 페이지 8: 왜 셀프 어텐션인가 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>층 종류마다 계산 비용은 어떻게 다른가?</li>
+          <li>최대 경로 길이가 짧으면 무엇이 좋은가?</li>
+          <li>문장이 매우 길면 셀프 어텐션은 어떤가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>왜 셀프 어텐션인가<span class="paper-ref">논문 4절, 표 1</span></h3>
+        <p>논문은 층 하나의 계산량인 <span class="term" data-definition="복잡도(complexity): 입력 크기에 따라 계산량이 늘어나는 정도. O 기호로 나타냄.">복잡도</span>(complexity), 차례로 해야 하는 순차 연산 수, 두 위치 사이 신호가 지나는 최대 <span class="term" data-definition="경로 길이(path length): 한 위치의 정보가 다른 위치에 닿기까지 거치는 연산 단계의 수.">경로 길이</span>(path length)로 층 종류를 비교한다. 표는 논문 표 1이다($n$: 문장 길이, $d$: 차원, $k$: 커널 크기, $r$: 이웃 크기).</p>
+        <table class="data-table animate-in">
+          <thead><tr><th>층 종류</th><th>층당 복잡도</th><th>순차 연산</th><th>최대 경로 길이</th></tr></thead>
+          <tbody>
+            <tr class="hl"><td>셀프 어텐션</td><td>$O(n^2 \cdot d)$</td><td>$O(1)$</td><td>$O(1)$</td></tr>
+            <tr><td>순환(<span class="term" data-definition="순환 신경망(recurrent neural network, RNN): 앞 위치의 은닉 상태를 받아 다음 위치를 차례로 계산하는 신경망.">RNN</span>)</td><td>$O(n \cdot d^2)$</td><td>$O(n)$</td><td>$O(n)$</td></tr>
+            <tr><td>합성곱</td><td>$O(k \cdot n \cdot d^2)$</td><td>$O(1)$</td><td>$O(\mathit{log}_k(n))$</td></tr>
+            <tr><td>제한 셀프 어텐션</td><td>$O(r \cdot n \cdot d)$</td><td>$O(1)$</td><td>$O(n/r)$</td></tr>
+          </tbody>
+          <caption>표는 층 종류별 복잡도, 순차 연산 수, 최대 경로 길이를 나타낸 것이다. (논문 표 1)</caption>
+        </table>
+        <div class="with-figure" style="--figure-side-width:300px">
+          <div class="callout callout-info animate-in">
+            <div class="callout-content">
+              <strong class="callout-title">보충 설명</strong>
+              <p>논문은 $n &lt; d$이면(문장 표현에서 흔함) 셀프 어텐션이 순환 층보다 빠르다고 본다. 예시 값으로 $d = 512$, $n = 50$이면 $n^2 d$는 128만, $n d^2$는 약 1,311만이다.</p>
+              <p>반대로 $n = 2000$이면 $n^2 d$가 약 20억으로 $n d^2$(약 5억)의 4배이다. 이는 긴 시퀀스에서 $n^2$이 부담이 된다는 해석으로 이어지며, 논문의 제한 셀프 어텐션은 이웃 $r$개만 보아 이 부담을 줄이는 안이다.</p>
+            </div>
+          </div>
+          <figure class="figure side">
+<svg viewBox="0 0 300 222" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="d=512에서 문장 길이 n에 따른 셀프 어텐션 n²d와 순환 층 nd²의 계산량. n=512에서 두 곡선이 만나며 그보다 짧으면 셀프 어텐션이 적다">
+<text x="150" y="12" text-anchor="middle" font-size="12" font-weight="700">층당 계산량(<tspan font-style="italic">d</tspan> = 512)</text>
+<line class="guide" x1="40" y1="188.0" x2="288" y2="188.0"/>
+<text x="36" y="192.0" text-anchor="end" font-size="10" class="muted">0억</text>
+<line class="guide" x1="40" y1="134.7" x2="288" y2="134.7"/>
+<text x="36" y="138.7" text-anchor="end" font-size="10" class="muted">2억</text>
+<line class="guide" x1="40" y1="81.3" x2="288" y2="81.3"/>
+<text x="36" y="85.3" text-anchor="end" font-size="10" class="muted">4억</text>
+<line class="guide" x1="40" y1="28.0" x2="288" y2="28.0"/>
+<text x="36" y="32.0" text-anchor="end" font-size="10" class="muted">6억</text>
+<line class="guide-axis" x1="40.0" y1="188" x2="40.0" y2="192"/>
+<text x="40.0" y="204" text-anchor="middle" font-size="10" class="muted">0</text>
+<line class="guide-axis" x1="102.0" y1="188" x2="102.0" y2="192"/>
+<text x="102.0" y="204" text-anchor="middle" font-size="10" class="muted">256</text>
+<line class="guide-axis" x1="164.0" y1="188" x2="164.0" y2="192"/>
+<text x="164.0" y="204" text-anchor="middle" font-size="10" class="muted">512</text>
+<line class="guide-axis" x1="226.0" y1="188" x2="226.0" y2="192"/>
+<text x="226.0" y="204" text-anchor="middle" font-size="10" class="muted">768</text>
+<line class="guide-axis" x1="288.0" y1="188" x2="288.0" y2="192"/>
+<text x="288.0" y="204" text-anchor="middle" font-size="10" class="muted">1024</text>
+<line class="guide-axis" x1="40" y1="188" x2="288" y2="188"/>
+<polyline class="ink accent" style="fill:none" points="40.0,188.0 43.9,188.0 47.8,187.9 51.6,187.7 55.5,187.4 59.4,187.1 63.2,186.7 67.1,186.3 71.0,185.8 74.9,185.2 78.8,184.5 82.6,183.8 86.5,183.0 90.4,182.1 94.2,181.1 98.1,180.1 102.0,179.1 105.9,177.9 109.8,176.7 113.6,175.4 117.5,174.0 121.4,172.6 125.2,171.1 129.1,169.5 133.0,167.9 136.9,166.2 140.8,164.4 144.6,162.5 148.5,160.6 152.4,158.6 156.2,156.5 160.1,154.4 164.0,152.2 167.9,149.9 171.8,147.6 175.6,145.2 179.5,142.7 183.4,140.1 187.2,137.5 191.1,134.8 195.0,132.1 198.9,129.2 202.8,126.3 206.6,123.4 210.5,120.3 214.4,117.2 218.2,114.0 222.1,110.8 226.0,107.5 229.9,104.1 233.8,100.6 237.6,97.1 241.5,93.5 245.4,89.8 249.2,86.1 253.1,82.3 257.0,78.4 260.9,74.4 264.8,70.4 268.6,66.3 272.5,62.2 276.4,57.9 280.2,53.6 284.1,49.3 288.0,44.8"/>
+<polyline class="ink" style="fill:none" points="40.0,188.0 43.9,186.9 47.8,185.8 51.6,184.6 55.5,183.5 59.4,182.4 63.2,181.3 67.1,180.2 71.0,179.1 74.9,177.9 78.8,176.8 82.6,175.7 86.5,174.6 90.4,173.5 94.2,172.3 98.1,171.2 102.0,170.1 105.9,169.0 109.8,167.9 113.6,166.7 117.5,165.6 121.4,164.5 125.2,163.4 129.1,162.3 133.0,161.2 136.9,160.0 140.8,158.9 144.6,157.8 148.5,156.7 152.4,155.6 156.2,154.4 160.1,153.3 164.0,152.2 167.9,151.1 171.8,150.0 175.6,148.9 179.5,147.7 183.4,146.6 187.2,145.5 191.1,144.4 195.0,143.3 198.9,142.1 202.8,141.0 206.6,139.9 210.5,138.8 214.4,137.7 218.2,136.5 222.1,135.4 226.0,134.3 229.9,133.2 233.8,132.1 237.6,131.0 241.5,129.8 245.4,128.7 249.2,127.6 253.1,126.5 257.0,125.4 260.9,124.2 264.8,123.1 268.6,122.0 272.5,120.9 276.4,119.8 280.2,118.7 284.1,117.5 288.0,116.4"/>
+<line class="guide" x1="164.0" y1="144.2" x2="164.0" y2="188" style="stroke-dasharray:3 3"/>
+<text x="158.0" y="140.2" text-anchor="end" font-size="10" class="muted"><tspan font-style="italic">n</tspan> = <tspan font-style="italic">d</tspan></text>
+<text x="236" y="80" text-anchor="end" font-size="11" class="accent-text">셀프 <tspan font-style="italic">n</tspan>²<tspan font-style="italic">d</tspan></text>
+<text x="284" y="148" text-anchor="end" font-size="11">순환 <tspan font-style="italic">nd</tspan>²</text>
+<text x="164" y="218" text-anchor="middle" font-size="10" class="muted">문장 길이 <tspan font-style="italic">n</tspan></text>
+</svg>
+            <figcaption class="figure-caption">그림은 식으로 계산한 두 층의 계산량을 나타낸 것이다(예시 값).</figcaption>
+          </figure>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>셀프 어텐션은 순차 연산과 경로 길이가 O(1)이고 n &lt; d이면 순환 층보다 계산량도 적지만, 문장이 길면 n²에 비례하는 비용이 커진다.</p></div>
+    </div>
+
+    <!-- 페이지 9: 핵심 정리와 확인 문제 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-accent animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">핵심 정리</strong>
+            <ol>
+              <li>인코더와 디코더는 각각 같은 층 6개를 쌓고, 인코더 마지막 층의 출력이 디코더 6개 층 모두의 크로스 어텐션에 들어간다.</li>
+              <li>하위 층마다 LayerNorm(x + Sublayer(x))를 적용하므로 모든 출력이 512차원이다.</li>
+              <li>층을 지나도 n×512가 유지되므로 같은 층을 N번 쌓을 수 있다.</li>
+              <li>셀프 어텐션은 경로 길이가 O(1)이지만 계산량이 n²에 비례한다.</li>
+            </ol>
+            <p>텐서 모양을 묻는 문항은 행렬 곱의 안쪽 차원이 맞는지부터 확인하라.</p>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>층 배치와 텐서 모양</h3>
+        <div class="quiz-container animate-in" id="ar-quiz-1">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="② | 점수 행렬은 (출력 길이) × (입력 길이) = 5×8이고, (5×8)(8×64)이므로 헤드 출력은 5×64이다."
+               data-explanation-wrong="| 정답은 ②이다. 쿼리는 출력 5토큰, 키는 입력 8토큰이므로 점수 행렬이 5×8이고 헤드 출력은 5×64이다. ④는 헤드 8개를 이어 붙인 뒤의 모양을 적었으므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">1</span>기본 모델의 디코더 크로스 어텐션에서 출력 문장이 5토큰, 입력 문장이 8토큰일 때 헤드 하나의 점수 행렬과 출력의 모양을 옳게 짝지은 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 5×5, 5×64</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 5×8, 5×64</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 8×5, 8×64</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 5×8, 5×512</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 8×8, 8×512</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-d"
+               data-explanation-right="④ | 디코더의 모든 층은 같은 번호의 인코더 층이 아니라 인코더 마지막 층의 출력을 받으므로 ④가 옳지 않다."
+               data-explanation-wrong="| 정답은 ④이다. 디코더 6개 층은 모두 인코더 마지막 층의 출력을 받는다. ③은 논문 3.2.3절의 설명과 같으므로 옳다.">
+            <h3 class="quiz-question"><span class="q-num">2</span>트랜스포머 구조에 대한 설명으로 옳지 <u>않은</u> 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 인코더와 디코더는 각각 같은 모양의 층 6개를 쌓는다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 디코더 층은 하위 층 3개로 이루어진다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 크로스 어텐션의 키와 값은 인코더 출력에서 온다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 디코더의 각 층은 같은 번호의 인코더 층 출력을 받는다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 모든 하위 층의 출력 차원은 512이다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('ar-quiz-1')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('ar-quiz-1')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>크로스 어텐션의 점수 행렬은 (출력 길이) × (입력 길이)이고, 디코더의 모든 층은 인코더 마지막 층의 출력을 받는다.</p></div>
+    </div>
+
+    <!-- 페이지 10: 확인 문제 (계속) -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>위치 인코딩과 FFN은 무엇을 하는가?</li>
+          <li>표 1에서 셀프 어텐션의 장점과 대가는 무엇인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>부품과 계산 비용</h3>
+        <div class="quiz-container animate-in" id="ar-quiz-2">
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="① | 위치 인코딩은 임베딩에 더하므로 차원이 같다. ㄴ, ㄷ은 옳지 않다."
+               data-explanation-wrong="| 정답은 ①이다. FFN은 위치마다 따로 적용되고, BLEU는 25.7과 25.8로 거의 같다. ④는 옳지 않은 ㄷ을 포함한다.">
+            <h3 class="quiz-question"><span class="q-num">3</span>위치 인코딩과 FFN에 대한 설명으로 옳은 것만을 <span class="nobr">&lt;보기&gt;에서</span> 있는 대로 고른 것은?<span class="q-points">[3점]</span></h3>
+            <div class="bogi">
+              <p>ㄱ. 위치 인코딩은 임베딩과 차원이 같다.</p>
+              <p>ㄴ. FFN은 여러 위치를 섞어 계산한다.</p>
+              <p>ㄷ. 학습형 위치 임베딩은 BLEU가 크게 낮았다.</p>
+            </div>
+            <div class="quiz-options row" style="grid-template-columns:repeat(3, minmax(0, 1fr))">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① ㄱ</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② ㄴ</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ ㄱ, ㄴ</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ ㄱ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ ㄱ, ㄴ, ㄷ</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="② | 셀프 어텐션은 모든 위치를 한 번에 비교하므로 어떤 두 위치도 O(1) 경로로 이어진다."
+               data-explanation-wrong="| 정답은 ②이다. 셀프 어텐션의 최대 경로 길이는 O(1)이다. ⑤는 $n &gt; d$이면 $n^2 d$가 $n d^2$보다 커지므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">4</span>논문 표 1에 대한 해석으로 옳은 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 순환 층은 순차 연산이 O(1)이다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 셀프 어텐션은 두 위치를 O(1) 경로로 잇는다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 셀프 어텐션의 복잡도는 $n$에 비례한다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 합성곱 층의 최대 경로 길이는 O(1)이다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ $n &gt; d$이면 셀프 어텐션이 언제나 더 싸다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('ar-quiz-2')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('ar-quiz-2')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>위치 인코딩은 임베딩과 같은 차원으로 더하고, 셀프 어텐션은 경로 길이 O(1)을 얻는 대신 n²에 비례하는 비용을 치른다.</p></div>
+    </div>
+
+  </div>
+</section>

@@ -1,0 +1,600 @@
+<section class="module" id="module-5">
+  <div class="module-content">
+
+    <div class="module-header">
+      <span class="module-number">6</span>
+      <h2 class="module-title">결과</h2>
+      <p class="module-subtitle">표와 그림으로 RAG의 성능, 검색의 역할, 한계를 읽는다</p>
+    </div>
+
+    <!-- 페이지 1: 표 1 결과 비교 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">학습 목표</strong>
+            <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
+            <ol>
+              <li>표 1과 표 2에서 RAG와 비교 대상의 점수를 비교하고 차이를 해석할 수 있다.</li>
+              <li>제거 실험과 index hot-swapping 결과로 검색 구성 요소의 역할을 설명할 수 있다.</li>
+              <li>retrieval collapse와 null document 같은 한계를 설명할 수 있다.</li>
+            </ol>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>오픈 도메인 QA<span class="paper-ref">논문 4.1절, 표 1</span></h3>
+        <p>그림은 네 <span class="term" data-definition="오픈 도메인 질의응답(Open-Domain QA): 정답이 든 문서를 주지 않고, 넓은 자료에서 스스로 찾아 질문에 답하는 과제.">오픈 도메인 질의응답(Open-Domain QA)</span> 데이터셋에서 테스트 <span class="term" data-definition="exact match(완전 일치, EM): 예측 답이 정답과 글자 그대로 같으면 1점, 아니면 0점을 주고 문항 수로 평균한 값.">exact match(완전 일치, EM)</span>를 나타낸 것이다.</p>
+        <div class="result-comparison animate-in" data-unit="" data-max="70">
+          <div class="result-header">
+            <h4>테스트 EM(%, -는 값 없음)</h4>
+            <div class="result-metric-toggle">
+              <button class="result-metric active" data-metric="nq">NQ</button>
+              <button class="result-metric" data-metric="tqa">TQA 표준</button>
+              <button class="result-metric" data-metric="tqawiki">TQA-Wiki</button>
+              <button class="result-metric" data-metric="wq">WQ</button>
+              <button class="result-metric" data-metric="ct">CT</button>
+            </div>
+          </div>
+          <div class="result-bars">
+            <div class="result-bar" data-nq="44.5" data-tqa="56.8" data-tqawiki="68.0" data-wq="45.2" data-ct="52.2">
+              <span class="result-label">RAG-Sequence(본 논문)</span>
+              <div class="result-bar-track"><div class="result-fill ours" style="width:0%"></div></div>
+              <span class="result-value"></span>
+            </div>
+            <div class="result-bar" data-nq="44.1" data-tqa="55.2" data-tqawiki="66.1" data-wq="45.5" data-ct="50.0">
+              <span class="result-label">RAG-Token(본 논문)</span>
+              <div class="result-bar-track"><div class="result-fill ours" style="width:0%"></div></div>
+              <span class="result-value"></span>
+            </div>
+            <div class="result-bar" data-nq="41.5" data-tqa="57.9" data-tqawiki="-" data-wq="41.1" data-ct="50.6">
+              <span class="result-label">DPR(open-book)</span>
+              <div class="result-bar-track"><div class="result-fill baseline" style="width:0%"></div></div>
+              <span class="result-value"></span>
+            </div>
+            <div class="result-bar" data-nq="40.4" data-tqa="-" data-tqawiki="-" data-wq="40.7" data-ct="46.8">
+              <span class="result-label">REALM(open-book)</span>
+              <div class="result-bar-track"><div class="result-fill baseline" style="width:0%"></div></div>
+              <span class="result-value"></span>
+            </div>
+            <div class="result-bar" data-nq="36.6" data-tqa="-" data-tqawiki="60.5" data-wq="44.7" data-ct="-">
+              <span class="result-label">T5-11B+SSM(closed-book)</span>
+              <div class="result-bar-track"><div class="result-fill baseline" style="width:0%"></div></div>
+              <span class="result-value"></span>
+            </div>
+            <div class="result-bar" data-nq="34.5" data-tqa="-" data-tqawiki="50.1" data-wq="37.4" data-ct="-">
+              <span class="result-label">T5-11B(closed-book)</span>
+              <div class="result-bar-track"><div class="result-fill baseline" style="width:0%"></div></div>
+              <span class="result-value"></span>
+            </div>
+          </div>
+        </div>
+        <p>NQ, WQ, CT에서는 RAG가 가장 높다. TQA는 T5와 비교하는 TQA-Wiki 분할에서만 가장 높고, 표준 분할에서는 DPR(57.9)이 RAG-Sequence(56.8)보다 높다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>RAG는 NQ, WQ, CT와 TQA-Wiki에서 가장 높은 EM을 얻었지만 TQA 표준 분할에서는 DPR보다 낮다.</p></div>
+    </div>
+
+    <!-- 페이지 2: 표 1 해석 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>파라미터가 훨씬 적은 RAG가 왜 T5-11B를 앞서는가?</li>
+          <li>답을 생성하면 추출보다 무엇이 나은가?</li>
+          <li>이 비교에서 조심할 점은 무엇인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">표 1 읽기: 크기, 생성, 초기화<span class="paper-ref">논문 4.1절, 부록 G</span></h3>
+        <div class="with-figure" style="--figure-side-width:300px">
+          <div>
+            <p><strong>작은 모델 + 외부 기억</strong> RAG의 학습 파라미터는 6억 2,600만 개(626M)로 T5-11B의 110억 개보다 훨씬 적다. 크기가 비슷한 T5-large(7억 7,000만 개)는 NQ 28.9로 RAG-Sequence 44.5보다 크게 낮다.</p>
+            <p><strong>생성의 이점</strong> 답은 없고 단서만 있는 문서도 생성에 기여한다. 검색 문서 어디에도 정답이 없을 때도 NQ에서 11.8%를 맞혔는데, 추출형이라면 0%이다.</p>
+            <p><strong>조심할 점</strong> REALM, T5+SSM과 달리 비싼 <span class="term" data-definition="salient span masking(SSM, 개체·날짜 같은 핵심 구간만 가리는 사전학습): 문장에서 개체나 날짜 구간을 가리고 맞히게 하는 사전학습 방법.">salient span masking(SSM, 개체·날짜 같은 핵심 구간만 가리는 사전학습)</span> 없이 얻은 결과이다. 다만 retriever는 NQ와 TQA의 검색 감독을 쓴 DPR로 초기화했다.</p>
+          </div>
+          <figure class="figure side">
+<svg viewBox="0 0 312 208" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="학습 파라미터 수와 NQ EM. RAG-Sequence 6억 2,600만 개 44.5, T5-large 7억 7,000만 개 28.9, T5-11B 110억 개 34.5">
+<path class="guide" d="M44,168.0 H284"/>
+<text x="38" y="172.0" class="muted" text-anchor="end" font-size="11">20</text>
+<path class="guide" d="M44,120.0 H284"/>
+<text x="38" y="124.0" class="muted" text-anchor="end" font-size="11">30</text>
+<path class="guide" d="M44,72.0 H284"/>
+<text x="38" y="76.0" class="muted" text-anchor="end" font-size="11">40</text>
+<path class="guide" d="M44,24.0 H284"/>
+<text x="38" y="28.0" class="muted" text-anchor="end" font-size="11">50</text>
+<path class="guide-axis" d="M44,16 V168 H284" fill="none"/>
+<text x="44.0" y="184" class="muted" text-anchor="middle" font-size="11">1억</text>
+<text x="124.0" y="184" class="muted" text-anchor="middle" font-size="11">10억</text>
+<text x="204.0" y="184" class="muted" text-anchor="middle" font-size="11">100억</text>
+<text x="284.0" y="184" class="muted" text-anchor="middle" font-size="11">1,000억</text>
+<text x="164" y="202" class="muted" text-anchor="middle" font-size="11">학습 파라미터 수(로그 눈금)</text>
+<text x="8" y="10" class="muted" text-anchor="start" font-size="11">NQ EM</text>
+<circle class="ink-fill" cx="114.9" cy="125.3" r="5"/>
+<text x="124.9" y="129.3" text-anchor="start" font-size="12">T5-large 28.9</text>
+<circle class="ink-fill" cx="207.3" cy="98.4" r="5"/>
+<text x="207.3" y="88.4" text-anchor="middle" font-size="12">T5-11B 34.5</text>
+<circle class="dot-accent" cx="107.7" cy="50.4" r="5"/>
+<text x="117.7" y="54.4" class="accent-text" text-anchor="start" font-size="12">RAG-Seq. 44.5</text>
+</svg>
+            <figcaption class="figure-caption">그림은 학습 파라미터 수와 NQ EM을 나타낸 것이다. (논문 표 1, 부록 G)</figcaption>
+          </figure>
+        </div>
+        <p>RAG는 문서를 <span class="term" data-definition="cross-encoder(query와 문서를 함께 읽고 점수): 질문과 문서를 한 입력으로 이어 넣어 관련도를 매기는 모델. 정확하지만 문서마다 다시 계산해야 함.">cross-encoder(query와 문서를 함께 읽고 점수)</span>로 다시 순위 매기는 단계도, 답 구간을 고르는 <span class="term" data-definition="reader(검색 문서에서 답을 읽어 내는 모델): 검색한 문서를 읽고 답 구간을 찾는 모델.">reader(검색 문서에서 답을 읽어 내는 모델)</span>도 없이 DPR QA 시스템보다 높다. 논문은 두 단계가 최고 성능에 꼭 필요하지 않다는 근거로 이 결과를 든다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>RAG는 작은 파라미터에 외부 기억을 붙여 큰 closed-book 모델을 앞서고 정답이 없는 문서에서도 답을 만들지만, retriever가 QA 감독을 받은 DPR에서 출발했다는 점을 함께 봐야 한다.</p></div>
+    </div>
+
+    <!-- 페이지 3: 표 2 결과 비교 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>검색을 붙이면 BART 기준선보다 얼마나 나은가?</li>
+          <li>gold 문맥을 쓴 최고 성능과는 얼마나 차이 나는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>생성과 분류<span class="paper-ref">논문 4.2~4.4절, 표 2</span></h3>
+        <p>그림은 생성·분류 과제의 테스트 점수를 나타낸 것이다(논문 표 2). 버튼으로 지표를 바꾸시오. *는 gold 문맥이나 증거를 받은 모델이고, FEVER에서는 두 RAG 모델이 같으므로 값이 같다.</p>
+        <div class="result-comparison animate-in" data-unit="" data-max="100">
+          <div class="result-header">
+            <h4>생성·분류 테스트 점수</h4>
+            <div class="result-metric-toggle">
+              <button class="result-metric active" data-metric="jeoqb">Jeopardy QB-1</button>
+              <button class="result-metric" data-metric="jeob">Jeopardy B-1</button>
+              <button class="result-metric" data-metric="msrl">MS MARCO R-L</button>
+              <button class="result-metric" data-metric="msb">MS MARCO B-1</button>
+              <button class="result-metric" data-metric="fevthree">FEVER-3</button>
+              <button class="result-metric" data-metric="fevtwo">FEVER-2</button>
+            </div>
+          </div>
+          <div class="result-bars">
+            <div class="result-bar" data-jeoqb="21.4" data-jeob="14.7" data-msrl="40.8" data-msb="44.2" data-fevthree="72.5" data-fevtwo="89.5">
+              <span class="result-label">RAG-Sequence(본 논문)</span>
+              <div class="result-bar-track"><div class="result-fill ours" style="width:0%"></div></div>
+              <span class="result-value"></span>
+            </div>
+            <div class="result-bar" data-jeoqb="22.2" data-jeob="17.3" data-msrl="40.1" data-msb="41.5" data-fevthree="72.5" data-fevtwo="89.5">
+              <span class="result-label">RAG-Token(본 논문)</span>
+              <div class="result-bar-track"><div class="result-fill ours" style="width:0%"></div></div>
+              <span class="result-value"></span>
+            </div>
+            <div class="result-bar" data-jeoqb="19.7" data-jeob="15.1" data-msrl="38.2" data-msb="41.6" data-fevthree="64.0" data-fevtwo="81.1">
+              <span class="result-label">BART 기준선</span>
+              <div class="result-bar-track"><div class="result-fill baseline" style="width:0%"></div></div>
+              <span class="result-value"></span>
+            </div>
+            <div class="result-bar" data-jeoqb="-" data-jeob="-" data-msrl="49.8*" data-msb="49.9*" data-fevthree="76.8" data-fevtwo="92.2*">
+              <span class="result-label">최고 성능</span>
+              <div class="result-bar-track"><div class="result-fill baseline" style="width:0%"></div></div>
+              <span class="result-value"></span>
+            </div>
+          </div>
+        </div>
+        <p>MS MARCO에서 RAG-Sequence는 BART <span class="term" data-definition="기준선(Baseline): 새 방법의 효과를 판단하려고 비교 대상으로 두는 기존 방법이나 모델.">기준선(Baseline)</span>보다 BLEU-1과 ROUGE-L이 각각 2.6점 높다. FEVER-3은 검색 감독을 쓴 복잡한 파이프라인인 <span class="term" data-definition="최고 성능(State of the Art): 비교 시점에 그 과제에서 보고된 가장 좋은 결과.">최고 성능(State of the Art)</span>과 4.3% 차이 이내이고, FEVER-2는 gold 증거 문장을 받은 RoBERTa와 2.7% 차이 이내이다.</p>
+        <p>FEVER에서 RAG의 1순위 문서가 gold 문서인 경우는 71%, 상위 10개 안에 있는 경우는 90%로, 검색 감독 없이도 증거를 꽤 잘 찾는다. Jeopardy B-1에서는 RAG-Sequence(14.7)가 BART(15.1)보다 낮다는 점도 함께 본다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>RAG는 생성·분류 과제에서 대부분 BART 기준선보다 높고, gold 문맥을 받은 최고 성능에 몇 점 차이로 다가간다.</p></div>
+    </div>
+
+    <!-- 페이지 4: 사람 평가와 다양성 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>사람이 보기에 RAG의 질문은 더 사실적인가?</li>
+          <li>RAG의 생성 문장은 더 다양한가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>사람 평가와 다양성<span class="paper-ref">논문 4.3절, 4.5절, 표 4·5</span></h3>
+        <p>평가자는 답 하나와 질문 두 개(BART, RAG-Token)를 보고 넷 중 하나를 고른다. 그림은 Jeopardy 질문 452쌍의 <span class="term" data-definition="사람 평가(Human Evaluation): 사람 평가자가 모델 출력을 직접 읽고 판단하는 평가.">사람 평가(Human Evaluation)</span> 결과를 <span class="term" data-definition="사실성(Factuality), 구체성(Specificity): 사실성은 문장을 믿을 만한 외부 자료로 확인할 수 있는 정도, 구체성은 입력과 출력이 서로 강하게 맞물린 정도.">사실성(Factuality)과 구체성(Specificity)</span>으로 나누어 나타낸 것이다.</p>
+        <figure class="svg-diagram fit animate-in" style="--diagram-max:760px">
+<svg viewBox="0 0 800 140" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Jeopardy 질문 452쌍의 사람 평가. 사실성은 RAG 나음 42.7%, BART 나음 7.1%. 구체성은 RAG 나음 37.4%, BART 나음 16.8%">
+<text x="104" y="16" text-anchor="start" font-size="13"><tspan font-weight="700">사실성</tspan></text>
+<path class="guide-axis" d="M104,24 V134" fill="none"/>
+<text x="96" y="39" text-anchor="end" font-size="12">BART 나음</text>
+<rect class="ink-fill" x="104" y="28" width="35.5" height="14" fill-opacity="0.35"/>
+<text x="145.5" y="39" class="muted" text-anchor="start" font-size="12">7.1%</text>
+<text x="96" y="61" text-anchor="end" font-size="12">RAG 나음</text>
+<rect class="accent-fill" x="104" y="50" width="213.5" height="14"/>
+<text x="323.5" y="61" class="accent-text" text-anchor="start" font-size="12">42.7%</text>
+<text x="96" y="83" text-anchor="end" font-size="12">둘 다 좋음</text>
+<rect class="ink-fill" x="104" y="72" width="58.5" height="14" fill-opacity="0.35"/>
+<text x="168.5" y="83" class="muted" text-anchor="start" font-size="12">11.7%</text>
+<text x="96" y="105" text-anchor="end" font-size="12">둘 다 나쁨</text>
+<rect class="ink-fill" x="104" y="94" width="88.5" height="14" fill-opacity="0.35"/>
+<text x="198.5" y="105" class="muted" text-anchor="start" font-size="12">17.7%</text>
+<text x="96" y="127" text-anchor="end" font-size="12">다수 없음</text>
+<rect class="ink-fill" x="104" y="116" width="104.0" height="14" fill-opacity="0.35"/>
+<text x="214.0" y="127" class="muted" text-anchor="start" font-size="12">20.8%</text>
+<text x="512" y="16" text-anchor="start" font-size="13"><tspan font-weight="700">구체성</tspan></text>
+<path class="guide-axis" d="M512,24 V134" fill="none"/>
+<text x="504" y="39" text-anchor="end" font-size="12">BART 나음</text>
+<rect class="ink-fill" x="512" y="28" width="84.0" height="14" fill-opacity="0.35"/>
+<text x="602.0" y="39" class="muted" text-anchor="start" font-size="12">16.8%</text>
+<text x="504" y="61" text-anchor="end" font-size="12">RAG 나음</text>
+<rect class="accent-fill" x="512" y="50" width="187.0" height="14"/>
+<text x="705.0" y="61" class="accent-text" text-anchor="start" font-size="12">37.4%</text>
+<text x="504" y="83" text-anchor="end" font-size="12">둘 다 좋음</text>
+<rect class="ink-fill" x="512" y="72" width="59.0" height="14" fill-opacity="0.35"/>
+<text x="577.0" y="83" class="muted" text-anchor="start" font-size="12">11.8%</text>
+<text x="504" y="105" text-anchor="end" font-size="12">둘 다 나쁨</text>
+<rect class="ink-fill" x="512" y="94" width="34.5" height="14" fill-opacity="0.35"/>
+<text x="552.5" y="105" class="muted" text-anchor="start" font-size="12">6.9%</text>
+<text x="504" y="127" text-anchor="end" font-size="12">다수 없음</text>
+<rect class="ink-fill" x="512" y="116" width="100.5" height="14" fill-opacity="0.35"/>
+<text x="618.5" y="127" class="muted" text-anchor="start" font-size="12">20.1%</text>
+</svg>
+          <figcaption class="figure-caption">그림은 쌍대 비교에서 각 선택지를 고른 비율을 나타낸 것이다. 구체성의 합은 표의 값 그대로 93.0%이다. (논문 표 4)</figcaption>
+        </figure>
+        <p>사실성에서 RAG가 낫다는 판정은 42.7%로 BART가 낫다는 7.1%의 약 6배이다. 표는 생성 문장의 <span class="term" data-definition="다양성(Diversity, 서로 다른 n-gram의 비율): 생성한 전체 n-gram 가운데 서로 다른 n-gram이 차지하는 비율. 높을수록 같은 표현을 덜 되풀이함.">다양성(Diversity, 서로 다른 n-gram의 비율)</span>을 서로 다른 trigram의 비율로 나타낸 것이다.</p>
+        <table class="data-table animate-in">
+          <thead><tr><th>과제</th><th class="num">Gold(사람)</th><th class="num">BART</th><th class="num">RAG-Token</th><th class="num">RAG-Sequence</th></tr></thead>
+          <tbody>
+            <tr><td>MS MARCO</td><td class="num">89.6%</td><td class="num">70.7%</td><td class="num">77.8%</td><td class="num">83.5%</td></tr>
+            <tr><td>Jeopardy</td><td class="num">90.0%</td><td class="num">32.4%</td><td class="num">46.8%</td><td class="num">53.8%</td></tr>
+          </tbody>
+          <caption>표는 생성 문장에서 서로 다른 trigram의 비율을 나타낸 것이다. (논문 표 5)</caption>
+        </table>
+        <p>RAG는 다양성을 높이는 디코딩 기법 없이도 BART보다 덜 되풀이한다. 다만 Jeopardy에서도 사람이 쓴 질문(90.0%)과는 차이가 크다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>사람 평가에서 RAG의 질문이 더 사실적이고 구체적이며, 생성 문장의 다양성도 RAG-Sequence, RAG-Token, BART 순으로 높다.</p></div>
+    </div>
+
+    <!-- 페이지 5: 그림 2 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>토큰을 만들 때 어느 문서가 쓰이는가?</li>
+          <li>두 기억은 어떻게 나누어 일하는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>생성 중 문서의 사후 확률<span class="paper-ref">논문 4.3절, 그림 2</span></h3>
+        <p>RAG-Token은 토큰마다 문서를 다시 고를 수 있으므로, 토큰을 만들 때 각 문서가 얼마나 쓰였는지를 문서별 <span class="term" data-definition="사후 확률(Posterior): 출력을 보고 난 뒤 다시 계산한 확률. 여기서는 어떤 토큰을 만들 때 각 문서가 쓰였을 확률.">사후 확률(Posterior)</span>로 볼 수 있다. 그림은 입력 “Hemingway”로 문서 5개를 검색해 질문을 만들 때의 모습이다.</p>
+        <figure class="svg-diagram fit animate-in" style="--diagram-max:712px">
+<svg viewBox="0 0 712 196" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="토큰마다 문서 5개의 사후 확률을 색 농도로 나타낸 예시 격자. 제목 첫 토큰에서 한 문서가 진하고 그 뒤에는 평평하다">
+<text x="106" y="18" class="mono" text-anchor="middle" font-size="12">The</text>
+<rect class="accent-fill" x="80" y="28" width="52" height="24" fill-opacity="0.15"/>
+<rect class="accent-fill" x="80" y="56" width="52" height="24" fill-opacity="0.9"/>
+<rect class="accent-fill" x="80" y="84" width="52" height="24" fill-opacity="0.15"/>
+<rect class="accent-fill" x="80" y="112" width="52" height="24" fill-opacity="0.15"/>
+<rect class="accent-fill" x="80" y="140" width="52" height="24" fill-opacity="0.15"/>
+<text x="162" y="18" class="mono" text-anchor="middle" font-size="12">Sun</text>
+<rect class="accent-fill" x="136" y="28" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="136" y="56" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="136" y="84" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="136" y="112" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="136" y="140" width="52" height="24" fill-opacity="0.2"/>
+<text x="218" y="18" class="mono" text-anchor="middle" font-size="12">Also</text>
+<rect class="accent-fill" x="192" y="28" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="192" y="56" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="192" y="84" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="192" y="112" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="192" y="140" width="52" height="24" fill-opacity="0.2"/>
+<text x="274" y="18" class="mono" text-anchor="middle" font-size="12">Rises</text>
+<rect class="accent-fill" x="248" y="28" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="248" y="56" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="248" y="84" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="248" y="112" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="248" y="140" width="52" height="24" fill-opacity="0.2"/>
+<text x="330" y="18" class="mono" text-anchor="middle" font-size="12">…</text>
+<rect class="accent-fill" x="304" y="28" width="52" height="24" fill-opacity="0.45"/>
+<rect class="accent-fill" x="304" y="56" width="52" height="24" fill-opacity="0.45"/>
+<rect class="accent-fill" x="304" y="84" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="304" y="112" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="304" y="140" width="52" height="24" fill-opacity="0.2"/>
+<text x="386" y="18" class="mono" text-anchor="middle" font-size="12">author</text>
+<rect class="accent-fill" x="360" y="28" width="52" height="24" fill-opacity="0.45"/>
+<rect class="accent-fill" x="360" y="56" width="52" height="24" fill-opacity="0.45"/>
+<rect class="accent-fill" x="360" y="84" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="360" y="112" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="360" y="140" width="52" height="24" fill-opacity="0.2"/>
+<text x="442" y="18" class="mono" text-anchor="middle" font-size="12">of</text>
+<rect class="accent-fill" x="416" y="28" width="52" height="24" fill-opacity="0.45"/>
+<rect class="accent-fill" x="416" y="56" width="52" height="24" fill-opacity="0.45"/>
+<rect class="accent-fill" x="416" y="84" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="416" y="112" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="416" y="140" width="52" height="24" fill-opacity="0.2"/>
+<text x="498" y="18" class="mono" text-anchor="middle" font-size="12">A</text>
+<rect class="accent-fill" x="472" y="28" width="52" height="24" fill-opacity="0.9"/>
+<rect class="accent-fill" x="472" y="56" width="52" height="24" fill-opacity="0.15"/>
+<rect class="accent-fill" x="472" y="84" width="52" height="24" fill-opacity="0.15"/>
+<rect class="accent-fill" x="472" y="112" width="52" height="24" fill-opacity="0.15"/>
+<rect class="accent-fill" x="472" y="140" width="52" height="24" fill-opacity="0.15"/>
+<text x="554" y="18" class="mono" text-anchor="middle" font-size="12">Farewell</text>
+<rect class="accent-fill" x="528" y="28" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="528" y="56" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="528" y="84" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="528" y="112" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="528" y="140" width="52" height="24" fill-opacity="0.2"/>
+<text x="610" y="18" class="mono" text-anchor="middle" font-size="12">to</text>
+<rect class="accent-fill" x="584" y="28" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="584" y="56" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="584" y="84" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="584" y="112" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="584" y="140" width="52" height="24" fill-opacity="0.2"/>
+<text x="666" y="18" class="mono" text-anchor="middle" font-size="12">Arms</text>
+<rect class="accent-fill" x="640" y="28" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="640" y="56" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="640" y="84" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="640" y="112" width="52" height="24" fill-opacity="0.2"/>
+<rect class="accent-fill" x="640" y="140" width="52" height="24" fill-opacity="0.2"/>
+<text x="72" y="45" text-anchor="end" font-size="12">문서 1</text>
+<text x="72" y="73" text-anchor="end" font-size="12">문서 2</text>
+<text x="72" y="101" text-anchor="end" font-size="12">문서 3</text>
+<text x="72" y="129" text-anchor="end" font-size="12">문서 4</text>
+<text x="72" y="157" text-anchor="end" font-size="12">문서 5</text>
+<path class="guide-axis" d="M80,172 H300" fill="none"/>
+<text x="190" y="188" class="muted" text-anchor="middle" font-size="12">“The Sun Also Rises”</text>
+<path class="guide-axis" d="M472,172 H692" fill="none"/>
+<text x="582" y="188" class="muted" text-anchor="middle" font-size="12">“A Farewell to Arms”</text>
+</svg>
+          <figcaption class="figure-caption">그림은 논문 그림 2의 경향을 다시 그린 것이다. 토큰 열과 칸의 농도는 예시 값이며 실제 수치가 아니다.</figcaption>
+        </figure>
+        <p>“A Farewell to Arms”를 만들 때는 그 소설이 언급된 문서 1이, “The Sun Also Rises”를 만들 때는 문서 2가 진하다. 그런데 각 제목의 첫 토큰 뒤에는 분포가 평평해진다. 나머지 제목은 <span class="term" data-definition="parametric memory(모델 파라미터에 저장된 기억): 학습으로 모델 가중치 안에 들어간 지식.">parametric memory(모델 파라미터에 저장된 기억)</span>로 완성한다는 뜻이다.</p>
+        <p>실제로 BART에 “The Sun”만 주어도 “The Sun Also Rises”를 완성한다. 논문은 <span class="term" data-definition="non-parametric memory(외부 문서 색인에 있는 기억): 모델 파라미터 밖의 문서 색인에 저장된 지식. 색인을 바꾸면 지식도 바뀜.">non-parametric memory(외부 문서 색인에 있는 기억)</span>가 parametric memory 속 지식을 끌어내는 역할을 한다고 해석한다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>검색 문서는 제목의 첫 토큰을 이끌고, 나머지 토큰은 모델 파라미터 속 지식이 채운다.</p></div>
+    </div>
+
+    <!-- 페이지 6: 제거 실험 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>retriever를 학습하지 않으면 얼마나 떨어지는가?</li>
+          <li>FEVER에서는 왜 BM25가 가장 좋은가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>제거 실험: retriever를 바꾸면<span class="paper-ref">논문 4.5절, 표 6</span></h3>
+        <p>논문은 <span class="term" data-definition="제거 실험(Ablation Study): 모델의 구성 요소를 하나씩 바꾸거나 빼고 성능 변화를 재서 그 요소의 기여를 확인하는 실험.">제거 실험(Ablation Study)</span>으로 retriever만 바꾸어 검증(dev) 점수를 쟀다. Frozen은 DPR을 고정한 설정, BM25는 <span class="term" data-definition="sparse retrieval(단어 일치 기반 검색): 질문과 문서에 같은 단어가 얼마나 나오는지로 점수를 매기는 검색. BM25가 대표적임.">sparse retrieval(단어 일치 기반 검색)</span>의 점수를 logit으로 쓴 설정이다.</p>
+        <div class="ablation-demo animate-in">
+          <div class="ablation-tabs">
+            <button class="ablation-tab active" onclick="showLayer('rs-abl-learn', this)">학습한 DPR(기본)</button>
+            <button class="ablation-tab" onclick="showLayer('rs-abl-frozen', this)">Frozen DPR</button>
+            <button class="ablation-tab" onclick="showLayer('rs-abl-bm25', this)">BM25</button>
+          </div>
+          <div class="ablation-viewport">
+            <div class="ablation-layer" id="rs-abl-learn" style="display:block">
+              <div class="ablation-metric">NQ 43.5 · FEVER-3 74.5</div>
+              <div class="ablation-delta neutral">기준</div>
+              <p class="ablation-description">query encoder를 generator와 함께 학습한 기본 RAG 모델이다.</p>
+            </div>
+            <div class="ablation-layer" id="rs-abl-frozen" style="display:none">
+              <div class="ablation-metric">NQ 37.8 · FEVER-3 72.9</div>
+              <div class="ablation-delta negative">NQ 5.7점, FEVER-3 1.6점 낮음</div>
+              <p class="ablation-description">retriever를 고정하면 모든 과제에서 점수가 내려간다. 검색을 과제에 맞게 학습하는 것이 도움이 된다.</p>
+            </div>
+            <div class="ablation-layer" id="rs-abl-bm25" style="display:none">
+              <div class="ablation-metric">NQ 29.7 · FEVER-3 75.1</div>
+              <div class="ablation-delta">NQ 13.8점 낮음, FEVER-3 0.6점 높음</div>
+              <p class="ablation-description">오픈 도메인 QA에서는 크게 떨어지지만 FEVER에서는 가장 좋다. 논문은 FEVER의 주장이 개체 중심이어서 단어 일치 검색에 잘 맞는다고 추정한다.</p>
+            </div>
+          </div>
+        </div>
+        <table class="data-table animate-in">
+          <thead><tr><th>RAG-Token</th><th class="num">NQ</th><th class="num">TQA</th><th class="num">WQ</th><th class="num">CT</th><th class="num">Jeo QB-1</th><th class="num">MS R-L</th><th class="num">FVR-3</th></tr></thead>
+          <tbody>
+            <tr><td>BM25</td><td class="num">29.7</td><td class="num">41.5</td><td class="num">32.1</td><td class="num">33.1</td><td class="num">22.3</td><td class="num">55.5</td><td class="num">75.1</td></tr>
+            <tr><td>Frozen</td><td class="num">37.8</td><td class="num">50.1</td><td class="num">37.1</td><td class="num">51.1</td><td class="num">21.7</td><td class="num">55.9</td><td class="num">72.9</td></tr>
+            <tr class="hl"><td>학습(기본)</td><td class="num">43.5</td><td class="num">54.8</td><td class="num">46.5</td><td class="num">51.9</td><td class="num">22.6</td><td class="num">56.2</td><td class="num">74.5</td></tr>
+          </tbody>
+          <caption>표는 retriever 설정별 RAG-Token의 검증 점수를 나타낸 것이다. (논문 표 6 일부)</caption>
+        </table>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>retriever를 학습하면 오픈 도메인 QA가 크게 오르지만, 개체 중심인 FEVER에서는 단어 일치 검색인 BM25가 가장 좋다.</p></div>
+    </div>
+
+    <!-- 페이지 7: hot-swapping, 문서 수 -->
+    <div class="screen cornell dense">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>색인만 바꾸면 모델의 지식이 바뀌는가?</li>
+          <li>테스트 때 문서를 더 많이 검색하면 늘 좋아지는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>index hot-swapping과 검색 문서 수<span class="paper-ref">논문 4.5절</span></h3>
+        <div class="with-figure" style="--figure-side-width:300px">
+          <div>
+            <p><span class="term" data-definition="index hot-swapping(색인 교체로 지식 갱신): 모델은 그대로 두고 문서 색인만 다른 시점의 것으로 바꾸어 모델이 쓰는 지식을 바꾸는 방법.">index hot-swapping(색인 교체로 지식 갱신)</span> 실험은 2016년 12월 위키백과(DrQA 덤프)로 만든 색인과 2018년 12월 색인을 바꾸어 끼운다. 두 시점 사이에 바뀐 세계 지도자 82명을 <span lang="en">“Who is {position}?”</span> 꼴로 NQ RAG 모델에 묻는다.</p>
+            <p>색인과 질문 시점이 맞으면 70%, 68%를 맞히고, 어긋나면 12%, 4%로 떨어진다. 다시 학습하지 않고 non-parametric memory만 바꾸어 지식을 갱신할 수 있다는 근거이다.</p>
+          </div>
+          <figure class="figure side">
+<svg viewBox="0 0 328 172" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="색인과 질문 시점이 맞으면 정답률 70%와 68%, 어긋나면 12%와 4%">
+<text x="220" y="14" class="muted" text-anchor="middle" font-size="12">질문한 지도자</text>
+<foreignObject x="120" y="20" width="100" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>2016년 기준</span></div></foreignObject>
+<foreignObject x="220" y="20" width="100" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>2018년 기준</span></div></foreignObject>
+<foreignObject x="8" y="48" width="104" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>2016년 색인</span></div></foreignObject>
+<rect class="node-rect accent" x="120" y="48" width="96" height="56" rx="8"/>
+<foreignObject x="128" y="52" width="80" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:18px"><span><strong>70%</strong></span></div></foreignObject>
+<rect class="node-rect" x="220" y="48" width="96" height="56" rx="8"/>
+<foreignObject x="228" y="52" width="80" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:18px"><span><strong>4%</strong></span></div></foreignObject>
+<foreignObject x="8" y="108" width="104" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>2018년 색인</span></div></foreignObject>
+<rect class="node-rect" x="120" y="108" width="96" height="56" rx="8"/>
+<foreignObject x="128" y="112" width="80" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:18px"><span><strong>12%</strong></span></div></foreignObject>
+<rect class="node-rect accent" x="220" y="108" width="96" height="56" rx="8"/>
+<foreignObject x="228" y="112" width="80" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:18px"><span><strong>68%</strong></span></div></foreignObject>
+</svg>
+            <figcaption class="figure-caption">그림은 색인 시점과 질문 시점의 조합별 정답률을 나타낸 것이다.</figcaption>
+          </figure>
+        </div>
+        <p>표는 검색 문서 수의 영향을 정리한 것이다. 논문 그림 3의 점 값은 본문으로 확인할 수 없으므로 경향만 적는다.</p>
+        <table class="data-table animate-in">
+          <thead><tr><th>조건</th><th>경향</th></tr></thead>
+          <tbody>
+            <tr><td>학습 때 문서 5개 대 10개</td><td>큰 차이 없음</td></tr>
+            <tr><td>테스트 문서 수, NQ, RAG-Sequence</td><td>늘릴수록 단조 증가</td></tr>
+            <tr><td>테스트 문서 수, NQ, RAG-Token</td><td>10개에서 정점</td></tr>
+            <tr><td>테스트 문서 수, MS MARCO, RAG-Token</td><td>ROUGE-L은 오르고 BLEU-1은 내려감</td></tr>
+            <tr><td>테스트 문서 수, MS MARCO, RAG-Sequence</td><td>효과가 덜함</td></tr>
+          </tbody>
+          <caption>표는 검색 문서 수에 따른 성능 경향을 나타낸 것이다. (논문 4.5절, 그림 3)</caption>
+        </table>
+        <p>문서를 더 검색하면 실행 시간도 늘어나므로, 문서 수는 성능과 비용을 함께 보고 정한다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>색인만 바꾸어도 답하는 지식이 바뀌고, 검색 문서 수는 모델과 과제에 따라 효과가 달라 성능과 비용을 함께 보고 정한다.</p></div>
+    </div>
+
+    <!-- 페이지 8: 한계 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>검색이 아무 역할을 하지 못하는 경우는 언제인가?</li>
+          <li>결과를 읽을 때 무엇을 감안해야 하는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">한계<span class="paper-ref">논문 부록 C·F·H, Broader Impact</span></h3>
+        <p>그림은 부록 H의 <span class="term" data-definition="retrieval collapse(입력과 무관하게 같은 문서만 검색하는 현상): retriever가 입력과 관계없이 같은 문서만 고르도록 학습되어 검색이 쓸모없어지는 현상.">retrieval collapse(입력과 무관하게 같은 문서만 검색하는 현상)</span>를 나타낸 것이다.</p>
+        <figure class="svg-diagram fit animate-in" style="--diagram-max:720px">
+<svg viewBox="0 0 800 152" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="retrieval collapse: 서로 다른 입력에도 retriever가 늘 같은 문서를 검색하고 generator가 그 문서를 무시해 BART와 같아진다">
+<rect class="node-rect" x="16" y="8" width="112" height="40" rx="8"/>
+<foreignObject x="24" y="12" width="96" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>입력 <i class="mi">x</i><sub>1</sub></span></div></foreignObject>
+<path class="edge-line" d="M128,28 H158"/><polygon class="edge-arrow" points="158,23 168,28 158,33"/>
+<rect class="node-rect" x="16" y="56" width="112" height="40" rx="8"/>
+<foreignObject x="24" y="60" width="96" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>입력 <i class="mi">x</i><sub>2</sub></span></div></foreignObject>
+<path class="edge-line" d="M128,76 H158"/><polygon class="edge-arrow" points="158,71 168,76 158,81"/>
+<rect class="node-rect" x="16" y="104" width="112" height="40" rx="8"/>
+<foreignObject x="24" y="108" width="96" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>입력 <i class="mi">x</i><sub>3</sub></span></div></foreignObject>
+<path class="edge-line" d="M128,124 H158"/><polygon class="edge-arrow" points="158,119 168,124 158,129"/>
+<rect class="node-rect" x="168" y="8" width="136" height="136" rx="8"/>
+<foreignObject x="176" y="12" width="120" height="128"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>retriever</span></div></foreignObject>
+<path class="edge-line accent" d="M304,76 H334"/><polygon class="edge-arrow accent" points="334,71 344,76 334,81"/>
+<rect class="node-rect accent" x="344" y="56" width="152" height="40" rx="8"/>
+<foreignObject x="352" y="60" width="136" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>늘 같은 문서 <i class="mi">z</i>*</span></div></foreignObject>
+<path class="edge-line" d="M496,76 H518"/><polygon class="edge-arrow" points="518,71 528,76 518,81"/>
+<rect class="node-rect" x="528" y="56" width="120" height="40" rx="8"/>
+<foreignObject x="536" y="60" width="104" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>generator</span></div></foreignObject>
+<path class="edge-line" d="M648,76 H670"/><polygon class="edge-arrow" points="670,71 680,76 670,81"/>
+<rect class="node-rect" x="680" y="56" width="104" height="40" rx="8"/>
+<foreignObject x="688" y="60" width="88" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>BART와 같은 출력</span></div></foreignObject>
+<foreignObject x="520" y="100" width="136" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; color:var(--color-text-secondary)"><span>문서를 무시하도록 학습됨</span></div></foreignObject>
+</svg>
+          <figcaption class="figure-caption">그림은 이야기 생성 같은 과제에서 검색이 붕괴하면 RAG가 BART와 같아지는 과정을 나타낸 것이다. (논문 부록 H)</figcaption>
+        </figure>
+        <p><strong>retrieval collapse</strong> 사실 지식 요구가 덜 분명하거나 목표 문장이 길면 retriever에 가는 기울기 정보가 약해질 수 있다고 논문은 추정한다.</p>
+        <p><strong><span class="term" data-definition="null document(빈 문서): 쓸모 있는 문서가 없을 때 고르라고 넣어 두는 빈 문서.">null document(빈 문서)</span></strong> 쓸모 있는 문서가 없는 입력을 위해 빈 문서를 세 방식으로 넣어 보았지만 성능이 오르지 않아 뺐다. MS MARCO에서는 검색이 덜 필요한 질문에 늘 특정 문서 묶음을 검색하도록 학습되었다.</p>
+        <p><strong>지식원과 초기화</strong> 위키백과도 완전히 사실적이거나 편향이 없지 않다. QA retriever는 NQ·TQA 검색 감독을 쓴 DPR에서 출발했고, 색인은 CPU 메모리 약 100 GB(압축하면 36 GB)를 차지한다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>검색이 붕괴하면 RAG는 BART와 같아지고, 빈 문서 방법은 효과가 없었으며, 지식원의 편향과 DPR 초기화, 색인 메모리도 함께 감안해야 한다.</p></div>
+    </div>
+
+    <!-- 페이지 9: 핵심 정리 + 확인 문제 1, 2 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-accent animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">핵심 정리</strong>
+            <ol>
+              <li>RAG는 NQ, WQ, CT와 TQA-Wiki에서 가장 높은 EM을 얻었다.</li>
+              <li>생성·분류 과제에서 대부분 BART 기준선보다 높고, 사람 평가에서 더 사실적이다.</li>
+              <li>학습한 retriever는 대부분 과제에 도움이 되지만 FEVER 과제는 BM25가 가장 좋다.</li>
+              <li>색인만 바꾸어 지식을 갱신할 수 있으나 retrieval collapse 같은 실패도 있다.</li>
+            </ol>
+            <p>표 비교 문항은 분할, 지표, gold 문맥 사용 여부부터 확인하라.</p>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>표와 실험 해석</h3>
+        <div class="quiz-container animate-in" id="rs-quiz-a">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="③ | ㄱ과 ㄷ은 옳다. ㄴ은 DPR 57.9가 56.8보다 높아 옳지 않다."
+               data-explanation-wrong="| 정답은 ③이다. ㄴ은 DPR 57.9가 더 높아 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">1</span>표 1과 표 2에 대한 설명으로 옳은 것만을 <span class="nobr">&lt;보기&gt;에서</span> 있는 대로 고른 것은?</h3>
+            <div class="bogi">
+              <p>ㄱ. NQ에서 RAG가 T5-11B보다 높다.</p>
+              <p>ㄴ. TQA 표준 분할에서 RAG가 DPR보다 높다.</p>
+              <p>ㄷ. MS MARCO 최고 성능은 gold 문맥을 썼다.</p>
+            </div>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① ㄱ</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② ㄴ</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ ㄱ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ ㄴ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ ㄱ, ㄴ, ㄷ</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-d"
+               data-explanation-right="④ | FEVER-3에서 BM25는 75.1로 학습한 DPR의 74.5보다 높으므로 ④는 옳지 않다."
+               data-explanation-wrong="| 정답은 ④이다. FEVER-3은 BM25 75.1이 학습한 DPR 74.5보다 높다. ②는 Frozen 37.8이 43.5보다 낮으므로 옳다.">
+            <h3 class="quiz-question"><span class="q-num">2</span>표 6 제거 실험(RAG-Token)의 해석으로 옳지 <u>않은</u> 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① NQ에서 BM25는 학습한 DPR보다 13.8점 낮다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② retriever를 고정하면 NQ 점수가 내려간다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 이 표는 검증 데이터에서 잰 값이다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ FEVER-3에서도 학습한 DPR이 BM25보다 높다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 학습한 retriever는 오픈 도메인 QA에서 효과가 크다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('rs-quiz-a')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('rs-quiz-a')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>표는 분할과 gold 문맥 여부를 확인하며 읽고, 제거 실험에서는 과제마다 가장 좋은 retriever가 다를 수 있다.</p></div>
+    </div>
+
+    <!-- 페이지 10: 확인 문제 3, 4 -->
+    <div class="screen cornell dense">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>색인 교체 실험은 무엇을 보여 주는가?</li>
+          <li>RAG가 BART와 같아지는 원인은 무엇인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>지식 갱신과 실패</h3>
+        <div class="quiz-container animate-in" id="rs-quiz-b">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="② | 같은 모델에 색인만 바꾸어 끼워도 시점이 맞으면 70%, 68%, 어긋나면 12%, 4%이므로 모델을 다시 학습하지 않고 지식을 바꿀 수 있다."
+               data-explanation-wrong="| 정답은 ②이다. 모델은 그대로 두고 색인만 바꾸었는데 정답률이 시점에 따라 크게 달라진다. ④는 70%와 68%로 비슷하므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">3</span>index hot-swapping 결과(시점이 맞으면 70%·68%, 어긋나면 12%·4%)로 알 수 있는 것으로 가장 적절한 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 2018년 지도자는 파라미터에만 저장되어 있다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 모델을 다시 학습하지 않고 색인만 바꾸어 지식을 갱신할 수 있다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 색인을 바꾸면 질문의 시점과 관계없이 정답률이 오른다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 2016년 색인은 2018년 색인보다 시점이 맞을 때도 크게 나쁘다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 이 실험은 retriever를 다시 학습해야 성립한다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="③ | retrieval collapse에서는 retriever가 입력과 무관하게 같은 문서를 고르고 generator가 그 문서를 무시하므로 RAG가 BART와 같아진다."
+               data-explanation-wrong="| 정답은 ③이다. 부록 H의 retrieval collapse로, generator가 늘 같은 문서를 무시하도록 학습되어 BART와 같아진다. ①은 색인 교체 실험이므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">4</span>이야기 생성 과제에서 RAG의 성능이 BART와 같아졌다. 원인으로 가장 적절한 것은?<span class="q-points">[3점]</span></h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 색인을 2016년 덤프로 바꾸었다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 검색 문서 수를 5개에서 10개로 늘렸다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 입력과 무관하게 같은 문서만 검색하게 되었다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ null document를 넣어 성능이 올랐다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ BM25 retriever로 바꾸었다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('rs-quiz-b')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('rs-quiz-b')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>색인 교체는 재학습 없는 지식 갱신을 보이고, retrieval collapse는 검색이 쓸모없어지는 실패를 보인다.</p></div>
+    </div>
+
+  </div>
+</section>

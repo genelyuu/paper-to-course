@@ -1,0 +1,518 @@
+<section class="module" id="module-1">
+  <div class="module-content">
+
+    <div class="module-header">
+      <span class="module-number">2</span>
+      <h2 class="module-title">이전 연구와 한계</h2>
+      <p class="module-subtitle">RAG 이전의 세 갈래 접근과 각각의 한계, 그리고 RAG가 합친 것을 따라간다</p>
+    </div>
+
+    <!-- 페이지 1: 세 갈래 개관 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">학습 목표</strong>
+            <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
+            <ol>
+              <li>closed-book, retrieve-and-extract, memory network 방식의 한계를 각각 설명할 수 있다.</li>
+              <li>RAG가 이전 연구에서 이어받은 것과 새로 합친 것을 구분할 수 있다.</li>
+              <li>지식 갱신, 근거 제시, 생성 가능 기준으로 네 접근을 비교할 수 있다.</li>
+            </ol>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">지식을 다루는 세 갈래<span class="paper-ref">논문 1·5절</span></h3>
+        <p>RAG 이전의 모델은 지식을 어디에 두었을까? 이전 연구는 지식을 두는 곳과 답을 내는 방식에 따라 세 갈래로 나눌 수 있다. 그림은 세 갈래와 <span class="term" data-definition="검색 증강 생성(Retrieval-Augmented Generation, RAG): 질문으로 문서를 검색하고, 질문과 검색한 문서를 함께 생성 모델에 넣어 답을 만드는 방법.">검색 증강 생성</span>(Retrieval-Augmented Generation, RAG)이 각 갈래에서 가져온 것을 나타낸 것이다.</p>
+        <div class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 216" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="closed-book에서는 사전학습 generator를, retrieve-and-extract에서는 사전학습 retriever를, memory network 계열에서는 외부 기억의 생각을 가져와 RAG 하나로 합친다">
+            <path class="edge-line" d="M136,104 V128 H380 V142"/><polygon class="edge-arrow" points="375,142 385,142 380,152"/>
+            <path class="edge-line accent" d="M400,104 V142"/><polygon class="edge-arrow accent" points="395,142 405,142 400,152"/>
+            <path class="edge-line" d="M664,104 V128 H420 V142"/><polygon class="edge-arrow" points="415,142 425,142 420,152"/>
+            <rect class="node-rect" x="16" y="8" width="240" height="96" rx="12"/>
+            <foreignObject x="24" y="12" width="224" height="88"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span><strong>① closed-book</strong><br/>지식: 파라미터<br/>출력: 생성</span></div></foreignObject>
+            <rect class="node-rect" x="280" y="8" width="240" height="96" rx="12"/>
+            <foreignObject x="288" y="12" width="224" height="88"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span><strong>② retrieve-and-extract</strong><br/>지식: 문서 색인<br/>출력: 문서 구간 추출</span></div></foreignObject>
+            <rect class="node-rect" x="544" y="8" width="240" height="96" rx="12"/>
+            <foreignObject x="552" y="12" width="224" height="88"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span><strong>③ memory network 계열</strong><br/>지식: 과제별 외부 기억<br/>학습: 과제마다 처음부터</span></div></foreignObject>
+            <text x="144" y="122" font-size="12" class="muted">사전학습 generator</text>
+            <text x="408" y="122" font-size="12" class="muted">사전학습 retriever</text>
+            <text x="672" y="122" font-size="12" class="muted">외부 기억</text>
+            <rect class="node-rect accent" x="240" y="152" width="320" height="56" rx="12"/>
+            <foreignObject x="248" y="156" width="304" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; font-weight:700"><span>RAG(2020): 셋을 확률 모델 하나로</span></div></foreignObject>
+          </svg>
+        </div>
+        <p>①은 <span class="term" data-definition="parametric memory(모델 파라미터에 저장된 기억): 학습 중 모델 가중치에 새겨진 지식. 따로 꺼내 보거나 고치기 어려움.">parametric memory</span>(모델 파라미터에 저장된 기억)만, ②는 주로 <span class="term" data-definition="non-parametric memory(외부 문서 색인에 있는 기억): 모델 밖에 문서 형태로 저장해 두고 필요할 때 검색해 읽는 지식.">non-parametric memory</span>(외부 문서 색인에 있는 기억)를 쓴다. 세 갈래는 저마다 한 가지씩을 잘했지만 한계도 뚜렷했다. 이 단원은 갈래마다 대표 연구와 한계를 본 뒤, RAG가 이들을 어떻게 묶었는지 정리한다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>이전 연구는 closed-book, retrieve-and-extract, memory network 계열로 나뉘고 RAG는 각각에서 한 가지씩을 가져왔다.</p></div>
+    </div>
+
+    <!-- 페이지 2: closed-book -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>closed-book과 open-book은 무엇이 다른가?</li>
+          <li>LAMA와 T5는 무엇을 보였는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">① closed-book: 파라미터에서 답을 꺼낸다<span class="paper-ref">논문 1절</span></h3>
+        <div class="with-figure" style="--figure-side-width:208px">
+          <div>
+            <p><span class="term" data-definition="closed-book(클로즈드북, 외운 지식만으로 답하기): 자료를 보지 않고 모델이 파라미터에 외운 지식만으로 답하는 방식.">closed-book</span>(클로즈드북, 외운 지식만으로 답하기)은 시험에서 책을 덮고 외운 것만으로 답하는 방식이다. 반대로 <span class="term" data-definition="open-book(오픈북, 자료를 찾아 읽고 답하기): 문서를 검색해 읽은 뒤 그 내용을 바탕으로 답하는 방식.">open-book</span>(오픈북, 자료를 찾아 읽고 답하기)은 그림처럼 책을 펴 놓고 찾아 읽으며 답한다.</p>
+            <p><a href="https://arxiv.org/abs/1909.01066" target="_blank" rel="noopener">LAMA</a>(Petroni et al., 2019)는 <span class="term" data-definition="사전학습 언어 모델(Pre-trained Language Model): 대량의 텍스트로 먼저 학습해 둔 언어 모델. 이후 과제별 데이터로 조금 더 학습해 씀.">사전학습 언어 모델</span>(Pre-trained Language Model)이 빈칸 질의만으로 사실 지식을 꺼낼 수 있음을 보였다. <a href="https://arxiv.org/abs/2002.08910" target="_blank" rel="noopener">T5 closed-book QA</a>(Roberts et al., 2020)는 <span class="term" data-definition="T5(Text-to-Text Transfer Transformer): 모든 과제를 글을 받아 글을 내는 형식으로 푸는 사전학습 seq2seq 모델.">T5</span>(Text-to-Text Transfer Transformer)를 질문과 답으로 <span class="term" data-definition="fine-tuning(미세 조정): 사전학습한 모델을 특정 과제의 데이터로 조금 더 학습시키는 일.">fine-tuning</span>(미세 조정)해 검색 없이 답하게 했다.</p>
+          </div>
+          <figure class="figure side"><img src="assets/fig-openbook.svg" alt="책상 위에 펼친 교과서와 답안지"><figcaption class="figure-caption">open-book은 책을 펴 놓고 답한다.</figcaption></figure>
+        </div>
+        <p>그림은 두 연구가 같은 사실을 묻는 과정을 나타낸 것이다. 질의와 답은 예시이다.</p>
+        <div class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 168" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="LAMA는 빈칸 질의를, T5는 질문을 받아 문서 없이 파라미터에서 답 피렌체를 꺼낸다">
+            <path class="edge-line" d="M288,32 H318"/><polygon class="edge-arrow" points="318,27 328,32 318,37"/>
+            <path class="edge-line" d="M528,32 H558"/><polygon class="edge-arrow" points="558,27 568,32 558,37"/>
+            <path class="edge-line" d="M288,96 H318"/><polygon class="edge-arrow" points="318,91 328,96 318,101"/>
+            <path class="edge-line" d="M528,96 H558"/><polygon class="edge-arrow" points="558,91 568,96 558,101"/>
+            <rect class="node-rect sq" x="16" y="8" width="272" height="48"/>
+            <foreignObject x="24" y="12" width="256" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>빈칸 질의: “단테는 ___에서 태어났다”</span></div></foreignObject>
+            <rect class="node-rect" x="328" y="8" width="200" height="48" rx="8"/>
+            <foreignObject x="336" y="12" width="184" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>LAMA: 사전학습 언어 모델</span></div></foreignObject>
+            <rect class="node-rect sq" x="568" y="8" width="216" height="48"/>
+            <foreignObject x="576" y="12" width="200" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>빈칸 채움: 피렌체</span></div></foreignObject>
+            <rect class="node-rect sq" x="16" y="72" width="272" height="48"/>
+            <foreignObject x="24" y="76" width="256" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>질문: “단테가 태어난 도시는?”</span></div></foreignObject>
+            <rect class="node-rect" x="328" y="72" width="200" height="48" rx="8"/>
+            <foreignObject x="336" y="76" width="184" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>T5: 질문-답으로 fine-tuning</span></div></foreignObject>
+            <rect class="node-rect sq" x="568" y="72" width="216" height="48"/>
+            <foreignObject x="576" y="76" width="200" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>생성한 답: 피렌체</span></div></foreignObject>
+            <foreignObject x="16" y="132" width="768" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; font-weight:700; color:var(--color-accent)"><span>두 경우 모두 문서를 보지 않고 파라미터에 든 지식만 쓴다</span></div></foreignObject>
+          </svg>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>LAMA와 T5는 사전학습 모델이 문서 없이 파라미터만으로 사실을 답할 수 있음을 보였다.</p></div>
+    </div>
+
+    <!-- 페이지 3: closed-book의 한계 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>closed-book 방식의 세 한계는 무엇인가?</li>
+          <li>파라미터를 늘리면 해결되는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>closed-book의 한계<span class="paper-ref">논문 1절, 표 1, 부록 G</span></h3>
+        <p>closed-book 모델이 더 많이 알게 하려면 파라미터를 늘려야 한다. 그래프는 <span class="term" data-definition="오픈 도메인 질의응답(Open-Domain QA): 정해진 지문 없이 위키백과 같은 넓은 자료에서 답을 찾아야 하는 질의응답.">오픈 도메인 질의응답</span>(Open-Domain QA) 벤치마크 NQ(Natural Questions)의 테스트 <span class="term" data-definition="exact match(완전 일치, EM): 모델의 답이 정답과 글자 그대로 같은 문항의 비율.">EM</span>(exact match, 완전 일치)을 모델별로 나타낸 것이다. 괄호 안은 파라미터 수이며 RAG는 학습하는 파라미터만 센 값이다.</p>
+        <div class="svg-diagram fit animate-in" style="--diagram-max:640px">
+          <svg viewBox="0 0 640 168" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="NQ EM: T5-large 28.9, T5-11B 34.5, T5-11B+SSM 36.6, RAG-Sequence 44.5">
+            <path class="guide" d="M208,20 V148 M280,20 V148 M352,20 V148 M424,20 V148 M496,20 V148 M568,20 V148"/>
+            <text x="196" y="43" font-size="13" text-anchor="end">T5-large(770M)</text>
+            <rect class="ink-fill" x="208" y="28" width="208.1" height="20"/>
+            <text x="422" y="43" font-size="12">28.9</text>
+            <text x="196" y="75" font-size="13" text-anchor="end">T5-11B(110억)</text>
+            <rect class="ink-fill" x="208" y="60" width="248.4" height="20"/>
+            <text x="462" y="75" font-size="12">34.5</text>
+            <text x="196" y="107" font-size="13" text-anchor="end">T5-11B+SSM(110억)</text>
+            <rect class="ink-fill" x="208" y="92" width="263.5" height="20"/>
+            <text x="477" y="107" font-size="12">36.6</text>
+            <text x="196" y="139" font-size="13" text-anchor="end" font-weight="700" class="accent-text">RAG-Sequence(626M)</text>
+            <rect class="accent-fill" x="208" y="124" width="320.4" height="20"/>
+            <text x="534" y="139" font-size="12" font-weight="700" class="accent-text">44.5</text>
+            <text x="208" y="164" font-size="11" text-anchor="middle" class="muted">0</text>
+            <text x="280" y="164" font-size="11" text-anchor="middle" class="muted">10</text>
+            <text x="352" y="164" font-size="11" text-anchor="middle" class="muted">20</text>
+            <text x="424" y="164" font-size="11" text-anchor="middle" class="muted">30</text>
+            <text x="496" y="164" font-size="11" text-anchor="middle" class="muted">40</text>
+            <text x="568" y="164" font-size="11" text-anchor="middle" class="muted">50</text>
+            <text x="208" y="12" font-size="12" font-weight="700">NQ 테스트 EM</text>
+          </svg>
+        </div>
+        <table class="data-table animate-in">
+          <caption>표는 parametric memory만 쓰는 모델의 세 한계를 나타낸 것이다. 환각 예는 BART의 실제 출력이다(논문 표 3).</caption>
+          <thead><tr><th>한계</th><th>무엇이 문제인가</th><th>예</th></tr></thead>
+          <tbody>
+            <tr><td>갱신 불가</td><td>사실이 바뀌면 다시 학습해야 함</td><td>학습 뒤 바뀐 국가 지도자</td></tr>
+            <tr><td>근거 불명</td><td>답이 어디서 왔는지 보일 수 없음</td><td>답만 있고 출처 문서가 없음</td></tr>
+            <tr><td><span class="term" data-definition="환각(Hallucination): 모델이 사실이 아니거나 근거 없는 내용을 그럴듯하게 만들어 내는 현상.">환각</span>(Hallucination)</td><td>그럴듯하지만 틀린 문장</td><td lang="en">“The middle ear is the part of the ear between the middle ear and the nose.”</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>closed-book은 파라미터를 키워야 지식이 늘고, 갱신 불가, 근거 불명, 환각이라는 한계가 남는다.</p></div>
+    </div>
+
+    <!-- 페이지 4: retrieve-and-extract -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>retrieve-and-extract는 답을 어떻게 내는가?</li>
+          <li>DrQA, ORQA, REALM, DPR은 무엇이 다른가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">② retrieve-and-extract: 찾아서 잘라 낸다<span class="paper-ref">논문 1·5절</span></h3>
+        <p><span class="term" data-definition="retrieve-and-extract(검색한 뒤 답 구간 추출): 질문으로 문서를 검색하고, 그 문서에서 답이 되는 구간을 골라내는 방식.">retrieve-and-extract</span>(검색한 뒤 답 구간 추출)는 <span class="term" data-definition="retriever(검색기): 질문을 받아 관련 문서를 찾아 주는 모델.">retriever</span>(검색기)로 문서를 찾고, <span class="term" data-definition="reader(검색 문서에서 답을 읽어 내는 모델): 검색한 문서를 읽고 답이 되는 구간의 시작과 끝을 고르는 모델.">reader</span>(검색 문서에서 답을 읽어 내는 모델)가 문서 속 답 구간을 그대로 잘라 낸다. 이렇게 답을 고르는 방식을 <span class="term" data-definition="추출형(Extractive, 문서에서 답 구간을 골라냄): 답을 새로 쓰지 않고 주어진 문서의 일부를 그대로 골라 답으로 내는 방식.">추출형</span>(Extractive, 문서에서 답 구간을 골라냄)이라 한다. 그림의 질문과 문서는 예시이다.</p>
+        <div class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 120" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="질문을 retriever가 받아 문서 top-k를 찾고 reader가 문서에서 답 구간 피렌체를 잘라 낸다">
+            <path class="edge-line" d="M152,32 H164"/><polygon class="edge-arrow" points="164,27 174,32 164,37"/>
+            <path class="edge-line" d="M310,32 H322"/><polygon class="edge-arrow" points="322,27 332,32 322,37"/>
+            <path class="edge-line" d="M468,32 H480"/><polygon class="edge-arrow" points="480,27 490,32 480,37"/>
+            <path class="edge-line accent" d="M626,32 H638"/><polygon class="edge-arrow accent" points="638,27 648,32 638,37"/>
+            <rect class="node-rect sq" x="16" y="8" width="136" height="48"/>
+            <foreignObject x="24" y="12" width="120" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>단테가 태어난 도시는?</span></div></foreignObject>
+            <rect class="node-rect" x="174" y="8" width="136" height="48" rx="8"/>
+            <foreignObject x="182" y="12" width="120" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>retriever</span></div></foreignObject>
+            <rect class="node-rect sq" x="332" y="8" width="136" height="48"/>
+            <foreignObject x="340" y="12" width="120" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>문서 top-<i class="mi">k</i></span></div></foreignObject>
+            <rect class="node-rect" x="490" y="8" width="136" height="48" rx="8"/>
+            <foreignObject x="498" y="12" width="120" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>reader</span></div></foreignObject>
+            <rect class="node-rect accent" x="648" y="8" width="136" height="48" rx="8"/>
+            <foreignObject x="656" y="12" width="120" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>답 구간: 피렌체</span></div></foreignObject>
+            <rect class="node-rect sq" x="332" y="72" width="452" height="40"/>
+            <foreignObject x="340" y="76" width="436" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>문서: “… 단테는 1265년 <strong style="color:var(--color-accent)">피렌체</strong>에서 태어났다 …” 중 구간 선택</span></div></foreignObject>
+          </svg>
+        </div>
+        <table class="data-table animate-in">
+          <caption>표는 retrieve-and-extract 계열의 대표 연구 네 편을 나타낸 것이다.</caption>
+          <thead><tr><th>연구</th><th>retriever</th><th>특징과 대가</th></tr></thead>
+          <tbody>
+            <tr><td><a href="https://arxiv.org/abs/1704.00051" target="_blank" rel="noopener">DrQA</a>(2017)</td><td>위키백과 <span class="term" data-definition="TF-IDF(Term Frequency-Inverse Document Frequency, 단어 빈도-역문서 빈도): 한 문서에 자주 나오고 다른 문서에는 드문 단어에 큰 점수를 주는 단어 일치 점수.">TF-IDF</span> 검색</td><td>검색은 학습하지 않고 추출형 reader만 학습함</td></tr>
+            <tr><td><a href="https://arxiv.org/abs/1906.00300" target="_blank" rel="noopener">ORQA</a>(2019)</td><td>학습하는 검색</td><td>검색을 <span class="term" data-definition="잠재 변수(Latent Variable): 결과에 영향을 주지만 데이터에서 직접 관찰되지 않는 변수.">잠재 변수</span>(Latent Variable)로 두고 학습함</td></tr>
+            <tr><td><a href="https://arxiv.org/abs/2002.08909" target="_blank" rel="noopener">REALM</a>(2020)</td><td>학습하는 검색</td><td>검색을 넣은 <span class="term" data-definition="MLM(Masked Language Model, 가린 단어 맞히기 모델): 문장의 일부 단어를 가리고 그 단어를 맞히도록 학습하는 언어 모델.">MLM</span>(Masked Language Model) 사전학습, 사전학습 중 색인을 주기적으로 다시 만들어 비용이 큼, <span class="term" data-definition="salient span masking(SSM, 개체·날짜 같은 핵심 구간만 가리는 사전학습): 사람 이름이나 날짜처럼 중요한 구간을 골라 가리고 맞히게 하는 사전학습 방법.">salient span masking</span>(SSM) 사용</td></tr>
+            <tr><td><a href="https://arxiv.org/abs/2004.04906" target="_blank" rel="noopener">DPR</a>(2020)</td><td><span class="term" data-definition="bi-encoder(query와 문서를 따로 임베딩): 질문과 문서를 서로 다른 인코더로 각각 벡터로 바꾸고 내적으로 점수를 매기는 구조.">bi-encoder</span> dense 검색</td><td><span class="term" data-definition="BM25(Best Matching 25): TF-IDF를 다듬은 단어 일치 검색 점수 함수. sparse retrieval의 대표적 기준.">BM25</span>를 넘어섬, QA 시스템은 <span class="term" data-definition="cross-encoder(query와 문서를 함께 읽고 점수): 질문과 문서를 한 입력으로 이어 붙여 함께 읽고 관련도를 매기는 구조.">cross-encoder</span> reranker와 추출형 reader를 더 씀</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>retrieve-and-extract는 검색한 문서에서 답 구간을 잘라 내며, 검색을 학습하는 방향으로 발전했다.</p></div>
+    </div>
+
+    <!-- 페이지 5: 추출의 한계 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>답이 문서에 그대로 없으면 추출형은 어떻게 되는가?</li>
+          <li>추출형으로 풀 수 없는 과제는 무엇인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>추출의 한계<span class="paper-ref">논문 1절, 4.1절</span></h3>
+        <p>추출형은 문서에 있는 글자만 답으로 낼 수 있지만, <span class="term" data-definition="생성형(Abstractive, 답을 새로 써냄): 문서를 참고하되 답 문장을 모델이 새로 만들어 내는 방식.">생성형</span>(Abstractive, 답을 새로 써냄)은 답을 새로 쓴다. 그림은 질문 “신곡을 쓴 시인은?”에 대해 정답 단어가 없는 문서를 받은 두 방식을 비교한 예시이다.</p>
+        <div class="svg-diagram animate-in" style="margin:var(--space-2) auto">
+          <svg viewBox="0 0 800 168" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="같은 문서를 받았을 때 추출형 reader는 답할 수 없고 생성형 generator는 문서의 단서와 외운 지식으로 단테라고 쓴다">
+            <path class="edge-line" d="M200,88 V102"/><polygon class="edge-arrow" points="195,102 205,102 200,112"/>
+            <path class="edge-line accent" d="M600,88 V102"/><polygon class="edge-arrow accent" points="595,102 605,102 600,112"/>
+            <foreignObject x="16" y="0" width="368" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; font-weight:700"><span>추출형 reader</span></div></foreignObject>
+            <rect class="node-rect sq" x="16" y="32" width="368" height="56"/>
+            <foreignObject x="24" y="36" width="352" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>문서: “신곡의 저자는 1265년 피렌체에서 태어났다.”</span></div></foreignObject>
+            <rect class="node-rect" x="16" y="112" width="368" height="48" rx="8"/>
+            <foreignObject x="24" y="116" width="352" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>“단테”라는 구간이 없어 답할 수 없음</span></div></foreignObject>
+            <foreignObject x="416" y="0" width="368" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; font-weight:700; color:var(--color-accent)"><span>생성형 generator(RAG)</span></div></foreignObject>
+            <rect class="node-rect sq" x="416" y="32" width="368" height="56"/>
+            <foreignObject x="424" y="36" width="352" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>문서: “신곡의 저자는 1265년 피렌체에서 태어났다.”</span></div></foreignObject>
+            <rect class="node-rect accent" x="416" y="112" width="368" height="48" rx="8"/>
+            <foreignObject x="424" y="116" width="352" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>문서의 단서와 외운 지식으로 “단테”를 써냄</span></div></foreignObject>
+          </svg>
+        </div>
+        <p>논문은 검색한 문서 어디에도 정답이 없는 경우에도 RAG가 NQ에서 <strong>11.8%</strong>를 맞혔고, 같은 경우 추출형은 <strong>0%</strong>라고 보고한다. 또 답이 문장이거나 질문인 과제에서는 잘라 낼 구간 자체가 없다.</p>
+        <table class="data-table animate-in">
+          <caption>표는 이 논문이 다루는 과제의 출력 형태를 나타낸 것이다. 마지막 열은 출력 형태에서 해석한 것이다.</caption>
+          <thead><tr><th>과제</th><th>원하는 출력</th><th>추출형으로</th></tr></thead>
+          <tbody>
+            <tr><td>NQ 등 오픈 도메인 QA</td><td>짧은 답</td><td>답이 문서에 있으면 가능</td></tr>
+            <tr><td>MS MARCO</td><td>문장으로 된 답</td><td>새 문장을 써야 해 어려움</td></tr>
+            <tr><td>Jeopardy 질문 생성</td><td>개체를 가리키는 질문 문장</td><td>문서에 없는 질문이므로 불가</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>추출형은 문서에 그대로 있는 구간만 답할 수 있어, 단서만 있는 문서나 생성 과제에서 막힌다.</p></div>
+    </div>
+
+    <!-- 페이지 6: memory network와 retrieve-and-edit -->
+    <div class="screen cornell dense">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>memory network의 기억은 RAG의 기억과 무엇이 다른가?</li>
+          <li>retrieve-and-edit는 무엇을 검색하는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag outline">개념 체크</span>③ memory network와 retrieve-and-edit<span class="paper-ref">논문 1·5절</span></h3>
+        <p><span class="term" data-definition="memory network(외부 기억을 읽고 쓰는 신경망): 모델 밖의 기억 칸에 정보를 벡터로 저장하고 필요할 때 읽어 쓰는 신경망.">memory network</span>(외부 기억을 읽고 쓰는 신경망, <a href="https://arxiv.org/abs/1410.3916" target="_blank" rel="noopener">Weston et al., 2014</a>)는 외부 기억을 두었으나 과제마다 처음부터 학습했고 기억이 벡터였다. <span class="term" data-definition="retrieve-and-edit(비슷한 예를 찾아 고쳐 쓰기): 입력과 비슷한 학습 입력-출력 쌍을 하나 찾아 그 출력을 고쳐 답을 만드는 방식.">retrieve-and-edit</span>(비슷한 예를 찾아 고쳐 쓰기)는 비슷한 학습 쌍 하나를 찾아 고쳐 쓴다. 그림은 두 방식을 나타낸 것이다.</p>
+        <div class="svg-diagram animate-in" style="margin:var(--space-2) auto">
+          <svg viewBox="0 0 800 120" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="memory network는 입력으로 벡터 기억 칸을 읽어 출력하고, retrieve-and-edit는 비슷한 학습 쌍 하나를 찾아 고쳐 출력한다">
+            <path class="edge-line" d="M96,56 H118"/><polygon class="edge-arrow" points="118,51 128,56 118,61"/>
+            <path class="edge-line" d="M280,56 H302"/><polygon class="edge-arrow" points="302,51 312,56 302,61"/>
+            <path class="edge-line" d="M496,56 H518"/><polygon class="edge-arrow" points="518,51 528,56 518,61"/>
+            <path class="edge-line" d="M680,56 H702"/><polygon class="edge-arrow" points="702,51 712,56 702,61"/>
+            <foreignObject x="16" y="0" width="368" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; font-weight:700"><span>memory network</span></div></foreignObject>
+            <rect class="node-rect" x="16" y="32" width="80" height="48" rx="8"/>
+            <foreignObject x="24" y="36" width="64" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>입력</span></div></foreignObject>
+            <rect class="node-rect sq" x="128" y="32" width="152" height="48"/>
+            <foreignObject x="136" y="36" width="136" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>기억 칸: [0.2, −1.3, …]</span></div></foreignObject>
+            <rect class="node-rect" x="312" y="32" width="72" height="48" rx="8"/>
+            <foreignObject x="316" y="36" width="64" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>출력</span></div></foreignObject>
+            <foreignObject x="16" y="84" width="368" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; color:var(--color-text-secondary)"><span>과제마다 처음부터 학습, 기억은 읽을 수 없는 벡터</span></div></foreignObject>
+            <foreignObject x="416" y="0" width="368" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; font-weight:700"><span>retrieve-and-edit</span></div></foreignObject>
+            <rect class="node-rect" x="416" y="32" width="80" height="48" rx="8"/>
+            <foreignObject x="424" y="36" width="64" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>입력</span></div></foreignObject>
+            <rect class="node-rect sq" x="528" y="32" width="152" height="48"/>
+            <foreignObject x="536" y="36" width="136" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>비슷한 학습 쌍 1개</span></div></foreignObject>
+            <rect class="node-rect" x="712" y="32" width="72" height="48" rx="8"/>
+            <foreignObject x="716" y="36" width="64" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>고쳐 씀</span></div></foreignObject>
+            <foreignObject x="416" y="84" width="368" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; color:var(--color-text-secondary)"><span>한 쌍만 가볍게 고침, 검색을 잠재 변수로 학습하지 않음</span></div></foreignObject>
+          </svg>
+        </div>
+                <div class="quiz-container animate-in" id="pr-check">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="③ | RAG의 기억은 위키백과 원문이라 읽고 고칠 수 있다."
+               data-explanation-wrong="| 정답은 ③이다. ①은 memory network의 특징이므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">1</span>RAG의 기억이 memory network의 기억과 다른 점으로 옳은 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 기억을 사람이 읽을 수 없는 벡터 칸에 저장한다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 과제마다 기억을 처음부터 학습한다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 기억이 원문 텍스트라 사람이 읽고 고칠 수 있다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('pr-check')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('pr-check')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>memory network는 과제별로 학습한 벡터 기억을, retrieve-and-edit는 비슷한 예 하나를 썼고, RAG는 사전학습된 원문 텍스트 기억을 쓴다.</p></div>
+    </div>
+
+    <!-- 페이지 7: 연구 계보 -->
+    <div class="screen cornell dense">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>RAG는 각 선행 연구에서 무엇을 이어받았는가?</li>
+          <li>무엇이 달라졌는가?</li>
+        </ul>
+        <div class="callout callout-accent animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">새로운 점</strong>
+            <p>REALM과 ORQA는 검색을 추출형 QA에만 붙였고, RAG는 이를 “NLP의 일꾼”인 <span class="term" data-definition="seq2seq(Sequence-to-Sequence, 입력 문장을 출력 문장으로 바꾸는 모델): 인코더가 입력 문장을 읽고 디코더가 출력 문장을 만드는 모델 구조.">seq2seq</span>(Sequence-to-Sequence) 전반으로 넓혔다.</p>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>연구 계보<span class="paper-ref">논문 1·5절</span></h3>
+        <div class="lineage-tree animate-in" style="padding:var(--space-3) var(--space-4); margin:var(--space-3) 0 0">
+          <div class="lineage-node lineage-root" data-detail="RAG(Retrieval-Augmented Generation): 사전학습한 retriever와 generator를 확률 모델 하나로 묶어 end-to-end로 학습하는 방법.">
+            <span class="lineage-label">RAG</span>
+            <span class="lineage-detail">본 논문(2020)</span>
+            <span class="novelty-badge">사전학습 retriever + generator를 end-to-end로</span>
+          </div>
+          <div class="lineage-branch">
+            <div class="lineage-edge-label">생성기 계승</div>
+            <div class="lineage-node" data-detail="BART(Lewis et al., 2019): 잡음 제거로 사전학습한 seq2seq 모델. RAG의 generator.">
+              <span class="lineage-label">BART(2019)</span>
+            </div>
+            <p class="lineage-note">사전학습 seq2seq generator. → <strong class="novelty">검색한 문서를 입력에 이어 붙여</strong> 지식을 보탠다.</p>
+          </div>
+          <div class="lineage-branch">
+            <div class="lineage-edge-label">검색기 계승</div>
+            <div class="lineage-node" data-detail="DPR(Karpukhin et al., 2020): BERT bi-encoder로 질문과 문서를 임베딩해 내적으로 찾는 dense retriever.">
+              <span class="lineage-label">DPR(2020)</span>
+            </div>
+            <p class="lineage-note">사전학습 dense retriever와 위키백과 색인. → <strong class="novelty">추출형 reader 대신 generator</strong>가 답을 쓴다.</p>
+          </div>
+          <div class="lineage-branch">
+            <div class="lineage-edge-label">잠재 검색</div>
+            <div class="lineage-node" data-detail="REALM(Guu et al., 2020), ORQA(Lee et al., 2019): 검색을 잠재 변수로 두고 학습한 오픈 도메인 추출형 QA.">
+              <span class="lineage-label">REALM·ORQA</span>
+            </div>
+            <p class="lineage-note">검색을 잠재 변수로 학습한다. → <strong class="novelty">seq2seq 과제 전반으로 넓히고 색인은 고정</strong>한다.</p>
+          </div>
+          <div class="lineage-branch">
+            <div class="lineage-edge-label">출발점</div>
+            <div class="lineage-node" data-detail="DrQA(Chen et al., 2017): 위키백과 TF-IDF 검색과 추출형 reader로 오픈 도메인 질문에 답한 시스템.">
+              <span class="lineage-label">DrQA(2017)</span>
+            </div>
+            <p class="lineage-note">위키백과 검색 + 추출형 reader. → <strong class="novelty">검색을 학습하고 답을 생성</strong>한다.</p>
+          </div>
+          <div class="lineage-branch">
+            <div class="lineage-edge-label">지식 확인</div>
+            <div class="lineage-node" data-detail="LAMA(Petroni et al., 2019), T5 closed-book QA(Roberts et al., 2020): 사전학습 모델의 파라미터에 사실 지식이 들어 있음을 보인 연구.">
+              <span class="lineage-label">LAMA·T5</span>
+            </div>
+            <p class="lineage-note">파라미터에 지식이 든다. → <strong class="novelty">부족한 지식을 검색으로</strong> 보탠다.</p>
+          </div>
+          <div class="lineage-branch">
+            <div class="lineage-edge-label">외부 기억</div>
+            <div class="lineage-node" data-detail="memory network(Weston et al., 2014; Sukhbaatar et al., 2015): 외부 기억 칸을 읽고 쓰는 신경망. 과제마다 처음부터 학습함.">
+              <span class="lineage-label">memory network</span>
+            </div>
+            <p class="lineage-note">외부 기억을 읽는다. → <strong class="novelty">원문 텍스트 기억을 사전학습으로 미리 채운다</strong>.</p>
+          </div>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>RAG는 BART와 DPR을 이어받고, REALM·ORQA의 잠재 검색을 seq2seq 전반으로 넓혔다.</p></div>
+    </div>
+
+    <!-- 페이지 8: RAG가 합친 것 + 비교표 -->
+    <div class="screen cornell dense">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>RAG는 무엇을 하나로 묶었는가?</li>
+          <li>네 접근은 지식 갱신과 생성에서 어떻게 다른가?</li>
+          <li>RAG의 대가는 무엇인가?</li>
+        </ul>
+        <div class="callout callout-warning animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">더 알아보기</strong>
+            <p>대가도 있다. 문서 인코더를 고정해 색인은 학습으로 나아지지 않고(4단원), 일부 과제에서는 retriever가 입력과 무관하게 같은 문서만 찾는 <span class="term" data-definition="retrieval collapse(입력과 무관하게 같은 문서만 검색하는 현상): 학습 중 retriever가 어떤 입력에도 같은 문서를 고르게 되어 검색이 쓸모없어지는 현상.">retrieval collapse</span>가 생긴다(6단원).</p>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">그래서 RAG는 무엇을 합쳤나<span class="paper-ref">논문 1·2절</span></h3>
+        <p>RAG는 사전학습한 retriever와 사전학습한 <span class="term" data-definition="generator(생성기): 질문과 검색한 문서를 받아 답 문장을 만드는 모델. RAG에서는 BART.">generator</span>(생성기)를 확률 모델 하나로 묶는다. 검색한 문서를 잠재 변수로 보고 <span class="term" data-definition="주변화(Marginalization): 모르는 변수의 모든 경우에 대해 확률을 가중합해 그 변수를 식에서 없애는 계산.">주변화</span>(Marginalization)하므로, 어느 문서를 찾아야 하는지 알려 주지 않아도 <span class="term" data-definition="end-to-end 학습(입력부터 출력까지 한 번에 학습): 여러 부품을 따로 학습하지 않고 최종 출력의 손실로 함께 학습하는 일.">end-to-end 학습</span>(입력부터 출력까지 한 번에 학습)을 할 수 있다(3단원).</p>
+        <div class="svg-diagram animate-in" style="margin:var(--space-2) auto">
+          <svg viewBox="0 0 800 152" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="사전학습 retriever와 사전학습 generator가 확률 모델 하나로 묶이고 end-to-end로 fine-tuning된다">
+            <path class="edge-line" d="M248,36 H276 V64 H294"/><polygon class="edge-arrow" points="294,59 304,64 294,69"/>
+            <path class="edge-line" d="M248,116 H276 V88 H294"/><polygon class="edge-arrow" points="294,83 304,88 294,93"/>
+            <path class="edge-line accent" d="M536,76 H582"/><polygon class="edge-arrow accent" points="582,71 592,76 582,81"/>
+            <rect class="node-rect" x="16" y="8" width="232" height="56" rx="8"/>
+            <foreignObject x="24" y="12" width="216" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>사전학습 retriever: DPR과 위키백과 색인</span></div></foreignObject>
+            <rect class="node-rect" x="16" y="88" width="232" height="56" rx="8"/>
+            <foreignObject x="24" y="92" width="216" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>사전학습 generator: BART</span></div></foreignObject>
+            <rect class="node-rect accent" x="304" y="40" width="232" height="72" rx="12"/>
+            <foreignObject x="312" y="44" width="216" height="64"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; font-weight:700"><span>확률 모델 하나: 문서를 잠재 변수로 주변화</span></div></foreignObject>
+            <rect class="node-rect sq" x="592" y="40" width="192" height="72"/>
+            <foreignObject x="600" y="44" width="176" height="64"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>end-to-end fine-tuning: query encoder와 BART만 갱신</span></div></foreignObject>
+          </svg>
+        </div>
+        <table class="data-table animate-in">
+          <caption>표는 네 접근을 네 기준으로 비교한 것이다. 셀은 논문 1·5절의 서술을 요약한 것이다.</caption>
+          <thead><tr><th>접근</th><th>지식 갱신</th><th>근거 제시</th><th>생성 가능</th><th>사전학습 필요</th></tr></thead>
+          <tbody>
+            <tr><td>closed-book</td><td>다시 학습</td><td>어려움</td><td>가능</td><td>대규모 사전학습, SSM으로 향상</td></tr>
+            <tr><td>retrieve-and-extract</td><td>색인 수정</td><td>추출한 문서 구간</td><td>불가(추출만)</td><td>REALM은 검색 사전학습과 SSM</td></tr>
+            <tr><td>memory network</td><td>벡터라 고치기 어려움</td><td>어려움</td><td>과제별 구조</td><td>없음, 과제마다 처음부터</td></tr>
+            <tr class="hl"><td>RAG</td><td>색인 교체</td><td>검색한 문서</td><td>가능</td><td>기존 DPR·BART를 fine-tuning만</td></tr>
+          </tbody>
+        </table>
+        <p class="diff-line"><strong>핵심 비교</strong> closed-book은 생성하지만 고치지 못하고, retrieve-and-extract는 고칠 수 있지만 생성하지 못하며, RAG는 사전학습된 두 부품을 묶어 둘 다 얻는다.</p>
+              </div>
+      <div class="summary"><span class="summary-label">요약</span><p>RAG는 사전학습 retriever와 generator를 주변화로 묶어 갱신, 근거, 생성을 함께 얻되 고정 색인과 retrieval collapse라는 대가를 진다.</p></div>
+    </div>
+
+    <!-- 페이지 9: 핵심 정리 + 확인 문제 1~2 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-accent animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">핵심 정리</strong>
+            <ol>
+              <li>closed-book은 파라미터를 키워야 지식이 늘고 갱신, 근거, 환각 문제가 남는다.</li>
+              <li>retrieve-and-extract는 고칠 수 있는 색인을 쓰지만 문서 구간만 답할 수 있다.</li>
+              <li>memory network는 과제마다 처음부터 학습한 벡터 기억을 썼다.</li>
+              <li>RAG는 사전학습 retriever와 generator를 확률 모델 하나로 묶었다.</li>
+              <li>비교 문항은 지식이 어디에 있고 출력이 무엇인지부터 확인하라.</li>
+            </ol>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>closed-book과 추출형</h3>
+        <div class="quiz-container animate-in" id="pr-quiz-1">
+          <div class="quiz-question-block"
+               data-correct="option-d"
+               data-explanation-right="④ | RAG의 retriever는 NQ 검색 감독으로 학습한 DPR로 초기화했으므로 이 표만으로 그 영향을 배제할 수 없다."
+               data-explanation-wrong="| 정답은 ④이다. RAG는 NQ 검색 감독을 쓴 DPR로 초기화했으므로 단정할 수 없다. ②는 626M이 110억보다 적고 44.5가 34.5보다 크므로 옳다.">
+            <h3 class="quiz-question"><span class="q-num">1</span>NQ 테스트 EM은 T5-large(770M) 28.9, T5-11B 34.5, T5-11B+SSM 36.6, RAG-Sequence(626M) 44.5이다. 해석으로 옳지 <u>않은</u> 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① T5는 파라미터를 늘리자 EM이 올랐다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② RAG는 T5-11B보다 파라미터가 적지만 EM이 높다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ SSM 사전학습은 T5-11B의 EM을 높였다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ RAG의 우위는 검색 감독과 무관하다고 단정할 수 있다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ T5는 답의 근거 문서를 보여 주지 않는다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="② | 추출형 reader는 문서에 있는 구간만 고르므로 문서에 없는 질문 문장을 써낼 수 없다."
+               data-explanation-wrong="| 정답은 ②이다. 추출형은 문서의 구간만 고르므로 새 질문을 쓸 수 없다. ④는 문서를 늘려도 출력 방식이 그대로이므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">2</span>추출형 reader를 쓰는 QA 시스템에 Jeopardy 질문 생성을 맡겼을 때 예상으로 옳은 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 검색만 잘되면 질문 문장을 그대로 잘라 낸다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 문서에 없는 질문 문장을 써낼 수 없다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ reader가 자동으로 생성형으로 바뀐다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 문서 수를 늘리면 질문을 쓸 수 있다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ closed-book 모델보다 반드시 정확하다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('pr-quiz-1')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('pr-quiz-1')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>수치는 비교 조건까지 보고 해석해야 하며, 추출형은 문서에 없는 문장을 만들 수 없다.</p></div>
+    </div>
+
+    <!-- 페이지 10: 확인 문제 3~4 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>RAG의 기억은 이전 외부 기억과 무엇이 다른가?</li>
+          <li>RAG는 왜 문서 인코더를 고정했는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>외부 기억과 설계 선택</h3>
+        <div class="quiz-container animate-in" id="pr-quiz-2">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="③ | ㄱ과 ㄴ은 논문 1·5절의 서술과 같고, ㄷ은 RAG에 대한 설명이다."
+               data-explanation-wrong="| 정답은 ③이다. ㄷ은 retrieve-and-edit가 아니라 RAG의 특징이므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">3</span>외부 기억에 대한 설명으로 옳은 것만을 <span class="nobr">&lt;보기&gt;에서</span> 있는 대로 고른 것은?</h3>
+            <div class="bogi">
+              <p>ㄱ. memory network는 과제별로 학습했다.</p>
+              <p>ㄴ. RAG의 기억은 사람이 고칠 수 있다.</p>
+              <p>ㄷ. retrieve-and-edit는 잠재 검색을 학습한다.</p>
+            </div>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① ㄱ</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② ㄷ</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ ㄱ, ㄴ</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ ㄴ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ ㄱ, ㄴ, ㄷ</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="① | 문서 인코더를 갱신하면 2,100만 개 문서의 색인을 주기적으로 다시 만들어야 하므로 비용이 크다."
+               data-explanation-wrong="| 정답은 ①이다. 인코더를 바꾸면 색인을 다시 만들어야 해 비싸다. ③은 고정이 성능을 높인다는 근거가 없으므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">4</span>RAG가 REALM과 달리 문서 인코더와 색인을 고정한 이유로 옳은 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 갱신하면 색인을 다시 만들어야 해 비싸다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 문서 인코더는 학습할 수 없는 구조이다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 고정하면 성능이 항상 더 높아진다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ BART가 문서 인코더 역할을 대신한다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 색인이 학습 파라미터에 포함되기 때문이다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('pr-quiz-2')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('pr-quiz-2')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>RAG의 기억은 읽고 고칠 수 있는 원문이고, 문서 인코더는 색인 재구축 비용 때문에 고정한다.</p></div>
+    </div>
+
+  </div>
+</section>

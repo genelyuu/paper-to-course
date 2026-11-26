@@ -1,0 +1,722 @@
+<section class="module" id="module-5">
+  <div class="module-content">
+
+    <div class="module-header">
+      <span class="module-number">6</span>
+      <h2 class="module-title">이후 동향</h2>
+      <p class="module-subtitle">트랜스포머가 세 갈래로 나뉜 과정과 오늘날 LLM이 바꾼 부품을 살핀다</p>
+    </div>
+
+    <!-- 페이지 1: 세 갈래 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-icon">&#127919;</div>
+          <div class="callout-content">
+            <strong class="callout-title">학습 목표</strong>
+            <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
+            <ol>
+              <li>encoder-only, encoder-decoder, decoder-only 구조를 어텐션 마스크와 사전학습 목표로 비교할 수 있다.</li>
+              <li>decoder-only가 많이 쓰이는 이유를 실험 근거와 실무적 이유로 구분해 설명할 수 있다.</li>
+              <li>이후 바뀐 부품이 원 논문 구조의 어디를 바꾸었는지 설명할 수 있다.</li>
+            </ol>
+          </div>
+        </div>
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">보충 설명</strong>
+            <p>이 단원은 논문 이후의 보충 내용이다(조사 시점 2026년 11월).</p>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">트랜스포머 이후 세 갈래</h3>
+        <p>GPT-3, LLaMA 같은 <span class="term" data-definition="LLM(large language model, 대규모 언어 모델): 매우 많은 텍스트로 사전학습한, 파라미터가 수십억 개 이상인 언어 모델.">LLM(large language model, 대규모 언어 모델)</span>은 이 논문의 <span class="term" data-definition="트랜스포머(Transformer): 순환과 합성곱 없이 어텐션과 FFN만으로 층을 쌓은 시퀀스 변환 모델.">트랜스포머</span>(Transformer)를 뼈대로 쓴다. 후속 연구는 논문 그림 1(4단원)의 <strong>왼쪽(인코더)만</strong>, <strong>둘 다</strong>, <strong>오른쪽(디코더)만</strong> 쓰는 세 갈래로 나뉘었다.</p>
+        <figure class="svg-diagram fit animate-in" style="--diagram-max:720px">
+          <svg viewBox="0 0 800 248" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="트랜스포머에서 encoder-only, encoder-decoder, decoder-only 세 갈래가 나왔고 각각 인코더만, 둘 다, 디코더만 쓴다">
+<rect class="node-rect" x="272" y="8" width="256" height="36" rx="8"/>
+<foreignObject x="280" y="12" width="240" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span><strong>트랜스포머</strong>(원 논문, 2017)</span></div></foreignObject>
+<path class="edge-line" d="M400,44 V60 H136 V70"/><polygon class="edge-arrow" points="131,70 141,70 136,80"/>
+<path class="edge-line" d="M400,60 V70"/><polygon class="edge-arrow" points="395,70 405,70 400,80"/>
+<path class="edge-line" d="M400,60 H664 V70"/><polygon class="edge-arrow" points="659,70 669,70 664,80"/>
+<rect class="node-rect" x="16" y="80" width="240" height="32" rx="8"/>
+<foreignObject x="24" y="84" width="224" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span><strong>encoder-only</strong></span></div></foreignObject>
+<rect class="node-rect" x="24" y="124" width="100" height="80" rx="8"/>
+<foreignObject x="32" y="128" width="84" height="72"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>인코더 층 ×<i class="mi">N</i><br/>셀프 어텐션 · FFN</span></div></foreignObject>
+<rect class="guide-fill" x="148" y="124" width="100" height="80" rx="8"/>
+<foreignObject x="156" y="128" width="84" height="72"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; color:var(--color-text-secondary)"><span>쓰지 않음</span></div></foreignObject>
+<foreignObject x="16" y="212" width="240" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; color:var(--color-text-secondary)"><span>BERT(2018)</span></div></foreignObject>
+<rect class="node-rect" x="280" y="80" width="240" height="32" rx="8"/>
+<foreignObject x="288" y="84" width="224" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span><strong>encoder-decoder</strong></span></div></foreignObject>
+<rect class="node-rect" x="288" y="124" width="100" height="80" rx="8"/>
+<foreignObject x="296" y="128" width="84" height="72"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>인코더 층 ×<i class="mi">N</i><br/>셀프 어텐션 · FFN</span></div></foreignObject>
+<rect class="node-rect" x="412" y="124" width="100" height="80" rx="8"/>
+<foreignObject x="420" y="128" width="84" height="72"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>디코더 층 ×<i class="mi">N</i><br/>마스크드 셀프 · 크로스 · FFN</span></div></foreignObject>
+<path class="edge-line" d="M388,164 H402"/><polygon class="edge-arrow" points="402,159 412,164 402,169"/>
+<foreignObject x="280" y="212" width="240" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; color:var(--color-text-secondary)"><span>T5(2019) · BART(2019)</span></div></foreignObject>
+<rect class="node-rect accent" x="544" y="80" width="240" height="32" rx="8"/>
+<foreignObject x="552" y="84" width="224" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span><strong>decoder-only</strong></span></div></foreignObject>
+<rect class="guide-fill" x="552" y="124" width="100" height="80" rx="8"/>
+<foreignObject x="560" y="128" width="84" height="72"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; color:var(--color-text-secondary)"><span>쓰지 않음</span></div></foreignObject>
+<rect class="node-rect" x="676" y="124" width="100" height="80" rx="8"/>
+<foreignObject x="684" y="128" width="84" height="72"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>디코더 층 ×<i class="mi">N</i><br/>마스크드 셀프 · FFN</span></div></foreignObject>
+<foreignObject x="544" y="212" width="240" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; color:var(--color-text-secondary)"><span>GPT-1(2018) · GPT-3(2020)</span></div></foreignObject>
+          </svg>
+          <figcaption class="figure-caption">그림은 원 트랜스포머에서 나온 세 갈래와 각 갈래가 쓰는 부분, 대표 모델을 나타낸 것이다.</figcaption>
+        </figure>
+        <div class="with-figure" style="--figure-side-width:112px">
+          <div>
+            <p><span class="term" data-definition="encoder-only(인코더만 쓰는 구조): 트랜스포머의 인코더 층만 쌓은 모델 구조. 입력 전체를 양방향으로 봄. BERT가 대표적임.">encoder-only(인코더만 쓰는 구조)</span>의 대표는 <span class="term" data-definition="BERT: 2018년 Google이 발표한 encoder-only 모델. 가린 토큰 맞히기로 사전학습한 뒤 과제마다 미세조정함.">BERT</span>이고, <span class="term" data-definition="encoder-decoder(인코더와 디코더를 모두 쓰는 구조): 인코더가 입력을 읽고 디코더가 크로스 어텐션으로 그 결과를 보며 출력을 만드는 구조. 원 논문의 트랜스포머가 이 구조임.">encoder-decoder(인코더와 디코더를 모두 쓰는 구조)</span>는 원 논문과 <span class="term" data-definition="T5: 2019년 Google이 발표한 encoder-decoder 모델. 모든 과제를 텍스트를 넣고 텍스트를 받는 형식으로 통일함.">T5</span>, <span class="term" data-definition="BART: 2019년 Facebook이 발표한 encoder-decoder 모델. 망가뜨린 텍스트를 원래대로 복원하도록 사전학습함.">BART</span>가 잇는다. <span class="term" data-definition="decoder-only(디코더만 쓰는 구조): 트랜스포머의 디코더 층만 쌓은 모델 구조. 인코더가 없으므로 크로스 어텐션 하위 층도 없음. GPT 계열이 대표적임.">decoder-only(디코더만 쓰는 구조)</span>는 GPT 계열이 잇는다. decoder-only에는 인코더가 없으므로 디코더 층의 크로스 어텐션(cross-attention)도 빠진다.</p>
+          </div>
+          <figure class="figure side"><img src="assets/fig-tree.svg" alt="한 줄기에서 세 갈래로 갈라지는 나무: 한 트랜스포머에서 세 계열이 나온 것에 빗댐"></figure>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>후속 모델은 원 트랜스포머의 인코더만, 둘 다, 디코더만 쓰는 세 갈래로 나뉜다.</p></div>
+    </div>
+
+    <!-- 페이지 2: 어텐션 마스크 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>세 갈래는 어텐션에서 무엇이 다른가?</li>
+          <li>디코더는 왜 앞 토큰만 보는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">어텐션 마스크의 모양</h3>
+        <p>세 갈래의 가장 큰 차이는 각 토큰이 어느 토큰을 볼 수 있는가이다. 그림은 토큰 4개짜리 입력에서 세 갈래의 셀프 어텐션(self-attention) 마스크를 나타낸 것이다. 행은 보는 토큰(쿼리), 열은 보이는 토큰(키)이고, 색칠한 칸만 볼 수 있다.</p>
+        <div class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 200" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="encoder-only는 4×4 칸이 모두 색칠됨, encoder-decoder는 인코더 전체와 디코더 아래 삼각형, decoder-only는 아래 삼각형만 색칠됨">
+<foreignObject x="16" y="8" width="240" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span><strong>encoder-only</strong></span></div></foreignObject>
+<rect class="accent-fill" x="98" y="50" width="16" height="16"/>
+<rect class="accent-fill" x="118" y="50" width="16" height="16"/>
+<rect class="accent-fill" x="138" y="50" width="16" height="16"/>
+<rect class="accent-fill" x="158" y="50" width="16" height="16"/>
+<rect class="accent-fill" x="98" y="70" width="16" height="16"/>
+<rect class="accent-fill" x="118" y="70" width="16" height="16"/>
+<rect class="accent-fill" x="138" y="70" width="16" height="16"/>
+<rect class="accent-fill" x="158" y="70" width="16" height="16"/>
+<rect class="accent-fill" x="98" y="90" width="16" height="16"/>
+<rect class="accent-fill" x="118" y="90" width="16" height="16"/>
+<rect class="accent-fill" x="138" y="90" width="16" height="16"/>
+<rect class="accent-fill" x="158" y="90" width="16" height="16"/>
+<rect class="accent-fill" x="98" y="110" width="16" height="16"/>
+<rect class="accent-fill" x="118" y="110" width="16" height="16"/>
+<rect class="accent-fill" x="138" y="110" width="16" height="16"/>
+<rect class="accent-fill" x="158" y="110" width="16" height="16"/>
+<foreignObject x="280" y="8" width="240" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span><strong>encoder-decoder</strong></span></div></foreignObject>
+<rect class="accent-fill" x="314" y="50" width="16" height="16"/>
+<rect class="accent-fill" x="334" y="50" width="16" height="16"/>
+<rect class="accent-fill" x="354" y="50" width="16" height="16"/>
+<rect class="accent-fill" x="374" y="50" width="16" height="16"/>
+<rect class="accent-fill" x="314" y="70" width="16" height="16"/>
+<rect class="accent-fill" x="334" y="70" width="16" height="16"/>
+<rect class="accent-fill" x="354" y="70" width="16" height="16"/>
+<rect class="accent-fill" x="374" y="70" width="16" height="16"/>
+<rect class="accent-fill" x="314" y="90" width="16" height="16"/>
+<rect class="accent-fill" x="334" y="90" width="16" height="16"/>
+<rect class="accent-fill" x="354" y="90" width="16" height="16"/>
+<rect class="accent-fill" x="374" y="90" width="16" height="16"/>
+<rect class="accent-fill" x="314" y="110" width="16" height="16"/>
+<rect class="accent-fill" x="334" y="110" width="16" height="16"/>
+<rect class="accent-fill" x="354" y="110" width="16" height="16"/>
+<rect class="accent-fill" x="374" y="110" width="16" height="16"/>
+<rect class="accent-fill" x="410" y="50" width="16" height="16"/>
+<rect class="guide-fill" x="430" y="50" width="16" height="16"/>
+<rect class="guide-fill" x="450" y="50" width="16" height="16"/>
+<rect class="guide-fill" x="470" y="50" width="16" height="16"/>
+<rect class="accent-fill" x="410" y="70" width="16" height="16"/>
+<rect class="accent-fill" x="430" y="70" width="16" height="16"/>
+<rect class="guide-fill" x="450" y="70" width="16" height="16"/>
+<rect class="guide-fill" x="470" y="70" width="16" height="16"/>
+<rect class="accent-fill" x="410" y="90" width="16" height="16"/>
+<rect class="accent-fill" x="430" y="90" width="16" height="16"/>
+<rect class="accent-fill" x="450" y="90" width="16" height="16"/>
+<rect class="guide-fill" x="470" y="90" width="16" height="16"/>
+<rect class="accent-fill" x="410" y="110" width="16" height="16"/>
+<rect class="accent-fill" x="430" y="110" width="16" height="16"/>
+<rect class="accent-fill" x="450" y="110" width="16" height="16"/>
+<rect class="accent-fill" x="470" y="110" width="16" height="16"/>
+<text x="352" y="148" text-anchor="middle" font-size="12" class="muted">인코더</text>
+<text x="448" y="148" text-anchor="middle" font-size="12" class="muted">디코더</text>
+<foreignObject x="544" y="8" width="240" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span><strong>decoder-only</strong></span></div></foreignObject>
+<rect class="accent-fill" x="626" y="50" width="16" height="16"/>
+<rect class="guide-fill" x="646" y="50" width="16" height="16"/>
+<rect class="guide-fill" x="666" y="50" width="16" height="16"/>
+<rect class="guide-fill" x="686" y="50" width="16" height="16"/>
+<rect class="accent-fill" x="626" y="70" width="16" height="16"/>
+<rect class="accent-fill" x="646" y="70" width="16" height="16"/>
+<rect class="guide-fill" x="666" y="70" width="16" height="16"/>
+<rect class="guide-fill" x="686" y="70" width="16" height="16"/>
+<rect class="accent-fill" x="626" y="90" width="16" height="16"/>
+<rect class="accent-fill" x="646" y="90" width="16" height="16"/>
+<rect class="accent-fill" x="666" y="90" width="16" height="16"/>
+<rect class="guide-fill" x="686" y="90" width="16" height="16"/>
+<rect class="accent-fill" x="626" y="110" width="16" height="16"/>
+<rect class="accent-fill" x="646" y="110" width="16" height="16"/>
+<rect class="accent-fill" x="666" y="110" width="16" height="16"/>
+<rect class="accent-fill" x="686" y="110" width="16" height="16"/>
+<foreignObject x="16" y="160" width="240" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; color:var(--color-text-secondary)"><span>양방향: 모든 칸을 봄</span></div></foreignObject>
+<foreignObject x="280" y="160" width="240" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; color:var(--color-text-secondary)"><span>인코더는 전부, 디코더는 앞만</span></div></foreignObject>
+<foreignObject x="544" y="160" width="240" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; color:var(--color-text-secondary)"><span>인과 마스크: 앞만 봄</span></div></foreignObject>
+          </svg>
+        </div>
+        <p>encoder-only는 모든 칸을 보므로 한 토큰을 앞뒤 문맥으로 함께 이해한다. decoder-only는 3단원의 <span class="term" data-definition="인과 마스크(causal mask): 각 토큰이 자기와 앞선 토큰만 보도록 뒤 토큰의 어텐션 점수를 가리는 마스크. 아래 삼각형 모양이 됨.">인과 마스크</span>(causal mask)로 자기와 앞 토큰만 본다. 뒤 토큰을 보면 맞혀야 할 다음 토큰을 미리 보게 되므로, 한 토큰씩 이어 쓰는 <span class="term" data-definition="자기회귀(auto-regressive): 앞에서 만든 출력을 다시 입력으로 넣어 다음 출력을 하나씩 만드는 방식.">자기회귀</span>(auto-regressive) 생성에는 이 마스크가 필요하다.</p>
+        <p>encoder-decoder는 인코더 안에서는 전부 보고, 디코더 안에서는 앞만 본다. 디코더의 크로스 어텐션은 인코더 출력의 모든 위치를 본다(3단원).</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>encoder-only는 양방향, decoder-only는 앞만 보는 인과 마스크, encoder-decoder는 둘을 함께 쓴다.</p></div>
+    </div>
+
+    <!-- 페이지 3: 사전학습 목표와 비교표 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>세 갈래는 같은 문장으로 무엇을 맞히도록 배우는가?</li>
+          <li>각 갈래는 어떤 일을 잘하는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>세 갈래의 비교</h3>
+        <p>그림은 같은 문장 “나는 학교에 간다”(예시)로 세 갈래가 <span class="term" data-definition="사전학습(pre-training): 특정 과제에 맞추기 전에 레이블 없는 대량의 텍스트로 모델을 먼저 학습하는 단계.">사전학습</span>(pre-training)에서 맞히는 것을 나타낸 것이다.</p>
+        <div class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 136" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="MLM은 가린 단어, T5는 지운 구간, GPT는 다음 토큰을 맞힌다">
+<foreignObject x="16" y="8" width="240" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span><strong>MLM: BERT</strong></span></div></foreignObject>
+<rect class="node-rect" x="36" y="40" width="200" height="36" rx="8"/>
+<foreignObject x="44" y="44" width="184" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>입력: 나는 [MASK] 간다</span></div></foreignObject>
+<path class="edge-line" d="M136,76 V82"/><polygon class="edge-arrow" points="131,82 141,82 136,92"/>
+<rect class="node-rect" x="36" y="92" width="200" height="36" rx="8"/>
+<foreignObject x="44" y="96" width="184" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>맞힐 것: 학교에</span></div></foreignObject>
+<foreignObject x="280" y="8" width="240" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span><strong>구간 복원: T5</strong></span></div></foreignObject>
+<rect class="node-rect" x="300" y="40" width="200" height="36" rx="8"/>
+<foreignObject x="308" y="44" width="184" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>입력: 나는 &lt;X&gt; 간다</span></div></foreignObject>
+<path class="edge-line" d="M400,76 V82"/><polygon class="edge-arrow" points="395,82 405,82 400,92"/>
+<rect class="node-rect" x="300" y="92" width="200" height="36" rx="8"/>
+<foreignObject x="308" y="96" width="184" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>맞힐 것: &lt;X&gt; 학교에 &lt;Y&gt;</span></div></foreignObject>
+<foreignObject x="544" y="8" width="240" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span><strong>다음 토큰 예측: GPT</strong></span></div></foreignObject>
+<rect class="node-rect" x="564" y="40" width="200" height="36" rx="8"/>
+<foreignObject x="572" y="44" width="184" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>입력: 나는 학교에</span></div></foreignObject>
+<path class="edge-line" d="M664,76 V82"/><polygon class="edge-arrow" points="659,82 669,82 664,92"/>
+<rect class="node-rect accent" x="564" y="92" width="200" height="36" rx="8"/>
+<foreignObject x="572" y="96" width="184" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>맞힐 것: 간다</span></div></foreignObject>
+          </svg>
+        </div>
+        <table class="data-table animate-in">
+          <thead><tr><th>기준</th><th>encoder-only</th><th>encoder-decoder</th><th>decoder-only</th></tr></thead>
+          <tbody>
+            <tr><td>쓰는 부분</td><td>인코더</td><td>인코더 + 디코더</td><td>디코더</td></tr>
+            <tr><td>보는 방향</td><td>양방향</td><td>입력은 양방향, 출력은 앞만</td><td>앞만</td></tr>
+            <tr><td>사전학습 목표</td><td><span class="term" data-definition="MLM(masked language modeling): 입력 토큰 일부를 가리고 양쪽 문맥으로 가린 토큰을 맞히는 사전학습 목표.">MLM(masked language modeling)</span></td><td>망가뜨린 입력 복원</td><td><span class="term" data-definition="다음 토큰 예측(next-token prediction): 앞 토큰들만 보고 바로 다음 토큰을 맞히는 사전학습 목표.">다음 토큰 예측</span>(next-token prediction)</td></tr>
+            <tr><td>대표 모델</td><td>BERT</td><td>원 논문, T5, BART</td><td>GPT 계열</td></tr>
+            <tr><td>잘하는 일</td><td>분류, 추출</td><td>번역, 요약</td><td>생성 전반</td></tr>
+          </tbody>
+          <caption>표는 세 갈래의 차이를 나타낸 것이다. 출처: <a href="https://arxiv.org/abs/1810.04805" target="_blank" rel="noopener">BERT</a>, <a href="https://arxiv.org/abs/1910.10683" target="_blank" rel="noopener">T5</a>, <a href="https://arxiv.org/abs/1910.13461" target="_blank" rel="noopener">BART</a>, <a href="https://arxiv.org/abs/2005.14165" target="_blank" rel="noopener">GPT-3</a></caption>
+        </table>
+        <p class="diff-line"><strong>핵심 비교</strong> encoder-only는 이해, decoder-only는 이어 쓰기, encoder-decoder는 입력을 읽고 다른 글로 바꾸기에 맞춘 구조이다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>세 갈래는 쓰는 부분, 보는 방향, 사전학습 목표가 달라 잘하는 일도 다르다.</p></div>
+    </div>
+
+    <!-- 페이지 4: 이유 1, 2 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>다음 토큰 예측은 왜 학습 신호가 많은가?</li>
+          <li>모든 과제를 이어 쓰기로 바꿀 수 있는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">decoder-only가 많이 쓰이는 이유 1: 학습 신호와 과제 통일</h3>
+        <p><strong>학습 신호.</strong> 다음 토큰 예측에서는 레이블 없는 텍스트의 모든 위치가 정답이 된다. BERT의 MLM은 입력의 15%만 가리고 그 토큰만 맞힌다(<a href="https://arxiv.org/abs/1810.04805" target="_blank" rel="noopener">BERT 3.1절</a>). 그림은 같은 문장(예시)에서 손실을 계산하는 위치를 색칠한 것이다.</p>
+        <div class="svg-diagram fit animate-in" style="--diagram-max:700px">
+          <svg viewBox="0 0 744 100" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="다음 토큰 예측은 6곳 모두, MLM은 가린 한 곳만 학습한다">
+<text x="8" y="27" font-size="12" font-weight="700">다음 토큰 예측</text>
+<text x="8" y="83" font-size="12" font-weight="700">MLM</text>
+<rect class="node-rect sq accent" x="120" y="8" width="64" height="28" rx="2"/>
+<foreignObject x="128" y="12" width="48" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>나는</span></div></foreignObject>
+<rect class="node-rect sq" x="120" y="64" width="64" height="28" rx="2"/>
+<foreignObject x="128" y="68" width="48" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>나는</span></div></foreignObject>
+<rect class="node-rect sq accent" x="192" y="8" width="64" height="28" rx="2"/>
+<foreignObject x="200" y="12" width="48" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>오늘</span></div></foreignObject>
+<rect class="node-rect sq" x="192" y="64" width="64" height="28" rx="2"/>
+<foreignObject x="200" y="68" width="48" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>오늘</span></div></foreignObject>
+<rect class="node-rect sq accent" x="264" y="8" width="64" height="28" rx="2"/>
+<foreignObject x="272" y="12" width="48" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>학교에</span></div></foreignObject>
+<rect class="node-rect sq accent" x="264" y="64" width="64" height="28" rx="2"/>
+<foreignObject x="272" y="68" width="48" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>[MASK]</span></div></foreignObject>
+<rect class="node-rect sq accent" x="336" y="8" width="64" height="28" rx="2"/>
+<foreignObject x="344" y="12" width="48" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>걸어서</span></div></foreignObject>
+<rect class="node-rect sq" x="336" y="64" width="64" height="28" rx="2"/>
+<foreignObject x="344" y="68" width="48" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>걸어서</span></div></foreignObject>
+<rect class="node-rect sq accent" x="408" y="8" width="64" height="28" rx="2"/>
+<foreignObject x="416" y="12" width="48" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>간다</span></div></foreignObject>
+<rect class="node-rect sq" x="408" y="64" width="64" height="28" rx="2"/>
+<foreignObject x="416" y="68" width="48" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>간다</span></div></foreignObject>
+<rect class="node-rect sq accent" x="480" y="8" width="64" height="28" rx="2"/>
+<foreignObject x="488" y="12" width="48" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>.</span></div></foreignObject>
+<rect class="node-rect sq" x="480" y="64" width="64" height="28" rx="2"/>
+<foreignObject x="488" y="68" width="48" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>.</span></div></foreignObject>
+<text x="560" y="27" font-size="12" class="accent-text">6곳 모두 학습(신호 6개)</text>
+<text x="560" y="83" font-size="12" class="muted">가린 1곳만 학습(신호 1개)</text>
+          </svg>
+        </div>
+        <div class="with-figure" style="--figure-side-width:224px">
+          <div>
+            <p><strong>과제 통일.</strong> decoder-only는 번역, 요약, 질의응답을 모두 “프롬프트 다음 글 이어 쓰기”로 표현한다. GPT-3은 기울기 갱신 없이 프롬프트 속 예시만 보고 과제를 푸는 <span class="term" data-definition="in-context learning(ICL): 모델 파라미터를 바꾸지 않고 프롬프트에 넣은 설명과 예시만으로 새 과제를 푸는 것.">in-context learning(ICL)</span>을 보였다(<a href="https://arxiv.org/abs/2005.14165" target="_blank" rel="noopener">Brown et al., 2020</a>).</p>
+            <p>예시가 하나도 없으면 <span class="term" data-definition="zero-shot(예시 없이 바로 푸는 것): 과제 설명만 주고 예시 없이 모델이 바로 답하게 하는 설정.">zero-shot(예시 없이 바로 푸는 것)</span>, 몇 개 있으면 few-shot이라 한다. 그림은 예시 두 개를 넣은 few-shot 프롬프트(예시)이다.</p>
+          </div>
+          <figure class="figure side">
+<svg viewBox="0 0 224 144" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="사과 → apple, 바다 → sea 다음에 학교 → 를 넣으면 모델이 school을 이어 쓴다">
+<rect class="node-rect sq" x="8" y="8" width="208" height="128" rx="2"/>
+<text x="20" y="32" font-size="13" class="muted">프롬프트</text>
+<text x="20" y="58" font-size="14">사과 → apple</text>
+<text x="20" y="82" font-size="14">바다 → sea</text>
+<text x="20" y="106" font-size="14">학교 →</text>
+<text x="70" y="106" font-size="14" class="accent-text" font-weight="700">school</text>
+<text x="20" y="128" font-size="11" class="muted">색 글자: 모델이 이어 쓴 부분</text>
+</svg>
+          </figure>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>다음 토큰 예측은 모든 위치에서 배우고, 모든 과제를 이어 쓰기 하나로 표현하게 해 준다.</p></div>
+    </div>
+
+    <!-- 페이지 5: 이유 3 (실험 근거) -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>구조와 목표를 같은 조건에서 비교하면 어느 쪽이 나은가?</li>
+          <li>그 결론에는 어떤 단서가 붙는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>decoder-only가 많이 쓰이는 이유 2: 실험 근거</h3>
+        <p><a href="https://arxiv.org/abs/2204.05832" target="_blank" rel="noopener">Wang et al.(ICML 2022)</a>은 파라미터 50억 개 이상, 토큰 1,700억 개 이상 규모에서 구조(decoder-only, encoder-decoder)와 사전학습 목표의 조합을 비교했다.</p>
+        <figure class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 116" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="비지도 사전학습 직후 zero-shot에서는 인과 decoder-only가, 멀티태스크 미세조정 뒤에는 비인과 모델이 가장 좋았다">
+<rect class="node-rect" x="16" y="8" width="320" height="44" rx="8"/>
+<foreignObject x="24" y="12" width="304" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>비지도 사전학습 직후의 zero-shot</span></div></foreignObject>
+<path class="edge-line accent" d="M336,30 H366"/><polygon class="edge-arrow accent" points="366,25 376,30 366,35"/>
+<rect class="node-rect accent" x="376" y="8" width="408" height="44" rx="8"/>
+<foreignObject x="384" y="12" width="392" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>가장 좋음: 인과 decoder-only + 다음 토큰 예측</span></div></foreignObject>
+<rect class="node-rect" x="16" y="64" width="320" height="44" rx="8"/>
+<foreignObject x="24" y="68" width="304" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>MLM 사전학습 뒤 멀티태스크 미세조정</span></div></foreignObject>
+<path class="edge-line" d="M336,86 H366"/><polygon class="edge-arrow" points="366,81 376,86 366,91"/>
+<rect class="node-rect" x="376" y="64" width="408" height="44" rx="8"/>
+<foreignObject x="384" y="68" width="392" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>가장 좋음: 입력을 양방향으로 보는 비인과 모델</span></div></foreignObject>
+          </svg>
+          <figcaption class="figure-caption">그림은 Wang et al.(2022)의 결론을 조건별로 나타낸 것이다.</figcaption>
+        </figure>
+        <div class="with-figure" style="--figure-side-width:140px">
+          <div>
+            <p><strong>단서:</strong> 이 결과는 decoder-only가 늘 낫다는 뜻이 아니다. 여러 과제로 <span class="term" data-definition="미세조정(fine-tuning): 사전학습한 모델을 특정 과제의 데이터로 조금 더 학습시켜 그 과제에 맞추는 일.">미세조정</span>(fine-tuning)하는 조건에서는 입력을 양방향으로 보는 비인과 모델이 앞섰다. 오른쪽 그림처럼 비인과 모델은 입력 부분을 서로 모두 보고 생성 부분만 앞을 본다.</p>
+            <p>저자들은 인과 디코더를 비인과로 효율적으로 바꾸어 경쟁력을 얻을 수 있다고도 보고했다.</p>
+          </div>
+          <figure class="figure side">
+<svg viewBox="0 0 132 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="입력 두 토큰은 서로 모두 보고 생성 부분은 앞만 보는 비인과 마스크">
+<rect class="accent-fill" x="18" y="18" width="16" height="16"/>
+<rect class="accent-fill" x="38" y="18" width="16" height="16"/>
+<rect class="guide-fill" x="58" y="18" width="16" height="16"/>
+<rect class="guide-fill" x="78" y="18" width="16" height="16"/>
+<rect class="guide-fill" x="98" y="18" width="16" height="16"/>
+<rect class="accent-fill" x="18" y="38" width="16" height="16"/>
+<rect class="accent-fill" x="38" y="38" width="16" height="16"/>
+<rect class="guide-fill" x="58" y="38" width="16" height="16"/>
+<rect class="guide-fill" x="78" y="38" width="16" height="16"/>
+<rect class="guide-fill" x="98" y="38" width="16" height="16"/>
+<rect class="accent-fill" x="18" y="58" width="16" height="16"/>
+<rect class="accent-fill" x="38" y="58" width="16" height="16"/>
+<rect class="accent-fill" x="58" y="58" width="16" height="16"/>
+<rect class="guide-fill" x="78" y="58" width="16" height="16"/>
+<rect class="guide-fill" x="98" y="58" width="16" height="16"/>
+<rect class="accent-fill" x="18" y="78" width="16" height="16"/>
+<rect class="accent-fill" x="38" y="78" width="16" height="16"/>
+<rect class="accent-fill" x="58" y="78" width="16" height="16"/>
+<rect class="accent-fill" x="78" y="78" width="16" height="16"/>
+<rect class="guide-fill" x="98" y="78" width="16" height="16"/>
+<rect class="accent-fill" x="18" y="98" width="16" height="16"/>
+<rect class="accent-fill" x="38" y="98" width="16" height="16"/>
+<rect class="accent-fill" x="58" y="98" width="16" height="16"/>
+<rect class="accent-fill" x="78" y="98" width="16" height="16"/>
+<rect class="accent-fill" x="98" y="98" width="16" height="16"/>
+<path class="guide-axis" d="M56,8 V120" fill="none"/>
+<text x="36" y="134" text-anchor="middle" font-size="11" class="muted">입력</text>
+<text x="88" y="134" text-anchor="middle" font-size="11" class="muted">생성 부분</text>
+</svg>
+            <figcaption class="figure-caption">비인과 마스크(예시)</figcaption>
+          </figure>
+        </div>
+        <p>BLOOM 논문(<a href="https://arxiv.org/abs/2211.05100" target="_blank" rel="noopener">2022</a>)은 이 결과를 decoder-only 채택의 근거로 인용했다. 따라서 BLOOM의 decoder-only 선택은 사전학습 직후의 zero-shot 성능을 중시한 결정으로 해석할 수 있다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>사전학습 직후 zero-shot에서는 인과 decoder-only가 가장 좋았지만 멀티태스크 미세조정 조건에서는 비인과 모델이 앞섰다.</p></div>
+    </div>
+
+    <!-- 페이지 6: 이유 4 (실무, KV 캐시) -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>생성할 때 앞 토큰을 다시 계산해야 하는가?</li>
+          <li>KV 캐시는 왜 인과 마스크와 잘 맞는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">decoder-only가 많이 쓰이는 이유 3: 실무적 이유</h3>
+        <p>앞의 두 쪽이 논문에 근거한 이유라면, 이 쪽은 <strong>실무적 이유</strong>이다. 첫째, 층 종류가 하나라 구조가 단순해 규모를 키우기 쉽다. 둘째, 생성 비용을 줄이는 <span class="term" data-definition="KV 캐시(KV cache): 생성 중에 앞 토큰들의 키와 값을 저장해 두고, 다음 토큰을 만들 때 다시 계산하지 않고 꺼내 쓰는 방법.">KV 캐시</span>(KV cache)가 인과 마스크와 잘 맞는다.</p>
+        <div class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 160" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="생성 단계마다 K·V 열이 하나씩 쌓이고 새 토큰의 키와 값만 새로 계산한다">
+<text x="8" y="28" font-size="12" font-weight="700">1단계</text>
+<rect class="node-rect sq accent" x="72" y="8" width="120" height="28" rx="2"/>
+<foreignObject x="80" y="12" width="104" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>K·V: 나는(새로)</span></div></foreignObject>
+<text x="208" y="27" font-size="12" class="muted">저장 1개, 새로 계산 1개</text>
+<text x="8" y="68" font-size="12" font-weight="700">2단계</text>
+<rect class="node-rect sq" x="72" y="48" width="120" height="28" rx="2"/>
+<foreignObject x="80" y="52" width="104" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>K·V: 나는</span></div></foreignObject>
+<rect class="node-rect sq accent" x="200" y="48" width="120" height="28" rx="2"/>
+<foreignObject x="208" y="52" width="104" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>K·V: 학교에(새로)</span></div></foreignObject>
+<text x="336" y="67" font-size="12" class="muted">저장 2개, 새로 계산 1개</text>
+<text x="8" y="108" font-size="12" font-weight="700">3단계</text>
+<rect class="node-rect sq" x="72" y="88" width="120" height="28" rx="2"/>
+<foreignObject x="80" y="92" width="104" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>K·V: 나는</span></div></foreignObject>
+<rect class="node-rect sq" x="200" y="88" width="120" height="28" rx="2"/>
+<foreignObject x="208" y="92" width="104" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>K·V: 학교에</span></div></foreignObject>
+<rect class="node-rect sq accent" x="328" y="88" width="120" height="28" rx="2"/>
+<foreignObject x="336" y="92" width="104" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>K·V: 걸어서(새로)</span></div></foreignObject>
+<text x="464" y="107" font-size="12" class="muted">저장 3개, 새로 계산 1개</text>
+<text x="8" y="148" font-size="12" font-weight="700">4단계</text>
+<rect class="node-rect sq" x="72" y="128" width="120" height="28" rx="2"/>
+<foreignObject x="80" y="132" width="104" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>K·V: 나는</span></div></foreignObject>
+<rect class="node-rect sq" x="200" y="128" width="120" height="28" rx="2"/>
+<foreignObject x="208" y="132" width="104" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>K·V: 학교에</span></div></foreignObject>
+<rect class="node-rect sq" x="328" y="128" width="120" height="28" rx="2"/>
+<foreignObject x="336" y="132" width="104" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>K·V: 걸어서</span></div></foreignObject>
+<rect class="node-rect sq accent" x="456" y="128" width="120" height="28" rx="2"/>
+<foreignObject x="464" y="132" width="104" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>K·V: 간다(새로)</span></div></foreignObject>
+<text x="592" y="147" font-size="12" class="muted">저장 4개, 새로 계산 1개</text>
+          </svg>
+        </div>
+        <p>그림은 “나는 학교에 걸어서 간다”를 한 토큰씩 만드는 단계(예시)에서 KV 캐시가 쌓이는 모습을 나타낸 것이다. 인과 마스크에서는 앞 토큰이 뒤 토큰을 보지 않으므로 새 토큰이 붙어도 앞 토큰의 표현이 바뀌지 않는다. 그래서 앞 토큰의 키·값을 저장해 두고 새 토큰의 키·값만 계산하면 된다.</p>
+        <div class="with-figure" style="--figure-side-width:160px">
+          <div>
+            <p>반면 양방향으로 보는 인코더는 토큰이 하나 늘면 앞 토큰의 표현도 모두 바뀐다. 대신 KV 캐시는 문장 길이와 층 수에 비례해 메모리를 차지하므로, 뒤에서 볼 MQA·GQA가 이 비용을 줄인다.</p>
+          </div>
+          <figure class="figure side"><img src="assets/fig-notebook.svg" alt="펜과 함께 펼친 공책"><figcaption class="figure-caption">앞 줄은 그대로 두고 한 줄씩 이어 쓴다</figcaption></figure>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>인과 마스크에서는 앞 토큰의 표현이 바뀌지 않아 KV 캐시로 키·값을 다시 쓸 수 있다.</p></div>
+    </div>
+
+    <!-- 페이지 7: 바뀐 부품 1 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>LayerNorm의 위치를 왜 옮겼는가?</li>
+          <li>위치 정보는 어떻게 넣게 되었는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">원 논문 이후 바뀐 부품 1: 정규화, 위치, FFN</h3>
+        <p>그림은 원 논문의 <span class="term" data-definition="Post-LN(잔차 덧셈 뒤 정규화): 하위 층 출력과 입력을 더한 뒤에 LayerNorm을 적용하는 배치. 원 논문의 LayerNorm(x + Sublayer(x))이 이 방식임.">Post-LN</span>(잔차 덧셈 뒤 정규화)과 이후의 <span class="term" data-definition="Pre-LN(하위 층 앞 정규화): LayerNorm을 하위 층의 입력 쪽에 두고, 하위 층 출력을 정규화하지 않은 입력에 더하는 배치.">Pre-LN</span>(하위 층 앞 정규화)을 나타낸 것이다. 바뀐 것은 <span class="term" data-definition="LayerNorm(layer normalization, 층 정규화): 한 토큰 벡터의 성분들을 평균 0, 분산 1이 되게 맞춘 뒤 학습되는 배율과 이동을 적용하는 연산.">LayerNorm(layer normalization, 층 정규화)</span>의 자리뿐이다.</p>
+        <div class="svg-diagram fit animate-in" style="--diagram-max:640px">
+          <svg viewBox="0 0 800 160" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Post-LN은 하위 층, 덧셈, LayerNorm 순이고 Pre-LN은 LayerNorm, 하위 층, 덧셈 순이며 잔차 연결이 덧셈으로 들어간다">
+<rect class="node-rect" x="16" y="32" width="40" height="40" rx="8"/>
+<foreignObject x="24" y="36" width="24" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:20px"><span><i class="mi">x</i></span></div></foreignObject>
+<rect class="node-rect" x="80" y="32" width="120" height="40" rx="8"/>
+<foreignObject x="88" y="36" width="104" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:19px"><span>하위 층</span></div></foreignObject>
+<rect class="node-rect" x="240" y="32" width="120" height="40" rx="8"/>
+<foreignObject x="248" y="36" width="104" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:19px"><span>덧셈 +</span></div></foreignObject>
+<rect class="node-rect" x="400" y="32" width="120" height="40" rx="8"/>
+<foreignObject x="408" y="36" width="104" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:19px"><span>LayerNorm</span></div></foreignObject>
+<rect class="node-rect" x="560" y="32" width="80" height="40" rx="8"/>
+<foreignObject x="564" y="36" width="72" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:19px"><span>다음 층</span></div></foreignObject>
+<path class="edge-line" d="M56,52 H70"/><polygon class="edge-arrow" points="70,47 80,52 70,57"/>
+<path class="edge-line" d="M200,52 H230"/><polygon class="edge-arrow" points="230,47 240,52 230,57"/>
+<path class="edge-line" d="M360,52 H390"/><polygon class="edge-arrow" points="390,47 400,52 390,57"/>
+<path class="edge-line" d="M520,52 H550"/><polygon class="edge-arrow" points="550,47 560,52 550,57"/>
+<path class="edge-line" d="M36,32 V16 H300 V22"/><polygon class="edge-arrow" points="295,22 305,22 300,32"/>
+<text x="656" y="58" font-size="17" font-weight="700">Post-LN(원 논문)</text>
+<rect class="node-rect" x="16" y="112" width="40" height="40" rx="8"/>
+<foreignObject x="24" y="116" width="24" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:20px"><span><i class="mi">x</i></span></div></foreignObject>
+<rect class="node-rect accent" x="80" y="112" width="120" height="40" rx="8"/>
+<foreignObject x="88" y="116" width="104" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:19px"><span>LayerNorm</span></div></foreignObject>
+<rect class="node-rect" x="240" y="112" width="120" height="40" rx="8"/>
+<foreignObject x="248" y="116" width="104" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:19px"><span>하위 층</span></div></foreignObject>
+<rect class="node-rect" x="400" y="112" width="120" height="40" rx="8"/>
+<foreignObject x="408" y="116" width="104" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:19px"><span>덧셈 +</span></div></foreignObject>
+<rect class="node-rect" x="560" y="112" width="80" height="40" rx="8"/>
+<foreignObject x="564" y="116" width="72" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:19px"><span>다음 층</span></div></foreignObject>
+<path class="edge-line" d="M56,132 H70"/><polygon class="edge-arrow" points="70,127 80,132 70,137"/>
+<path class="edge-line" d="M200,132 H230"/><polygon class="edge-arrow" points="230,127 240,132 230,137"/>
+<path class="edge-line" d="M360,132 H390"/><polygon class="edge-arrow" points="390,127 400,132 390,137"/>
+<path class="edge-line" d="M520,132 H550"/><polygon class="edge-arrow" points="550,127 560,132 550,137"/>
+<path class="edge-line" d="M36,112 V96 H460 V102"/><polygon class="edge-arrow" points="455,102 465,102 460,112"/>
+<text x="656" y="138" font-size="17" font-weight="700">Pre-LN</text>
+          </svg>
+        </div>
+        <table class="data-table animate-in">
+          <thead><tr><th>부품</th><th>원 논문</th><th>이후</th><th>무엇이 좋아졌나</th></tr></thead>
+          <tbody>
+            <tr><td>정규화 위치</td><td>Post-LN</td><td>Pre-LN(<a href="https://arxiv.org/abs/2002.04745" target="_blank" rel="noopener">Xiong et al., 2020</a>)</td><td>초기 기울기가 안정되어 <span class="term" data-definition="학습률 예열(warm-up): 학습 초기에 학습률을 작은 값에서 서서히 키우는 절차.">학습률 예열</span>(warm-up) 없이도 비슷한 성능, 짧은 학습</td></tr>
+            <tr><td>위치 정보</td><td>사인 위치 인코딩을 임베딩에 한 번 더함</td><td><span class="term" data-definition="RoPE(rotary position embedding, 회전 위치 임베딩): 층마다 쿼리와 키 벡터를 위치에 따라 정해지는 각도로 회전시켜 위치를 넣는 방법. 어텐션 점수에 두 토큰의 상대 위치가 드러남.">RoPE</span>(rotary position embedding, 회전 위치 임베딩, <a href="https://arxiv.org/abs/2104.09864" target="_blank" rel="noopener">Su et al., 2021</a>)</td><td>절대 위치를 회전으로 넣어 어텐션에 상대 위치가 드러남</td></tr>
+            <tr><td>FFN 활성화</td><td>ReLU</td><td><span class="term" data-definition="SwiGLU(게이트가 있는 FFN 활성화): 두 선형 사영 가운데 하나에 Swish 계열 함수를 씌워 다른 하나와 곱하는 FFN 활성화. GLU의 변형임.">SwiGLU</span>(게이트가 있는 FFN 활성화, <a href="https://arxiv.org/abs/2002.05202" target="_blank" rel="noopener">Shazeer, 2020</a>)</td><td>일부 GLU 변형이 ReLU보다 품질이 좋음</td></tr>
+          </tbody>
+          <caption>표는 원 논문 이후 바뀐 부품을 나타낸 것이다.</caption>
+        </table>
+        <p>예를 들어 <a href="https://arxiv.org/abs/2302.13971" target="_blank" rel="noopener">LLaMA(2023)</a>는 하위 층 입력을 RMSNorm으로 정규화하고, ReLU를 SwiGLU로, 절대 위치 임베딩을 RoPE로 바꾸었다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>이후 모델은 LayerNorm을 하위 층 앞으로 옮기고 위치 정보와 FFN 활성화를 바꾸었다.</p></div>
+    </div>
+
+    <!-- 페이지 8: 바뀐 부품 2 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>키·값 헤드를 줄이면 무엇을 얻고 무엇을 잃는가?</li>
+          <li>파라미터를 늘리면서 계산량은 그대로 둘 수 있는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">원 논문 이후 바뀐 부품 2: 키·값 헤드와 전문가</h3>
+        <p>원 논문의 멀티헤드 어텐션(multi-head attention)은 헤드 8개가 키·값을 따로 둔다. <span class="term" data-definition="MQA(multi-query attention, 멀티쿼리 어텐션): 모든 쿼리 헤드가 키·값 헤드 하나를 함께 쓰는 어텐션.">MQA(multi-query attention, 멀티쿼리 어텐션)</span>는 모든 헤드가 키·값 한 벌을 나눠 써 KV 캐시를 크게 줄이고 생성을 빠르게 하지만 품질이 조금 떨어진다(<a href="https://arxiv.org/abs/1911.02150" target="_blank" rel="noopener">Shazeer, 2019</a>). <span class="term" data-definition="GQA(grouped-query attention, 그룹 쿼리 어텐션): 쿼리 헤드를 몇 묶음으로 나누고 묶음마다 키·값 헤드 하나를 함께 쓰는 어텐션. 키·값 헤드 수가 1과 쿼리 헤드 수 사이임.">GQA(grouped-query attention, 그룹 쿼리 어텐션)</span>는 그 중간이며, 저자들은 멀티헤드에 가까운 품질과 MQA에 가까운 속도를 보고했다(<a href="https://arxiv.org/abs/2305.13245" target="_blank" rel="noopener">Ainslie et al., 2023</a>).</p>
+        <div class="svg-diagram fit animate-in" style="--diagram-max:600px">
+          <svg viewBox="0 0 800 132" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="쿼리 헤드 8개에 대해 키·값이 멀티헤드는 8벌, GQA 예시는 2벌, MQA는 1벌이다">
+<foreignObject x="16" y="8" width="232" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:20px"><span><strong>멀티헤드(원 논문)</strong></span></div></foreignObject>
+<rect class="node-rect sq" x="24" y="40" width="20" height="20" rx="2"/>
+<rect class="node-rect sq" x="52" y="40" width="20" height="20" rx="2"/>
+<rect class="node-rect sq" x="80" y="40" width="20" height="20" rx="2"/>
+<rect class="node-rect sq" x="108" y="40" width="20" height="20" rx="2"/>
+<rect class="node-rect sq" x="136" y="40" width="20" height="20" rx="2"/>
+<rect class="node-rect sq" x="164" y="40" width="20" height="20" rx="2"/>
+<rect class="node-rect sq" x="192" y="40" width="20" height="20" rx="2"/>
+<rect class="node-rect sq" x="220" y="40" width="20" height="20" rx="2"/>
+<rect class="node-rect sq accent" x="24" y="68" width="20" height="20" rx="2"/>
+<rect class="node-rect sq accent" x="52" y="68" width="20" height="20" rx="2"/>
+<rect class="node-rect sq accent" x="80" y="68" width="20" height="20" rx="2"/>
+<rect class="node-rect sq accent" x="108" y="68" width="20" height="20" rx="2"/>
+<rect class="node-rect sq accent" x="136" y="68" width="20" height="20" rx="2"/>
+<rect class="node-rect sq accent" x="164" y="68" width="20" height="20" rx="2"/>
+<rect class="node-rect sq accent" x="192" y="68" width="20" height="20" rx="2"/>
+<rect class="node-rect sq accent" x="220" y="68" width="20" height="20" rx="2"/>
+<foreignObject x="16" y="96" width="232" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:20px; color:var(--color-text-secondary)"><span>키·값 8벌</span></div></foreignObject>
+<foreignObject x="284" y="8" width="232" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:20px"><span><strong>GQA(예시: 2그룹)</strong></span></div></foreignObject>
+<rect class="node-rect sq" x="292" y="40" width="20" height="20" rx="2"/>
+<rect class="node-rect sq" x="320" y="40" width="20" height="20" rx="2"/>
+<rect class="node-rect sq" x="348" y="40" width="20" height="20" rx="2"/>
+<rect class="node-rect sq" x="376" y="40" width="20" height="20" rx="2"/>
+<rect class="node-rect sq" x="404" y="40" width="20" height="20" rx="2"/>
+<rect class="node-rect sq" x="432" y="40" width="20" height="20" rx="2"/>
+<rect class="node-rect sq" x="460" y="40" width="20" height="20" rx="2"/>
+<rect class="node-rect sq" x="488" y="40" width="20" height="20" rx="2"/>
+<rect class="node-rect sq accent" x="292" y="68" width="104" height="20" rx="2"/>
+<rect class="node-rect sq accent" x="404" y="68" width="104" height="20" rx="2"/>
+<foreignObject x="284" y="96" width="232" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:20px; color:var(--color-text-secondary)"><span>키·값 2벌</span></div></foreignObject>
+<foreignObject x="552" y="8" width="232" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:20px"><span><strong>MQA</strong></span></div></foreignObject>
+<rect class="node-rect sq" x="560" y="40" width="20" height="20" rx="2"/>
+<rect class="node-rect sq" x="588" y="40" width="20" height="20" rx="2"/>
+<rect class="node-rect sq" x="616" y="40" width="20" height="20" rx="2"/>
+<rect class="node-rect sq" x="644" y="40" width="20" height="20" rx="2"/>
+<rect class="node-rect sq" x="672" y="40" width="20" height="20" rx="2"/>
+<rect class="node-rect sq" x="700" y="40" width="20" height="20" rx="2"/>
+<rect class="node-rect sq" x="728" y="40" width="20" height="20" rx="2"/>
+<rect class="node-rect sq" x="756" y="40" width="20" height="20" rx="2"/>
+<rect class="node-rect sq accent" x="560" y="68" width="216" height="20" rx="2"/>
+<foreignObject x="552" y="96" width="232" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:20px; color:var(--color-text-secondary)"><span>키·값 1벌</span></div></foreignObject>
+<text x="6" y="56" font-size="18" class="muted" font-style="italic">Q</text>
+          </svg>
+        </div>
+        <p><span class="term" data-definition="MoE(mixture of experts, 전문가 혼합): FFN을 여러 개(전문가) 두고 라우터가 토큰마다 그중 일부만 골라 계산하는 구조.">MoE(mixture of experts, 전문가 혼합)</span>는 FFN을 여러 개 두고 토큰마다 일부만 계산한다(<a href="https://arxiv.org/abs/1701.06538" target="_blank" rel="noopener">Shazeer et al., 2017</a>). Switch Transformer는 FFN 층을 이렇게 바꾸고 토큰을 전문가 하나에만 보냈다(<a href="https://arxiv.org/abs/2101.03961" target="_blank" rel="noopener">Fedus et al., 2021</a>). 그림은 <a href="https://arxiv.org/abs/2401.04088" target="_blank" rel="noopener">Mixtral(2024)</a>처럼 8개 중 2개를 고르는 경우이다.</p>
+        <div class="svg-diagram fit animate-in" style="--diagram-max:600px">
+          <svg viewBox="0 0 800 156" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="라우터가 FFN 8개 가운데 3번과 6번 두 개만 골라 계산한다">
+<rect class="node-rect" x="256" y="8" width="288" height="40" rx="8"/>
+<foreignObject x="264" y="12" width="272" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:20px"><span>라우터: 토큰마다 2개 선택</span></div></foreignObject>
+<rect class="node-rect sq" x="24" y="80" width="80" height="32" rx="2"/>
+<foreignObject x="24" y="80" width="80" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:19px; line-height:1.2"><span>FFN 1</span></div></foreignObject>
+<rect class="node-rect sq" x="120" y="80" width="80" height="32" rx="2"/>
+<foreignObject x="120" y="80" width="80" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:19px; line-height:1.2"><span>FFN 2</span></div></foreignObject>
+<rect class="node-rect sq accent" x="216" y="80" width="80" height="32" rx="2"/>
+<foreignObject x="216" y="80" width="80" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:19px; line-height:1.2"><span>FFN 3</span></div></foreignObject>
+<rect class="node-rect sq" x="312" y="80" width="80" height="32" rx="2"/>
+<foreignObject x="312" y="80" width="80" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:19px; line-height:1.2"><span>FFN 4</span></div></foreignObject>
+<rect class="node-rect sq" x="408" y="80" width="80" height="32" rx="2"/>
+<foreignObject x="408" y="80" width="80" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:19px; line-height:1.2"><span>FFN 5</span></div></foreignObject>
+<rect class="node-rect sq accent" x="504" y="80" width="80" height="32" rx="2"/>
+<foreignObject x="504" y="80" width="80" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:19px; line-height:1.2"><span>FFN 6</span></div></foreignObject>
+<rect class="node-rect sq" x="600" y="80" width="80" height="32" rx="2"/>
+<foreignObject x="600" y="80" width="80" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:19px; line-height:1.2"><span>FFN 7</span></div></foreignObject>
+<rect class="node-rect sq" x="696" y="80" width="80" height="32" rx="2"/>
+<foreignObject x="696" y="80" width="80" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:19px; line-height:1.2"><span>FFN 8</span></div></foreignObject>
+<path class="edge-line accent" d="M400,48 V60 H256 V70"/><polygon class="edge-arrow accent" points="251,70 261,70 256,80"/>
+<path class="edge-line accent" d="M400,60 H544 V70"/><polygon class="edge-arrow accent" points="539,70 549,70 544,80"/>
+<foreignObject x="16" y="120" width="768" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:17px; color:var(--color-text-secondary)"><span>나머지 FFN 6개는 이 토큰에서 계산하지 않음. Mixtral은 전체 파라미터 47B, 활성 13B</span></div></foreignObject>
+          </svg>
+        </div>
+        <p>토큰당 계산은 활성 파라미터만큼이지만, 라우터가 어느 전문가든 고를 수 있으므로 전체 파라미터는 모두 메모리에 올려 두어야 한다고 해석할 수 있다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>GQA·MQA는 키·값 헤드를 줄여 생성을 빠르게 하고, MoE는 전문가 일부만 계산해 파라미터에 비해 계산을 줄인다.</p></div>
+    </div>
+
+    <!-- 페이지 9: 핵심 정리 + 확인 문제 1, 2 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">&#128161;</div>
+          <div class="callout-content">
+            <strong class="callout-title">핵심 정리</strong>
+            <ol>
+              <li>후속 모델은 인코더만, 둘 다, 디코더만 쓰는 세 갈래로 나뉘고 어텐션 마스크와 사전학습 목표가 다르다.</li>
+              <li>decoder-only는 모든 위치에서 배우고 모든 과제를 이어 쓰기로 표현하며, 사전학습 직후 zero-shot에서 가장 좋았다. 다만 멀티태스크 미세조정 조건에서는 비인과 모델이 앞섰다.</li>
+              <li>Pre-LN, RoPE, SwiGLU, GQA, MoE는 원 논문의 LayerNorm 위치, 위치 인코딩, FFN, 키·값 헤드를 바꾼 것이다.</li>
+            </ol>
+            <p>구조를 묻는 문항은 각 토큰이 어느 토큰을 볼 수 있는지부터 그려 보라.</p>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>어텐션 마스크</h3>
+        <div class="quiz-container animate-in" id="tr-quiz-a">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="③ | 아래 삼각형 마스크는 각 토큰이 앞 토큰만 보는 인과 마스크이므로 새 토큰이 붙어도 앞 토큰의 키·값이 바뀌지 않아 KV 캐시로 다시 쓸 수 있다."
+               data-explanation-wrong="| 정답은 ③이다. 인과 마스크에서는 앞 토큰의 표현이 바뀌지 않으므로 키·값을 저장해 다시 쓸 수 있다. ①은 양쪽 문맥을 보는 encoder-only의 설명이므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">1</span>그림은 어떤 모델의 셀프 어텐션 마스크를 나타낸 것이다(색칠한 칸만 볼 수 있음, 행은 쿼리, 열은 키). 이 모델에 대한 설명으로 옳은 것은?</h3>
+            <div class="q-body">
+              <div class="quiz-options">
+                <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 가린 토큰을 앞뒤 문맥으로 함께 맞힌다.</span></button>
+                <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 셋째 토큰은 넷째 토큰을 참고해 표현을 만든다.</span></button>
+                <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 생성할 때 앞 토큰의 키·값을 저장해 다시 쓸 수 있다.</span></button>
+                <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 인코더 출력을 크로스 어텐션으로 받아야 한다.</span></button>
+                <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 모든 토큰이 서로를 보는 양방향 모델이다.</span></button>
+              </div>
+              <figure class="q-figure" style="--q-figure-width:120px" aria-label="4×4 칸 중 아래 삼각형만 색칠된 마스크">
+                <svg viewBox="0 0 112 112" xmlns="http://www.w3.org/2000/svg" role="img">
+<rect class="accent-fill" x="10" y="10" width="20" height="20"/>
+<rect class="guide" fill="none" x="34" y="10" width="20" height="20"/>
+<rect class="guide" fill="none" x="58" y="10" width="20" height="20"/>
+<rect class="guide" fill="none" x="82" y="10" width="20" height="20"/>
+<rect class="accent-fill" x="10" y="34" width="20" height="20"/>
+<rect class="accent-fill" x="34" y="34" width="20" height="20"/>
+<rect class="guide" fill="none" x="58" y="34" width="20" height="20"/>
+<rect class="guide" fill="none" x="82" y="34" width="20" height="20"/>
+<rect class="accent-fill" x="10" y="58" width="20" height="20"/>
+<rect class="accent-fill" x="34" y="58" width="20" height="20"/>
+<rect class="accent-fill" x="58" y="58" width="20" height="20"/>
+<rect class="guide" fill="none" x="82" y="58" width="20" height="20"/>
+<rect class="accent-fill" x="10" y="82" width="20" height="20"/>
+<rect class="accent-fill" x="34" y="82" width="20" height="20"/>
+<rect class="accent-fill" x="58" y="82" width="20" height="20"/>
+<rect class="accent-fill" x="82" y="82" width="20" height="20"/>
+                </svg>
+              </figure>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('tr-quiz-a')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('tr-quiz-a')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>아래 삼각형 마스크는 앞 토큰만 보는 인과 마스크이며 KV 캐시와 잘 맞는다.</p></div>
+    </div>
+
+    <!-- 페이지 10: 더 알아보기 + 확인 문제 3, 4 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>decoder-only가 많이 쓰이는 근거는 무엇이고 그 단서는 무엇인가?</li>
+          <li>키·값 헤드 수는 KV 캐시 크기와 어떤 관계인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>decoder-only와 KV 캐시</h3>
+        <div class="quiz-container animate-in" id="tr-quiz-b">
+          <div class="quiz-question-block"
+               data-correct="option-d"
+               data-explanation-right="④ | 멀티태스크 미세조정 뒤에는 입력을 양방향으로 보는 비인과 모델이 가장 좋았으므로 ④는 옳지 않다."
+               data-explanation-wrong="| 정답은 ④이다. 멀티태스크 미세조정 뒤에는 비인과 모델이 앞섰다. ③은 사전학습 직후 zero-shot의 결과이므로 옳다.">
+            <h3 class="quiz-question"><span class="q-num">2</span>decoder-only가 많이 쓰이는 이유에 대한 설명으로 옳지 <u>않은</u> 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 다음 토큰 예측은 텍스트의 모든 위치를 정답으로 쓴다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② GPT-3은 프롬프트 속 예시만으로 과제를 풀었다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 사전학습 직후 zero-shot에서는 인과 decoder-only가 가장 좋았다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 멀티태스크 미세조정 뒤에도 인과 decoder-only가 늘 가장 좋았다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 인과 마스크는 KV 캐시와 잘 맞는다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="③ | 키·값 헤드가 2개이면 토큰 하나가 한 층에 저장하는 수는 2×64×2=256개이다."
+               data-explanation-wrong="| 정답은 ③이다. 2×64×2=256개이다. ②의 128개는 MQA(키·값 헤드 1개)의 값이다.">
+            <h3 class="quiz-question"><span class="q-num">3</span>헤드 8개, $d_k=d_v=64$인 층에서 토큰 하나의 키·값은 $8 \times 64 \times 2 = 1024$개의 수이다. 키·값 헤드가 2개인 GQA에서는 몇 개인가?<span class="q-points">[3점]</span></h3>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 64개</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 128개</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 256개</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 512개</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 1024개</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('tr-quiz-b')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('tr-quiz-b')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>decoder-only의 우위에는 미세조정 조건에 따른 단서가 붙고, GQA는 키·값 헤드 수를 줄인 만큼 KV 캐시를 줄인다.</p></div>
+    </div>
+
+
+    <!-- 페이지 11: 더 알아보기 + 확인 문제 4 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-warning animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">더 알아보기</strong>
+            <p>트랜스포머를 코드와 그림으로 더 보려면 다음 자료를 읽는다.</p>
+            <ul>
+              <li><a href="https://nlp.seas.harvard.edu/annotated-transformer" target="_blank" rel="noopener">The Annotated Transformer</a>(Harvard NLP, 코드 해설)</li>
+              <li><a href="https://d2l.ai/chapter_attention-mechanisms-and-transformers/transformer.html" target="_blank" rel="noopener">Dive into Deep Learning 11.7</a>(교재)</li>
+              <li><a href="https://jalammar.github.io/illustrated-transformer/" target="_blank" rel="noopener">The Illustrated Transformer</a>(그림 해설)</li>
+            </ul>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>바뀐 부품</h3>
+        <div class="quiz-container animate-in" id="tr-quiz-c">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="③ | Pre-LN은 LayerNorm을 하위 층 입력 쪽에 두고, Mixtral은 층마다 전문가 8개 중 2개만 계산한다. RoPE는 임베딩에 한 번 더하는 방식이 아니라 층마다 쿼리와 키를 회전시키므로 ㄴ은 옳지 않다."
+               data-explanation-wrong="| 정답은 ③이다. ㄱ과 ㄷ은 옳다. 임베딩에 위치 벡터를 한 번 더하는 것은 원 논문의 사인 위치 인코딩이므로 ㄴ은 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">4</span>원 논문 이후 바뀐 부품에 대한 설명으로 옳은 것만을 <span class="nobr">&lt;보기&gt;에서</span> 있는 대로 고른 것은?</h3>
+            <div class="bogi">
+              <p>ㄱ. Pre-LN은 LayerNorm을 하위 층의 입력 쪽에 둔다.</p>
+              <p>ㄴ. RoPE는 위치 벡터를 입력 임베딩에 한 번만 더한다.</p>
+              <p>ㄷ. Mixtral은 층마다 FFN 전문가 8개 중 토큰마다 2개만 계산한다.</p>
+            </div>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① ㄱ</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② ㄴ</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ ㄱ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ ㄴ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ ㄱ, ㄴ, ㄷ</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('tr-quiz-c')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('tr-quiz-c')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>Pre-LN, RoPE, MoE는 각각 원 논문의 정규화 위치, 위치 정보, FFN을 바꾼다.</p></div>
+    </div>
+
+  </div>
+</section>

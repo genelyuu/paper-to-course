@@ -1,0 +1,609 @@
+<section class="module" id="module-1">
+  <div class="module-content">
+
+    <div class="module-header">
+      <span class="module-number">2</span>
+      <h2 class="module-title">순환 신경망에서 어텐션으로</h2>
+      <p class="module-subtitle">트랜스포머 이전 연구의 한계와 어텐션이 등장해 본체가 되기까지의 흐름을 따라간다</p>
+    </div>
+
+    <!-- 페이지 1: 학습 목표 + 순환 신경망의 순차 계산 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-icon">&#127919;</div>
+          <div class="callout-content">
+            <strong class="callout-title">학습 목표</strong>
+            <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
+            <ol>
+              <li>순환 신경망과 seq2seq의 한계를 순차 계산과 고정 길이 벡터로 설명할 수 있다.</li>
+              <li>어텐션이 순환 신경망에 붙어 쓰이다가 트랜스포머에서 본체가 된 과정을 설명할 수 있다.</li>
+              <li>순환, 합성곱, 셀프 어텐션의 최대 경로 길이를 비교할 수 있다.</li>
+            </ol>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">순환 신경망의 순차 계산<span class="paper-ref">논문 1절</span></h3>
+        <p><span class="term" data-definition="어텐션(attention): 출력의 각 위치가 입력의 어느 위치를 얼마나 참고할지 비중을 계산하여 정보를 가져오는 방식.">어텐션</span>(attention)은 처음에 왜 순환 신경망에 붙어서 쓰였고, <span class="term" data-definition="트랜스포머(Transformer): 순환과 합성곱 없이 어텐션만으로 인코더와 디코더를 구성한 모델.">트랜스포머</span>(Transformer)는 왜 순환 신경망을 떼어 냈을까? 답은 순환 신경망의 계산 방식에서 시작한다.</p>
+        <div class="with-figure" style="--figure-side-width:312px">
+          <div>
+            <p><span class="term" data-definition="순환 신경망(recurrent neural network, RNN): 토큰을 순서대로 하나씩 읽으면서 이전 단계의 은닉 상태를 다음 단계로 넘기는 신경망.">순환 신경망</span>(recurrent neural network, RNN)은 위치 $t$의 <span class="term" data-definition="은닉 상태(hidden state): 순환 신경망이 지금까지 읽은 내용을 요약해 들고 다니는 벡터.">은닉 상태</span>(hidden state) $h_t$를 앞 은닉 상태 $h_{t-1}$과 위치 $t$의 입력 $x_t$로 계산한다(논문 1절).</p>
+            <div class="math-equation">
+              $$h_t = f(h_{t-1},\, x_t)$$
+            </div>
+            <p>여기서 $f$는 학습되는 변환이다. $h_3$을 구하려면 $h_2$가 끝나야 하므로 한 문장 안에서 계산을 나누어 동시에 처리하는 <span class="term" data-definition="병렬화(parallelization): 여러 계산을 나누어 동시에 처리하는 것.">병렬화</span>(parallelization)가 막힌다. 논문은 문장이 길수록 메모리 제약 때문에 여러 문장을 한 번에 묶어 처리하기도 어려워진다고 지적한다.</p>
+            <p>그림처럼 첫 단어의 정보가 넷째 위치에 닿으려면 3단계를 거쳐야 한다. 두 위치를 잇는 단계 수를 <span class="term" data-definition="경로 길이(path length): 한 위치의 정보가 다른 위치에 닿기까지 거쳐야 하는 계산 단계의 수.">경로 길이</span>(path length)라 하며, 순환 신경망에서는 문장 길이 $n$에 비례해 $O(n)$이다.</p>
+          </div>
+          <figure class="figure side">
+<svg viewBox="0 0 312 184" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="입력 x1부터 x4가 아래에 있고 은닉 상태 h1부터 h4가 위에 있다. h1에서 h4까지 가로 화살표 3개를 거쳐야 한다">
+<foreignObject x="8" y="0" width="296" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; word-break:keep-all; line-height:1.4; font-weight:700; color:var(--color-accent)"><span><i class="mi">x</i><sub>1</sub>의 정보가 <i class="mi">h</i><sub>4</sub>까지 3단계</span></div></foreignObject>
+<rect class="node-rect sq" x="8" y="40" width="56" height="32"/>
+<foreignObject x="16" y="44" width="40" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span><i class="mi">h</i><sub>1</sub></span></div></foreignObject>
+<rect class="node-rect sq" x="88" y="40" width="56" height="32"/>
+<foreignObject x="96" y="44" width="40" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span><i class="mi">h</i><sub>2</sub></span></div></foreignObject>
+<rect class="node-rect sq" x="168" y="40" width="56" height="32"/>
+<foreignObject x="176" y="44" width="40" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span><i class="mi">h</i><sub>3</sub></span></div></foreignObject>
+<rect class="node-rect sq" x="248" y="40" width="56" height="32"/>
+<foreignObject x="256" y="44" width="40" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span><i class="mi">h</i><sub>4</sub></span></div></foreignObject>
+<line class="edge-line accent" x1="64" y1="56" x2="78" y2="56"/><polygon class="edge-arrow accent" points="78,51 88,56 78,61"/>
+<line class="edge-line accent" x1="144" y1="56" x2="158" y2="56"/><polygon class="edge-arrow accent" points="158,51 168,56 158,61"/>
+<line class="edge-line accent" x1="224" y1="56" x2="238" y2="56"/><polygon class="edge-arrow accent" points="238,51 248,56 238,61"/>
+<rect class="node-rect sq" x="8" y="112" width="56" height="32"/>
+<foreignObject x="16" y="116" width="40" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span><i class="mi">x</i><sub>1</sub></span></div></foreignObject>
+<rect class="node-rect sq" x="88" y="112" width="56" height="32"/>
+<foreignObject x="96" y="116" width="40" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span><i class="mi">x</i><sub>2</sub></span></div></foreignObject>
+<rect class="node-rect sq" x="168" y="112" width="56" height="32"/>
+<foreignObject x="176" y="116" width="40" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span><i class="mi">x</i><sub>3</sub></span></div></foreignObject>
+<rect class="node-rect sq" x="248" y="112" width="56" height="32"/>
+<foreignObject x="256" y="116" width="40" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span><i class="mi">x</i><sub>4</sub></span></div></foreignObject>
+<line class="edge-line" x1="36" y1="112" x2="36" y2="82"/><polygon class="edge-arrow" points="31,82 36,72 41,82"/>
+<line class="edge-line" x1="116" y1="112" x2="116" y2="82"/><polygon class="edge-arrow" points="111,82 116,72 121,82"/>
+<line class="edge-line" x1="196" y1="112" x2="196" y2="82"/><polygon class="edge-arrow" points="191,82 196,72 201,82"/>
+<line class="edge-line" x1="276" y1="112" x2="276" y2="82"/><polygon class="edge-arrow" points="271,82 276,72 281,82"/>
+<foreignObject x="8" y="152" width="296" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; word-break:keep-all; line-height:1.4; color:var(--color-text-secondary)"><span>앞 상태가 끝나야 다음 상태를 계산한다</span></div></foreignObject>
+</svg>
+<figcaption class="figure-caption">그림은 은닉 상태가 사슬로 이어져 경로 길이가 위치 수에 비례함을 나타낸 것이다.</figcaption>
+          </figure>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>순환 신경망은 은닉 상태를 순서대로 계산하므로 병렬화가 막히고 먼 위치 사이 경로 길이가 $O(n)$이다.</p></div>
+    </div>
+
+    <!-- 페이지 2: 기울기 소실과 LSTM -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-icon">&#128214;</div>
+          <div class="callout-content">
+            <strong class="callout-title">배경 지식</strong>
+            <p>이 화면은 논문을 읽기 위해 먼저 알아 둘 이전 연구이다.</p>
+          </div>
+        </div>
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>먼 과거의 단어는 왜 학습하기 어려운가?</li>
+          <li>LSTM이 해결한 것과 남긴 것은 무엇인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">기울기 소실과 LSTM</h3>
+        <div class="with-figure" style="--figure-side-width:280px">
+          <div>
+            <p>순환 신경망을 학습할 때 오차 신호인 기울기는 시간 단계를 거꾸로 거슬러 전달된다. 단계마다 곱해지는 값이 1보다 작으면 신호가 지수적으로 줄어드는데, 이를 <span class="term" data-definition="기울기 소실(vanishing gradient): 학습 신호가 여러 단계를 거슬러 전달되며 0에 가깝게 작아지는 현상.">기울기 소실</span>(vanishing gradient)이라 한다. 반대로 1보다 크면 신호가 커지는 <span class="term" data-definition="기울기 폭주(exploding gradient): 학습 신호가 여러 단계를 거슬러 전달되며 지나치게 커지는 현상.">기울기 폭주</span>(exploding gradient)가 생긴다.</p>
+            <p>그림 위쪽은 단계마다 0.5가 곱해지는 예시이다. 4단계만 거슬러 가도 신호가 0.0625로 줄어든다. <a href="https://doi.org/10.1109/72.279181" target="_blank" rel="noopener">Bengio et al.(1994)</a>은 시간 간격이 길수록 경사 하강 학습이 어려워지며, 정보를 오래 붙잡는 조건이 곧 기울기를 감쇠시키는 조건이라는 상충 관계를 보였다.</p>
+            <p><a href="https://doi.org/10.1162/neco.1997.9.8.1735" target="_blank" rel="noopener">Hochreiter와 Schmidhuber(1997)</a>의 <span class="term" data-definition="LSTM(long short-term memory): 셀 상태와 게이트를 두어 오래전 정보를 잃지 않고 전달하도록 만든 순환 신경망.">LSTM</span>(long short-term memory)은 오차가 일정하게 흐르는 내부 통로(셀 상태)를 두고, <span class="term" data-definition="게이트(gate): 정보를 얼마나 넣고 꺼낼지 0과 1 사이의 값으로 조절하는 장치.">게이트</span>(gate)로 정보를 넣고 꺼내게 했다. 이것으로 기울기 소실과 폭주는 크게 줄었다.</p>
+            <p>그러나 LSTM도 $h_t$를 $h_{t-1}$에서 계산한다. 논문 1절이 LSTM을 포함한 순환 모델 전체에 대해 <strong>“순차 계산이라는 근본 제약은 남아 있다”</strong>고 쓴 이유이다.</p>
+          </div>
+          <figure class="figure side">
+<svg viewBox="0 0 280 304" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="위: 단계마다 0.5가 곱해질 때 기울기 크기가 1, 0.5, 0.25, 0.125, 0.0625로 줄어드는 막대. 아래: LSTM의 셀 상태와 입력 게이트, 출력 게이트">
+<text x="8" y="14" font-size="12" font-weight="700">기울기 크기(예시, 단계마다 ×0.5)</text>
+<text x="56" y="41" text-anchor="end" font-size="12">0단계</text>
+<rect class="guide-fill" x="64" y="28" width="160" height="16"/><rect class="ink-fill" x="64" y="28" width="160" height="16"/>
+<text x="272" y="41" text-anchor="end" font-size="12">1</text>
+<text x="56" y="65" text-anchor="end" font-size="12">1단계</text>
+<rect class="guide-fill" x="64" y="52" width="160" height="16"/><rect class="ink-fill" x="64" y="52" width="80" height="16"/>
+<text x="272" y="65" text-anchor="end" font-size="12">0.5</text>
+<text x="56" y="89" text-anchor="end" font-size="12">2단계</text>
+<rect class="guide-fill" x="64" y="76" width="160" height="16"/><rect class="ink-fill" x="64" y="76" width="40" height="16"/>
+<text x="272" y="89" text-anchor="end" font-size="12">0.25</text>
+<text x="56" y="113" text-anchor="end" font-size="12">3단계</text>
+<rect class="guide-fill" x="64" y="100" width="160" height="16"/><rect class="ink-fill" x="64" y="100" width="20" height="16"/>
+<text x="272" y="113" text-anchor="end" font-size="12">0.125</text>
+<text x="56" y="137" text-anchor="end" font-size="12">4단계</text>
+<rect class="guide-fill" x="64" y="124" width="160" height="16"/><rect class="ink-fill" x="64" y="124" width="10" height="16"/>
+<text x="272" y="137" text-anchor="end" font-size="12">0.0625</text>
+<line class="guide-axis" x1="64" y1="24" x2="64" y2="144"/>
+<text x="64" y="160" text-anchor="middle" font-size="11" class="muted">0</text><text x="144" y="160" text-anchor="middle" font-size="11" class="muted">0.5</text><text x="224" y="160" text-anchor="middle" font-size="11" class="muted">1</text>
+<line class="guide" x1="8" y1="172" x2="272" y2="172"/>
+<text x="8" y="196" font-size="12" font-weight="700">LSTM: 셀 상태와 게이트</text>
+<rect class="node-rect sq accent" x="8" y="208" width="264" height="32"/>
+<foreignObject x="16" y="212" width="248" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; word-break:keep-all; line-height:1.4; font-weight:700"><span>셀 상태: 오차가 일정하게 흐름</span></div></foreignObject>
+<rect class="node-rect sq" x="24" y="272" width="104" height="28"/>
+<foreignObject x="32" y="274" width="88" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; word-break:keep-all; line-height:1.4"><span>입력 게이트</span></div></foreignObject>
+<rect class="node-rect sq" x="152" y="272" width="104" height="28"/>
+<foreignObject x="160" y="274" width="88" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; word-break:keep-all; line-height:1.4"><span>출력 게이트</span></div></foreignObject>
+<line class="edge-line" x1="76" y1="272" x2="76" y2="250"/><polygon class="edge-arrow" points="71,250 76,240 81,250"/>
+<line class="edge-line" x1="204" y1="240" x2="204" y2="262"/><polygon class="edge-arrow" points="199,262 204,272 209,262"/>
+<text x="84" y="262" font-size="11" class="muted">넣기</text>
+<text x="212" y="262" font-size="11" class="muted">꺼내기</text>
+</svg>
+<figcaption class="figure-caption">그림은 기울기 감쇠(예시 값)와 LSTM의 셀 상태·게이트를 나타낸 것이다.</figcaption>
+          </figure>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>LSTM은 게이트로 기울기 소실을 완화했지만 은닉 상태를 순서대로 계산한다는 제약은 그대로 남았다.</p></div>
+    </div>
+
+    <!-- 페이지 3: seq2seq와 고정 길이 벡터 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-icon">&#128214;</div>
+          <div class="callout-content">
+            <strong class="callout-title">배경 지식</strong>
+            <p>이 화면은 논문을 읽기 위해 먼저 알아 둘 이전 연구이다.</p>
+          </div>
+        </div>
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>seq2seq는 입력 문장을 무엇으로 바꾸는가?</li>
+          <li>긴 문장에서 왜 병목이 생기는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">seq2seq와 고정 길이 벡터</h3>
+        <div class="with-figure" style="--figure-side-width:88px">
+          <div>
+            <p><span class="term" data-definition="seq2seq(sequence-to-sequence): 인코더가 입력 시퀀스를 벡터로 바꾸고 디코더가 그 벡터에서 출력 시퀀스를 만드는 구조.">seq2seq</span>(sequence-to-sequence)에서는 다층 LSTM <span class="term" data-definition="인코더(encoder): 입력 문장을 벡터 표현으로 바꾸는 부분.">인코더</span>(encoder)가 입력 문장 전체를 고정 차원 벡터 하나로 만들고, 다른 LSTM <span class="term" data-definition="디코더(decoder): 인코더가 만든 표현을 바탕으로 출력 문장을 한 토큰씩 만드는 부분.">디코더</span>(decoder)가 그 벡터에서 출력 문장을 만든다(<a href="https://arxiv.org/abs/1409.3215" target="_blank" rel="noopener">Sutskever et al., 2014</a>). 같은 해 <a href="https://arxiv.org/abs/1406.1078" target="_blank" rel="noopener">Cho et al.(2014)</a>도 RNN 인코더-디코더를 제안하며 게이트가 있는 순환 단위인 <span class="term" data-definition="GRU(gated recurrent unit): LSTM보다 게이트 수를 줄인 순환 신경망 단위.">GRU</span>(gated recurrent unit)를 함께 내놓았다.</p>
+        <p>인코더가 만든 이 벡터를 <span class="term" data-definition="문맥 벡터(context vector): 디코더가 출력을 만들 때 참고하도록 입력 문장의 내용을 담아 넘기는 벡터.">문맥 벡터</span>(context vector)라 한다.</p>
+          </div>
+          <figure class="figure side"><img src="assets/fig-hourglass.svg" alt="좁은 목을 지나 모래가 흘러내리는 모래시계"><figcaption class="figure-caption">좁은 목 = 문맥 벡터</figcaption></figure>
+        </div>
+        <figure class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 200" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="입력 8단어가 깔때기 모양의 인코더를 지나 문맥 벡터 c 하나로 압축되고, 디코더가 c만 받아 출력 y1부터 y4를 만든다">
+            <foreignObject x="16" y="0" width="344" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; word-break:keep-all; line-height:1.4; color:var(--color-text-secondary)"><span>입력(예시): 나는 어제 도서관에서 빌린 두꺼운 책을 다 읽었다</span></div></foreignObject>
+            <rect class="node-rect sq" x="16" y="36" width="344" height="40"/>
+            <foreignObject x="24" y="40" width="328" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span>입력 8단어 <i class="mi">x</i><sub>1</sub> … <i class="mi">x</i><sub>8</sub></span></div></foreignObject>
+            <polygon class="guide-fill" points="16,84 360,84 212,124 164,124"/>
+            <foreignObject x="112" y="88" width="152" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; word-break:keep-all; line-height:1.4"><span>인코더(LSTM)</span></div></foreignObject>
+            <line class="edge-line accent" x1="212" y1="144" x2="430" y2="144"/><polygon class="edge-arrow accent" points="430,139 440,144 430,149"/>
+            <rect class="node-rect sq accent" x="164" y="128" width="48" height="32"/>
+            <foreignObject x="168" y="132" width="40" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4; font-weight:700"><span><i class="mi">c</i></span></div></foreignObject>
+            <foreignObject x="220" y="104" width="208" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; word-break:keep-all; line-height:1.4; color:var(--color-accent); font-weight:700"><span>고정 길이 벡터 하나</span></div></foreignObject>
+            <foreignObject x="440" y="92" width="344" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; word-break:keep-all; line-height:1.4"><span>디코더(LSTM)는 <i class="mi">c</i>만 받아 출력한다</span></div></foreignObject>
+            <rect class="node-rect sq" x="440" y="128" width="72" height="32"/><foreignObject x="448" y="132" width="56" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span><i class="mi">y</i><sub>1</sub></span></div></foreignObject>
+<line class="edge-line" x1="512" y1="144" x2="518" y2="144"/><polygon class="edge-arrow" points="518,139 528,144 518,149"/>
+<rect class="node-rect sq" x="528" y="128" width="72" height="32"/><foreignObject x="536" y="132" width="56" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span><i class="mi">y</i><sub>2</sub></span></div></foreignObject>
+<line class="edge-line" x1="600" y1="144" x2="606" y2="144"/><polygon class="edge-arrow" points="606,139 616,144 606,149"/>
+<rect class="node-rect sq" x="616" y="128" width="72" height="32"/><foreignObject x="624" y="132" width="56" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span><i class="mi">y</i><sub>3</sub></span></div></foreignObject>
+<line class="edge-line" x1="688" y1="144" x2="694" y2="144"/><polygon class="edge-arrow" points="694,139 704,144 694,149"/>
+<rect class="node-rect sq" x="704" y="128" width="72" height="32"/><foreignObject x="712" y="132" width="56" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span><i class="mi">y</i><sub>4</sub></span></div></foreignObject>
+            <foreignObject x="16" y="168" width="768" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; word-break:keep-all; line-height:1.4; font-weight:700"><span>입력이 8단어든 50단어든 <i class="mi">c</i>의 크기는 같다</span></div></foreignObject>
+          </svg>
+          <figcaption class="figure-caption">그림은 입력 길이와 관계없이 문맥 벡터 <i class="mi">c</i> 하나가 인코더와 디코더를 잇는 병목임을 나타낸 것이다(문장은 예시).</figcaption>
+        </figure>
+        <p>문장이 길수록 더 많은 내용을 같은 크기의 <span class="term" data-definition="고정 길이 벡터(fixed-length vector): 입력 길이와 관계없이 크기가 정해져 있는 벡터.">고정 길이 벡터</span>(fixed-length vector)에 밀어 넣어야 한다. <a href="https://arxiv.org/abs/1409.0473" target="_blank" rel="noopener">Bahdanau et al.(2014)</a>은 이 고정 길이 벡터가 인코더-디코더 성능의 병목이라고 추정했다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>seq2seq는 입력 전체를 고정 길이 문맥 벡터 하나로 압축하므로 긴 문장일수록 병목이 생긴다.</p></div>
+    </div>
+
+    <!-- 페이지 4: 어텐션을 RNN에 붙이다 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-icon">&#128214;</div>
+          <div class="callout-content">
+            <strong class="callout-title">배경 지식</strong>
+            <p>이 화면은 논문을 읽기 위해 먼저 알아 둘 이전 연구이다.</p>
+          </div>
+        </div>
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>어텐션은 고정 길이 병목을 어떻게 풀었는가?</li>
+          <li>어텐션을 붙인 뒤에도 남은 제약은 무엇인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">어텐션을 RNN에 붙이다</h3>
+        <p><a href="https://arxiv.org/abs/1409.0473" target="_blank" rel="noopener">Bahdanau et al.(2014)</a>은 문맥 벡터 하나 대신, 디코더가 단어를 하나 낼 때마다 인코더의 모든 은닉 상태를 다시 보고 가중합으로 그 단어 전용 문맥 벡터 $\boldsymbol{c}_t$를 만들게 했다. 이 방식이 <span class="term" data-definition="어텐션(attention): 출력의 각 위치가 입력의 어느 위치를 얼마나 참고할지 비중을 계산하여 정보를 가져오는 방식.">어텐션</span>이다. 비중은 출력 단어가 입력의 어느 위치와 맞는지 부드럽게 찾는 <span class="term" data-definition="정렬(alignment): 출력 단어와 그에 대응하는 입력 위치를 짝짓는 것.">정렬</span>(alignment) 역할을 한다.</p>
+        <div class="math-equation">
+          $$\boldsymbol{c}_t = \sum_{i} \alpha_{t,i}\, \boldsymbol{h}_i, \qquad \sum_{i} \alpha_{t,i} = 1$$
+        </div>
+        <p>여기서 $\alpha_{t,i}$는 $t$번째 출력 단어가 $i$번째 은닉 상태에 두는 비중이다. 그림의 비중 값은 예시이다.</p>
+        <figure class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 232" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="인코더 은닉 상태 h1부터 h4가 비중 0.1, 0.6, 0.2, 0.1로 가중합되어 문맥 벡터 c_t가 되고, c_t가 디코더 상태 s_t를 거쳐 출력 단어 y_t가 된다">
+            <foreignObject x="16" y="0" width="768" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; word-break:keep-all; line-height:1.4; color:var(--color-text-secondary)"><span>출력 단어마다 비중 <i class="mi">α</i>를 새로 계산한다(비중 값은 예시)</span></div></foreignObject>
+            <rect class="node-rect sq" x="16" y="32" width="384" height="40"/>
+            <foreignObject x="24" y="36" width="368" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span>문맥 벡터 <i class="mi">c</i><sub class="mi">t</sub> = 0.1<i class="mi">h</i><sub>1</sub> + 0.6<i class="mi">h</i><sub>2</sub> + 0.2<i class="mi">h</i><sub>3</sub> + 0.1<i class="mi">h</i><sub>4</sub></span></div></foreignObject>
+            <line class="edge-line" x1="52" y1="152" x2="52" y2="82"/><polygon class="edge-arrow" points="47,82 52,72 57,82"/>
+            <line class="edge-line accent" x1="156" y1="152" x2="156" y2="82"/><polygon class="edge-arrow accent" points="151,82 156,72 161,82"/>
+            <line class="edge-line" x1="260" y1="152" x2="260" y2="82"/><polygon class="edge-arrow" points="255,82 260,72 265,82"/>
+            <line class="edge-line" x1="364" y1="152" x2="364" y2="82"/><polygon class="edge-arrow" points="359,82 364,72 369,82"/>
+            <text x="60" y="120" font-size="13">0.1</text>
+            <text x="164" y="120" font-size="13" font-weight="700" class="accent-text">0.6</text>
+            <text x="268" y="120" font-size="13">0.2</text>
+            <text x="372" y="120" font-size="13">0.1</text>
+            <rect class="node-rect sq" x="16" y="152" width="72" height="40"/><foreignObject x="24" y="156" width="56" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span><i class="mi">h</i><sub>1</sub></span></div></foreignObject>
+            <line class="edge-line" x1="88" y1="172" x2="110" y2="172"/><polygon class="edge-arrow" points="110,167 120,172 110,177"/>
+            <rect class="node-rect sq" x="120" y="152" width="72" height="40"/><foreignObject x="128" y="156" width="56" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span><i class="mi">h</i><sub>2</sub></span></div></foreignObject>
+            <line class="edge-line" x1="192" y1="172" x2="214" y2="172"/><polygon class="edge-arrow" points="214,167 224,172 214,177"/>
+            <rect class="node-rect sq" x="224" y="152" width="72" height="40"/><foreignObject x="232" y="156" width="56" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span><i class="mi">h</i><sub>3</sub></span></div></foreignObject>
+            <line class="edge-line" x1="296" y1="172" x2="318" y2="172"/><polygon class="edge-arrow" points="318,167 328,172 318,177"/>
+            <rect class="node-rect sq" x="328" y="152" width="72" height="40"/><foreignObject x="336" y="156" width="56" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span><i class="mi">h</i><sub>4</sub></span></div></foreignObject>
+            <foreignObject x="16" y="200" width="384" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; word-break:keep-all; line-height:1.4; color:var(--color-text-secondary)"><span>인코더 은닉 상태는 여전히 순서대로 계산한다</span></div></foreignObject>
+            <line class="edge-line" x1="400" y1="52" x2="470" y2="52"/><polygon class="edge-arrow" points="470,47 480,52 470,57"/>
+            <rect class="node-rect sq" x="480" y="32" width="136" height="40"/><foreignObject x="488" y="36" width="120" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span>디코더 상태 <i class="mi">s</i><sub class="mi">t</sub></span></div></foreignObject>
+            <line class="edge-line" x1="616" y1="52" x2="638" y2="52"/><polygon class="edge-arrow" points="638,47 648,52 638,57"/>
+            <rect class="node-rect sq" x="648" y="32" width="136" height="40"/><foreignObject x="656" y="36" width="120" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; word-break:keep-all; line-height:1.4"><span>출력 단어 <i class="mi">y</i><sub class="mi">t</sub></span></div></foreignObject>
+            <foreignObject x="480" y="88" width="304" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; word-break:keep-all; line-height:1.4; color:var(--color-text-secondary)"><span>디코더는 고정 벡터 하나가 아니라 단어마다 새 문맥 벡터를 받는다</span></div></foreignObject>
+          </svg>
+          <figcaption class="figure-caption">그림은 디코더 한 단계가 인코더 은닉 상태 전부에 비중을 두어 문맥 벡터를 만드는 과정을 나타낸 것이다.</figcaption>
+        </figure>
+        <p>이 모델의 인코더는 양방향 RNN이다. 이 모델은 영어-프랑스어 번역에서 기존 구문 기반 최고 시스템과 비슷한 성능을 냈고, 긴 문장에서 특히 이점이 컸다. 다만 어텐션은 RNN 위에 <strong>덧붙인 장치</strong>였으므로 은닉 상태 $\boldsymbol{h}_i$는 여전히 순서대로 계산된다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>Bahdanau 어텐션은 단어마다 은닉 상태의 가중합을 만들어 고정 길이 병목을 풀었지만 RNN의 순차 계산은 그대로 두었다.</p></div>
+    </div>
+
+    <!-- 페이지 5: 점수 계산 (가산 어텐션과 내적) -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-icon">&#128214;</div>
+          <div class="callout-content">
+            <strong class="callout-title">배경 지식</strong>
+            <p>이 화면은 논문을 읽기 위해 먼저 알아 둘 이전 연구이다.</p>
+          </div>
+        </div>
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>비중을 정하는 점수는 어떻게 매기는가?</li>
+          <li>내적 점수는 트랜스포머로 어떻게 이어지는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">점수 매기기: 가산과 내적</h3>
+        <div class="with-figure" style="--figure-side-width:260px">
+          <div>
+            <p>비중 $\alpha$를 만들려면 먼저 디코더 상태 $\boldsymbol{s}$와 각 은닉 상태 $\boldsymbol{h}_i$가 얼마나 맞는지 점수를 매긴다. Bahdanau는 은닉층 하나인 작은 신경망으로 점수를 계산했으며, 이를 <span class="term" data-definition="가산 어텐션(additive attention): 두 벡터를 은닉층 하나인 작은 신경망에 넣어 관련도 점수를 계산하는 어텐션.">가산 어텐션</span>(additive attention)이라 한다.</p>
+            <p><a href="https://arxiv.org/abs/1508.04025" target="_blank" rel="noopener">Luong et al.(2015)</a>은 <span class="term" data-definition="내적(dot product): 두 벡터의 같은 위치의 성분끼리 곱하여 모두 더한 값. 두 벡터가 비슷한 방향일수록 커짐.">내적</span>(dot product), general, concat 같은 점수 함수를 비교했다. 그중 내적 점수는 두 벡터를 곱해 더하기만 하면 된다. 버튼을 눌러 한 출력 단계의 계산을 따라가시오(점수 값은 예시).</p>
+          </div>
+          <figure class="figure side">
+<svg viewBox="0 0 260 208" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="가산 어텐션은 s와 h를 작은 신경망에 넣어 점수를 내고, 내적 어텐션은 s와 h를 곱해 더해 점수를 낸다">
+<text x="8" y="14" font-size="12" font-weight="700">가산 어텐션(Bahdanau)</text>
+<rect class="node-rect sq" x="8" y="24" width="40" height="28"/><foreignObject x="12" y="26" width="32" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span><i class="mi">s</i></span></div></foreignObject>
+<rect class="node-rect sq" x="8" y="60" width="40" height="28"/><foreignObject x="12" y="62" width="32" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span><i class="mi">h</i><sub class="mi">i</sub></span></div></foreignObject>
+<rect class="node-rect sq" x="84" y="24" width="92" height="64"/><foreignObject x="88" y="28" width="84" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; word-break:keep-all; line-height:1.4"><span>은닉층 1개 신경망</span></div></foreignObject>
+<rect class="node-rect sq" x="204" y="40" width="48" height="32"/><foreignObject x="206" y="44" width="44" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4"><span>점수</span></div></foreignObject>
+<line class="edge-line" x1="48" y1="38" x2="74" y2="38"/><polygon class="edge-arrow" points="74,33 84,38 74,43"/>
+<line class="edge-line" x1="48" y1="74" x2="74" y2="74"/><polygon class="edge-arrow" points="74,69 84,74 74,79"/>
+<line class="edge-line" x1="176" y1="56" x2="194" y2="56"/><polygon class="edge-arrow" points="194,51 204,56 194,61"/>
+<line class="guide" x1="8" y1="104" x2="252" y2="104"/>
+<text x="8" y="126" font-size="12" font-weight="700">내적(Luong)</text>
+<rect class="node-rect sq" x="8" y="136" width="40" height="28"/><foreignObject x="12" y="138" width="32" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span><i class="mi">s</i></span></div></foreignObject>
+<rect class="node-rect sq" x="8" y="172" width="40" height="28"/><foreignObject x="12" y="174" width="32" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span><i class="mi">h</i><sub class="mi">i</sub></span></div></foreignObject>
+<rect class="node-rect sq" x="84" y="136" width="92" height="64"/><foreignObject x="88" y="140" width="84" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; word-break:keep-all; line-height:1.4"><span>곱해서 더하기</span></div></foreignObject>
+<rect class="node-rect sq accent" x="204" y="152" width="48" height="32"/><foreignObject x="206" y="156" width="44" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4; font-weight:700"><span>점수</span></div></foreignObject>
+<line class="edge-line" x1="48" y1="150" x2="74" y2="150"/><polygon class="edge-arrow" points="74,145 84,150 74,155"/>
+<line class="edge-line" x1="48" y1="186" x2="74" y2="186"/><polygon class="edge-arrow" points="74,181 84,186 74,191"/>
+<line class="edge-line accent" x1="176" y1="168" x2="194" y2="168"/><polygon class="edge-arrow accent" points="194,163 204,168 194,173"/>
+</svg>
+<figcaption class="figure-caption">그림은 두 점수 함수의 계산 경로를 나타낸 것이다.</figcaption>
+          </figure>
+        </div>
+        <div class="math-derivation animate-in" id="ln-math-score">
+          <div class="math-step" data-step="0">
+            <div class="math-equation">
+              $$e_i = \boldsymbol{s}^{\top}\boldsymbol{h}_i$$
+            </div>
+            <div class="math-explanation">
+              <p>내적 점수 $e_i$는 디코더 상태와 $i$번째 은닉 상태가 같은 방향일수록 크다. 예시로 은닉 상태 3개의 점수가 $(2,\,1,\,-2)$라고 하자.</p>
+            </div>
+          </div>
+          <div class="math-step" data-step="1" style="display:none">
+            <div class="math-equation">
+              $$\alpha_i = \frac{\mathit{exp}(e_i)}{\sum_j \mathit{exp}(e_j)} \approx (0.72,\ 0.27,\ 0.01)$$
+            </div>
+            <div class="math-explanation">
+              <p><span class="term" data-definition="소프트맥스(softmax): 실수 여러 개를 모두 양수이고 합이 1인 값으로 바꾸는 함수. 큰 값에 더 큰 비중을 줌.">소프트맥스</span>(softmax)로 점수를 합이 1인 비중으로 바꾼다. 1단원에서 구한 값과 같다.</p>
+            </div>
+          </div>
+          <div class="math-step" data-step="2" style="display:none">
+            <div class="math-equation">
+              $$\boldsymbol{c} = \sum_i \alpha_i \boldsymbol{h}_i \approx 0.72\,\boldsymbol{h}_1 + 0.27\,\boldsymbol{h}_2 + 0.01\,\boldsymbol{h}_3$$
+            </div>
+            <div class="math-explanation">
+              <p>비중으로 은닉 상태를 섞으면 이번 출력 단어 전용 문맥 벡터가 된다. 점수가 가장 큰 $\boldsymbol{h}_1$이 대부분을 차지한다.</p>
+            </div>
+          </div>
+          <div class="math-step" data-step="3" style="display:none">
+            <div class="math-equation">
+              $$\mathit{Attention}(Q, K, V) = \mathit{softmax}\!\left(\frac{QK^{\top}}{\sqrt{d_k}}\right)V \tag{1}$$
+            </div>
+            <div class="math-explanation">
+              <p>트랜스포머의 식 (1)도 내적 점수 → 소프트맥스 → 가중합의 순서를 그대로 따른다. 디코더 상태 자리에 <span class="term" data-definition="쿼리(query): 지금 찾고 있는 정보를 나타내는 벡터.">쿼리</span>(query), 은닉 상태 자리에 <span class="term" data-definition="키(key): 각 위치가 어떤 정보를 담고 있는지 알리는 이름표 벡터.">키</span>(key)와 <span class="term" data-definition="값(value): 각 위치가 실제로 전달하는 정보 벡터.">값</span>(value)이 들어가며, $\sqrt{d_k}$로 나누는 이유는 3단원에서 다룬다.</p>
+            </div>
+          </div>
+          <div class="math-controls">
+            <button class="btn math-prev-btn">이전 단계</button>
+            <button class="btn math-next-btn">다음 단계</button>
+            <button class="btn math-reset-btn">처음부터</button>
+            <span class="math-progress"></span>
+          </div>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>어텐션은 점수 → 소프트맥스 → 가중합 순서로 계산하며, Luong의 내적 점수가 트랜스포머의 스케일드 내적 어텐션으로 이어진다.</p></div>
+    </div>
+
+    <!-- 페이지 6: 어텐션만 남기기까지 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>어텐션을 붙인 뒤에도 무엇이 남았는가?</li>
+          <li>합성곱 신경망의 시도는 어디서 막혔는가?</li>
+          <li>트랜스포머는 무엇을 빼고 무엇을 남겼는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">어텐션만 남기기까지<span class="paper-ref">논문 1·2절</span></h3>
+        <p>논문 1절에 따르면 어텐션은 거리와 관계없이 의존 관계를 모델링하게 해 주었지만, 몇몇 경우를 빼면 순환 신경망과 함께 쓰였다. 따라서 순차 계산이라는 제약은 그대로였다.</p>
+        <p>순차 계산을 줄이려는 다른 시도로 <span class="term" data-definition="합성곱 신경망(convolutional neural network, CNN): 작은 창(커널)을 입력 위로 밀며 이웃한 위치를 한꺼번에 계산하는 신경망.">합성곱 신경망</span>(convolutional neural network, CNN)을 쓴 Extended Neural GPU, <a href="https://arxiv.org/abs/1610.10099" target="_blank" rel="noopener">ByteNet</a>, <a href="https://arxiv.org/abs/1705.03122" target="_blank" rel="noopener">ConvS2S</a>가 있다. 이들은 모든 위치를 병렬로 계산했지만, 두 위치를 잇는 연산 수가 거리에 따라 ConvS2S는 선형으로, ByteNet은 로그로 늘어 먼 위치 사이 의존을 배우기 어려웠다(논문 2절).</p>
+        <p>한편 한 시퀀스 안의 위치끼리 관련지어 표현을 만드는 <span class="term" data-definition="셀프 어텐션(self-attention): 한 시퀀스 안의 각 위치가 같은 시퀀스의 모든 위치를 참고해 표현을 만드는 어텐션.">셀프 어텐션</span>(self-attention)이 독해, 요약, 문장 표현 등에 이미 쓰이고 있었다. <span class="term" data-definition="트랜스포머(Transformer): 순환과 합성곱 없이 어텐션만으로 인코더와 디코더를 구성한 모델.">트랜스포머</span>는 순환과 합성곱을 빼고 <strong>셀프 어텐션만으로 층을 쌓은 첫 <span class="term" data-definition="시퀀스 변환(sequence transduction): 입력 시퀀스를 길이가 다를 수 있는 출력 시퀀스로 바꾸는 과제. 기계 번역이 대표적임.">시퀀스 변환</span>(sequence transduction) 모델</strong>이다.</p>
+        <figure class="svg-diagram animate-in">
+          <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:var(--space-4)">
+<svg viewBox="0 0 240 168" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="순환: 위치 4개에서 첫 위치와 끝 위치를 잇는 데 3단계">
+<rect class="node-rect sq" x="24" y="104" width="24" height="24"/><rect class="node-rect sq" x="80" y="104" width="24" height="24"/><rect class="node-rect sq" x="136" y="104" width="24" height="24"/><rect class="node-rect sq" x="192" y="104" width="24" height="24"/><line class="edge-line" x1="48" y1="116" x2="70" y2="116"/><polygon class="edge-arrow" points="70,111 80,116 70,121"/><line class="edge-line" x1="104" y1="116" x2="126" y2="116"/><polygon class="edge-arrow" points="126,111 136,116 126,121"/><line class="edge-line" x1="160" y1="116" x2="182" y2="116"/><polygon class="edge-arrow" points="182,111 192,116 182,121"/><foreignObject x="8" y="136" width="224" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; word-break:keep-all; line-height:1.4"><span>순환: 3단계</span></div></foreignObject>
+</svg>
+<svg viewBox="0 0 240 168" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="팽창 합성곱(커널 2): 두 칸씩 묶는 층을 2번 거쳐 2단계">
+<path class="edge-line" d="M36,104 V92 H92 V104 M148,104 V92 H204 V104 M64,92 V90 M176,92 V90"/><polygon class="edge-arrow" points="59,90 64,80 69,90"/><polygon class="edge-arrow" points="171,90 176,80 181,90"/>
+<path class="edge-line" d="M64,56 V44 H176 V56 M120,44 V42"/><polygon class="edge-arrow" points="115,42 120,32 125,42"/>
+<rect class="node-rect sq" x="24" y="104" width="24" height="24"/><rect class="node-rect sq" x="80" y="104" width="24" height="24"/><rect class="node-rect sq" x="136" y="104" width="24" height="24"/><rect class="node-rect sq" x="192" y="104" width="24" height="24"/><rect class="node-rect sq" x="52" y="56" width="24" height="24"/><rect class="node-rect sq" x="164" y="56" width="24" height="24"/><rect class="node-rect sq" x="108" y="8" width="24" height="24"/>
+<foreignObject x="8" y="136" width="224" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; word-break:keep-all; line-height:1.4"><span>팽창 합성곱(커널 2): 2단계</span></div></foreignObject>
+</svg>
+<svg viewBox="0 0 240 168" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="셀프 어텐션: 모든 위치가 한 층에서 바로 이어져 1단계">
+<path class="edge-line" d="M36,104 V90 M92,104 V90 M148,104 V90 M204,104 V90"/><polygon class="edge-arrow" points="31,90 36,80 41,90"/><polygon class="edge-arrow" points="87,90 92,80 97,90"/><polygon class="edge-arrow" points="143,90 148,80 153,90"/><polygon class="edge-arrow" points="199,90 204,80 209,90"/><rect class="node-rect sq" x="24" y="104" width="24" height="24"/><rect class="node-rect sq" x="80" y="104" width="24" height="24"/><rect class="node-rect sq" x="136" y="104" width="24" height="24"/><rect class="node-rect sq" x="192" y="104" width="24" height="24"/><rect class="node-rect sq accent" x="24" y="56" width="192" height="24"/><foreignObject x="32" y="56" width="176" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; word-break:keep-all; line-height:1.4; font-weight:700"><span>셀프 어텐션 층</span></div></foreignObject><foreignObject x="8" y="136" width="224" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; word-break:keep-all; line-height:1.4; font-weight:700; color:var(--color-accent)"><span>셀프 어텐션: 1단계</span></div></foreignObject>
+</svg>
+          </div>
+          <figcaption class="figure-caption">그림은 위치 4개(예시)에서 가장 먼 두 위치를 잇는 순차 단계 수를 나타낸 것이다.</figcaption>
+        </figure>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>순환은 순차 계산이, 합성곱은 거리에 따라 늘어나는 연산 수가 걸림돌이었고, 트랜스포머는 셀프 어텐션만 남겨 두 문제를 함께 풀었다.</p></div>
+    </div>
+
+    <!-- 페이지 7: 연구 계보 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">&#10024;</div>
+          <div class="callout-content">
+            <strong class="callout-title">새로운 점</strong>
+            <p>앞선 연구는 어텐션을 순환 신경망이나 합성곱 모델에 <em>덧붙였다</em>. 트랜스포머는 <strong>어텐션만 남겼다</strong>.</p>
+          </div>
+        </div>
+        <span class="cue-label">연대표</span>
+        <figure class="figure" style="margin:var(--space-2) 0 0; max-width:100%; width:100%">
+<svg viewBox="0 0 216 264" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="연대표: 1994 RNN 장기 의존 분석, 1997 LSTM, 2014 seq2seq와 Bahdanau, 2015 Luong, 2016 셀프 어텐션과 ByteNet, 2017 ConvS2S와 트랜스포머">
+<rect class="node-rect sq" x="8" y="8" width="48" height="28"/><foreignObject x="10" y="10" width="44" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4"><span>1994</span></div></foreignObject>
+<foreignObject x="64" y="8" width="152" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="height:100%; display:flex; align-items:center; justify-content:flex-start; text-align:left; font-size:12px; word-break:keep-all; line-height:1.3"><span>RNN 장기 의존 분석</span></div></foreignObject>
+<line class="edge-line" x1="32" y1="36" x2="32" y2="42"/><polygon class="edge-arrow" points="27,42 32,52 37,42"/>
+<rect class="node-rect sq" x="8" y="52" width="48" height="28"/><foreignObject x="10" y="54" width="44" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4"><span>1997</span></div></foreignObject>
+<foreignObject x="64" y="52" width="152" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="height:100%; display:flex; align-items:center; justify-content:flex-start; text-align:left; font-size:12px; word-break:keep-all; line-height:1.3"><span>LSTM</span></div></foreignObject>
+<line class="edge-line" x1="32" y1="80" x2="32" y2="86"/><polygon class="edge-arrow" points="27,86 32,96 37,86"/>
+<rect class="node-rect sq" x="8" y="96" width="48" height="28"/><foreignObject x="10" y="98" width="44" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4"><span>2014</span></div></foreignObject>
+<foreignObject x="64" y="96" width="152" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="height:100%; display:flex; align-items:center; justify-content:flex-start; text-align:left; font-size:12px; word-break:keep-all; line-height:1.3"><span>seq2seq, Bahdanau</span></div></foreignObject>
+<line class="edge-line" x1="32" y1="124" x2="32" y2="130"/><polygon class="edge-arrow" points="27,130 32,140 37,130"/>
+<rect class="node-rect sq" x="8" y="140" width="48" height="28"/><foreignObject x="10" y="142" width="44" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4"><span>2015</span></div></foreignObject>
+<foreignObject x="64" y="140" width="152" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="height:100%; display:flex; align-items:center; justify-content:flex-start; text-align:left; font-size:12px; word-break:keep-all; line-height:1.3"><span>Luong 내적 점수</span></div></foreignObject>
+<line class="edge-line" x1="32" y1="168" x2="32" y2="174"/><polygon class="edge-arrow" points="27,174 32,184 37,174"/>
+<rect class="node-rect sq" x="8" y="184" width="48" height="28"/><foreignObject x="10" y="186" width="44" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4"><span>2016</span></div></foreignObject>
+<foreignObject x="64" y="184" width="152" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="height:100%; display:flex; align-items:center; justify-content:flex-start; text-align:left; font-size:12px; word-break:keep-all; line-height:1.3"><span>셀프 어텐션, ByteNet</span></div></foreignObject>
+<line class="edge-line accent" x1="32" y1="212" x2="32" y2="218"/><polygon class="edge-arrow accent" points="27,218 32,228 37,218"/>
+<rect class="node-rect sq accent" x="8" y="228" width="48" height="28"/><foreignObject x="10" y="230" width="44" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4; font-weight:700"><span>2017</span></div></foreignObject>
+<foreignObject x="64" y="228" width="152" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="height:100%; display:flex; align-items:center; justify-content:flex-start; text-align:left; font-size:12px; word-break:keep-all; line-height:1.3; font-weight:700; color:var(--color-accent)"><span>ConvS2S, 트랜스포머</span></div></foreignObject>
+</svg>
+<figcaption class="figure-caption">그림은 계보의 연대를 나타낸 것이다. 오른쪽 계보는 옆 가지를 빼면 아래로 갈수록 오래된 연구이며, 노드를 누르면 설명이 나온다.</figcaption>
+        </figure>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>연구 계보<span class="paper-ref">논문 2절</span></h3>
+        <div class="lineage-tree animate-in" style="padding:var(--space-3) var(--space-4); margin:var(--space-3) 0 0">
+          <div class="lineage-node lineage-root" data-detail="트랜스포머(Transformer): 순환과 합성곱 없이 어텐션만으로 인코더와 디코더를 구성한 모델이다.">
+            <span class="lineage-label">트랜스포머</span>
+            <span class="lineage-detail">본 논문(2017)</span>
+            <span class="novelty-badge">어텐션만으로 구성</span>
+          </div>
+          <div class="lineage-branch">
+            <div class="lineage-edge-label">선행 기법</div>
+            <div class="lineage-node" data-detail="셀프 어텐션 선행 연구: 한 시퀀스 안의 위치끼리 관련지어 표현을 만드는 방법으로 독해, 요약, 텍스트 함의, 문장 표현에 쓰였다(Cheng et al., 2016; Parikh et al., 2016; Lin et al., 2017; Paulus et al., 2017).">
+              <span class="lineage-label">셀프 어텐션(2016~)</span>
+            </div>
+            <p class="lineage-note">한 시퀀스 안 위치끼리 참조한다. → <strong class="novelty">셀프 어텐션만으로 인코더·디코더</strong>를 만들었다.</p>
+          </div>
+          <div class="lineage-branch">
+            <div class="lineage-edge-label">점수 계승</div>
+            <div class="lineage-node" data-detail="Luong et al.(2015): 전역·지역 어텐션과 내적·general·concat 점수 함수를 비교한 번역 연구이다.">
+              <span class="lineage-label">Luong(2015)</span>
+            </div>
+            <p class="lineage-note">내적으로 점수를 매긴다. → <strong class="novelty">내적을 √<i class="mi">d</i><sub class="mi">k</sub>로 나누어</strong> 썼다.</p>
+          </div>
+          <div class="lineage-branch">
+            <div class="lineage-edge-label">어텐션 도입</div>
+            <div class="lineage-node" data-detail="Bahdanau et al.(2014): 디코더가 출력할 때마다 입력의 관련 위치에 비중을 두어 참고하게 한 신경 기계 번역이다.">
+              <span class="lineage-label">Bahdanau(2014)</span>
+            </div>
+            <p class="lineage-note">어텐션을 RNN의 <em>보조 장치</em>로 썼다. → <strong class="novelty">어텐션을 본체</strong>로 삼았다.</p>
+          </div>
+          <div class="lineage-branch">
+            <div class="lineage-edge-label">구조 계승</div>
+            <div class="lineage-node" data-detail="seq2seq: 순환 신경망으로 만든 인코더와 디코더로 번역을 수행한 방법이다(Sutskever et al., 2014; Cho et al., 2014).">
+              <span class="lineage-label">seq2seq(2014)</span>
+            </div>
+            <p class="lineage-note">인코더-디코더 틀을 이어받았다. → <strong class="novelty">RNN을 셀프 어텐션 층으로</strong> 바꿨다.</p>
+          </div>
+          <div class="lineage-branch">
+            <div class="lineage-edge-label">출발점</div>
+            <div class="lineage-node" data-detail="LSTM(1997): 셀 상태와 게이트로 순환 신경망의 기울기 소실을 완화한 모델이다. 장기 의존 학습이 어렵다는 분석(Bengio et al., 1994)에 대한 해법이다.">
+              <span class="lineage-label">RNN·LSTM(1997)</span>
+            </div>
+            <p class="lineage-note">기울기 소실은 줄였으나 순차 계산은 남았다. → <strong class="novelty">순차 계산을 없앴다</strong>.</p>
+          </div>
+          <div class="lineage-branch">
+            <div class="lineage-edge-label">옆 가지</div>
+            <div class="lineage-node" data-detail="합성곱 번역(ByteNet 2016, ConvS2S 2017): 순환 대신 합성곱으로 모든 위치를 병렬로 계산한 모델이다. 두 위치를 잇는 연산 수가 ByteNet은 로그, ConvS2S는 선형으로 늘어난다.">
+              <span class="lineage-label">ByteNet·ConvS2S</span>
+            </div>
+            <p class="lineage-note">병렬화했으나 연산 수가 거리에 따라 늘었다. → <strong class="novelty">거리와 관계없이 한 단계</strong>로 잇는다.</p>
+          </div>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>트랜스포머는 인코더-디코더 틀, 어텐션, 내적 점수, 셀프 어텐션을 이어받되 순환과 합성곱 없이 어텐션만으로 구성한 점이 새롭다.</p></div>
+    </div>
+
+    <!-- 페이지 8: 비교 데이터 표 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>네 구조는 병렬화와 경로 길이에서 어떻게 다른가?</li>
+          <li>어텐션을 붙인 RNN은 어떤 문제를 풀고 어떤 문제를 남겼는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>네 구조 비교<span class="paper-ref">논문 4절</span></h3>
+        <p>표는 지금까지 본 네 구조를 층 안 병렬화, 최대 경로 길이, 고정 길이 병목으로 비교한 것이다. $n$은 문장 길이, $k$는 합성곱 커널 크기이다.</p>
+        <table class="data-table animate-in">
+          <caption>표는 네 구조의 차이를 나타낸 것이다. 순환·합성곱·셀프 어텐션의 순차 연산과 최대 경로 길이는 논문 표 1의 값이고, RNN + 어텐션 행과 고정 길이 병목 열은 구조에서 해석한 것이다.</caption>
+          <thead><tr><th>구조</th><th>층 안 병렬화(순차 연산)</th><th>최대 경로 길이</th><th>고정 길이 병목</th></tr></thead>
+          <tbody>
+            <tr><td>RNN(seq2seq)</td><td>불가, $O(n)$</td><td>$O(n)$</td><td>있음: 문맥 벡터 하나</td></tr>
+            <tr><td>RNN + 어텐션</td><td>불가, $O(n)$</td><td>입력 안은 $O(n)$, 출력→입력은 1단계</td><td>없음: 단어마다 문맥 벡터</td></tr>
+            <tr><td>CNN(ByteNet, ConvS2S)</td><td>가능, $O(1)$</td><td>팽창 합성곱은 $O(\mathit{log}_k n)$, ConvS2S는 거리에 비례</td><td>없음</td></tr>
+            <tr class="hl"><td>트랜스포머</td><td>가능, $O(1)$</td><td>$O(1)$</td><td>없음</td></tr>
+          </tbody>
+        </table>
+        <p class="diff-line"><strong>핵심 비교</strong> 어텐션은 병목을 없앴고, 합성곱은 병렬화를 얻었으며, 트랜스포머는 셀프 어텐션만 남겨 병렬화와 짧은 경로를 함께 얻었다.</p>
+        <div class="callout callout-warning animate-in">
+          <div class="callout-icon">&#128269;</div>
+          <div class="callout-content">
+            <strong class="callout-title">더 알아보기</strong>
+            <p>짧은 경로에는 대가가 있다. 논문 2절은 모든 위치를 비중으로 평균 내면 표현의 해상도가 떨어진다고 밝히고, 이를 멀티헤드 어텐션(multi-head attention)으로 보완한다(3단원). 또 셀프 어텐션의 층당 계산량은 $O(n^2 \cdot d)$라서 문장이 길면 부담이 커진다(4단원).</p>
+          </div>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>트랜스포머는 네 구조 가운데 유일하게 층 안 병렬화, 상수 경로 길이, 병목 없음을 모두 갖췄다.</p></div>
+    </div>
+
+    <!-- 페이지 9: 핵심 정리 + 확인 문제 1~2 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-accent animate-in">
+          <div class="callout-icon">&#128161;</div>
+          <div class="callout-content">
+            <strong class="callout-title">핵심 정리</strong>
+            <ol>
+              <li>순환 신경망은 $h_t$를 $h_{t-1}$에서 계산하므로 병렬화가 막히고 경로 길이가 $O(n)$이다.</li>
+              <li>LSTM은 게이트로 기울기 소실을 줄였지만 순차 계산은 남았다.</li>
+              <li>seq2seq의 고정 길이 문맥 벡터는 긴 문장에서 병목이 된다.</li>
+              <li>어텐션은 RNN에 붙어 병목을 풀었고, 트랜스포머는 RNN을 빼고 어텐션만 남겼다.</li>
+              <li>경로 길이를 묻는 문항은 정보가 거치는 순차 단계 수를 세어라.</li>
+            </ol>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>병목과 어텐션</h3>
+        <div class="quiz-container animate-in" id="ln-quiz-1">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="③ | 문맥 벡터의 크기가 입력 길이와 관계없이 같으므로 긴 문장에서 병목이 된다."
+               data-explanation-wrong="| 정답은 ③이다. 문맥 벡터의 크기는 고정되므로 긴 문장에서 병목이 된다. ①은 크기가 입력 길이에 따라 늘지 않으므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">1</span>다음 중 seq2seq의 문맥 벡터에 대한 설명으로 옳은 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 입력 문장이 길수록 벡터의 크기도 커진다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 디코더가 출력 단어마다 새로 계산한다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 크기가 정해져 있어 긴 문장에서 병목이 된다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 인코더의 순차 계산을 없앴다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 합성곱 신경망으로만 만들 수 있다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="③ | 단어마다 은닉 상태 전부를 가중합하고(ㄱ), 비중은 소프트맥스로 만들므로 합이 1이다(ㄷ)."
+               data-explanation-wrong="| 정답은 ③이다. ㄴ은 어텐션을 붙여도 은닉 상태를 순서대로 계산하므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">2</span>Bahdanau 어텐션에 대한 설명으로 옳은 것만을 <span class="nobr">&lt;보기&gt;에서</span> 있는 대로 고른 것은?</h3>
+            <div class="bogi">
+              <p>ㄱ. 단어마다 은닉 상태 전부를 가중합한다.</p>
+              <p>ㄴ. 인코더의 순차 계산을 없앴다.</p>
+              <p>ㄷ. 비중의 합은 1이다.</p>
+            </div>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① ㄱ</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② ㄴ</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ ㄱ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ ㄴ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ ㄱ, ㄴ, ㄷ</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('ln-quiz-1')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('ln-quiz-1')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>고정 길이 문맥 벡터는 긴 문장에서 병목이 되고, 어텐션은 단어마다 가중합을 만들어 이를 풀었다.</p></div>
+    </div>
+
+    <!-- 페이지 10: 확인 문제 3~4 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>각 구조에서 먼 두 위치는 몇 단계 만에 이어지는가?</li>
+          <li>앞선 연구가 남긴 한계는 무엇인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>경로 길이와 연구 흐름</h3>
+        <div class="quiz-container animate-in" id="ln-quiz-2">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="② | 순환 층은 은닉 상태를 하나씩 거치므로 15단계, 셀프 어텐션 층은 모든 위치를 한 번에 비교하므로 1단계이다."
+               data-explanation-wrong="| 정답은 ②이다. 순환 층은 16 − 1 = 15단계, 셀프 어텐션 층은 1단계이다. ①은 위치 수를 단계 수로 셌으므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">3</span>길이 16인 문장에서 첫 위치의 정보가 마지막 위치에 닿는 순차 단계 수를 순환 층, 셀프 어텐션 층 순으로 옳게 짝지은 것은?<span class="q-points">[3점]</span></h3>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 16, 1</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 15, 1</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 15, 4</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 4, 1</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 1, 1</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-e"
+               data-explanation-right="⑤ | LSTM도 $h_t$를 $h_{t-1}$에서 계산하므로 순차 계산이 남았다."
+               data-explanation-wrong="| 정답은 ⑤이다. LSTM도 은닉 상태를 순서대로 계산한다. ③은 논문 2절의 내용이므로 옳다.">
+            <h3 class="quiz-question"><span class="q-num">4</span>트랜스포머 이전 연구에 대한 설명으로 옳지 <u>않은</u> 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 어텐션은 대개 순환 신경망과 함께 쓰였다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② ByteNet의 연산 수는 거리에 따라 로그로 는다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ ConvS2S의 연산 수는 거리에 따라 선형으로 는다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 셀프 어텐션은 이전에도 독해, 요약에 쓰였다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ LSTM은 게이트로 순차 계산을 없앴다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('ln-quiz-2')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('ln-quiz-2')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>순환 층의 경로 길이는 위치 수보다 하나 적고, 셀프 어텐션 층은 1단계이며, LSTM도 순차 계산을 없애지 못했다.</p></div>
+    </div>
+
+  </div>
+</section>

@@ -1,0 +1,317 @@
+<section class="module" id="module-0">
+  <div class="module-content">
+
+    <div class="module-header">
+      <span class="module-number">1</span>
+      <h2 class="module-title">훑어보기</h2>
+      <p class="module-subtitle">서베이가 RAG 연구를 어떻게 정리하는지 한 장의 지도로 먼저 살핀다</p>
+    </div>
+
+    <!-- 페이지 1: 쓴 이유와 새로운 점 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">학습 목표</strong>
+            <p>이 단원을 학습하면 다음을 할 수 있다.</p>
+            <ol>
+              <li>이 서베이가 RAG 연구를 정리한 세 축(패러다임, 핵심 기술, 평가)을 설명할 수 있다.</li>
+              <li>서베이 지도에서 한 주제를 다루는 논문 절과 강의 단원을 찾을 수 있다.</li>
+              <li>서베이 전후 RAG 연구의 흐름을 시간 순서로 설명할 수 있다.</li>
+            </ol>
+          </div>
+        </div>
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>LLM 단독 생성은 무엇이 부족한가?</li>
+          <li>이 서베이는 RAG 연구를 무엇으로 정리하는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">이 논문을 쓴 이유와 새로운 점<span class="paper-ref">논문 1절</span></h3>
+        <p><span class="term" data-definition="대규모 언어 모델(Large Language Model, LLM): 방대한 글을 학습해 다음 토큰을 예측하는, 파라미터가 수십억 개 이상인 언어 모델.">대규모 언어 모델(Large Language Model, LLM)</span>은 학습 데이터에 없거나 최신 정보가 필요한 질문에서 <span class="term" data-definition="환각(Hallucination): 모델이 사실과 다르거나 근거 없는 내용을 그럴듯하게 만들어 내는 현상.">환각(Hallucination)</span>을 일으킨다. <span class="term" data-definition="검색 증강 생성(Retrieval-Augmented Generation, RAG): 질문과 관련된 문서를 외부 지식 베이스에서 찾아 질문과 함께 언어 모델에 넣고 답을 만드는 방법.">검색 증강 생성(Retrieval-Augmented Generation, RAG)</span>은 외부 문서를 찾아 질문과 함께 넣어 이 한계를 줄인다. 이 논문은 빠르게 늘어난 RAG 연구를 한 체계로 정리한 서베이이다.</p>
+        <p>그림은 두 방식이 같은 <span class="term" data-definition="query(검색 질의): 사용자가 던진 질문을 검색 시스템에 넣는 입력 문장.">query(검색 질의)</span>를 처리하는 과정을 나타낸 것이다.</p>
+        <div class="svg-diagram animate-in" style="margin:var(--space-3) auto"><svg viewBox="0 0 800 204" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="이전 방식은 query를 LLM에 바로 넣어 답하고, RAG는 외부 문서를 검색해 query와 함께 LLM에 넣어 근거 있는 답을 만든다"><foreignObject x="16" y="0" width="368" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4; font-weight:700"><span>이전 방식: LLM 단독 생성</span></div></foreignObject><rect class="node-rect sq" x="16" y="48" width="96" height="48" rx="2"/><foreignObject x="20" y="52" width="88" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span>query</span></div></foreignObject><path class="edge-line" d="M112,72 H142"/><polygon class="edge-arrow" points="142,67 152,72 142,77"/><rect class="node-rect sq" x="152" y="48" width="96" height="48" rx="2"/><foreignObject x="156" y="52" width="88" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span>LLM</span></div></foreignObject><path class="edge-line" d="M248,72 H278"/><polygon class="edge-arrow" points="278,67 288,72 278,77"/><rect class="node-rect sq" x="288" y="48" width="96" height="48" rx="2"/><foreignObject x="292" y="52" width="88" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span>답</span></div></foreignObject><foreignObject x="16" y="112" width="368" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4; color:var(--color-text-secondary)"><span>학습 때 파라미터에 새긴 지식만으로 답함</span></div></foreignObject><foreignObject x="16" y="168" width="368" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4; font-weight:700"><span>모르는 최신 사실도 그럴듯하게 지어냄(환각)</span></div></foreignObject><line class="guide" x1="400" y1="8" x2="400" y2="196"/><foreignObject x="416" y="0" width="368" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4; font-weight:700; color:var(--color-accent)"><span>제안 방식: 검색 증강 생성(RAG)</span></div></foreignObject><rect class="node-rect sq" x="416" y="48" width="64" height="48" rx="2"/><foreignObject x="420" y="52" width="56" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span>query</span></div></foreignObject><rect class="node-rect sq" x="512" y="48" width="64" height="48" rx="2"/><foreignObject x="516" y="52" width="56" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span>검색</span></div></foreignObject><rect class="node-rect sq" x="608" y="48" width="64" height="48" rx="2"/><foreignObject x="612" y="52" width="56" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span>LLM</span></div></foreignObject><rect class="node-rect sq accent" x="704" y="48" width="64" height="48" rx="2"/><foreignObject x="708" y="52" width="56" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span>답</span></div></foreignObject><path class="edge-line" d="M480,72 H502"/><polygon class="edge-arrow" points="502,67 512,72 502,77"/><path class="edge-line" d="M576,72 H598"/><polygon class="edge-arrow" points="598,67 608,72 598,77"/><path class="edge-line accent" d="M672,72 H694"/><polygon class="edge-arrow accent" points="694,67 704,72 694,77"/><rect class="node-rect sq" x="496" y="120" width="96" height="40" rx="2"/><foreignObject x="500" y="124" width="88" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span>외부 문서</span></div></foreignObject><path class="edge-line" d="M544,120 V106"/><polygon class="edge-arrow" points="539,106 544,96 549,106"/><foreignObject x="608" y="120" width="176" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4; color:var(--color-text-secondary)"><span>근거 문서를 함께 보여 줌</span></div></foreignObject><foreignObject x="416" y="168" width="368" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4; font-weight:700; color:var(--color-accent)"><span>근거가 있는 답, 문서만 바꾸면 지식 갱신</span></div></foreignObject></svg></div>
+        <div class="callout callout-accent animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">새로운 점</strong>
+            <ol>
+              <li><strong>세 패러다임:</strong> RAG 연구를 <span class="term" data-definition="Naive RAG: 문서를 찾아 질문과 함께 LLM에 바로 넣는 가장 단순한 RAG. 3단원에서 자세히 다룸.">Naive</span>, <span class="term" data-definition="Advanced RAG: Naive RAG의 검색 앞뒤에 query 다듬기와 검색 결과 정리를 더한 RAG. 3단원에서 자세히 다룸.">Advanced</span>, <span class="term" data-definition="Modular RAG: 검색·생성 단계를 부품처럼 바꾸거나 더하고, 반복·분기도 할 수 있게 만든 RAG. 3단원에서 자세히 다룸.">Modular RAG</span>의 세 단계 발전으로 정리한다(2절, 그림 3).</li>
+              <li><strong>세 핵심 기술:</strong> <span class="term" data-definition="검색(Retrieval): 질문과 관련된 문서를 외부 문서 모음에서 찾아오는 일. 4단원에서 자세히 다룸.">검색(Retrieval)</span>, <span class="term" data-definition="생성(Generation): 찾은 문서와 질문을 LLM에 넣어 답을 쓰는 일. 5단원에서 자세히 다룸.">생성(Generation)</span>, <span class="term" data-definition="증강(Augmentation): 검색과 생성을 언제, 몇 번 엮을지 정하는 과정. 5단원에서 자세히 다룸.">증강(Augmentation)</span>을 각각 한 절(3~5절)로 나누어 기술별로 분석한다.</li>
+              <li><strong>평가 체계:</strong> 26개 과제와 약 50개 데이터셋, 평가 대상·지표·벤치마크·도구를 한데 묶는다(1절, 6절).</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>이 서베이는 LLM의 환각과 낡은 지식을 외부 검색으로 보완하는 RAG 연구를 세 패러다임, 세 기술, 평가 체계로 정리한다.</p></div>
+    </div>
+
+    <!-- 페이지 2: 서베이의 지도 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>서베이 본문은 어떤 덩어리로 나뉘는가?</li>
+          <li>각 덩어리는 이 강의의 몇 단원에서 다루는가?</li>
+          <li>논문에 없는 내용은 어디에 놓이는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>서베이의 지도<span class="paper-ref">논문 2~7절</span></h3>
+        <p>그림은 서베이 본문을 한 장의 지도로 나타낸 것이다. 위 칸은 RAG가 발전해 온 세 단계(2절), 가운데 칸은 RAG를 이루는 세 기술(3~5절), 아래 칸은 평가(6절)와 논의(7절)이다. 교과 색 배지는 그 칸을 다루는 이 강의의 단원이다.</p>
+        <figure class="svg-diagram fit animate-in" style="--diagram-max:720px; margin:var(--space-3) auto"><svg viewBox="0 0 800 520" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="서베이 지도: 앞에 2단원 배경, 본문은 2절 세 패러다임(3단원), 3~5절 검색·생성·증강(4·5단원), 6절 평가(6단원), 7절 논의(7단원), 뒤에 8단원 서베이 이후 동향"><rect class="node-rect sq" x="16" y="16" width="768" height="44" rx="2"/><foreignObject x="20" y="20" width="760" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span>앞: 논문 1절 서론 + 서베이를 읽기 위한 배경 지식</span></div></foreignObject><rect class="accent-fill" x="720" y="6" width="56" height="20" rx="2"/><foreignObject x="724" y="8" width="48" height="16"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4; font-weight:700; color:#FFFFFF"><span>2단원</span></div></foreignObject><path class="edge-line" d="M400,60 V74"/><polygon class="edge-arrow" points="395,74 400,84 405,74"/><rect class="guide-fill" x="16" y="84" width="768" height="360" rx="4"/><text class="muted" x="32" y="106" font-size="12">서베이 본문(논문 2~7절)</text><rect class="node-rect sq" x="32" y="120" width="736" height="96" rx="2"/><text x="48" y="142" font-size="13" font-weight="700">2절 · 세 패러다임: RAG는 어떻게 발전했나</text><rect class="accent-fill" x="704" y="110" width="56" height="20" rx="2"/><foreignObject x="708" y="112" width="48" height="16"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4; font-weight:700; color:#FFFFFF"><span>3단원</span></div></foreignObject><rect class="node-rect sq" x="48" y="152" width="208" height="48" rx="2"/><foreignObject x="52" y="156" width="200" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span>Naive RAG: 찾고 바로 답함</span></div></foreignObject><rect class="node-rect sq" x="296" y="152" width="208" height="48" rx="2"/><foreignObject x="300" y="156" width="200" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span>Advanced RAG: 찾기 앞뒤를 다듬음</span></div></foreignObject><rect class="node-rect sq" x="544" y="152" width="208" height="48" rx="2"/><foreignObject x="548" y="156" width="200" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span>Modular RAG: 부품을 갈아 끼움</span></div></foreignObject><path class="edge-line" d="M256,176 H286"/><polygon class="edge-arrow" points="286,171 296,176 286,181"/><path class="edge-line" d="M504,176 H534"/><polygon class="edge-arrow" points="534,171 544,176 534,181"/><rect class="node-rect sq" x="32" y="232" width="736" height="112" rx="2"/><text x="48" y="252" font-size="13" font-weight="700">3~5절 · 세 핵심 기술: RAG는 무엇으로 이루어지나</text><rect class="node-rect sq" x="48" y="272" width="208" height="60" rx="2"/><foreignObject x="52" y="276" width="200" height="52"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span>3절 검색: 무엇을 어떤 단위로 찾나</span></div></foreignObject><rect class="accent-fill" x="192" y="262" width="56" height="20" rx="2"/><foreignObject x="196" y="264" width="48" height="16"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4; font-weight:700; color:#FFFFFF"><span>4단원</span></div></foreignObject><rect class="node-rect sq" x="296" y="272" width="208" height="60" rx="2"/><foreignObject x="300" y="276" width="200" height="52"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span>4절 생성: 찾은 글을 어떻게 다듬어 넘기나</span></div></foreignObject><rect class="accent-fill" x="440" y="262" width="56" height="20" rx="2"/><foreignObject x="444" y="264" width="48" height="16"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4; font-weight:700; color:#FFFFFF"><span>5단원</span></div></foreignObject><rect class="node-rect sq" x="544" y="272" width="208" height="60" rx="2"/><foreignObject x="548" y="276" width="200" height="52"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span>5절 증강: 검색과 생성을 몇 번 엮나</span></div></foreignObject><rect class="accent-fill" x="688" y="262" width="56" height="20" rx="2"/><foreignObject x="692" y="264" width="48" height="16"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4; font-weight:700; color:#FFFFFF"><span>5단원</span></div></foreignObject><rect class="node-rect sq" x="32" y="368" width="360" height="60" rx="2"/><foreignObject x="36" y="372" width="352" height="52"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span>6절 과제와 평가: 무엇으로 어떻게 재나</span></div></foreignObject><rect class="accent-fill" x="328" y="358" width="56" height="20" rx="2"/><foreignObject x="332" y="360" width="48" height="16"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4; font-weight:700; color:#FFFFFF"><span>6단원</span></div></foreignObject><rect class="node-rect sq" x="408" y="368" width="360" height="60" rx="2"/><foreignObject x="412" y="372" width="352" height="52"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span>7절 논의와 향후 전망: 무엇이 남았나</span></div></foreignObject><rect class="accent-fill" x="704" y="358" width="56" height="20" rx="2"/><foreignObject x="708" y="360" width="48" height="16"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4; font-weight:700; color:#FFFFFF"><span>7단원</span></div></foreignObject><path class="edge-line" d="M400,444 V458"/><polygon class="edge-arrow" points="395,458 400,468 405,458"/><rect class="node-rect sq" x="16" y="468" width="768" height="44" rx="2"/><foreignObject x="20" y="472" width="760" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4"><span>뒤: 서베이 이후 동향(논문 밖, 2024~2026년)</span></div></foreignObject><rect class="accent-fill" x="720" y="458" width="56" height="20" rx="2"/><foreignObject x="724" y="460" width="48" height="16"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4; font-weight:700; color:#FFFFFF"><span>8단원</span></div></foreignObject></svg><figcaption class="figure-caption">그림은 서베이의 절 구성과 이 강의의 단원을 나타낸 것이다. 출처: 논문 목차와 그림 1, 3을 참고해 다시 그림.</figcaption></figure>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>서베이 본문은 세 패러다임, 세 핵심 기술, 평가와 논의로 나뉘며, 강의 3~7단원이 이를 차례로 다룬다.</p></div>
+    </div>
+
+    <!-- 페이지 3: 지도와 단원의 대응 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>단원마다 어떤 질문에 답하는가?</li>
+          <li>논문 순서와 강의 순서는 어디가 다른가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">지도와 단원의 대응<span class="paper-ref">논문 1~8절</span></h3>
+        <p>표는 지도의 각 칸을 이 강의의 단원과 짝지은 것이다. 단원마다 답하려는 질문 하나를 적어 두었으므로, 읽다가 길을 잃으면 이 표로 돌아와 지금 어느 질문을 풀고 있는지 확인하면 된다.</p>
+        <table class="data-table animate-in">
+          <thead><tr><th>단원</th><th>논문 위치</th><th>답하는 질문</th></tr></thead>
+          <tbody>
+            <tr><td>2 서론과 배경</td><td>1절 + 배경 지식</td><td>LLM은 왜 검색이 필요하고, 문서는 어떻게 찾는가?</td></tr>
+            <tr><td>3 RAG 개요</td><td>2절</td><td>RAG는 어떤 구조이고, 어떤 단계를 거쳐 발전했는가?</td></tr>
+            <tr><td>4 검색</td><td>3절</td><td>무엇을 어떤 단위로 색인하고, 질문을 어떻게 다듬어 찾는가?</td></tr>
+            <tr><td>5 생성과 증강</td><td>4절, 5절</td><td>찾은 문서를 어떻게 다듬어 LLM에 넘기고, 검색을 몇 번 하는가?</td></tr>
+            <tr><td>6 과제와 평가</td><td>6절</td><td>RAG를 어떤 과제와 지표로 재는가?</td></tr>
+            <tr><td>7 논의와 향후 전망</td><td>7절, 8절</td><td>무엇이 아직 풀리지 않았고, RAG는 어디로 가는가?</td></tr>
+            <tr><td>8 서베이 이후 동향</td><td>논문 밖</td><td>서베이가 나온 뒤 무엇이 새로 나왔는가?</td></tr>
+          </tbody>
+          <caption>표는 이 강의의 단원과 논문 절, 단원이 답하는 질문을 나타낸 것이다.</caption>
+        </table>
+        <p>논문 순서와 다른 곳은 두 군데이다. 5단원은 생성(4절)과 증강(5절)을 함께 다루고, 7단원은 논의(7절)에 결론(8절)을 더한다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>강의 2~7단원은 논문 1~8절을 거의 그대로 따라가고, 8단원만 논문 밖의 이후 동향을 다룬다.</p></div>
+    </div>
+
+    <!-- 페이지 4: 시간선 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>이 서베이는 RAG 연구의 흐름에서 어디에 놓이는가?</li>
+          <li>서베이가 나온 뒤에는 어떤 연구가 이어졌는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">RAG 연구의 시간선</h3>
+        <p>2020년 RAG가 제안된 뒤 관련 연구가 빠르게 늘었고, 이 서베이는 2023년 12월(arXiv 2312.10997, v5 2024) 그 연구를 한 체계로 묶었다. 그림의 교과 색 칸이 이 서베이의 자리이다.</p>
+        <figure class="svg-diagram animate-in" style="margin:var(--space-3) auto"><svg viewBox="0 0 800 288" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RAG 연구 시간선: 2020 RAG, 2023년 12월 이 서베이, 2024 GraphRAG·Modular RAG·long context 비교, 2025 Parametric RAG·Search-R1·Agentic RAG 서베이, 2026 LIMIT"><path class="guide-axis" d="M16,48 H784"/><foreignObject x="16" y="8" width="144" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:15px; line-height:1.4; font-weight:700"><span>2020</span></div></foreignObject><circle class="ink-fill" cx="88" cy="48" r="5"/><path class="guide" d="M88,53 V72"/><rect class="node-rect sq" x="16" y="72" width="144" height="64" rx="2"/><foreignObject x="20" y="76" width="136" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4"><span>RAG(Lewis et al.): 검색과 생성을 한 모델로 묶음</span></div></foreignObject><foreignObject x="172" y="8" width="144" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:15px; line-height:1.4; font-weight:700; color:var(--color-accent)"><span>2023.12</span></div></foreignObject><circle class="accent-fill" cx="244" cy="48" r="5"/><path class="guide" d="M244,53 V72"/><rect class="node-rect sq accent" x="172" y="72" width="144" height="64" rx="2"/><foreignObject x="176" y="76" width="136" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4"><span>이 서베이(Gao et al.): RAG 연구를 한 체계로 정리, v5 2024</span></div></foreignObject><foreignObject x="328" y="8" width="144" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:15px; line-height:1.4; font-weight:700"><span>2024</span></div></foreignObject><circle class="ink-fill" cx="400" cy="48" r="5"/><path class="guide" d="M400,53 V72"/><rect class="node-rect sq" x="328" y="72" width="144" height="64" rx="2"/><foreignObject x="332" y="76" width="136" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4"><span>GraphRAG: 문서 모음 전체를 그래프로 묶어 요약</span></div></foreignObject><rect class="node-rect sq" x="328" y="144" width="144" height="64" rx="2"/><foreignObject x="332" y="148" width="136" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4"><span>Modular RAG 후속 논문: 부품을 조합하는 틀</span></div></foreignObject><rect class="node-rect sq" x="328" y="216" width="144" height="64" rx="2"/><foreignObject x="332" y="220" width="136" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4"><span>long context와 RAG 비교: 성능과 비용</span></div></foreignObject><foreignObject x="484" y="8" width="144" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:15px; line-height:1.4; font-weight:700"><span>2025</span></div></foreignObject><circle class="ink-fill" cx="556" cy="48" r="5"/><path class="guide" d="M556,53 V72"/><rect class="node-rect sq" x="484" y="72" width="144" height="64" rx="2"/><foreignObject x="488" y="76" width="136" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4"><span>Parametric RAG: 문서를 가중치에 더함</span></div></foreignObject><rect class="node-rect sq" x="484" y="144" width="144" height="64" rx="2"/><foreignObject x="488" y="148" width="136" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4"><span>Search-R1: 강화 학습으로 검색 호출을 배움</span></div></foreignObject><rect class="node-rect sq" x="484" y="216" width="144" height="64" rx="2"/><foreignObject x="488" y="220" width="136" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4"><span>Agentic RAG 서베이: 에이전트가 검색을 계획</span></div></foreignObject><foreignObject x="640" y="8" width="144" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:15px; line-height:1.4; font-weight:700"><span>2026</span></div></foreignObject><circle class="ink-fill" cx="712" cy="48" r="5"/><path class="guide" d="M712,53 V72"/><rect class="node-rect sq" x="640" y="72" width="144" height="64" rx="2"/><foreignObject x="644" y="76" width="136" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4"><span>LIMIT(ICLR 2026): 임베딩 하나로 찾을 수 있는 범위의 한계</span></div></foreignObject></svg><figcaption class="figure-caption">그림은 RAG 연구의 주요 연구를 발표 연도 순으로 나타낸 것이다. 출처: <a href="https://arxiv.org/abs/2312.10997" target="_blank" rel="noopener" style="color:var(--color-accent)">이 서베이</a>, <a href="https://arxiv.org/abs/2404.16130" target="_blank" rel="noopener" style="color:var(--color-accent)">GraphRAG</a>, <a href="https://arxiv.org/abs/2407.21059" target="_blank" rel="noopener" style="color:var(--color-accent)">Modular RAG</a>, <a href="https://arxiv.org/abs/2407.16833" target="_blank" rel="noopener" style="color:var(--color-accent)">long context 비교</a>, <a href="https://arxiv.org/abs/2501.15915" target="_blank" rel="noopener" style="color:var(--color-accent)">Parametric RAG</a>, <a href="https://arxiv.org/abs/2503.09516" target="_blank" rel="noopener" style="color:var(--color-accent)">Search-R1</a>, <a href="https://arxiv.org/abs/2501.09136" target="_blank" rel="noopener" style="color:var(--color-accent)">Agentic RAG 서베이</a>, <a href="https://arxiv.org/abs/2508.21038" target="_blank" rel="noopener" style="color:var(--color-accent)">LIMIT</a>.</figcaption></figure>
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">보충 설명</strong>
+            <p>2024년 이후 칸은 논문에 없는 보충이며, 조사 시점(2026년 11월)까지 1차 출처로 확인한 연구만 담았다. <span class="term" data-definition="GraphRAG: 문서 모음에서 개체와 관계를 뽑아 그래프로 묶고, 묶음별 요약으로 말뭉치 전체에 대한 질문에 답하는 방법. 8단원에서 자세히 다룸.">GraphRAG</span>, <span class="term" data-definition="Parametric RAG(PRAG): 검색한 문서를 입력에 붙이지 않고 문서별 작은 가중치 조각으로 모델에 더하는 방법. 8단원에서 자세히 다룸.">Parametric RAG(PRAG)</span>, <span class="term" data-definition="Agentic RAG(에이전트가 검색을 계획·반복하는 RAG): 스스로 계획하고 도구를 쓰는 에이전트가 검색을 언제, 몇 번 할지 정하는 RAG. 8단원에서 자세히 다룸.">Agentic RAG(에이전트가 검색을 계획·반복하는 RAG)</span>처럼 서베이의 틀을 넓힌 연구는 8단원에서 자세히 다룬다.</p>
+          </div>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>이 서베이는 2020년 RAG 이후의 연구를 2023년 말에 정리했고, 그 뒤 GraphRAG, Parametric RAG, Agentic RAG 같은 연구가 이어졌다.</p></div>
+    </div>
+
+    <!-- 페이지 5: 연구 계보 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>세 패러다임은 앞선 연구에서 무엇을 이어받았는가?</li>
+          <li>뒤의 연구는 검색의 순서와 시점을 어떻게 바꾸었는가?</li>
+        </ul>
+        <div class="callout callout-accent animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">새로운 점</strong>
+            <p>이 서베이는 개별 방법을 제안하지 않고, 흩어진 RAG 연구를 세 패러다임과 세 기술의 좌표 위에 다시 놓는다.</p>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>연구 계보<span class="paper-ref">논문 1절, 2절</span></h3>
+        <div class="lineage-tree animate-in" style="margin:var(--space-2) 0; padding:var(--space-4) var(--space-6)">
+          <div class="lineage-node lineage-root" data-detail="이 서베이가 정리한 Modular RAG 틀">
+            <span class="lineage-label">Modular RAG 틀</span>
+            <span class="lineage-detail">Gao et al., 2023</span>
+            <span class="novelty-badge">흩어진 RAG 연구를 세 패러다임으로 체계화</span>
+          </div>
+          <div class="lineage-branch">
+            <div class="lineage-edge-label">출발점</div>
+            <div class="lineage-node" data-detail="검색기와 생성기를 결합한 RAG"><span class="lineage-label">RAG</span><span class="lineage-detail">Lewis et al., 2020</span></div>
+            <p class="lineage-note"><span class="term" data-definition="dense retriever: query와 문서를 각각 숫자 벡터로 바꾸어 가까운 문서를 찾는 검색기. 2단원에서 자세히 다룸.">dense retriever</span>와 생성 모델을 잇는 <span class="term" data-definition="Retrieve-Read: 먼저 문서를 찾고(Retrieve) 그 문서를 읽어 답하는(Read) 순서.">Retrieve-Read</span> 구조를 이어받음. → <strong class="novelty">LLM 시대의 추론 단계 RAG까지 같은 틀로 묶음</strong>.</p>
+          </div>
+          <div class="lineage-branch">
+            <div class="lineage-edge-label">검색기</div>
+            <div class="lineage-node" data-detail="dense passage retrieval"><span class="lineage-label">DPR</span><span class="lineage-detail">Karpukhin et al., 2020</span></div>
+            <p class="lineage-note">query와 문서를 따로 <span class="term" data-definition="임베딩(Embedding): 글의 뜻을 숫자 목록(벡터)으로 바꾼 것. 뜻이 비슷한 글은 가까운 벡터가 됨. 2단원에서 자세히 다룸.">임베딩(Embedding)</span>하는 dense retrieval(임베딩 벡터 기반 검색)을 이어받음. → <strong class="novelty">임베딩 <span class="term" data-definition="fine-tuning(미세 조정): 이미 학습한 모델을 특정 과제의 데이터로 조금 더 학습시키는 것. 3단원에서 자세히 다룸.">fine-tuning(미세 조정)</span> 같은 retriever 개선을 한 절로 정리</strong>.</p>
+          </div>
+          <div class="lineage-branch">
+            <div class="lineage-edge-label">새 패턴</div>
+            <div class="lineage-node" data-detail="query rewriting 후 검색"><span class="lineage-label">Rewrite-Retrieve-Read</span><span class="lineage-detail">Ma et al., 2023</span></div>
+            <p class="lineage-note">Retrieve-Read 순서를 이어받음. → <strong class="novelty">앞에 <span class="term" data-definition="query rewriting(질의 재작성): 검색이 잘 되도록 사용자 질문을 LLM으로 고쳐 쓰는 것. 4단원에서 자세히 다룸.">query rewriting(질의 재작성)</span> 모듈을 끼워 순서 자체를 바꿈</strong>.</p>
+          </div>
+          <div class="lineage-branch">
+            <div class="lineage-edge-label">적응형</div>
+            <div class="lineage-node" data-detail="reflection token으로 검색 시점 결정"><span class="lineage-label">Self-RAG</span><span class="lineage-detail">Asai et al., 2023</span></div>
+            <p class="lineage-note">검색 결과를 읽어 답하는 흐름을 이어받음. → <strong class="novelty">검색할지 말지를 모델이 스스로 정함</strong>(<span class="term" data-definition="adaptive retrieval(필요할 때만 검색): 모델이 검색이 필요하다고 판단할 때만 검색하는 방식. 5단원에서 자세히 다룸.">adaptive retrieval</span>).</p>
+          </div>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>세 패러다임은 RAG와 DPR의 Retrieve-Read 구조를 이어받고, query rewriting과 adaptive retrieval로 순서와 시점을 바꿔 왔다.</p></div>
+    </div>
+
+    <!-- 페이지 6: 이 강의를 읽는 법 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>강의는 어떤 순서로 진행하는가?</li>
+          <li>왜 전체 구도부터 보고 세부로 들어가는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">이 강의를 읽는 법</h3>
+        <p>이 강의는 전체 구도를 먼저 보고 세부로 들어간다. 2단원에서 배경 지식을 갖춘 뒤 3~5단원에서 RAG의 구조와 기술을 하나씩 살피고, 6단원 평가와 7단원 논의를 거쳐 8단원에서 서베이 이후 동향을 본다.</p>
+        <div class="svg-diagram animate-in" style="margin:var(--space-3) auto"><svg viewBox="0 0 800 72" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="강의 순서: 1단원 훑어보기, 2단원 배경, 3~5단원 세부, 6단원 평가, 7단원 논의, 8단원 동향"><rect class="node-rect sq accent" x="16" y="16" width="98" height="48" rx="2"/><foreignObject x="20" y="20" width="90" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4; font-weight:700"><span>훑어보기</span></div></foreignObject><rect class="accent-fill" x="50" y="6" width="56" height="20" rx="2"/><foreignObject x="54" y="8" width="48" height="16"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4; font-weight:700; color:#FFFFFF"><span>1단원</span></div></foreignObject><rect class="node-rect sq" x="150" y="16" width="98" height="48" rx="2"/><foreignObject x="154" y="20" width="90" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4; font-weight:700"><span>배경</span></div></foreignObject><rect class="accent-fill" x="184" y="6" width="56" height="20" rx="2"/><foreignObject x="188" y="8" width="48" height="16"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4; font-weight:700; color:#FFFFFF"><span>2단원</span></div></foreignObject><path class="edge-line" d="M114,40 H140"/><polygon class="edge-arrow" points="140,35 150,40 140,45"/><rect class="node-rect sq" x="284" y="16" width="98" height="48" rx="2"/><foreignObject x="288" y="20" width="90" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4; font-weight:700"><span>세부</span></div></foreignObject><rect class="accent-fill" x="310" y="6" width="64" height="20" rx="2"/><foreignObject x="314" y="8" width="56" height="16"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4; font-weight:700; color:#FFFFFF"><span>3~5단원</span></div></foreignObject><path class="edge-line" d="M248,40 H274"/><polygon class="edge-arrow" points="274,35 284,40 274,45"/><rect class="node-rect sq" x="418" y="16" width="98" height="48" rx="2"/><foreignObject x="422" y="20" width="90" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4; font-weight:700"><span>평가</span></div></foreignObject><rect class="accent-fill" x="452" y="6" width="56" height="20" rx="2"/><foreignObject x="456" y="8" width="48" height="16"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4; font-weight:700; color:#FFFFFF"><span>6단원</span></div></foreignObject><path class="edge-line" d="M382,40 H408"/><polygon class="edge-arrow" points="408,35 418,40 408,45"/><rect class="node-rect sq" x="552" y="16" width="98" height="48" rx="2"/><foreignObject x="556" y="20" width="90" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4; font-weight:700"><span>논의</span></div></foreignObject><rect class="accent-fill" x="586" y="6" width="56" height="20" rx="2"/><foreignObject x="590" y="8" width="48" height="16"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4; font-weight:700; color:#FFFFFF"><span>7단원</span></div></foreignObject><path class="edge-line" d="M516,40 H542"/><polygon class="edge-arrow" points="542,35 552,40 542,45"/><rect class="node-rect sq" x="686" y="16" width="98" height="48" rx="2"/><foreignObject x="690" y="20" width="90" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; line-height:1.4; font-weight:700"><span>동향</span></div></foreignObject><rect class="accent-fill" x="720" y="6" width="56" height="20" rx="2"/><foreignObject x="724" y="8" width="48" height="16"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.4; font-weight:700; color:#FFFFFF"><span>8단원</span></div></foreignObject><path class="edge-line" d="M650,40 H676"/><polygon class="edge-arrow" points="676,35 686,40 676,45"/></svg></div>
+        <table class="data-table animate-in">
+          <thead><tr><th>단계</th><th>단원</th><th>이 자리에 둔 이유</th></tr></thead>
+          <tbody>
+            <tr><td>훑어보기</td><td>1</td><td>세부 기술을 만날 때마다 그 기술이 지도의 어느 칸에 놓이는지 바로 알 수 있다.</td></tr>
+            <tr><td>배경</td><td>2</td><td>검색과 임베딩을 모르면 3단원의 구조도부터 읽히지 않는다.</td></tr>
+            <tr><td>세부</td><td>3~5</td><td>전체 구조(3단원)를 본 뒤 찾기(4단원)와 다듬어 넘기기(5단원)로 나누어 들어간다.</td></tr>
+            <tr><td>평가</td><td>6</td><td>각 기술을 알아야 무엇을 재는지, 왜 그 지표인지 이해할 수 있다.</td></tr>
+            <tr><td>논의</td><td>7</td><td>평가에서 드러난 약점이 남은 과제로 이어진다.</td></tr>
+            <tr><td>동향</td><td>8</td><td>서베이의 틀을 익힌 뒤에야 이후 연구가 무엇을 바꾸었는지 보인다.</td></tr>
+          </tbody>
+          <caption>표는 강의의 단원 순서와 그 순서로 둔 이유를 나타낸 것이다.</caption>
+        </table>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>강의는 훑어보기, 배경, 세부, 평가, 논의, 동향의 순서로 진행하며, 앞 단원이 뒤 단원을 읽는 바탕이 된다.</p></div>
+    </div>
+
+    <!-- 페이지 7: 단원별 핵심 용어 미리보기 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>단원마다 처음 자세히 만나는 핵심 용어는 무엇인가?</li>
+          <li>모르는 용어는 어떻게 찾아보는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">단원별 핵심 용어 미리보기</h3>
+        <p>RAG 분야의 용어는 대부분 영어 그대로 쓰이므로 이 강의도 원어를 그대로 쓰고, 처음 나올 때 한글 뜻을 괄호로 단다. 용어에 마우스를 올리거나 누르면 풀이가 나온다.</p>
+        <table class="data-table animate-in">
+          <thead><tr><th>용어</th><th>한 줄 풀이</th><th>자세히 다루는 단원</th></tr></thead>
+          <tbody>
+            <tr><td><span class="term" data-definition="closed-book(클로즈드북, 외운 지식만으로 답하기): 자료 없이 학습 때 익힌 지식만으로 답하는 방식. open-book(오픈북)은 자료를 찾아 읽고 답하는 방식.">closed-book, open-book</span></td><td>외운 지식만으로 답하기, 자료를 찾아 읽고 답하기</td><td>2단원</td></tr>
+            <tr><td><span class="term" data-definition="임베딩(Embedding): 글의 뜻을 숫자 목록(벡터)으로 바꾼 것. 뜻이 비슷한 글은 가까운 벡터가 됨.">임베딩(Embedding)</span></td><td>글의 뜻을 숫자 목록(벡터)으로 바꾼 것</td><td>2단원</td></tr>
+            <tr><td><span class="term" data-definition="retriever(검색기): query와 가까운 문서를 찾아 돌려주는 구성 요소. generator(생성기)는 그 문서를 읽고 답을 쓰는 LLM.">retriever, generator</span></td><td>문서를 찾는 부품, 답을 쓰는 부품</td><td>3단원</td></tr>
+            <tr><td><span class="term" data-definition="chunking(문서를 청크로 나누기): 긴 문서를 검색 단위가 되는 작은 조각으로 자르는 것.">chunking</span></td><td>긴 문서를 검색하기 좋은 크기로 자르기</td><td>4단원</td></tr>
+            <tr><td><span class="term" data-definition="reranking(재순위화): 처음 찾은 문서를 더 정밀한 모델로 다시 점수 매겨 순서를 바꾸는 것.">reranking</span></td><td>찾은 문서의 순서를 다시 매기기</td><td>5단원</td></tr>
+            <tr><td><span class="term" data-definition="faithfulness(답이 문맥에 충실한 정도): 답의 내용이 검색한 문서에 근거하는 정도.">faithfulness</span></td><td>답이 검색한 문서 내용에 충실한 정도</td><td>6단원</td></tr>
+            <tr><td><span class="term" data-definition="long context(긴 입력 문맥): LLM이 한 번에 받을 수 있는 아주 긴 입력. 문서를 통째로 넣는 대안이 됨.">long context</span></td><td>아주 긴 입력을 한 번에 받는 LLM</td><td>7단원</td></tr>
+            <tr><td><span class="term" data-definition="GraphRAG: 문서 모음을 그래프로 묶고 요약해 전체에 대한 질문에 답하는 방법. Agentic RAG는 에이전트가 검색 시점과 횟수를 스스로 정하는 RAG.">GraphRAG, Agentic RAG</span></td><td>그래프 요약으로 답하기, 에이전트가 검색 계획하기</td><td>8단원</td></tr>
+          </tbody>
+          <caption>표는 단원마다 처음 자세히 다루는 핵심 용어를 미리 나타낸 것이다.</caption>
+        </table>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>단원마다 새 핵심 용어가 나오며, 이 강의는 원어를 쓰고 첫 등장에 한글 뜻과 툴팁 풀이를 단다.</p></div>
+    </div>
+
+    <!-- 페이지 8: 핵심 정리 + 확인 문제 1 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-accent animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">핵심 정리</strong>
+            <ul>
+              <li>이 서베이는 RAG 연구를 세 패러다임(2절), 세 핵심 기술(3~5절), 평가(6절)로 정리하고 7절에서 남은 과제를 논의한다.</li>
+              <li>강의 2~7단원은 논문 1~8절을 따라가고, 8단원은 논문 밖의 이후 동향이다.</li>
+              <li>이 서베이(2023년 12월)는 2020년 RAG 이후의 연구를 묶었고, 그 뒤 GraphRAG, Parametric RAG, Agentic RAG가 이어졌다.</li>
+              <li>지도 문항은 그 기술이 검색 전, 검색, 검색 뒤 가운데 어디에 놓이는지부터 확인하라.</li>
+            </ul>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag outline">확인 문제</span>서베이 지도 읽기</h3>
+        <div class="quiz-container animate-in" id="bp-quiz-a">
+          <div class="quiz-question-block" data-correct="option-d"
+               data-explanation-right="④ | reranking은 검색이 끝난 뒤 문서를 LLM에 넘기기 전에 다듬는 일이므로 논문 4절(생성)의 4.1절에 있고, 이 강의에서는 5단원이 다룬다."
+               data-explanation-wrong="| 정답은 ④이다. reranking은 논문 4.1절에 있고, 5단원이 4절과 5절을 함께 다룬다. ③은 이름의 검색에 끌린 선택이지만 4단원은 무엇을 어떤 단위로 찾는지(논문 3절)를 다루므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">1</span>검색한 문서의 순서를 다시 매기는 reranking(논문 4.1절)을 자세히 다루는 단원은?</h3>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 2단원</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 3단원</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 4단원</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 5단원</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 6단원</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <div class="quiz-question-block" data-correct="option-d"
+               data-explanation-right="④ | Search-R1은 2025년 연구로 이 서베이의 마지막 판(v5 2024)보다 뒤에 나왔으므로 서베이 7절에 있을 수 없고, 8단원에서 다룬다."
+               data-explanation-wrong="| 정답은 ④이다. Search-R1은 서베이보다 뒤인 2025년에 나온 연구이므로 논문 7절에 없다. ⑤는 2단원이 논문 1절과 배경 지식을 함께 다루므로 옳은 설명이다.">
+            <h3 class="quiz-question"><span class="q-num">2</span>서베이 지도에 대한 설명으로 옳지 <u>않은</u> 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 2절은 RAG를 Naive, Advanced, Modular RAG의 세 패러다임으로 나눈다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 3~5절은 검색, 생성, 증강을 한 절씩 다룬다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 6절은 RAG를 평가하는 과제, 지표, 도구를 정리한다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 7절은 2025년의 Search-R1을 미래 과제의 사례로 분석한다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 2단원은 논문 1절과 서베이를 읽기 위한 배경 지식을 다룬다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('bp-quiz-a')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('bp-quiz-a')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>reranking은 검색 뒤 문서를 다듬는 일이므로 5단원에 있고, 서베이 뒤의 연구는 8단원에 있다.</p></div>
+    </div>
+
+    <!-- 페이지 9: 확인 문제 2 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>서베이 전후의 연구를 시간 순서로 놓을 수 있는가?</li>
+          <li>각 연구는 서베이보다 앞인가, 뒤인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag outline">확인 문제</span>시간선 읽기</h3>
+        <div class="quiz-container animate-in" id="bp-quiz-b">
+          <div class="quiz-question-block" data-correct="option-a"
+               data-explanation-right="① | RAG(2020), 이 서베이(2023년 12월), Parametric RAG(SIGIR 2025), LIMIT(ICLR 2026)의 순서이다."
+               data-explanation-wrong="| 정답은 ①이다. RAG(2020) 다음에 이 서베이(2023년 12월)가 나왔고, Parametric RAG(2025)와 LIMIT(2026)은 서베이 뒤의 연구이다. ③은 Parametric RAG를 서베이 앞에 두었지만 Parametric RAG는 2025년 연구이므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">3</span><span class="nobr">&lt;보기&gt;의</span> 연구를 발표된 순서대로 옳게 나열한 것은?</h3>
+            <div class="bogi">
+              <p>ㄱ. LIMIT: 임베딩 하나로 찾을 수 있는 범위의 한계를 보임</p>
+              <p>ㄴ. RAG(Lewis et al.): 검색과 생성을 한 모델로 묶음</p>
+              <p>ㄷ. 이 서베이: RAG 연구를 세 패러다임과 세 기술로 정리함</p>
+              <p>ㄹ. Parametric RAG: 검색한 문서를 가중치에 더함</p>
+            </div>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① ㄴ → ㄷ → ㄹ → ㄱ</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② ㄷ → ㄴ → ㄹ → ㄱ</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ ㄴ → ㄹ → ㄷ → ㄱ</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ ㄴ → ㄷ → ㄱ → ㄹ</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ ㄹ → ㄴ → ㄷ → ㄱ</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('bp-quiz-b')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('bp-quiz-b')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>RAG(2020) 뒤에 이 서베이(2023년 12월)가 나왔고, Parametric RAG(2025)와 LIMIT(2026)은 서베이 이후의 연구이다.</p></div>
+    </div>
+
+  </div>
+</section>

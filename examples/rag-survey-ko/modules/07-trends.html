@@ -1,0 +1,333 @@
+<section class="module" id="module-7">
+  <div class="module-content">
+
+    <div class="module-header">
+      <span class="module-number">8</span>
+      <h2 class="module-title">서베이 이후 동향</h2>
+      <p class="module-subtitle">2023년 서베이 이후 GraphRAG, Parametric RAG, Agentic RAG가 서베이의 어느 한계를 풀었는지 살핀다</p>
+    </div>
+
+    <!-- 페이지 1: 무엇이 달라졌나 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul><li>서베이 이후 RAG 연구는 어디에서 갈라졌는가?</li><li>이 단원의 주제는 어떤 순서로 읽는가?</li></ul>
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">학습 목표</strong>
+            <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
+            <ol>
+              <li>서베이 이후 연구가 서베이 분류의 어느 칸에서 갈라져 나왔는지 설명할 수 있다.</li>
+              <li><span class="term" data-definition="GraphRAG: 문서에서 개체와 관계를 뽑아 지식 그래프를 만들고, 그래프를 묶은 커뮤니티마다 요약을 미리 써 두어 말뭉치 전체에 대한 질문에 답하는 방법. Microsoft 연구진이 제안함.">GraphRAG</span>, <span class="term" data-definition="Parametric RAG(PRAG): 검색한 문서를 입력 문맥에 붙이지 않고, 문서마다 미리 학습해 둔 작은 파라미터를 모델에 합쳐 지식을 넣는 RAG.">Parametric RAG(PRAG)</span>, <span class="term" data-definition="Agentic RAG(에이전트가 검색을 계획·반복하는 RAG): 성찰·계획·도구 사용을 하는 LLM 에이전트가 언제, 무엇을, 몇 번 검색할지 스스로 정하는 RAG.">Agentic RAG(에이전트가 검색을 계획·반복하는 RAG)</span>가 푸는 문제와 비용을 비교할 수 있다.</li>
+              <li>주어진 상황에 알맞은 후보 방법을 판단할 수 있다.</li>
+            </ol>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">보충 설명</strong>
+            <p>이 단원은 서베이 이후 연구를 보충한 것이며 조사 시점은 2026년 11월이다.</p>
+          </div>
+        </div>
+        <h3 class="screen-heading">무엇이 달라졌나</h3>
+        <p>2023년 12월 서베이 뒤 <span class="term" data-definition="검색 증강 생성(Retrieval-Augmented Generation, RAG): 질문과 관련된 문서를 외부 지식 베이스에서 찾아 질문과 함께 언어 모델에 넣고 답을 만드는 방법.">RAG</span> 연구는 서베이 분류의 몇몇 칸에서 갈라졌다(왼쪽: 서베이의 칸, 오른쪽: 이후 연구). 주제마다 <strong>무엇을 풀려는가 → 핵심 아이디어 그림 → 한계와 비용</strong>의 순서로 읽는다.</p>
+        <figure class="svg-diagram animate-in" style="margin:var(--space-2) auto"><svg viewBox="0 0 800 268" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="서베이의 네 칸(검색 단위와 인덱스, 지식을 넣는 곳, adaptive retrieval, retriever)에서 GraphRAG, Parametric RAG, Agentic RAG와 강화 학습 검색, LIMIT 연구가 각각 갈라져 나온 지도"><rect class="guide-fill" x="16" y="8" width="768" height="32" rx="4"/><text x="400" y="29" text-anchor="middle" font-size="13">서베이(2023)의 틀: Naive → Advanced → Modular RAG, 기술 축 retrieval · generation · augmentation</text><text x="166" y="64" text-anchor="middle" font-size="14" font-weight="700">서베이의 칸</text><text x="602" y="64" text-anchor="middle" font-size="14" font-weight="700">이후 연구(2024~2026)</text><rect class="node-rect sq" x="16" y="76" width="300" height="40" rx="2"/><foreignObject x="24" y="80" width="284" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span><b>retrieval</b> · 검색 단위와 인덱스 (4단원)</span></div></foreignObject><rect class="node-rect sq" x="420" y="76" width="364" height="40" rx="2"/><foreignObject x="428" y="80" width="348" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span><b>GraphRAG</b> · 청크 → 지식 그래프와 community summary</span></div></foreignObject><path class="edge-line" d="M316,96 H410"/><polygon class="edge-arrow" points="410,91 420,96 410,101"/><rect class="node-rect sq" x="16" y="124" width="300" height="40" rx="2"/><foreignObject x="24" y="128" width="284" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span><b>augmentation</b> · 지식을 넣는 곳: 입력 문맥 (5단원)</span></div></foreignObject><rect class="node-rect sq" x="420" y="124" width="364" height="40" rx="2"/><foreignObject x="428" y="128" width="348" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span><b>Parametric RAG</b> · 입력 문맥 → 모델 파라미터(LoRA)</span></div></foreignObject><path class="edge-line" d="M316,144 H410"/><polygon class="edge-arrow" points="410,139 420,144 410,149"/><rect class="node-rect sq" x="16" y="172" width="300" height="40" rx="2"/><foreignObject x="24" y="176" width="284" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span><b>augmentation</b> · adaptive retrieval: 규칙 신호 (5단원)</span></div></foreignObject><rect class="node-rect sq" x="420" y="172" width="364" height="40" rx="2"/><foreignObject x="428" y="176" width="348" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span><b>Agentic RAG · 강화 학습 검색</b> · 규칙 → 학습한 정책</span></div></foreignObject><path class="edge-line" d="M316,192 H410"/><polygon class="edge-arrow" points="410,187 420,192 410,197"/><rect class="node-rect sq" x="16" y="220" width="300" height="40" rx="2"/><foreignObject x="24" y="224" width="284" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span><b>retrieval</b> · retriever: 단일 벡터 임베딩 (4단원)</span></div></foreignObject><rect class="node-rect sq" x="420" y="220" width="364" height="40" rx="2"/><foreignObject x="428" y="224" width="348" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span><b>LIMIT</b> · 단일 벡터 임베딩의 이론적 한계</span></div></foreignObject><path class="edge-line" d="M316,240 H410"/><polygon class="edge-arrow" points="410,235 420,240 410,245"/></svg><figcaption class="figure-caption">그림은 서베이의 분류 위에 이후 연구가 갈라져 나온 자리를 나타낸 것이다. 출처: 이 단원 각 쪽의 원 논문을 바탕으로 새로 그림.</figcaption></figure>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>서베이 이후 연구는 검색 단위, 지식을 넣는 곳, 검색 시점, retriever의 한계에서 각각 GraphRAG, Parametric RAG, Agentic RAG, LIMIT 연구로 갈라졌다.</p></div>
+    </div>
+
+    <!-- 페이지 2: GraphRAG가 푸는 문제 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul><li>global 질문이란 무엇인가?</li><li>질문과 비슷한 청크 몇 개로는 왜 전체 주제를 답할 수 없는가?</li></ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">GraphRAG: global 질문 문제</h3>
+        <div class="with-figure" style="--figure-side-width:176px">
+          <div>
+            <p><strong>무엇을 풀려는가:</strong> Edge et al.(2024)의 GraphRAG는 “이 문서 묶음의 주요 주제는?” 같은 <span class="term" data-definition="global 질문(말뭉치 전체에 대한 질문): 특정 사실 하나가 아니라 문서 묶음 전체를 훑어야 답할 수 있는 질문. 예: 이 데이터셋의 주요 주제는 무엇인가.">global 질문(말뭉치 전체에 대한 질문)</span>에 답하려고 나왔다. 3단원의 Naive RAG는 질문과 비슷한 <span class="term" data-definition="청크(Chunk): 검색 단위로 쓰려고 문서를 잘라 낸 짧은 조각.">청크(Chunk)</span> <span class="term" data-definition="top-k(상위 k개): 유사도가 높은 순으로 고른 앞의 k개 결과.">top-$k$(상위 $k$개)</span>만 골라 읽는다.</p>
+            <p>주요 주제는 어느 한 청크에 적혀 있지 않고 말뭉치 전체에 흩어져 있다. 그래서 질문과 비슷한 청크 몇 개로는 전체를 요약할 수 없고, 원 논문도 이런 질문에서 일반 RAG가 실패한다고 본다.</p>
+            <p>그림은 메모를 핀으로 꽂고 실로 이은 보드를 나타낸 것이다. 메모를 실로 이어 전체 그림을 보는 것처럼, GraphRAG는 청크 사이의 관계를 먼저 이어 두고 묶음마다 요약해 둔다.</p>
+          </div>
+          <figure class="figure side"><img src="assets/fig-board.svg" alt="코르크 보드에 꽂은 메모들을 실로 서로 이은 선화: 흩어진 메모를 이어 전체 그림을 보는 비유"></figure>
+        </div>
+        <figure class="svg-diagram animate-in" style="margin:var(--space-2) auto"><svg viewBox="0 0 800 198" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="일반 RAG는 청크 12개 가운데 질문과 비슷한 3개만 읽어 일부 주제만 답하고, global 질문은 청크 전체를 주제별로 묶은 요약이 있어야 답할 수 있음"><text x="176" y="20" text-anchor="middle" font-size="14" font-weight="700">일반 RAG: 질문과 비슷한 청크 3개만 읽음</text><text x="600" y="20" text-anchor="middle" font-size="14" font-weight="700">global 질문에 필요한 것: 전체를 훑은 요약</text><rect class="node-rect sq" x="36" y="36" width="40" height="40" rx="2"/><rect class="node-rect sq accent" x="84" y="36" width="40" height="40" rx="2"/><rect class="node-rect sq" x="132" y="36" width="40" height="40" rx="2"/><rect class="node-rect sq" x="180" y="36" width="40" height="40" rx="2"/><rect class="node-rect sq accent" x="228" y="36" width="40" height="40" rx="2"/><rect class="node-rect sq" x="276" y="36" width="40" height="40" rx="2"/><rect class="node-rect sq" x="36" y="84" width="40" height="40" rx="2"/><rect class="node-rect sq" x="84" y="84" width="40" height="40" rx="2"/><rect class="node-rect sq" x="132" y="84" width="40" height="40" rx="2"/><rect class="node-rect sq accent" x="180" y="84" width="40" height="40" rx="2"/><rect class="node-rect sq" x="228" y="84" width="40" height="40" rx="2"/><rect class="node-rect sq" x="276" y="84" width="40" height="40" rx="2"/><path class="edge-line" d="M200,124 V140"/><polygon class="edge-arrow" points="195,140 200,150 205,140"/><rect class="node-rect sq" x="100" y="150" width="200" height="40" rx="2"/><foreignObject x="108" y="154" width="184" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>일부 주제만 담긴 답</span></div></foreignObject><rect class="guide-fill" x="428" y="32" width="104" height="96" rx="4"/><rect class="node-rect sq" x="436" y="36" width="40" height="40" rx="2"/><rect class="node-rect sq" x="484" y="36" width="40" height="40" rx="2"/><rect class="node-rect sq" x="436" y="84" width="40" height="40" rx="2"/><rect class="node-rect sq" x="484" y="84" width="40" height="40" rx="2"/><rect class="guide-fill" x="548" y="32" width="104" height="96" rx="4"/><rect class="node-rect sq" x="556" y="36" width="40" height="40" rx="2"/><rect class="node-rect sq" x="604" y="36" width="40" height="40" rx="2"/><rect class="node-rect sq" x="556" y="84" width="40" height="40" rx="2"/><rect class="node-rect sq" x="604" y="84" width="40" height="40" rx="2"/><rect class="guide-fill" x="668" y="32" width="104" height="96" rx="4"/><rect class="node-rect sq" x="676" y="36" width="40" height="40" rx="2"/><rect class="node-rect sq" x="724" y="36" width="40" height="40" rx="2"/><rect class="node-rect sq" x="676" y="84" width="40" height="40" rx="2"/><rect class="node-rect sq" x="724" y="84" width="40" height="40" rx="2"/><path class="edge-line accent" d="M600,128 V140"/><polygon class="edge-arrow accent" points="595,140 600,150 605,140"/><rect class="node-rect sq accent" x="500" y="150" width="200" height="40" rx="2"/><foreignObject x="508" y="154" width="184" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>주제 전체를 묶은 답</span></div></foreignObject></svg><figcaption class="figure-caption">그림은 같은 말뭉치(청크 12개는 예시)에서 일반 RAG가 읽는 범위와 global 질문에 필요한 범위를 나타낸 것이다. 출처: <a href="https://arxiv.org/abs/2404.16130" target="_blank" rel="noopener">Edge et al., From Local to Global</a>을 바탕으로 새로 그림.</figcaption></figure>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>말뭉치 전체의 주제를 묻는 global 질문은 비슷한 청크 몇 개로 답할 수 없어, GraphRAG는 전체를 미리 묶어 요약해 둔다.</p></div>
+    </div>
+
+    <!-- 페이지 3: GraphRAG 작동 과정과 비용 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul><li>GraphRAG는 질문 전에 무엇을 만들어 두는가?</li><li>map과 reduce는 각각 무엇을 하는가?</li><li>GraphRAG의 대가는 무엇인가?</li></ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">GraphRAG의 작동 과정과 비용</h3>
+        <p><strong>핵심 아이디어:</strong> <span class="term" data-definition="대규모 언어 모델(Large Language Model, LLM): 방대한 글을 학습해 다음 토큰을 예측하는, 파라미터가 수십억 개 이상인 언어 모델.">LLM</span>이 청크마다 개체와 관계를 뽑아 <span class="term" data-definition="지식 그래프(Knowledge Graph, KG): 개체를 점으로, 개체 사이의 관계를 선으로 나타낸 자료 구조.">지식 그래프(Knowledge Graph, KG)</span>를 만들고, <span class="term" data-definition="Leiden 알고리즘: 그래프에서 서로 촘촘히 이어진 점들을 묶어 커뮤니티로 나누는 방법. 큰 묶음 안에 작은 묶음이 있는 계층으로도 나눔.">Leiden</span> 알고리즘으로 그래프를 계층 커뮤니티로 묶는다. 커뮤니티마다 <span class="term" data-definition="community summary(커뮤니티 요약): 그래프의 한 커뮤니티에 속한 개체와 관계를 LLM이 미리 요약해 둔 글.">community summary(커뮤니티 요약)</span>를 아래에서 위로 써 둔 뒤, 질문이 오면 요약마다 부분 답을 내고(map) 점수순으로 합친다(reduce).</p>
+        <figure class="svg-diagram animate-in" style="margin:var(--space-2) auto"><svg viewBox="0 0 800 208" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="오프라인에서 청크, LLM의 개체·관계 추출, 지식 그래프, Leiden 계층 커뮤니티, community summary를 만들고, 온라인에서 global 질문을 커뮤니티마다 map으로 부분 답하고 점수순으로 reduce해 최종 답을 만드는 GraphRAG 과정"><rect class="guide-fill" x="0" y="0" width="800" height="96" rx="4"/><text class="muted" x="10" y="16" text-anchor="start" font-size="12">오프라인: 색인 구축(질문 전에 한 번)</text><rect class="node-rect sq" x="16" y="26" width="128" height="60" rx="2"/><foreignObject x="24" y="30" width="112" height="52"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span>청크</span></div></foreignObject><path class="edge-line" d="M144,56 H166"/><polygon class="edge-arrow" points="166,51 176,56 166,61"/><rect class="node-rect sq" x="176" y="26" width="128" height="60" rx="2"/><foreignObject x="184" y="30" width="112" height="52"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span>LLM이 개체·관계 추출</span></div></foreignObject><path class="edge-line" d="M304,56 H326"/><polygon class="edge-arrow" points="326,51 336,56 326,61"/><rect class="node-rect sq" x="336" y="26" width="128" height="60" rx="2"/><foreignObject x="344" y="30" width="112" height="52"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span>지식 그래프</span></div></foreignObject><path class="edge-line" d="M464,56 H486"/><polygon class="edge-arrow" points="486,51 496,56 486,61"/><rect class="node-rect sq" x="496" y="26" width="128" height="60" rx="2"/><foreignObject x="504" y="30" width="112" height="52"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span>Leiden 계층 커뮤니티</span></div></foreignObject><path class="edge-line" d="M624,56 H646"/><polygon class="edge-arrow" points="646,51 656,56 646,61"/><rect class="node-rect sq" x="656" y="26" width="128" height="60" rx="2"/><foreignObject x="664" y="30" width="112" height="52"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span>community summary (아래에서 위로)</span></div></foreignObject><rect class="guide-fill" x="0" y="112" width="800" height="96" rx="4"/><text class="muted" x="10" y="128" text-anchor="start" font-size="12">온라인: global 질문 처리</text><rect class="node-rect sq" x="16" y="138" width="168" height="60" rx="2"/><foreignObject x="24" y="142" width="152" height="52"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span>global 질문</span></div></foreignObject><path class="edge-line" d="M184,168 H206"/><polygon class="edge-arrow" points="206,163 216,168 206,173"/><rect class="node-rect sq" x="216" y="138" width="168" height="60" rx="2"/><foreignObject x="224" y="142" width="152" height="52"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span>map: 커뮤니티마다 부분 답과 유용성 점수(0~100점)</span></div></foreignObject><path class="edge-line" d="M384,168 H406"/><polygon class="edge-arrow" points="406,163 416,168 406,173"/><rect class="node-rect sq" x="416" y="138" width="168" height="60" rx="2"/><foreignObject x="424" y="142" width="152" height="52"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span>reduce: 점수가 높은 순으로 결합</span></div></foreignObject><path class="edge-line accent" d="M584,168 H606"/><polygon class="edge-arrow accent" points="606,163 616,168 606,173"/><rect class="node-rect sq accent" x="616" y="138" width="168" height="60" rx="2"/><foreignObject x="624" y="142" width="152" height="52"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span>최종 답</span></div></foreignObject><path class="edge-line" d="M720,86 V104 H300 V128"/><polygon class="edge-arrow" points="295,128 300,138 305,128"/></svg><figcaption class="figure-caption">그림은 GraphRAG의 색인 단계와 질문 처리 단계를 나타낸 것이다. 출처: <a href="https://arxiv.org/abs/2404.16130" target="_blank" rel="noopener">Edge et al. 2024</a>의 설명을 바탕으로 새로 그림.</figcaption></figure>
+        <table class="data-table animate-in">
+          <thead><tr><th>기준</th><th>원 논문의 보고와 이후 상황</th></tr></thead>
+          <tbody>
+            <tr><td>결과</td><td>약 100만 토큰 규모의 말뭉치 2개에서 답의 포괄성과 다양성이 일반 RAG보다 높았다(LLM이 판정함).</td></tr>
+            <tr><td>비용</td><td>색인 단계에 LLM 호출이 많아 비용과 시간이 크다. 팟캐스트 데이터의 색인에 281분이 걸렸다.</td></tr>
+            <tr><td>평가 범위</td><td>두 말뭉치의 <span class="term" data-definition="sensemaking(자료 전체의 뜻을 파악하는 일): 많은 자료를 훑어 전체 흐름과 주제를 이해하는 일.">sensemaking(자료 전체의 뜻을 파악하는 일)</span> 질문에 국한된 평가이다.</td></tr>
+            <tr><td>이후 변형</td><td>LightRAG, HippoRAG처럼 가벼운 변형이 나왔지만, 비용 비교는 벤치마크마다 엇갈린다.</td></tr>
+          </tbody>
+          <caption>표는 GraphRAG의 결과와 한계를 나타낸 것이다.</caption>
+        </table>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>GraphRAG는 그래프와 community summary를 미리 만들어 global 질문에 강하지만, 색인에 LLM 호출이 많아 비용과 시간이 크다.</p></div>
+    </div>
+
+    <!-- 페이지 4: Parametric RAG -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul><li>지식을 문맥에 넣는 것과 파라미터에 넣는 것은 어떻게 다른가?</li><li>Parametric RAG는 어떤 비용을 오프라인으로 옮기는가?</li></ul>
+        <div class="callout callout-warning animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">더 알아보기</strong>
+            <p>후속 연구 <a href="https://arxiv.org/abs/2503.23895" target="_blank" rel="noopener">DyPRAG</a>(Tan et al., 2025)는 가벼운 parameter translator가 추론 시점에 문서를 파라미터로 바꾸어, 문서마다 학습하고 저장하는 비용을 없앤다.</p>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">Parametric RAG: 문서를 파라미터에 넣기</h3>
+        <p><strong>무엇을 풀려는가:</strong> 2단원의 <span class="term" data-definition="in-context learning(문맥 내 학습, ICL): 가중치를 바꾸지 않고 입력 문맥에 넣은 예시나 문서만으로 과제를 해내는 LLM의 능력.">in-context learning(문맥 내 학습, ICL)</span>처럼 일반 RAG는 검색 문서를 입력 문맥에 붙이므로, 문서가 많을수록 입력이 길어져 계산이 늘어난다. Su et al.(SIGIR 2025)의 Parametric RAG는 문서마다 <span class="term" data-definition="LoRA(Low-Rank Adaptation, 저랭크 적응): 원래 가중치는 그대로 두고, 작은 행렬 두 개의 곱을 더해 일부만 학습하는 방법. 학습하고 저장할 파라미터가 적음.">LoRA(Low-Rank Adaptation, 저랭크 적응)</span>를 <span class="term" data-definition="FFN(Feed-Forward Network, 피드포워드 신경망): 트랜스포머 층마다 어텐션 뒤에 놓이는 완전 연결 신경망.">FFN(Feed-Forward Network, 피드포워드 신경망)</span> 행렬에만 학습해 두고, 지식을 입력이 아니라 파라미터에 넣는다.</p>
+        <figure class="svg-diagram animate-in" style="margin:var(--space-2) auto"><svg viewBox="0 0 800 210" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="in-context RAG는 검색 문서를 입력 문맥에 붙이고, Parametric RAG는 오프라인에서 문서마다 LoRA를 학습해 두었다가 온라인에서 검색한 문서의 LoRA를 모델에 합쳐 질문만 넣고 답함"><text x="16" y="14" text-anchor="start" font-size="13" font-weight="700">in-context RAG(2단원 ICL): 문맥에 넣기</text><rect class="node-rect sq" x="16" y="22" width="168" height="44" rx="2"/><foreignObject x="24" y="26" width="152" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>query</span></div></foreignObject><path class="edge-line" d="M184,44 H206"/><polygon class="edge-arrow" points="206,39 216,44 206,49"/><rect class="node-rect sq" x="216" y="22" width="168" height="44" rx="2"/><foreignObject x="224" y="26" width="152" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>검색 문서 3개</span></div></foreignObject><path class="edge-line" d="M384,44 H406"/><polygon class="edge-arrow" points="406,39 416,44 406,49"/><rect class="node-rect sq" x="416" y="22" width="168" height="44" rx="2"/><foreignObject x="424" y="26" width="152" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>문서 + 질문을 입력 문맥에 붙임</span></div></foreignObject><path class="edge-line" d="M584,44 H606"/><polygon class="edge-arrow" points="606,39 616,44 606,49"/><rect class="node-rect sq" x="616" y="22" width="168" height="44" rx="2"/><foreignObject x="624" y="26" width="152" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>LLM → 답</span></div></foreignObject><text x="16" y="82" text-anchor="start" font-size="13" font-weight="700">Parametric RAG · 오프라인(문서마다 한 번): 파라미터에 넣을 준비</text><rect class="node-rect sq" x="16" y="90" width="168" height="44" rx="2"/><foreignObject x="24" y="94" width="152" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>문서</span></div></foreignObject><path class="edge-line" d="M184,112 H206"/><polygon class="edge-arrow" points="206,107 216,112 206,117"/><rect class="node-rect sq" x="216" y="90" width="168" height="44" rx="2"/><foreignObject x="224" y="94" width="152" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>문서 증강: 재작성 + QA 쌍</span></div></foreignObject><path class="edge-line" d="M384,112 H406"/><polygon class="edge-arrow" points="406,107 416,112 406,117"/><rect class="node-rect sq" x="416" y="90" width="168" height="44" rx="2"/><foreignObject x="424" y="94" width="152" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>문서별 LoRA 학습(FFN 행렬만)</span></div></foreignObject><text x="16" y="150" text-anchor="start" font-size="13" font-weight="700">Parametric RAG · 온라인(질문마다): 파라미터에 넣기</text><rect class="node-rect sq" x="16" y="158" width="168" height="44" rx="2"/><foreignObject x="24" y="162" width="152" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>query</span></div></foreignObject><path class="edge-line" d="M184,180 H206"/><polygon class="edge-arrow" points="206,175 216,180 206,185"/><rect class="node-rect sq" x="216" y="158" width="168" height="44" rx="2"/><foreignObject x="224" y="162" width="152" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>검색: 관련 문서 찾기</span></div></foreignObject><path class="edge-line accent" d="M384,180 H406"/><polygon class="edge-arrow accent" points="406,175 416,180 406,185"/><rect class="node-rect sq accent" x="416" y="158" width="168" height="44" rx="2"/><foreignObject x="424" y="162" width="152" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>그 문서의 LoRA를 합쳐 모델 갱신</span></div></foreignObject><path class="edge-line" d="M584,180 H606"/><polygon class="edge-arrow" points="606,175 616,180 606,185"/><rect class="node-rect sq" x="616" y="158" width="168" height="44" rx="2"/><foreignObject x="624" y="162" width="152" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>LLM → 답(입력은 질문만)</span></div></foreignObject><path class="edge-line" d="M500,134 V148"/><polygon class="edge-arrow" points="495,148 500,158 505,148"/></svg><figcaption class="figure-caption">그림은 지식을 문맥에 넣는 방식과 파라미터에 넣는 방식을 나타낸 것이다(문서 3개는 예시). 출처: <a href="https://arxiv.org/abs/2501.15915" target="_blank" rel="noopener">Su et al., Parametric RAG</a>를 바탕으로 새로 그림.</figcaption></figure>
+        <table class="data-table animate-in">
+          <thead><tr><th>기준</th><th>in-context RAG</th><th>Parametric RAG</th></tr></thead>
+          <tbody>
+            <tr><td>온라인 계산</td><td>문서가 입력을 길게 만듦</td><td>입력에 여러 문서를 넣지 않아 절약</td></tr>
+            <tr><td>오프라인 준비</td><td>색인 구축</td><td>문서마다 증강과 LoRA 학습(계산 부담)</td></tr>
+            <tr><td>저장·LLM 교체</td><td>문서 원문과 색인, LLM을 바꿔도 그대로 씀</td><td>문서마다 LoRA(LLaMA3-8B, 16비트 기준 약 4.72 MB), 특정 LLM에 묶임</td></tr>
+          </tbody>
+          <caption>표는 두 방식의 차이를 나타낸 것이다. 원 논문은 두 방식을 함께 쓰면 더 좋아졌다고 보고한다.</caption>
+        </table>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>Parametric RAG는 문서마다 학습한 LoRA를 모델에 합쳐 입력을 줄이지만, 오프라인 학습과 문서별 저장, 특정 LLM에 묶이는 대가가 있다.</p></div>
+    </div>
+
+    <!-- 페이지 5: Agentic RAG와 강화 학습 검색 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul><li>5단원의 FLARE·Self-RAG와 무엇이 다른가?</li><li>Search-R1은 무엇을 보상으로 삼는가?</li><li>에이전트가 검색을 이끌면 무엇이 비싸지는가?</li></ul>
+        <figure class="svg-diagram animate-in" style="margin:var(--space-4) 0 0"><svg viewBox="0 0 216 240" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Agentic RAG의 에이전트는 성찰, 계획, 도구 사용, 다중 에이전트 협업을 함"><rect class="node-rect sq accent" x="8" y="8" width="200" height="40" rx="2"/><foreignObject x="16" y="12" width="184" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span><b>Agentic RAG</b> 에이전트</span></div></foreignObject><path class="edge-line" d="M24,48 V214"/><path class="edge-line" d="M24,82 H38"/><polygon class="edge-arrow" points="38,77 48,82 38,87"/><rect class="node-rect sq" x="48" y="64" width="160" height="36" rx="2"/><foreignObject x="56" y="68" width="144" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>성찰</span></div></foreignObject><path class="edge-line" d="M24,126 H38"/><polygon class="edge-arrow" points="38,121 48,126 38,131"/><rect class="node-rect sq" x="48" y="108" width="160" height="36" rx="2"/><foreignObject x="56" y="112" width="144" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>계획</span></div></foreignObject><path class="edge-line" d="M24,170 H38"/><polygon class="edge-arrow" points="38,165 48,170 38,175"/><rect class="node-rect sq" x="48" y="152" width="160" height="36" rx="2"/><foreignObject x="56" y="156" width="144" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>도구 사용(검색 등)</span></div></foreignObject><path class="edge-line" d="M24,214 H38"/><polygon class="edge-arrow" points="38,209 48,214 38,219"/><rect class="node-rect sq" x="48" y="196" width="160" height="36" rx="2"/><foreignObject x="56" y="200" width="144" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>다중 에이전트 협업</span></div></foreignObject></svg><figcaption class="figure-caption">Agentic RAG의 에이전트가 하는 일. 출처: <a href="https://arxiv.org/abs/2501.09136" target="_blank" rel="noopener">Singh et al.</a>을 바탕으로 새로 그림.</figcaption></figure>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">Agentic RAG와 강화 학습 검색</h3>
+        <p><strong>무엇을 풀려는가:</strong> 5단원의 <span class="term" data-definition="adaptive retrieval(필요할 때만 검색): 생성 도중 검색이 필요한 때를 판단해 그때만 검색하는 방식.">adaptive retrieval(필요할 때만 검색)</span>에서 FLARE는 낮은 확률 토큰, Self-RAG는 reflection token이라는 정해 둔 신호로 검색 시점을 정했다. 이후 연구는 <strong>검색 시점과 query를 모델이 학습하는</strong> 쪽으로 나아갔다.</p>
+        <p><strong>핵심 아이디어:</strong> Jin et al.(2025)의 <a href="https://arxiv.org/abs/2503.09516" target="_blank" rel="noopener">Search-R1</a>에서 모델은 추론하다가 <code>&lt;search&gt;</code> 토큰으로 검색을 부르고, 결과를 <code>&lt;information&gt;</code>으로 받아 추론을 이어 간다. 학습은 <span class="term" data-definition="강화 학습(Reinforcement Learning, RL): 정답을 직접 알려 주지 않고, 행동의 결과로 받은 보상이 커지도록 정책을 고쳐 나가는 학습 방법.">강화 학습(Reinforcement Learning, RL)</span>으로 하며 <span class="term" data-definition="PPO(Proximal Policy Optimization, 근접 정책 최적화): 정책이 한 번에 너무 크게 바뀌지 않게 제한하며 보상을 높이는 강화 학습 알고리즘.">PPO</span>와 <span class="term" data-definition="GRPO(Group Relative Policy Optimization, 그룹 상대 정책 최적화): 같은 질문에 낸 여러 답의 보상을 서로 비교해 정책을 고치는 강화 학습 알고리즘. 가치 함수가 필요 없음.">GRPO</span>를 쓴다. 보상은 최종 답의 <span class="term" data-definition="exact match(완전 일치, EM): 모델의 답이 정답 문자열과 정확히 같으면 1, 아니면 0을 주는 지표.">exact match(완전 일치, EM)</span>뿐이고 검색 결과 토큰은 손실에서 제외한다.</p>
+        <figure class="svg-diagram animate-in" style="margin:var(--space-2) auto"><svg viewBox="0 0 800 158" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Search-R1에서 모델은 think로 추론하고 search 태그로 query를 써서 검색하며, information 태그로 결과를 받아 다시 추론하는 과정을 반복하다가 answer 태그로 최종 답을 내고, 최종 답의 EM이 보상이 됨"><text class="muted" x="600" y="14" text-anchor="middle" font-size="12">충분하면 답함</text><path class="edge-line accent" d="M100,40 V20 H700 V30"/><polygon class="edge-arrow accent" points="695,30 700,40 705,30"/><rect class="node-rect sq" x="16" y="40" width="168" height="52" rx="2"/><foreignObject x="24" y="44" width="152" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span><code>&lt;think&gt; 추론</code></span></div></foreignObject><path class="edge-line" d="M184,66 H206"/><polygon class="edge-arrow" points="206,61 216,66 206,71"/><rect class="node-rect sq" x="216" y="40" width="168" height="52" rx="2"/><foreignObject x="224" y="44" width="152" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span><code>&lt;search&gt; query &lt;/search&gt;</code></span></div></foreignObject><path class="edge-line" d="M384,66 H406"/><polygon class="edge-arrow" points="406,61 416,66 406,71"/><rect class="node-rect sq" x="416" y="40" width="168" height="52" rx="2"/><foreignObject x="424" y="44" width="152" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span><code>&lt;information&gt; 검색 결과 &lt;/information&gt;</code></span></div></foreignObject><rect class="node-rect sq accent" x="616" y="40" width="168" height="52" rx="2"/><foreignObject x="624" y="44" width="152" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.35"><span><code>&lt;answer&gt; 최종 답 &lt;/answer&gt;</code></span></div></foreignObject><path class="edge-line" d="M500,92 V112 H100 V102"/><polygon class="edge-arrow" points="95,102 100,92 105,102"/><text class="muted" x="300" y="128" text-anchor="middle" font-size="12">부족하면 다시 생각하고 또 검색함</text><text x="100" y="150" text-anchor="middle" font-size="12">모델이 씀</text><text x="300" y="150" text-anchor="middle" font-size="12">모델이 query를 씀</text><text x="500" y="150" text-anchor="middle" font-size="12">검색 엔진이 채움 · 손실에서 제외</text><text x="700" y="150" text-anchor="middle" font-size="12">EM이 보상</text></svg><figcaption class="figure-caption">그림은 Search-R1이 추론과 검색을 번갈아 하다가 답을 내는 흐름을 나타낸 것이다. 출처: <a href="https://arxiv.org/abs/2503.09516" target="_blank" rel="noopener">Jin et al. 2025</a>를 바탕으로 새로 그림.</figcaption></figure>
+        <p>Singh et al.의 <a href="https://arxiv.org/abs/2501.09136" target="_blank" rel="noopener">Agentic RAG 서베이</a>(2026년 4월 개정판)는 성찰·계획·도구 사용·다중 에이전트 협업을 하는 자율 에이전트를 RAG 안에 두는 흐름을 정리하고, 이를 에이전트 수, 제어 구조, 자율성, 지식 표현의 네 축으로 나눈다. 강화 학습 기반 검색은 Lin et al.의 <a href="https://arxiv.org/abs/2510.16724" target="_blank" rel="noopener">agentic search 서베이</a>가 정리한다.</p>
+        <p><strong>한계와 비용:</strong> 단계가 늘수록 LLM 호출 횟수와 <span class="term" data-definition="지연(Latency): 질문을 넣은 뒤 답이 나오기까지 걸리는 시간.">지연(Latency)</span>이 늘고, 한 단계의 잘못이 뒤로 넘어가는 <span class="term" data-definition="오류 전파(Error Propagation): 앞 단계의 잘못이 뒤 단계로 넘어가 쌓이는 현상.">오류 전파(Error Propagation)</span>가 생길 수 있다. 흐름이 질문마다 달라 평가도 어렵다. 이는 3단원에서 본 Modular RAG의 대가가 더 커진 것으로 해석할 수 있다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>Search-R1과 Agentic RAG는 검색 시점과 query를 모델이 익히거나 계획하게 하지만, 호출 횟수·지연·오류 전파·평가의 어려움이 커진다.</p></div>
+    </div>
+
+    <!-- 페이지 6: LIMIT -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul><li>단일 벡터 임베딩은 왜 모든 top-$k$ 조합을 돌려줄 수 없는가?</li><li>임베딩 검색의 한계를 메우는 대안은 무엇인가?</li></ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">임베딩 검색의 이론적 한계: LIMIT</h3>
+        <div class="with-figure" style="--figure-side-width:200px">
+          <div>
+            <p><strong>무엇을 풀려는가:</strong> 4단원에서 본 <span class="term" data-definition="dense retrieval(임베딩 벡터 기반 검색): query와 문서를 임베딩 벡터로 바꾸어 벡터끼리 가까운 문서를 찾는 검색.">dense retrieval(임베딩 벡터 기반 검색)</span>의 실패(드문 개체, 도메인 이동, 부정 표현)는 실험에서 드러난 약점이었다. Weller et al.(ICLR 2026)의 <a href="https://arxiv.org/abs/2508.21038" target="_blank" rel="noopener">LIMIT 연구</a>는 이 약점에 이론적 뿌리가 있음을 보인다.</p>
+            <p><strong>핵심 아이디어:</strong> 차원이 고정된 단일 벡터 <span class="term" data-definition="임베딩(Embedding): 문장이나 문서를 뜻이 비슷할수록 가까운 숫자 벡터로 바꾼 것.">임베딩(Embedding)</span>으로는 어떤 query로도 돌려줄 수 없는 top-$k$ 조합이 생긴다. 그림은 이 주장을 2차원으로 줄인 자체 예시이다. 네 문서가 원 위에 있으면 <span class="term" data-definition="코사인 유사도(Cosine Similarity): 두 벡터 사이 각도의 코사인 값. 방향이 비슷할수록 1에 가까움.">코사인 유사도(Cosine Similarity)</span>로 고른 top-2는 늘 이웃한 두 문서여서, $d_1$과 $d_3$을 함께 돌려주는 query는 없다.</p>
+          </div>
+          <figure class="figure side"><svg viewBox="0 0 224 224" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="단위원 위 네 문서 d1, d2, d3, d4와 query q: 어떤 q를 넣어도 top-2는 이웃한 두 문서이므로 d1과 d3을 함께 돌려줄 수 없음"><defs><marker id="tr-ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L8,4 L0,8 z" class="ink-fill"/></marker></defs><path class="guide" d="M16,112 H208 M112,16 V208"/><circle class="guide" cx="112" cy="112" r="80" fill="none"/><line class="ink" x1="112" y1="112" x2="176.1" y2="75.0" marker-end="url(#tr-ah)"/><text x="170.1" y="67.0" font-style="italic">q</text><circle class="dot-accent" cx="192" cy="112" r="6"/><circle class="ink-fill" cx="112" cy="32" r="6"/><circle class="dot-accent" cx="32" cy="112" r="6"/><circle class="ink-fill" cx="112" cy="192" r="6"/><text class="accent-text" x="196" y="132" font-style="italic">d<tspan font-size="9" dy="3">1</tspan></text><text x="122" y="28" font-style="italic">d<tspan font-size="9" dy="3">2</tspan></text><text class="accent-text" x="20" y="132" font-style="italic">d<tspan font-size="9" dy="3">3</tspan></text><text x="122" y="208" font-style="italic">d<tspan font-size="9" dy="3">4</tspan></text></svg><figcaption class="figure-caption">2차원 임베딩 예시(문서 4개)</figcaption></figure>
+        </div>
+        <table class="data-table animate-in">
+          <thead><tr><th>대안</th><th>무엇을 바꾸는가</th></tr></thead>
+          <tbody>
+            <tr><td><span class="term" data-definition="cross-encoder(query와 문서를 함께 읽고 점수): query와 문서를 한 입력으로 이어 붙여 모델이 함께 읽고 관련도 점수를 내는 방식. 정확하지만 문서마다 다시 계산해야 함.">cross-encoder(query와 문서를 함께 읽고 점수)</span></td><td>문서를 벡터 하나로 미리 줄이지 않고 query와 함께 읽는다.</td></tr>
+            <tr><td><span class="term" data-definition="multi-vector(다중 벡터): 문서 하나를 토큰이나 구절마다 벡터 여러 개로 나타내는 방식.">multi-vector(다중 벡터)</span></td><td>문서 하나를 벡터 여러 개로 나타낸다.</td></tr>
+            <tr><td>더 표현력 있는 유사도 함수</td><td>내적 하나보다 복잡한 점수 함수를 쓴다.</td></tr>
+          </tbody>
+          <caption>표는 LIMIT 연구가 제시한 대안을 나타낸 것이다. 실무에서는 4단원의 <span class="term" data-definition="hybrid retrieval(sparse와 dense를 섞은 검색): 단어 일치 검색과 임베딩 검색의 결과를 함께 쓰는 검색.">hybrid retrieval(sparse와 dense를 섞은 검색)</span>와 <span class="term" data-definition="reranking(재순위화): 처음 검색한 후보들을 더 정밀한 모델로 다시 점수 매겨 순서를 바꾸는 일.">reranking(재순위화)</span>로 dense retrieval의 빈틈을 메운다.</caption>
+        </table>
+        <p><strong>long context와의 관계:</strong> 검색을 거치지 않고 문서를 통째로 넣는 <span class="term" data-definition="long context(긴 입력 문맥): LLM이 한 번에 입력으로 받을 수 있는 매우 긴 토큰 범위.">long context(긴 입력 문맥)</span>도 길이 될 수 있다. 7단원에서 본 Li et al.(<a href="https://arxiv.org/abs/2407.16833" target="_blank" rel="noopener">2024</a>)은 long context가 평균 성능은 높지만 RAG의 비용이 훨씬 낮다고 보고하고, query마다 둘 중 하나를 고르는 Self-Route로 절충했다. 따라서 검색의 한계를 알고 쓰되 비용에 맞추어 고르는 것이 현실적이라고 해석할 수 있다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>단일 벡터 임베딩은 돌려줄 수 없는 top-$k$ 조합이 생기므로 cross-encoder, multi-vector, hybrid retrieval과 reranking으로 보완한다.</p></div>
+    </div>
+
+    <!-- 페이지 7: 연구 계보 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul><li>이후 연구는 서베이에서 무엇을 이어받았는가?</li><li>각 갈래는 무엇을 바꾸었는가?</li></ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>연구 계보: 이어받은 것과 달라진 것</h3>
+        <div class="lineage-tree animate-in" style="margin:var(--space-2) 0; padding:var(--space-3) var(--space-6)">
+          <div class="lineage-node lineage-root" data-detail="Naive, Advanced, Modular RAG의 세 패러다임과 retrieval·generation·augmentation 기술을 정리한 서베이">
+            <span class="lineage-label">RAG 서베이</span>
+            <span class="lineage-detail">Gao et al., 2023</span>
+            <span class="novelty-badge">RAG 연구를 세 패러다임과 세 기술로 정리</span>
+          </div>
+          <div class="lineage-branch">
+            <div class="lineage-edge-label">검색 단위</div>
+            <div class="lineage-node" data-detail="지식 그래프와 community summary로 global 질문에 답하는 방법"><span class="lineage-label">GraphRAG</span><span class="lineage-detail">Edge et al., 2024</span></div>
+            <p class="lineage-note">4단원의 지식 그래프·계층 인덱스를 이어받음. → <strong class="novelty">말뭉치 전체를 커뮤니티 요약으로 미리 정리</strong>한다.</p>
+          </div>
+          <div class="lineage-branch">
+            <div class="lineage-edge-label">넣는 곳</div>
+            <div class="lineage-node" data-detail="문서별 LoRA를 모델에 합치는 Parametric RAG와 추론 시점에 파라미터를 만드는 DyPRAG"><span class="lineage-label">PRAG · DyPRAG</span><span class="lineage-detail">Su · Tan et al., 2025</span></div>
+            <p class="lineage-note">검색 → 생성 흐름을 이어받음. → <strong class="novelty">지식을 입력이 아니라 파라미터에 넣는다</strong>.</p>
+          </div>
+          <div class="lineage-branch">
+            <div class="lineage-edge-label">검색 시점</div>
+            <div class="lineage-node" data-detail="강화 학습으로 검색 시점과 query를 익히는 Search-R1과 자율 에이전트를 둔 Agentic RAG"><span class="lineage-label">Search-R1 등</span><span class="lineage-detail">Jin et al., 2025</span></div>
+            <p class="lineage-note">5단원의 iterative·adaptive retrieval을 이어받음. → <strong class="novelty">검색 시점과 query를 모델이 학습(Search-R1)하거나 에이전트가 계획(Agentic RAG)</strong>한다.</p>
+          </div>
+          <div class="lineage-branch">
+            <div class="lineage-edge-label">retriever</div>
+            <div class="lineage-node" data-detail="단일 벡터 임베딩 검색의 이론적 한계를 보인 연구"><span class="lineage-label">LIMIT</span><span class="lineage-detail">Weller et al., 2026</span></div>
+            <p class="lineage-note">dense retriever를 이어받음. → <strong class="novelty">단일 벡터의 표현 한계를 이론으로 보인다</strong>.</p>
+          </div>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>이후 연구는 서베이의 틀을 이어받아 검색 단위, 지식을 넣는 곳, 검색 시점, retriever를 각각 바꾸었다.</p></div>
+    </div>
+
+    <!-- 페이지 8: 네 흐름의 비교와 방법 고르기 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul><li>네 흐름은 RAG의 어디를 바꾸는가?</li><li>상황마다 어떤 방법을 먼저 검토하는가?</li></ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>네 흐름의 비교와 방법 고르기</h3>
+        <table class="data-table animate-in">
+          <thead><tr><th>기준</th><th>GraphRAG</th><th>Parametric RAG</th><th>Agentic RAG</th><th>LIMIT 연구</th></tr></thead>
+          <tbody>
+            <tr><td>푸는 문제</td><td>global 질문</td><td>긴 입력의 온라인 계산</td><td>정해 둔 검색 시점</td><td>dense retrieval 실패의 원인</td></tr>
+            <tr><td>바꾸는 곳</td><td>검색 단위·인덱스</td><td>지식을 넣는 곳</td><td>검색 시점과 query</td><td>retriever의 표현 방식</td></tr>
+            <tr><td>주된 비용</td><td>색인의 LLM 호출</td><td>문서별 학습·저장</td><td>호출·지연·평가</td><td>대안의 계산량</td></tr>
+          </tbody>
+          <caption>표는 이 단원에서 본 네 흐름의 차이를 나타낸 것이다.</caption>
+        </table>
+        <p class="diff-line"><strong>핵심 비교</strong> GraphRAG는 무엇을 찾을지, Parametric RAG는 어디에 넣을지, Agentic RAG는 언제 찾을지를 바꾸고, LIMIT 연구는 어떻게 찾는지의 한계를 짚는다.</p>
+        <table class="data-table animate-in">
+          <thead><tr><th>상황</th><th>후보 방법</th></tr></thead>
+          <tbody>
+            <tr><td>문서 묶음 전체의 주제를 요약해야 함</td><td>GraphRAG</td></tr>
+            <tr><td><span class="term" data-definition="문맥 창(Context Window): LLM이 한 번에 입력으로 받을 수 있는 토큰의 범위.">문맥 창(Context Window)</span>이 짧고 같은 문서를 반복해서 조회함</td><td>Parametric RAG 검토</td></tr>
+            <tr><td>여러 번 찾아야 하는 <span class="term" data-definition="multi-hop(여러 문서를 건너 추론): 한 문서로는 답할 수 없어 여러 문서의 사실을 차례로 이어야 답하는 질문 유형.">multi-hop(여러 문서를 건너 추론)</span> 질문</td><td>Agentic RAG, <span class="term" data-definition="iterative retrieval(반복 검색): 생성과 검색을 여러 번 번갈아 하며 문맥을 보강하는 방식.">iterative retrieval(반복 검색)</span></td></tr>
+            <tr><td>오류 코드·고유명사처럼 글자가 정확히 맞아야 함</td><td>hybrid retrieval + reranker</td></tr>
+          </tbody>
+          <caption>표는 상황별로 먼저 검토할 후보 방법을 나타낸 것이다. 실제 선택은 비용과 데이터에 맞추어 시험해 보고 정한다.</caption>
+        </table>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>방법은 질문이 전체 요약인지, 같은 문서를 반복 조회하는지, 여러 번 찾아야 하는지, 글자가 정확히 맞아야 하는지에 따라 고른다.</p></div>
+    </div>
+
+    <!-- 페이지 9: 핵심 정리 + 확인 문제 1 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-accent animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">핵심 정리</strong>
+            <ul>
+              <li>GraphRAG는 그래프와 community summary를 미리 만들어 global 질문에 답하지만 색인 비용이 크다.</li>
+              <li>Parametric RAG는 지식을 LoRA 파라미터에 넣어 입력을 줄이지만 오프라인 학습과 저장이 든다.</li>
+              <li>Search-R1과 Agentic RAG는 검색 시점과 query를 모델이 정하지만 호출과 지연이 늘어난다.</li>
+              <li>LIMIT 연구는 단일 벡터 임베딩에 돌려줄 수 없는 top-$k$ 조합이 있음을 보였다.</li>
+              <li>방법을 고르는 문항은 질문이 전체 요약인지, 여러 번 찾기인지, 정확한 글자 일치인지부터 가려라.</li>
+            </ul>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag outline">확인 문제</span>상황에 맞는 방법 고르기</h3>
+        <div class="quiz-container animate-in" id="tr-quiz-a">
+          <div class="quiz-question-block" data-correct="option-b"
+               data-explanation-right="② | “올해 회의에서 되풀이된 주요 주제”는 회의록 전체를 훑어야 답할 수 있는 global 질문이므로, 커뮤니티 요약을 미리 만들어 map·reduce로 답하는 GraphRAG가 알맞다."
+               data-explanation-wrong="| 정답은 ②이다. 주요 주제를 묻는 global 질문은 질문과 비슷한 청크 몇 개로는 답할 수 없으므로 GraphRAG를 먼저 검토한다. ①은 비슷한 청크 몇 개만 읽어 일부 주제만 답하게 되므로 알맞지 않다.">
+            <h3 class="quiz-question"><span class="q-num">1</span>사내 회의록 수천 건을 두고 “올해 회의에서 되풀이된 주요 주제는?”에 답하려 한다. 먼저 검토할 방법으로 가장 알맞은 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 질문과 비슷한 청크 top-3만 읽는 Naive RAG</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 지식 그래프와 community summary를 쓰는 GraphRAG</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 문서마다 LoRA를 학습하는 Parametric RAG</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 오류 코드를 정확히 찾는 BM25 단독 검색</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 검색 없이 LLM의 parametric knowledge로만 답하기</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <div class="quiz-question-block" data-correct="option-c"
+               data-explanation-right="③ | 답에 이르려면 회사 → 창업자 → 대학 → 도시를 차례로 찾아야 하는 multi-hop 질문이므로, 검색 시점과 query를 모델이 정하며 여러 번 검색하는 Agentic RAG나 iterative retrieval이 알맞다."
+               data-explanation-wrong="| 정답은 ③이다. 앞 검색의 결과를 보고 다음 query를 정해야 하므로 여러 번 검색하는 방법이 알맞다. ①은 말뭉치 전체의 주제를 묻는 global 질문에 맞춘 방법이므로 이 질문에는 알맞지 않다.">
+            <h3 class="quiz-question"><span class="q-num">2</span>“A 회사 창업자가 졸업한 대학은 어느 도시에 있는가?”처럼 여러 번 찾아야 답할 수 있는 질문(예시)에 먼저 검토할 방법으로 가장 알맞은 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 커뮤니티 요약을 map·reduce로 합치는 GraphRAG</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 한 번만 검색하는 Naive RAG</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 검색 시점과 query를 모델이 정하며 여러 번 검색하는 Agentic RAG</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 임베딩 차원만 키운 dense retrieval</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 검색 결과를 버리고 질문만 넣는 방식</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('tr-quiz-a')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('tr-quiz-a')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>전체 주제 요약에는 GraphRAG를, 여러 번 찾아야 하는 질문에는 Agentic RAG나 iterative retrieval을 먼저 검토한다.</p></div>
+    </div>
+
+    <!-- 페이지 10: 확인 문제 2 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul><li>Parametric RAG의 비용은 어디에 있는가?</li><li>Search-R1은 무엇을 학습하고 무엇을 보상으로 받는가?</li></ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag outline">확인 문제</span>Parametric RAG와 Search-R1</h3>
+        <div class="quiz-container animate-in" id="tr-quiz-b">
+          <div class="quiz-question-block" data-correct="option-d"
+               data-explanation-right="④ | 문서마다 증강과 LoRA 학습을 해야 하므로 오프라인 부담이 크다. 문서별 학습을 없앤 것은 DyPRAG이다."
+               data-explanation-wrong="| 정답은 ④이다. 문서마다 LoRA를 학습하므로 오프라인 부담이 크다. ②는 원 논문의 설명이므로 옳다.">
+            <h3 class="quiz-question"><span class="q-num">3</span>Parametric RAG에 대한 설명으로 옳지 <u>않은</u> 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 입력에 문서를 넣지 않아 온라인 계산을 줄인다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 문서마다 LoRA를 FFN 행렬에만 학습한다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 학습한 LoRA가 특정 LLM에 묶인다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 문서별 학습이 없어 오프라인 계산이 거의 없다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ in-context RAG와 함께 쓸 수 있다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <div class="quiz-question-block" data-correct="option-c"
+               data-explanation-right="③ | ㄱ과 ㄷ은 Search-R1의 설명이다. 보상은 최종 답의 EM뿐이므로 ㄴ은 옳지 않다."
+               data-explanation-wrong="| 정답은 ③이다. 보상은 문서별 점수가 아니라 최종 답의 EM뿐이므로 ㄴ은 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">4</span>Search-R1에 대해 옳은 것만을 <span class="nobr">&lt;보기&gt;에서</span> 있는 대로 고른 것은?</h3>
+            <div class="bogi">
+              <p>ㄱ. 검색 결과 토큰은 손실 계산에서 제외한다.</p>
+              <p>ㄴ. 보상은 문서마다 사람이 매긴 관련성 점수이다.</p>
+              <p>ㄷ. 모델이 검색 시점과 query를 스스로 정한다.</p>
+            </div>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① ㄱ</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② ㄴ</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ ㄱ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ ㄴ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ ㄱ, ㄴ, ㄷ</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('tr-quiz-b')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('tr-quiz-b')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>Parametric RAG는 오프라인 학습 비용을 지고, Search-R1은 최종 답의 EM만으로 검색 행동을 학습한다.</p></div>
+    </div>
+
+  </div>
+</section>

@@ -1,0 +1,449 @@
+<section class="module" id="module-6">
+  <div class="module-content">
+
+    <div class="module-header">
+      <span class="module-number">7</span>
+      <h2 class="module-title">이후 동향</h2>
+      <p class="module-subtitle">RAG(2020)의 설계 선택을 후속 연구가 어떻게 바꾸었는지 따라간다</p>
+    </div>
+
+    <!-- 페이지 1: 지도 -->
+    <div class="screen cornell dense">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">학습 목표</strong>
+            <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
+            <ol>
+              <li>후속 연구마다 RAG(2020)의 어떤 설계 선택을 바꾸었는지 짝지을 수 있다.</li>
+              <li>후속 연구가 얻은 이득과 새로 생긴 비용을 함께 설명할 수 있다.</li>
+            </ol>
+          </div>
+        </div>
+        <div class="callout callout-warning animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">논문 이후의 보충</strong>
+            <p>이 단원은 원 논문에 없는 내용이다. 조사 시점은 2026년 11월이며, 각 논문의 arXiv 초록과 본문에서 확인한 내용만 적었다.</p>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">RAG(2020)에서 갈라진 길</h3>
+        <p>RAG(2020)는 몇 가지를 정해 두고 시작했다. 문서마다 따로 생성해 확률로 섞고, 문서 인코더는 고정하며, 생성기는 함께 학습하고, 모든 입력에서 늘 top-<i class="mi">k</i> 문서를 검색한다. 후속 연구는 이 선택을 하나씩 바꾸었다.</p>
+        <figure class="svg-diagram fit animate-in" style="--diagram-max:760px">
+<svg viewBox="0 0 800 312" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RAG(2020)의 다섯 가지 설계 선택에서 FiD, Atlas, RETRO, REPLUG와 In-Context RALM, Self-RAG가 나온 관계">
+<foreignObject x="16" y="0" width="336" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span><strong>RAG(2020)의 선택</strong></span></div></foreignObject>
+<foreignObject x="448" y="0" width="336" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span><strong>후속 연구</strong></span></div></foreignObject>
+<rect class="node-rect" x="16" y="32" width="336" height="44" rx="8"/>
+<foreignObject x="24" y="36" width="320" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>문서마다 따로 생성하고 확률로 섞음</span></div></foreignObject>
+<path class="edge-line" d="M352,54 H438"/><polygon class="edge-arrow" points="438,49 448,54 438,59"/>
+<rect class="node-rect" x="448" y="32" width="336" height="44" rx="8"/>
+<foreignObject x="456" y="36" width="320" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span><strong>FiD</strong> (2020): 디코더에서 문서를 함께 읽음</span></div></foreignObject>
+<rect class="node-rect" x="16" y="88" width="336" height="44" rx="8"/>
+<foreignObject x="24" y="92" width="320" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>문서 인코더 고정(재색인 비용 회피)</span></div></foreignObject>
+<path class="edge-line" d="M352,110 H438"/><polygon class="edge-arrow" points="438,105 448,110 438,115"/>
+<rect class="node-rect" x="448" y="88" width="336" height="44" rx="8"/>
+<foreignObject x="456" y="92" width="320" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span><strong>Atlas</strong> (2022): retriever와 LM을 함께 사전학습</span></div></foreignObject>
+<rect class="node-rect" x="16" y="144" width="336" height="44" rx="8"/>
+<foreignObject x="24" y="148" width="320" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>위키백과 2,100만 문서, 생성기 BART</span></div></foreignObject>
+<path class="edge-line" d="M352,166 H438"/><polygon class="edge-arrow" points="438,161 448,166 438,171"/>
+<rect class="node-rect" x="448" y="144" width="336" height="44" rx="8"/>
+<foreignObject x="456" y="148" width="320" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span><strong>RETRO</strong> (2021): 2조 토큰 DB, 언어 모델 사전학습</span></div></foreignObject>
+<rect class="node-rect" x="16" y="200" width="336" height="44" rx="8"/>
+<foreignObject x="24" y="204" width="320" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>생성기를 함께 fine-tuning</span></div></foreignObject>
+<path class="edge-line" d="M352,222 H438"/><polygon class="edge-arrow" points="438,217 448,222 438,227"/>
+<rect class="node-rect" x="448" y="200" width="336" height="44" rx="8"/>
+<foreignObject x="456" y="204" width="320" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span><strong>REPLUG · In-Context RALM</strong> (2023): 고정 LM에 붙이기</span></div></foreignObject>
+<rect class="node-rect" x="16" y="256" width="336" height="44" rx="8"/>
+<foreignObject x="24" y="260" width="320" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>모든 입력에서 늘 top-<i class="mi">k</i> 검색</span></div></foreignObject>
+<path class="edge-line" d="M352,278 H438"/><polygon class="edge-arrow" points="438,273 448,278 438,283"/>
+<rect class="node-rect" x="448" y="256" width="336" height="44" rx="8"/>
+<foreignObject x="456" y="260" width="320" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span><strong>Self-RAG</strong> (2023): 필요할 때만 검색, 자기 평가</span></div></foreignObject>
+</svg>
+          <figcaption class="figure-caption">그림은 RAG(2020)의 설계 선택과 그것을 바꾼 후속 연구를 짝지어 나타낸 것이다.</figcaption>
+        </figure>
+        <p>각 쪽은 같은 순서로 읽는다. 무엇을 풀려 했는가, 어떻게 했는가, 무엇을 대가로 치렀는가, RAG(2020)의 어느 칸을 바꾸었는가이다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>후속 연구는 RAG(2020)의 결합 방식, 문서 인코더 고정, 데이터 규모, 생성기 학습, 늘 검색하기라는 선택을 하나씩 바꾸었다.</p></div>
+    </div>
+
+    <!-- 페이지 2: FiD -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>여러 문서를 한꺼번에 읽으면 무엇이 나아지는가?</li>
+          <li>문서가 늘면 계산은 어떻게 늘어나는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">FiD: 디코더에서 문서를 함께 읽기</h3>
+        <p><span class="term" data-definition="FiD(Fusion-in-Decoder): 문서마다 질문과 이어 붙여 인코더로 따로 처리하고, 디코더가 모든 문서 표현을 한꺼번에 읽어 답을 생성하는 모델.">FiD(Fusion-in-Decoder)</span>(Izacard &amp; Grave, 2020)는 여러 문서에 흩어진 증거를 합치려 한다. 그림은 같은 질문과 문서 3개를 두 모델이 다루는 방식을 나타낸 것이다.</p>
+        <figure class="svg-diagram fit animate-in" style="--diagram-max:760px">
+<svg viewBox="0 0 800 256" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="같은 질문과 문서 3개에서 RAG-Sequence는 문서마다 생성 확률을 구해 가중합하고, FiD는 문서마다 따로 인코딩한 뒤 디코더 하나가 모두를 함께 읽는다">
+<foreignObject x="16" y="8" width="368" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span><strong>RAG-Sequence (2020)</strong></span></div></foreignObject>
+<foreignObject x="424" y="8" width="368" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span><strong>FiD (2020)</strong></span></div></foreignObject>
+<rect class="node-rect" x="16" y="48" width="112" height="40" rx="8"/>
+<foreignObject x="24" y="52" width="96" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>질문 + 문서 1</span></div></foreignObject>
+<path class="edge-line" d="M128,68 H142"/><polygon class="edge-arrow" points="142,63 152,68 142,73"/>
+<rect class="node-rect" x="152" y="48" width="96" height="40" rx="8"/>
+<foreignObject x="160" y="52" width="80" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>생성 확률 1</span></div></foreignObject>
+<rect class="node-rect" x="16" y="104" width="112" height="40" rx="8"/>
+<foreignObject x="24" y="108" width="96" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>질문 + 문서 2</span></div></foreignObject>
+<path class="edge-line" d="M128,124 H142"/><polygon class="edge-arrow" points="142,119 152,124 142,129"/>
+<rect class="node-rect" x="152" y="104" width="96" height="40" rx="8"/>
+<foreignObject x="160" y="108" width="80" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>생성 확률 2</span></div></foreignObject>
+<rect class="node-rect" x="16" y="160" width="112" height="40" rx="8"/>
+<foreignObject x="24" y="164" width="96" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>질문 + 문서 3</span></div></foreignObject>
+<path class="edge-line" d="M128,180 H142"/><polygon class="edge-arrow" points="142,175 152,180 142,185"/>
+<rect class="node-rect" x="152" y="160" width="96" height="40" rx="8"/>
+<foreignObject x="160" y="164" width="80" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>생성 확률 3</span></div></foreignObject>
+<path class="edge-line" d="M248,68 H264 V124"/>
+<path class="edge-line" d="M248,180 H264 V124"/>
+<path class="edge-line" d="M248,124 H270"/><polygon class="edge-arrow" points="270,119 280,124 270,129"/>
+<rect class="node-rect" x="280" y="104" width="104" height="40" rx="8"/>
+<foreignObject x="288" y="108" width="88" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>주변화<br/>(가중합)</span></div></foreignObject>
+<foreignObject x="16" y="228" width="368" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; color:var(--color-text-secondary)"><span>문서마다 따로 생성한 뒤 확률로 섞는다</span></div></foreignObject>
+<rect class="node-rect" x="424" y="48" width="112" height="40" rx="8"/>
+<foreignObject x="432" y="52" width="96" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>질문 + 문서 1</span></div></foreignObject>
+<path class="edge-line" d="M536,68 H550"/><polygon class="edge-arrow" points="550,63 560,68 550,73"/>
+<rect class="node-rect" x="560" y="48" width="96" height="40" rx="8"/>
+<foreignObject x="568" y="52" width="80" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>인코더 1</span></div></foreignObject>
+<rect class="node-rect" x="424" y="104" width="112" height="40" rx="8"/>
+<foreignObject x="432" y="108" width="96" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>질문 + 문서 2</span></div></foreignObject>
+<path class="edge-line" d="M536,124 H550"/><polygon class="edge-arrow" points="550,119 560,124 550,129"/>
+<rect class="node-rect" x="560" y="104" width="96" height="40" rx="8"/>
+<foreignObject x="568" y="108" width="80" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>인코더 2</span></div></foreignObject>
+<rect class="node-rect" x="424" y="160" width="112" height="40" rx="8"/>
+<foreignObject x="432" y="164" width="96" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>질문 + 문서 3</span></div></foreignObject>
+<path class="edge-line" d="M536,180 H550"/><polygon class="edge-arrow" points="550,175 560,180 550,185"/>
+<rect class="node-rect" x="560" y="160" width="96" height="40" rx="8"/>
+<foreignObject x="568" y="164" width="80" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>인코더 3</span></div></foreignObject>
+<path class="edge-line" d="M656,68 H672 V124"/>
+<path class="edge-line" d="M656,180 H672 V124"/>
+<path class="edge-line accent" d="M656,124 H678"/><polygon class="edge-arrow accent" points="678,119 688,124 678,129"/>
+<rect class="node-rect accent" x="688" y="104" width="104" height="40" rx="8"/>
+<foreignObject x="696" y="108" width="88" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>디코더<br/>(전체에 어텐션)</span></div></foreignObject>
+<foreignObject x="424" y="228" width="368" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; color:var(--color-text-secondary)"><span>인코더는 따로, 디코더는 모두를 함께 읽는다</span></div></foreignObject>
+</svg>
+          <figcaption class="figure-caption">그림은 RAG-Sequence와 FiD가 여러 문서를 결합하는 위치를 나타낸 것이다.</figcaption>
+        </figure>
+        <p>인코더가 문서를 따로 처리하므로 계산 시간은 문서 수에 대해 선형으로 늘어난다. 그래서 학습 때 문단을 5개에서 100개까지 늘려 실험할 수 있었고, 문단이 늘수록 성능이 크게 올랐다. FiD-large의 NQ EM은 51.4로, 같은 논문 표의 RAG 44.5보다 높다.</p>
+        <p class="diff-line"><strong>핵심 비교</strong> RAG는 문서마다 생성한 뒤 확률로 섞고, FiD는 디코더 하나가 모든 문서를 함께 읽는다.</p>
+        <p>출처: <a href="https://arxiv.org/abs/2007.01282" target="_blank" rel="noopener">Izacard &amp; Grave 2020, arXiv:2007.01282</a></p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>FiD는 결합 위치를 디코더 안으로 옮겨 여러 문서의 증거를 함께 읽고, 문서 수에 선형인 계산으로 문단을 100개까지 늘렸다.</p></div>
+    </div>
+
+    <!-- 페이지 3: RETRO -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>외부 기억을 2조 토큰까지 키우면 무엇을 얻는가?</li>
+          <li>성능 향상을 읽을 때 무엇을 조심해야 하는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">RETRO: 외부 기억을 사전학습 규모로</h3>
+        <p>RETRO(Borgeaud et al., 2021)는 “작은 생성기 + 큰 외부 기억”을 언어 모델 사전학습으로 넓혔다. 2조 토큰 데이터베이스에서 이웃 청크를 검색해, The Pile에서 GPT-3, Jurassic-1과 비슷한 성능을 25배 적은 파라미터로 냈다.</p>
+        <figure class="svg-diagram fit animate-in" style="--diagram-max:760px">
+<svg viewBox="0 0 800 124" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RETRO는 앞 청크 64토큰을 고정 BERT로 임베딩해 2조 토큰 DB에서 이웃 청크를 찾고, 인코딩한 이웃을 chunked cross-attention으로 다음 청크 생성에 쓰며 이를 반복한다">
+<rect class="node-rect" x="20" y="8" width="136" height="64" rx="8"/>
+<foreignObject x="28" y="12" width="120" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>앞 청크<br/>(64토큰)</span></div></foreignObject>
+<rect class="node-rect" x="176" y="8" width="136" height="64" rx="8"/>
+<foreignObject x="184" y="12" width="120" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>고정 BERT로<br/>임베딩</span></div></foreignObject>
+<rect class="node-rect" x="332" y="8" width="136" height="64" rx="8"/>
+<foreignObject x="340" y="12" width="120" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>2조 토큰 DB에서<br/>이웃 청크 검색</span></div></foreignObject>
+<rect class="node-rect" x="488" y="8" width="136" height="64" rx="8"/>
+<foreignObject x="496" y="12" width="120" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>이웃 청크<br/>인코딩</span></div></foreignObject>
+<rect class="node-rect accent" x="644" y="8" width="136" height="64" rx="8"/>
+<foreignObject x="652" y="12" width="120" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>chunked<br/>cross-attention으로 다음 청크 생성</span></div></foreignObject>
+<path class="edge-line" d="M156,40 H166"/><polygon class="edge-arrow" points="166,35 176,40 166,45"/>
+<path class="edge-line" d="M312,40 H322"/><polygon class="edge-arrow" points="322,35 332,40 322,45"/>
+<path class="edge-line" d="M468,40 H478"/><polygon class="edge-arrow" points="478,35 488,40 478,45"/>
+<path class="edge-line accent" d="M624,40 H634"/><polygon class="edge-arrow accent" points="634,35 644,40 634,45"/>
+<path class="edge-line" d="M712,72 V96 H88 V82"/><polygon class="edge-arrow" points="83,82 93,82 88,72"/>
+<foreignObject x="240" y="96" width="320" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; color:var(--color-text-secondary)"><span>다음 청크에서 다시 반복</span></div></foreignObject>
+</svg>
+          <figcaption class="figure-caption">그림은 RETRO가 청크 단위로 검색하고 생성하는 과정을 나타낸 것이다.</figcaption>
+        </figure>
+        <p>retriever는 RAG처럼 학습하지 않고 고정한 BERT 모델이다. 대가는 색인 크기로, MassiveText 전체 색인은 93 TB(위키백과만이면 215 GB)이다. 저자들은 평가 데이터가 학습 데이터에 새어 든 누출(leakage)이 성능 향상의 일부라고 스스로 밝힌다.</p>
+        <p class="diff-line"><strong>핵심 비교</strong> RAG는 위키백과 2,100만 문서로 과제마다 fine-tuning하고, RETRO는 2조 토큰 DB로 언어 모델을 처음부터 사전학습한다.</p>
+        <p>출처: <a href="https://arxiv.org/abs/2112.04426" target="_blank" rel="noopener">Borgeaud et al. 2021, arXiv:2112.04426</a></p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>RETRO는 고정 retriever와 2조 토큰 DB로 작은 언어 모델이 큰 모델에 맞서게 했지만, 색인이 매우 크고 누출이 향상의 일부이다.</p></div>
+    </div>
+
+    <!-- 페이지 4: Atlas -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>retriever와 LM을 함께 사전학습하면 무엇이 좋아지는가?</li>
+          <li>문서 인코더를 학습하면 왜 비용이 커지는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>Atlas: retriever와 함께 사전학습</h3>
+        <p>Atlas(Izacard et al., 2022)는 RAG가 향후 과제로 남긴 “처음부터 함께 사전학습”을 다룬다. Contriever retriever와 FiD 구조 언어 모델(110억 파라미터)을 함께 사전학습해, NQ 예시 64개만으로 42% 넘는 정확도를 냈다. 파라미터가 50배 많은 540B 모델보다 약 3%p 높다.</p>
+        <figure class="svg-diagram fit animate-in" style="--diagram-max:760px">
+<svg viewBox="0 0 800 108" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Atlas는 Contriever retriever와 FiD 구조 언어 모델을 함께 사전학습한다">
+<rect class="guide-fill" x="160" y="4" width="504" height="96" rx="8"/>
+<text x="412" y="20" class="muted" text-anchor="middle" font-size="12">함께 사전학습</text>
+<rect class="node-rect" x="16" y="32" width="120" height="56" rx="8"/>
+<foreignObject x="24" y="36" width="104" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>질문 · 문맥</span></div></foreignObject>
+<rect class="node-rect accent" x="168" y="32" width="152" height="56" rx="8"/>
+<foreignObject x="176" y="36" width="136" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>Contriever<br/>retriever</span></div></foreignObject>
+<rect class="node-rect" x="352" y="32" width="120" height="56" rx="8"/>
+<foreignObject x="360" y="36" width="104" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>문서 <i class="mi">K</i>개</span></div></foreignObject>
+<rect class="node-rect accent" x="504" y="32" width="152" height="56" rx="8"/>
+<foreignObject x="512" y="36" width="136" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>FiD 언어 모델<br/>(T5 기반)</span></div></foreignObject>
+<rect class="node-rect" x="688" y="32" width="96" height="56" rx="8"/>
+<foreignObject x="696" y="36" width="80" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>출력</span></div></foreignObject>
+<path class="edge-line" d="M136,60 H158"/><polygon class="edge-arrow" points="158,55 168,60 158,65"/>
+<path class="edge-line" d="M320,60 H342"/><polygon class="edge-arrow" points="342,55 352,60 342,65"/>
+<path class="edge-line" d="M472,60 H494"/><polygon class="edge-arrow" points="494,55 504,60 494,65"/>
+<path class="edge-line" d="M656,60 H678"/><polygon class="edge-arrow" points="678,55 688,60 678,65"/>
+</svg>
+          <figcaption class="figure-caption">그림은 Atlas의 두 학습 대상과 데이터 흐름을 나타낸 것이다.</figcaption>
+        </figure>
+        <p>문서 인코더를 학습하면 저장해 둔 문서 임베딩이 낡으므로 주기적으로 다시 색인해야 한다. 논문의 계산은 문서 3,700만 개, 배치 64, 문서 20개, 1,000단계마다 갱신이면 학습 비용이 약 30% 늘어난다는 것이다. 대안으로 든 query-side fine-tuning은 문서 인코더를 고정하는 RAG(2020)의 방식과 같다.</p>
+        <p class="diff-line"><strong>핵심 비교</strong> RAG는 비용 때문에 문서 인코더를 고정했고, Atlas는 재색인 비용을 감수하고 retriever 전체를 함께 사전학습한다.</p>
+        <p>출처: <a href="https://arxiv.org/abs/2208.03299" target="_blank" rel="noopener">Izacard et al. 2022, arXiv:2208.03299</a></p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>Atlas는 retriever와 LM을 함께 사전학습해 적은 예시로도 높은 정확도를 냈지만, 문서 인코더를 학습하는 대가로 재색인 비용을 치른다.</p></div>
+    </div>
+
+    <!-- 페이지 5: REPLUG, In-Context RALM -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>생성기를 학습하지 않고도 검색을 붙일 수 있는가?</li>
+          <li>두 방법은 각각 무엇을 대가로 치르는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">REPLUG와 In-Context RALM: 고정 LM에 붙이기</h3>
+        <p><span class="term" data-definition="대규모 언어 모델(Large Language Model, LLM): 매우 많은 텍스트로 사전학습한, 파라미터가 수십억 개 이상인 언어 모델.">대규모 언어 모델(Large Language Model, LLM)</span>은 내부를 고치거나 다시 학습하기 어렵다. 2023년의 두 연구는 LM을 고정한 채 검색 문서를 입력 앞에 붙인다. 그림은 두 방식을 나타낸 것이다.</p>
+        <figure class="svg-diagram fit animate-in" style="--diagram-max:760px">
+<svg viewBox="0 0 800 256" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="REPLUG는 문서마다 고정 LM을 따로 실행해 출력 확률을 가중 평균하고, In-Context RALM은 문서를 앞 글 앞에 붙여 고정 LM에 넣고 s토큰마다 다시 검색한다">
+<foreignObject x="16" y="8" width="368" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span><strong>REPLUG</strong></span></div></foreignObject>
+<foreignObject x="424" y="8" width="368" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span><strong>In-Context RALM</strong></span></div></foreignObject>
+<rect class="node-rect" x="16" y="48" width="120" height="40" rx="8"/>
+<foreignObject x="24" y="52" width="104" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>문서 1 + 입력</span></div></foreignObject>
+<path class="edge-line" d="M136,68 H150"/><polygon class="edge-arrow" points="150,63 160,68 150,73"/>
+<rect class="node-rect" x="160" y="48" width="88" height="40" rx="8"/>
+<foreignObject x="168" y="52" width="72" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>LM(고정)</span></div></foreignObject>
+<rect class="node-rect" x="16" y="104" width="120" height="40" rx="8"/>
+<foreignObject x="24" y="108" width="104" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>문서 2 + 입력</span></div></foreignObject>
+<path class="edge-line" d="M136,124 H150"/><polygon class="edge-arrow" points="150,119 160,124 150,129"/>
+<rect class="node-rect" x="160" y="104" width="88" height="40" rx="8"/>
+<foreignObject x="168" y="108" width="72" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>LM(고정)</span></div></foreignObject>
+<rect class="node-rect" x="16" y="160" width="120" height="40" rx="8"/>
+<foreignObject x="24" y="164" width="104" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>문서 3 + 입력</span></div></foreignObject>
+<path class="edge-line" d="M136,180 H150"/><polygon class="edge-arrow" points="150,175 160,180 150,185"/>
+<rect class="node-rect" x="160" y="160" width="88" height="40" rx="8"/>
+<foreignObject x="168" y="164" width="72" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>LM(고정)</span></div></foreignObject>
+<path class="edge-line" d="M248,68 H264 V124"/>
+<path class="edge-line" d="M248,180 H264 V124"/>
+<path class="edge-line accent" d="M248,124 H270"/><polygon class="edge-arrow accent" points="270,119 280,124 270,129"/>
+<rect class="node-rect accent" x="280" y="104" width="104" height="40" rx="8"/>
+<foreignObject x="288" y="108" width="88" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>출력 확률<br/>가중 평균</span></div></foreignObject>
+<rect class="node-rect" x="424" y="104" width="120" height="40" rx="8"/>
+<foreignObject x="432" y="108" width="104" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>문서 + 앞 글</span></div></foreignObject>
+<path class="edge-line" d="M544,124 H558"/><polygon class="edge-arrow" points="558,119 568,124 558,129"/>
+<rect class="node-rect" x="568" y="104" width="88" height="40" rx="8"/>
+<foreignObject x="576" y="108" width="72" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>LM(고정)</span></div></foreignObject>
+<path class="edge-line" d="M656,124 H670"/><polygon class="edge-arrow" points="670,119 680,124 670,129"/>
+<rect class="node-rect" x="680" y="104" width="104" height="40" rx="8"/>
+<foreignObject x="688" y="108" width="88" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>다음 <i class="mi">s</i>토큰</span></div></foreignObject>
+<path class="edge-line" d="M732,144 V176 H484 V154"/><polygon class="edge-arrow" points="479,154 489,154 484,144"/>
+<foreignObject x="512" y="180" width="248" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; color:var(--color-text-secondary)"><span><i class="mi">s</i>토큰마다 다시 검색</span></div></foreignObject>
+<foreignObject x="16" y="228" width="368" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; color:var(--color-text-secondary)"><span>문서 수만큼 LM을 여러 번 실행</span></div></foreignObject>
+<foreignObject x="424" y="228" width="368" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; color:var(--color-text-secondary)"><span>구조 변경·추가 학습 없이 입력 앞에 붙임</span></div></foreignObject>
+</svg>
+          <figcaption class="figure-caption">그림은 REPLUG의 문서별 앙상블과 In-Context RALM의 반복 검색을 나타낸 것이다.</figcaption>
+        </figure>
+        <p>REPLUG 방식은 RAG-Sequence식 문서별 결합을 블랙박스 LM에 적용한다. GPT-3의 언어 모델링을 6.3%, Codex의 5-shot MMLU를 5.1% 높였지만 문서 수만큼 LM을 실행한다. In-Context RALM 방식은 학습이 전혀 없으며, 기성 BM25만으로 LM 파라미터를 2~3배 늘린 만큼의 향상을 얻었다.</p>
+        <p class="diff-line"><strong>핵심 비교</strong> RAG는 생성기를 함께 fine-tuning하고, REPLUG와 In-Context RALM은 LM을 고정한 채 입력만 바꾼다.</p>
+        <p>출처: <a href="https://arxiv.org/abs/2301.12652" target="_blank" rel="noopener">Shi et al. 2023, arXiv:2301.12652</a> · <a href="https://arxiv.org/abs/2302.00083" target="_blank" rel="noopener">Ram et al. 2023, arXiv:2302.00083</a></p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>REPLUG와 In-Context RALM은 고정 LM의 입력 앞에 문서를 붙여 생성기 학습을 없앴고, 대신 여러 번 실행하거나 자주 다시 검색하는 비용을 치른다.</p></div>
+    </div>
+
+    <!-- 페이지 6: Self-RAG -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>늘 검색하면 무엇이 문제인가?</li>
+          <li>모델이 스스로 검색 여부를 어떻게 정하는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">Self-RAG: 필요할 때만 검색하고 스스로 평가</h3>
+        <p>Self-RAG(Asai et al., 2023)는 필요와 관계없이 늘 같은 수의 문단을 검색하면 도움 안 되는 응답이 나온다고 지적한다. 그래서 <span class="term" data-definition="reflection token(스스로 평가하는 특수 토큰): 검색 여부, 문단 관련성, 근거 여부, 유용성을 모델이 직접 출력하도록 만든 특수 토큰.">reflection token(스스로 평가하는 특수 토큰)</span>으로 검색 여부를 정하고 결과를 평가한다.</p>
+        <figure class="svg-diagram fit animate-in" style="--diagram-max:760px">
+<svg viewBox="0 0 800 152" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Self-RAG는 Retrieve 토큰으로 검색 여부를 정하고, 검색하면 IsRel로 문단 관련성을 따진 뒤 문단마다 생성하고 IsSup과 IsUse로 평가해 고르며, 검색하지 않으면 바로 생성한 뒤 IsUse로만 평가한다">
+<rect class="node-rect accent" x="16" y="8" width="136" height="64" rx="8"/>
+<foreignObject x="24" y="12" width="120" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>Retrieve<br/>검색이 필요한가</span></div></foreignObject>
+<rect class="node-rect" x="184" y="8" width="136" height="64" rx="8"/>
+<foreignObject x="192" y="12" width="120" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>문단 검색</span></div></foreignObject>
+<rect class="node-rect" x="352" y="8" width="136" height="64" rx="8"/>
+<foreignObject x="360" y="12" width="120" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>IsRel<br/>문단이 관련 있는가</span></div></foreignObject>
+<rect class="node-rect" x="520" y="8" width="120" height="64" rx="8"/>
+<foreignObject x="528" y="12" width="104" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>문단마다 생성</span></div></foreignObject>
+<rect class="node-rect accent" x="672" y="8" width="112" height="64" rx="8"/>
+<foreignObject x="680" y="12" width="96" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>IsSup · IsUse<br/>평가해 고름</span></div></foreignObject>
+<path class="edge-line" d="M152,40 H174"/><polygon class="edge-arrow" points="174,35 184,40 174,45"/>
+<path class="edge-line" d="M320,40 H342"/><polygon class="edge-arrow" points="342,35 352,40 342,45"/>
+<path class="edge-line" d="M488,40 H510"/><polygon class="edge-arrow" points="510,35 520,40 510,45"/>
+<path class="edge-line" d="M640,40 H662"/><polygon class="edge-arrow" points="662,35 672,40 662,45"/>
+<text x="168" y="32" class="muted" text-anchor="middle" font-size="11">예</text>
+<path class="edge-line" d="M84,72 V124 H184"/><polygon class="edge-arrow" points="184,119 194,124 184,129"/>
+<text x="96" y="116" class="muted" text-anchor="start" font-size="11">아니요</text>
+<rect class="node-rect" x="194" y="104" width="136" height="40" rx="8"/>
+<foreignObject x="202" y="108" width="120" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>검색 없이 생성</span></div></foreignObject>
+<path class="edge-line" d="M330,124 H662"/><polygon class="edge-arrow" points="662,119 672,124 662,129"/>
+<rect class="node-rect" x="672" y="104" width="112" height="40" rx="8"/>
+<foreignObject x="680" y="108" width="96" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>IsUse만 평가</span></div></foreignObject>
+</svg>
+          <figcaption class="figure-caption">그림은 Self-RAG의 네 가지 reflection token이 쓰이는 순서를 나타낸 것이다.</figcaption>
+        </figure>
+        <p>IsSup은 출력이 문단에 뒷받침되는지, IsUse는 유용성을 1~5로 매긴다. 7B·13B 모델이 ChatGPT와 검색 증강 Llama2-chat보다 오픈 도메인 QA, 추론, 사실 검증에서 나았다. 대가로 GPT-4로 만든 라벨 4,000~20,000개로 critic 모델을 따로 학습해야 한다.</p>
+        <p class="diff-line"><strong>핵심 비교</strong> RAG는 모든 입력에서 top-<i class="mi">k</i>를 검색하고 null document 시도도 실패했으며, Self-RAG는 검색 여부 자체를 모델이 정한다.</p>
+        <p>출처: <a href="https://arxiv.org/abs/2310.11511" target="_blank" rel="noopener">Asai et al. 2023, arXiv:2310.11511</a></p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>Self-RAG는 reflection token으로 필요할 때만 검색하고 출력을 스스로 평가하지만, GPT-4 라벨과 별도 critic 학습이 필요하다.</p></div>
+    </div>
+
+    <!-- 페이지 7: 비교와 더 읽기 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>후속 연구를 한 표로 놓으면 무엇이 보이는가?</li>
+          <li>RAG를 더 넓게 공부하려면 어디로 가는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">한눈에 비교</h3>
+        <p>표는 이 단원의 연구를 RAG(2020)와 나란히 놓은 것이다.</p>
+        <table class="data-table animate-in">
+          <thead><tr><th>연구</th><th>retriever</th><th>생성기·LM</th><th>결합</th><th>새 비용</th></tr></thead>
+          <tbody>
+            <tr class="hl"><td>RAG(2020)</td><td>query만 학습</td><td>함께 fine-tuning</td><td>문서별 확률 섞기</td><td>-</td></tr>
+            <tr><td>FiD(2020)</td><td>고정</td><td>fine-tuning</td><td>디코더에서 함께</td><td>긴 디코더 입력</td></tr>
+            <tr><td>RETRO(2021)</td><td>고정 BERT</td><td>사전학습</td><td>chunked cross-attention</td><td>93 TB 색인</td></tr>
+            <tr><td>Atlas(2022)</td><td>함께 사전학습</td><td>함께 사전학습</td><td>디코더에서 함께</td><td>재색인 약 30%</td></tr>
+            <tr><td>REPLUG(2023)</td><td>학습 가능(LSR)</td><td>고정</td><td>출력 확률 앙상블</td><td>문서 수만큼 실행</td></tr>
+            <tr><td>In-Context RALM(2023)</td><td>고정 BM25 등</td><td>고정</td><td>입력 앞에 붙임</td><td>잦은 재검색</td></tr>
+            <tr><td>Self-RAG(2023)</td><td>고정</td><td>fine-tuning</td><td>필요할 때 검색</td><td>critic 학습</td></tr>
+          </tbody>
+          <caption>표는 RAG(2020)와 후속 연구의 구성 요소별 선택을 나타낸 것이다.</caption>
+        </table>
+        <p class="diff-line"><strong>핵심 비교</strong> 후속 연구는 학습할 부분을 늘리거나(Atlas) 줄이고(REPLUG, In-Context RALM), 결합 위치(FiD)와 검색 시점(Self-RAG)을 바꾸었다.</p>
+        <p>이후 흐름은 같은 저장소의 <a href="../rag-survey-ko/index.html" target="_blank" rel="noopener">RAG 서베이 강의</a>(Gao et al. 2023, <a href="https://arxiv.org/abs/2312.10997" target="_blank" rel="noopener">arXiv:2312.10997</a>)로 이어진다. 구현은 <a href="https://huggingface.co/docs/transformers/model_doc/rag" target="_blank" rel="noopener">HuggingFace RAG 문서</a>, 발표 배경은 <a href="https://ai.meta.com/blog/retrieval-augmented-generation-streamlining-the-creation-of-intelligent-natural-language-processing-models/" target="_blank" rel="noopener">Meta AI 블로그(2020)</a>에서 볼 수 있다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>후속 연구는 학습 범위, 결합 위치, 검색 시점을 바꾸며 RAG(2020)를 넓혔고, 각각 새 비용을 함께 가져왔다.</p></div>
+    </div>
+
+    <!-- 페이지 8: 핵심 정리 + 확인 문제 1, 2 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-accent animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">핵심 정리</strong>
+            <ol>
+              <li>FiD는 디코더에서 여러 문서를 함께 읽는다.</li>
+              <li>RETRO는 2조 토큰 DB로 언어 모델을 사전학습한다.</li>
+              <li>Atlas는 retriever와 LM을 함께 사전학습하고 재색인 비용을 치른다.</li>
+              <li>REPLUG, In-Context RALM은 LM을 고정하고, Self-RAG는 검색 여부를 스스로 정한다.</li>
+            </ol>
+            <p>후속 연구 문항은 RAG(2020)의 어느 칸을 바꾸었는지부터 짝지어라.</p>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>후속 연구 짝짓기</h3>
+        <div class="quiz-container animate-in" id="tr-quiz-a">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="② | Atlas는 문서 인코더까지 학습하므로 문서 임베딩이 낡아 주기적으로 다시 색인해야 하고, 그 비용이 약 30%이다."
+               data-explanation-wrong="| 정답은 ②이다. Atlas는 retriever 전체를 함께 학습하므로 주기적 재색인이 필요하다. ①은 FiD가 계산 시간이 문서 수에 선형으로 늘어난다고 밝히므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">1</span>후속 연구와 그 대가를 바르게 짝지은 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① FiD - 계산 시간이 문서 수의 제곱으로 늘어남</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② Atlas - 문서 인코더 학습에 따른 주기적 재색인</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ In-Context RALM - 생성기 전체를 다시 학습</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ RETRO - retriever를 함께 학습하는 비용</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ Self-RAG - 모든 입력에서 늘 검색하는 비용</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-d"
+               data-explanation-right="④ | REPLUG는 LM을 블랙박스로 고정하고 문서마다 따로 실행한 출력 확률을 섞으므로 LM 내부를 고치지 않는다."
+               data-explanation-wrong="| 정답은 ④이다. REPLUG는 LM을 고정하므로 LM 내부 구조를 고치지 않는다. ②는 RETRO가 retriever로 고정 BERT를 쓰므로 옳다.">
+            <h3 class="quiz-question"><span class="q-num">2</span>후속 연구에 대한 설명으로 옳지 <u>않은</u> 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① FiD는 인코더가 문서를 따로 처리하고 디코더가 함께 읽는다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② RETRO는 고정한 BERT로 이웃 청크를 검색한다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ In-Context RALM은 추가 학습 없이 문서를 입력 앞에 붙인다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ REPLUG는 검색 문서를 읽도록 LM 내부 구조를 고친다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ Self-RAG는 Retrieve 토큰으로 검색 여부를 정한다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('tr-quiz-a')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('tr-quiz-a')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>후속 연구는 각자 RAG(2020)의 한 칸을 바꾸었고 그만큼 새 비용을 치렀다.</p></div>
+    </div>
+
+    <!-- 페이지 9: 확인 문제 3 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>RAG(2020)가 고정한 것은 무엇이었는가?</li>
+          <li>그 선택을 되돌린 연구는 무엇인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>설계 선택과 후속 연구</h3>
+        <div class="quiz-container animate-in" id="tr-quiz-b">
+          <div class="quiz-question-block"
+               data-correct="option-e"
+               data-explanation-right="⑤ | ㄱ은 Atlas, ㄴ은 Self-RAG, ㄷ은 REPLUG·In-Context RALM이 바꾼 RAG(2020)의 선택이므로 모두 옳다."
+               data-explanation-wrong="| 정답은 ⑤이다. 문서 인코더 고정은 Atlas(ㄱ), 늘 top-k 검색은 Self-RAG(ㄴ), 생성기 fine-tuning은 REPLUG·In-Context RALM(ㄷ)이 바꾸었다. ③은 ㄴ을 빠뜨렸으므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">3</span>RAG(2020)의 설계 선택과 그것을 바꾼 후속 연구를 바르게 짝지은 것만을 <span class="nobr">&lt;보기&gt;에서</span> 있는 대로 고른 것은?<span class="q-points">[3점]</span></h3>
+            <div class="bogi">
+              <p>ㄱ. 문서 인코더 고정 - Atlas</p>
+              <p>ㄴ. 모든 입력에서 늘 top-<i class="mi">k</i> 검색 - Self-RAG</p>
+              <p>ㄷ. 생성기를 함께 fine-tuning - REPLUG, In-Context RALM</p>
+            </div>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① ㄱ</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② ㄴ</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ ㄱ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ ㄴ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ ㄱ, ㄴ, ㄷ</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('tr-quiz-b')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('tr-quiz-b')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>문서 인코더 고정, 늘 검색하기, 생성기 학습은 각각 Atlas, Self-RAG, REPLUG·In-Context RALM이 바꾼 선택이다.</p></div>
+    </div>
+
+  </div>
+</section>

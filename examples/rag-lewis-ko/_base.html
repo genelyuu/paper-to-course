@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RAG: 검색으로 지식을 보강하는 생성 모델</title>
+
+  <!-- 외부 의존성 없음: 아래 파일은 build.sh가 모두 index.html 안에 넣는다(글꼴은 data URI).
+       본문 P2C Sans(Pretendard v1.3.9 KS X 1001 부분 집합, OFL), 코드 JetBrains Mono(OFL), 수식 KaTeX 0.16.10(MIT). -->
+  <link rel="stylesheet" href="vendor/fonts.css">
+  <link rel="stylesheet" href="vendor/katex/katex.min.css">
+  <script src="vendor/katex/katex.min.js"></script>
+  <script src="vendor/katex/auto-render.min.js"></script>
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!--
+    강의별 설정 — 아래 네 개의 강조색 변수만 바꿉니다.
+    선택지(교과 색 프리셋: accent / hover / light / muted, 흰 글자 대비):
+      과학탐구 파랑  #1F6FB2 / #185A92 / #E8F1FA / #6FA3D3  (기본값, 5.28:1) ML·물리·생명 등 자연과학
+      수학 초록      #1B7A50 / #145F3E / #E6F4EC / #6BB592  (5.32:1) 이론·최적화·통계
+      사회탐구 보라  #6B4FA8 / #563F88 / #F0ECF8 / #A08ECB  (6.35:1) 경제·사회과학·HCI
+      영어 주황      #B85C0F / #964A0B / #FCEFE3 / #E0A06A  (4.59:1) 언어학·언어 중심 NLP
+      국어 노랑은 흰 글자 대비가 부족해 뺀다.
+  -->
+  <style>
+    :root {
+      --color-accent:       #1F6FB2;
+      --color-accent-hover: #185A92;
+      --color-accent-light: #E8F1FA;
+      --color-accent-muted: #6FA3D3;
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <nav class="nav" id="nav" aria-label="강의 내비게이션">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">RAG: 검색으로 지식을 보강하는 생성 모델</span>
+      <div class="nav-dots" id="nav-dots">
+        <button class="nav-dot" data-target="module-0" data-tooltip="1 서론과 배경" aria-label="1단원 서론과 배경"></button>
+        <button class="nav-dot" data-target="module-1" data-tooltip="2 이전 연구와 한계" aria-label="2단원 이전 연구와 한계"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="3 RAG 모델" aria-label="3단원 RAG 모델"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="4 검색기, 생성기, 학습" aria-label="4단원 검색기, 생성기, 학습"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="5 실험 설계" aria-label="5단원 실험 설계"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="6 결과" aria-label="6단원 결과"></button>
+        <button class="nav-dot" data-target="module-6" data-tooltip="7 이후 동향" aria-label="7단원 이후 동향"></button>
+      </div>
+    </div>
+  </nav>
+
+  <aside class="sidebar" id="sidebar" aria-label="강의 목차">
+    <div class="sidebar-header">
+      <span class="sidebar-title">RAG: 검색으로 지식을 보강하는 생성 모델</span>
+    </div>
+    <nav class="sidebar-nav" id="sidebar-nav">
+      <a class="sidebar-item" data-module="0" href="#module-0"><span class="sidebar-item-num">1</span><span class="sidebar-item-label">서론과 배경</span></a>
+      <a class="sidebar-item" data-module="1" href="#module-1"><span class="sidebar-item-num">2</span><span class="sidebar-item-label">이전 연구와 한계</span></a>
+      <a class="sidebar-item" data-module="2" href="#module-2"><span class="sidebar-item-num">3</span><span class="sidebar-item-label">RAG 모델</span></a>
+      <a class="sidebar-item" data-module="3" href="#module-3"><span class="sidebar-item-num">4</span><span class="sidebar-item-label">검색기, 생성기, 학습</span></a>
+      <a class="sidebar-item" data-module="4" href="#module-4"><span class="sidebar-item-num">5</span><span class="sidebar-item-label">실험 설계</span></a>
+      <a class="sidebar-item" data-module="5" href="#module-5"><span class="sidebar-item-num">6</span><span class="sidebar-item-label">결과</span></a>
+      <a class="sidebar-item" data-module="6" href="#module-6"><span class="sidebar-item-num">7</span><span class="sidebar-item-label">이후 동향</span></a>
+    </nav>
+  </aside>
+
+  <button class="sidebar-toggle" id="sidebar-toggle" aria-label="목차 열기/닫기" aria-expanded="false">
+    <span class="sidebar-toggle-icon"></span>
+  </button>
+
+  <div class="page-wrapper" id="page-wrapper">
+  <main id="main">

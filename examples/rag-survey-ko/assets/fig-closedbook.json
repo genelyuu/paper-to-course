@@ -1,0 +1,13 @@
+{
+  "model": "Efficient-Large-Model/Sana_Sprint_0.6B_1024px_diffusers",
+  "device": "mps",
+  "dtype": "torch.bfloat16",
+  "steps": 2,
+  "size": 1024,
+  "seed": 7,
+  "prompt": "an empty school desk with a pencil and a blank answer sheet, closed exam without books",
+  "style": ", simple black line drawing, textbook illustration, flat, no shading, no gradient, white background, clean closed outlines, no text, no letters",
+  "seconds": 1.38,
+  "paths": 15,
+  "bytes": 47874
+}

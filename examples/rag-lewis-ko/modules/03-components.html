@@ -1,0 +1,351 @@
+<section class="module" id="module-3">
+  <div class="module-content">
+
+    <div class="module-header">
+      <span class="module-number">4</span>
+      <h2 class="module-title">검색기, 생성기, 학습</h2>
+      <p class="module-subtitle">DPR retriever, BART generator, 학습 범위와 디코딩 방법을 차례로 살펴본다</p>
+    </div>
+
+    <!-- 쪽 1: DPR bi-encoder -->
+    <div class="screen cornell dense">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">학습 목표</strong>
+            <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
+            <ol>
+              <li>DPR이 내적과 MIPS로 문서를 고르는 과정을 설명할 수 있다.</li>
+              <li>학습 중 갱신하는 부분과 고정하는 부분을 구분하고 그 대가를 설명할 수 있다.</li>
+              <li>Thorough Decoding과 Fast Decoding의 추가 계산량을 비교할 수 있다.</li>
+            </ol>
+          </div>
+        </div>
+        <figure class="figure side" style="--figure-side-width:216px; margin:var(--space-4) 0 0"><svg viewBox="0 0 228 104" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RAG 구조도 축소판: 오프라인 문서 색인과 온라인 query encoder, MIPS, generator, 주변화. 색칠한 칸이 이 쪽에서 다루는 부분"><path class="edge-line" d="M86,32 V46"/><polygon class="edge-arrow" points="81,46 91,46 86,56"/><path class="edge-line" d="M52,70 H54"/><polygon class="edge-arrow" points="54,65 64,70 54,75"/><path class="edge-line" d="M108,70 H110"/><polygon class="edge-arrow" points="110,65 120,70 110,75"/><path class="edge-line" d="M164,70 H166"/><polygon class="edge-arrow" points="166,65 176,70 166,75"/><rect class="node-rect sq accent" x="64" y="8" width="44" height="24"/><foreignObject x="72" y="12" width="28" height="16"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>색인</span></div></foreignObject><rect class="node-rect sq accent" x="8" y="56" width="44" height="28"/><foreignObject x="16" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span><i class="mi">q</i></span></div></foreignObject><rect class="node-rect sq accent" x="64" y="56" width="44" height="28"/><foreignObject x="72" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>MIPS</span></div></foreignObject><rect class="node-rect sq" x="120" y="56" width="44" height="28"/><foreignObject x="128" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span><i class="mi">p</i><sub>θ</sub></span></div></foreignObject><rect class="node-rect sq" x="176" y="56" width="44" height="28"/><foreignObject x="184" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>Σ</span></div></foreignObject><text class="muted" x="116" y="24" font-size="11">오프라인</text><text class="muted" x="8" y="100" font-size="11">온라인</text></svg><figcaption class="figure-caption">지도: 색칠한 칸이 retriever이다.</figcaption></figure>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">retriever: DPR<span class="paper-ref">논문 2.2절</span></h3>
+        <p>RAG의 <span class="term" data-definition="retriever(검색기): 질문을 받아 관련 문서를 찾아 오는 구성 요소.">retriever(검색기)</span>는 <span class="term" data-definition="DPR(Dense Passage Retriever): BERT 두 개로 질문과 문단을 각각 임베딩하고 내적으로 검색하는 retriever. 오픈 도메인 질의응답용으로 학습됨.">DPR(Dense Passage Retriever)</span>이다. DPR은 질문과 문서를 서로 다른 <span class="term" data-definition="BERT(양방향 인코더 사전학습 모델): 문장의 앞뒤 문맥을 함께 읽도록 사전학습한 트랜스포머 인코더. base 크기는 파라미터 약 1억 1,000만 개임.">BERT(양방향 인코더 사전학습 모델)</span>로 따로 벡터로 바꾸는 <span class="term" data-definition="bi-encoder(query와 문서를 따로 임베딩): 질문과 문서를 서로 다른 인코더로 각각 벡터로 바꾸고 벡터끼리만 비교하는 구조. 문서 벡터를 미리 계산해 둘 수 있음.">bi-encoder(query와 문서를 따로 임베딩)</span> 구조이다. 두 인코더는 모두 BERT-base 크기이다.</p>
+        <div class="math-equation">$$p_\eta(z|x) \propto \mathit{exp}\big(\boldsymbol{d}(z)^{\top}\boldsymbol{q}(x)\big), \qquad \boldsymbol{d}(z) = \mathit{BERT}_d(z), \quad \boldsymbol{q}(x) = \mathit{BERT}_q(x)$$</div>
+        <p>여기서 $\boldsymbol{q}(x)$는 <span class="term" data-definition="query encoder(질의 인코더): 질문을 임베딩 벡터 하나로 바꾸는 신경망. 기호는 q(x).">query encoder(질의 인코더)</span>가 만든 질문 벡터, $\boldsymbol{d}(z)$는 <span class="term" data-definition="document encoder(문서 인코더): 문서를 임베딩 벡터 하나로 바꾸는 신경망. 기호는 d(z).">document encoder(문서 인코더)</span>가 만든 문서 벡터이다. 두 벡터의 <span class="term" data-definition="내적(Inner Product): 두 벡터의 같은 자리 성분끼리 곱해 모두 더한 값. 클수록 두 벡터가 비슷한 방향임.">내적(Inner Product)</span>이 클수록 문서 확률이 커지며, 비례 기호 ∝는 top-<i class="mi">k</i> 문서끼리 합이 1이 되게 나눈다는 뜻이다.</p>
+        <div class="svg-diagram animate-in" style="margin:var(--space-3) auto">
+          <svg viewBox="0 0 800 144" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="DPR bi-encoder: 질문은 BERT_q로, 문서는 BERT_d로 따로 벡터가 되고, 두 벡터의 내적에 softmax를 적용해 문서 확률을 얻는다"><path class="edge-line" d="M144,32 H166"/><polygon class="edge-arrow" points="166,27 176,32 166,37"/><path class="edge-line" d="M304,32 H326"/><polygon class="edge-arrow" points="326,27 336,32 326,37"/><path class="edge-line" d="M144,112 H166"/><polygon class="edge-arrow" points="166,107 176,112 166,117"/><path class="edge-line" d="M304,112 H326"/><polygon class="edge-arrow" points="326,107 336,112 326,117"/><path class="edge-line" d="M432,32 H544 V38"/><polygon class="edge-arrow" points="539,38 549,38 544,48"/><path class="edge-line" d="M432,112 H544 V106"/><polygon class="edge-arrow" points="539,106 549,106 544,96"/><path class="edge-line accent" d="M608,72 H646"/><polygon class="edge-arrow accent" points="646,67 656,72 646,77"/><rect class="node-rect sq" x="16" y="8" width="128" height="48"/><foreignObject x="24" y="12" width="112" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>질문 <i class="mi">x</i></span></div></foreignObject><rect class="node-rect sq" x="176" y="8" width="128" height="48"/><foreignObject x="184" y="12" width="112" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>query encoder BERT<sub>q</sub></span></div></foreignObject><rect class="node-rect sq" x="336" y="8" width="96" height="48"/><foreignObject x="344" y="12" width="80" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span><i class="mi">q</i>(<i class="mi">x</i>) 벡터</span></div></foreignObject><rect class="node-rect sq" x="16" y="88" width="128" height="48"/><foreignObject x="24" y="92" width="112" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>문서 <i class="mi">z</i> (100단어)</span></div></foreignObject><rect class="node-rect sq" x="176" y="88" width="128" height="48"/><foreignObject x="184" y="92" width="112" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>document encoder BERT<sub>d</sub></span></div></foreignObject><rect class="node-rect sq" x="336" y="88" width="96" height="48"/><foreignObject x="344" y="92" width="80" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span><i class="mi">d</i>(<i class="mi">z</i>) 벡터</span></div></foreignObject><rect class="node-rect sq" x="480" y="48" width="128" height="48"/><foreignObject x="488" y="52" width="112" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>내적 <i class="mi">d</i>(<i class="mi">z</i>)<sup>⊤</sup><i class="mi">q</i>(<i class="mi">x</i>)</span></div></foreignObject><rect class="node-rect sq accent" x="656" y="48" width="128" height="48"/><foreignObject x="664" y="52" width="112" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>softmax → <i class="mi">p</i><sub>η</sub>(<i class="mi">z</i>|<i class="mi">x</i>)</span></div></foreignObject></svg>
+        </div>
+        <p>질문과 문서가 서로를 보지 않고 벡터만 만나므로, 문서 벡터는 질문이 오기 전에 미리 계산해 둘 수 있다. 이것이 2,100만 문서를 검색할 수 있는 이유이자, 두 문장을 함께 읽는 모델보다 세밀한 비교를 하지 못한다는 대가이다. 논문은 DPR이 학습해 둔 bi-encoder로 retriever를 초기화했고, 이 DPR은 TriviaQA와 Natural Questions에서 답이 든 문서를 찾도록 학습된 모델이다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>DPR은 질문과 문서를 각각 BERT로 벡터화하고 두 벡터의 내적으로 문서 확률을 정한다.</p></div>
+    </div>
+
+    <!-- 쪽 2: MIPS, FAISS, 색인 규모 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>2,100만 문서 가운데 top-<i class="mi">k</i>를 어떻게 빨리 찾는가?</li>
+          <li>색인을 두는 데 드는 비용은 얼마인가?</li>
+        </ul>
+        <figure class="figure side" style="--figure-side-width:216px; margin:var(--space-4) 0 0"><svg viewBox="0 0 228 104" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RAG 구조도 축소판: 오프라인 문서 색인과 온라인 query encoder, MIPS, generator, 주변화. 색칠한 칸이 이 쪽에서 다루는 부분"><path class="edge-line" d="M86,32 V46"/><polygon class="edge-arrow" points="81,46 91,46 86,56"/><path class="edge-line" d="M52,70 H54"/><polygon class="edge-arrow" points="54,65 64,70 54,75"/><path class="edge-line" d="M108,70 H110"/><polygon class="edge-arrow" points="110,65 120,70 110,75"/><path class="edge-line" d="M164,70 H166"/><polygon class="edge-arrow" points="166,65 176,70 166,75"/><rect class="node-rect sq accent" x="64" y="8" width="44" height="24"/><foreignObject x="72" y="12" width="28" height="16"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>색인</span></div></foreignObject><rect class="node-rect sq accent" x="8" y="56" width="44" height="28"/><foreignObject x="16" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span><i class="mi">q</i></span></div></foreignObject><rect class="node-rect sq accent" x="64" y="56" width="44" height="28"/><foreignObject x="72" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>MIPS</span></div></foreignObject><rect class="node-rect sq" x="120" y="56" width="44" height="28"/><foreignObject x="128" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span><i class="mi">p</i><sub>θ</sub></span></div></foreignObject><rect class="node-rect sq" x="176" y="56" width="44" height="28"/><foreignObject x="184" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>Σ</span></div></foreignObject><text class="muted" x="116" y="24" font-size="11">오프라인</text><text class="muted" x="8" y="100" font-size="11">온라인</text></svg><figcaption class="figure-caption">지도: 색칠한 칸이 retriever이다.</figcaption></figure>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">MIPS와 문서 색인의 규모<span class="paper-ref">논문 2.2, 3절, 부록 C</span></h3>
+        <div class="with-figure" style="--figure-side-width:176px">
+          <div>
+            <p>내적이 가장 큰 <span class="term" data-definition="top-k(상위 k개): 점수가 가장 높은 k개만 골라 쓰는 것.">top-<i class="mi">k</i>(상위 $k$개)</span> 문서를 고르는 일은 <span class="term" data-definition="MIPS(Maximum Inner Product Search, 최대 내적 검색): 질의 벡터와 내적이 가장 큰 벡터를 찾는 문제. 보통 근사적으로 빠르게 풂.">MIPS(Maximum Inner Product Search, 최대 내적 검색)</span> 문제이다. 모든 문서와 내적을 계산하면 질문 하나에 2,100만 번을 계산해야 한다. 논문은 <span class="term" data-definition="FAISS(벡터 검색 라이브러리): 대량의 벡터에서 가까운 벡터를 빠르게 찾게 해 주는 오픈소스 라이브러리. 벡터 압축 기능도 있음.">FAISS(벡터 검색 라이브러리)</span>의 <span class="term" data-definition="HNSW(Hierarchical Navigable Small World, 그래프 기반 근사 최근접 탐색): 벡터를 여러 층의 이웃 그래프로 엮어, 위층에서 크게 건너뛰고 아래층에서 좁혀 가며 찾는 색인 방식.">HNSW(Hierarchical Navigable Small World, 그래프 기반 근사 최근접 탐색)</span> 색인으로 이 문제를 <span class="term" data-definition="근사 최근접 이웃 탐색(Approximate Nearest Neighbor, ANN): 가장 가까운 벡터를 정확히 찾는 대신 거의 가장 가까운 벡터를 훨씬 빨리 찾는 방법.">근사 최근접 이웃 탐색(Approximate Nearest Neighbor, ANN)</span>으로 풀어 준선형 시간에 답을 얻는다.</p>
+            <p>근사이므로 빠른 대신 정확한 top-<i class="mi">k</i>와 다른 문서가 섞일 수 있다. 메모리도 든다. 논문은 색인 벡터를 CPU에 두었다.</p>
+          </div>
+          <figure class="figure side"><img src="assets/fig-magnifier.svg" alt="책 위에 놓인 돋보기"><figcaption class="figure-caption">retriever는 거대한 책 더미에서 몇 쪽만 골라 비추는 돋보기이다.</figcaption></figure>
+        </div>
+        <table class="data-table animate-in">
+          <thead><tr><th>항목</th><th class="num">값</th><th>출처</th></tr></thead>
+          <tbody>
+            <tr><td>지식원</td><td class="num">위키백과 2018년 12월</td><td>3절</td></tr>
+            <tr><td>문서 단위</td><td class="num">겹치지 않는 100단어 <span class="term" data-definition="청크(Chunk): 검색 단위가 되도록 긴 문서를 잘라 낸 조각. 이 논문은 100단어 단위로 자름.">청크(Chunk)</span></td><td>3절</td></tr>
+            <tr class="hl"><td>문서 수 = 색인 벡터 수</td><td class="num">2,100만 개</td><td>3절</td></tr>
+            <tr><td>색인 메모리(CPU)</td><td class="num">약 100 GB</td><td>부록 C</td></tr>
+            <tr><td>FAISS 압축 뒤 메모리</td><td class="num">36 GB</td><td>부록 C</td></tr>
+          </tbody>
+          <caption>표는 RAG가 쓰는 <span class="term" data-definition="문서 색인(Document Index): 모든 문서의 임베딩 벡터를 빠르게 찾을 수 있게 모아 둔 자료 구조.">문서 색인(Document Index)</span>의 규모와 비용을 나타낸 것이다.</caption>
+        </table>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>2,100만 문서의 top-<i class="mi">k</i>는 FAISS의 HNSW 근사 MIPS로 빠르게 찾지만, 색인에는 약 100 GB(압축 시 36 GB)의 메모리가 든다.</p></div>
+    </div>
+
+    <!-- 쪽 3: BART generator -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>generator는 질문과 문서를 어떻게 함께 읽는가?</li>
+          <li>문서가 많아지면 generator의 계산은 어떻게 늘어나는가?</li>
+        </ul>
+        <figure class="figure side" style="--figure-side-width:216px; margin:var(--space-4) 0 0"><svg viewBox="0 0 228 104" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RAG 구조도 축소판: 오프라인 문서 색인과 온라인 query encoder, MIPS, generator, 주변화. 색칠한 칸이 이 쪽에서 다루는 부분"><path class="edge-line" d="M86,32 V46"/><polygon class="edge-arrow" points="81,46 91,46 86,56"/><path class="edge-line" d="M52,70 H54"/><polygon class="edge-arrow" points="54,65 64,70 54,75"/><path class="edge-line" d="M108,70 H110"/><polygon class="edge-arrow" points="110,65 120,70 110,75"/><path class="edge-line" d="M164,70 H166"/><polygon class="edge-arrow" points="166,65 176,70 166,75"/><rect class="node-rect sq" x="64" y="8" width="44" height="24"/><foreignObject x="72" y="12" width="28" height="16"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>색인</span></div></foreignObject><rect class="node-rect sq" x="8" y="56" width="44" height="28"/><foreignObject x="16" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span><i class="mi">q</i></span></div></foreignObject><rect class="node-rect sq" x="64" y="56" width="44" height="28"/><foreignObject x="72" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>MIPS</span></div></foreignObject><rect class="node-rect sq accent" x="120" y="56" width="44" height="28"/><foreignObject x="128" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span><i class="mi">p</i><sub>θ</sub></span></div></foreignObject><rect class="node-rect sq" x="176" y="56" width="44" height="28"/><foreignObject x="184" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>Σ</span></div></foreignObject><text class="muted" x="116" y="24" font-size="11">오프라인</text><text class="muted" x="8" y="100" font-size="11">온라인</text></svg><figcaption class="figure-caption">지도: 색칠한 칸이 generator이다.</figcaption></figure>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">generator: BART<span class="paper-ref">논문 2.3절</span></h3>
+        <div class="with-figure" style="--figure-side-width:176px">
+          <div>
+            <p>RAG의 <span class="term" data-definition="generator(생성기): 질문과 문서를 읽고 답 문장을 만들어 내는 구성 요소.">generator(생성기)</span>는 <span class="term" data-definition="BART(잡음 제거로 사전학습한 seq2seq 모델): 망가뜨린 문장을 원래대로 되돌리는 과제로 사전학습한 인코더-디코더 트랜스포머.">BART(잡음 제거로 사전학습한 seq2seq 모델)</span>의 large 판이며 파라미터가 4억 개 규모(400M)이다. BART는 <span class="term" data-definition="seq2seq(Sequence-to-Sequence, 입력 문장을 출력 문장으로 바꾸는 모델): 인코더가 입력을 읽고 디코더가 출력 토큰을 하나씩 만드는 모델 구조.">seq2seq(Sequence-to-Sequence, 입력 문장을 출력 문장으로 바꾸는 모델)</span>로, 망가뜨린 문장을 되살리는 잡음 제거 과제로 사전학습되었다.</p>
+            <p>RAG는 질문 $x$와 검색 문서 $z$를 <strong>단순히 이어 붙여</strong> BART에 넣는다. 디코더는 <span class="term" data-definition="자기회귀(Autoregressive): 앞에서 만든 토큰을 다시 입력으로 받아 다음 토큰을 하나씩 만드는 방식.">자기회귀(Autoregressive)</span> 방식으로 답을 한 토큰씩 쓴다. 이 파라미터 $\theta$가 RAG의 <span class="term" data-definition="parametric memory(모델 파라미터에 저장된 기억): 학습으로 모델 가중치 안에 들어간 지식. 직접 읽거나 고치기 어려움.">parametric memory(모델 파라미터에 저장된 기억)</span>이다.</p>
+          </div>
+          <figure class="figure side"><img src="assets/fig-pen.svg" alt="종이 위에 글을 쓰는 만년필"><figcaption class="figure-caption">generator는 찾아 온 문서를 옆에 두고 답을 쓰는 펜이다.</figcaption></figure>
+        </div>
+        <div class="svg-diagram animate-in" style="margin:var(--space-3) auto">
+          <svg viewBox="0 0 800 168" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="질문 x와 검색 문서 z를 이어 붙여 BART 인코더에 넣고, BART 디코더가 답 토큰을 하나씩 만든다. 문서가 k개면 k번 반복한다"><path class="edge-line" d="M120,48 V64 H400 V48"/><path class="edge-line" d="M292,64 V78"/><polygon class="edge-arrow" points="287,78 297,78 292,88"/><path class="edge-line" d="M372,112 H394"/><polygon class="edge-arrow" points="394,107 404,112 394,117"/><path class="edge-line accent" d="M564,112 H586"/><polygon class="edge-arrow accent" points="586,107 596,112 586,117"/><rect class="node-rect sq" x="16" y="8" width="208" height="40"/><foreignObject x="24" y="12" width="192" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span><i class="mi">x</i> = define middle ear</span></div></foreignObject><rect class="node-rect sq" x="232" y="8" width="336" height="40"/><foreignObject x="240" y="12" width="320" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span><i class="mi">z</i> = 검색 문서 100단어(예: Middle ear 문단)</span></div></foreignObject><text class="muted" x="584" y="32" font-size="12">이어 붙임 [<tspan font-style="italic">x</tspan>; <tspan font-style="italic">z</tspan>]</text><rect class="node-rect sq" x="212" y="88" width="160" height="48"/><foreignObject x="220" y="92" width="144" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>BART 인코더</span></div></foreignObject><rect class="node-rect sq" x="404" y="88" width="160" height="48"/><foreignObject x="412" y="92" width="144" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>BART 디코더(자기회귀)</span></div></foreignObject><rect class="node-rect sq accent" x="596" y="88" width="188" height="48"/><foreignObject x="604" y="92" width="172" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span><i class="mi">p</i><sub>θ</sub>(<i class="mi">y</i><sub><i class="mi">i</i></sub>|<i class="mi">x</i>,<i class="mi">z</i>,<i class="mi">y</i><sub>1:<i class="mi">i</i>−1</sub>)</span></div></foreignObject><text class="muted" x="400" y="160" text-anchor="middle" font-size="12">문서가 <tspan font-style="italic">k</tspan>개면 이 계산을 문서마다 한 번씩, <tspan font-style="italic">k</tspan>번 한다</text></svg>
+        </div>
+        <p>대가는 계산량이다. 문서마다 [질문; 문서]를 따로 읽으므로 문서가 $k$개면 generator를 $k$번 돌려야 하고, 문서 100단어가 붙어 입력도 길어진다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>BART generator는 질문과 문서를 이어 붙인 입력을 읽고 답을 한 토큰씩 쓰며, 문서 수만큼 계산을 되풀이한다.</p></div>
+    </div>
+
+    <!-- 쪽 4: 학습 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>정답 문서 없이 retriever를 어떻게 학습하는가?</li>
+          <li>학습 중 갱신되는 파라미터는 얼마인가?</li>
+        </ul>
+        <figure class="figure side" style="--figure-side-width:216px; margin:var(--space-4) 0 0"><svg viewBox="0 0 228 104" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RAG 구조도 축소판: 오프라인 문서 색인과 온라인 query encoder, MIPS, generator, 주변화. 색칠한 칸이 이 쪽에서 다루는 부분"><path class="edge-line" d="M86,32 V46"/><polygon class="edge-arrow" points="81,46 91,46 86,56"/><path class="edge-line" d="M52,70 H54"/><polygon class="edge-arrow" points="54,65 64,70 54,75"/><path class="edge-line" d="M108,70 H110"/><polygon class="edge-arrow" points="110,65 120,70 110,75"/><path class="edge-line" d="M164,70 H166"/><polygon class="edge-arrow" points="166,65 176,70 166,75"/><rect class="node-rect sq" x="64" y="8" width="44" height="24"/><foreignObject x="72" y="12" width="28" height="16"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>색인</span></div></foreignObject><rect class="node-rect sq accent" x="8" y="56" width="44" height="28"/><foreignObject x="16" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span><i class="mi">q</i></span></div></foreignObject><rect class="node-rect sq" x="64" y="56" width="44" height="28"/><foreignObject x="72" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>MIPS</span></div></foreignObject><rect class="node-rect sq accent" x="120" y="56" width="44" height="28"/><foreignObject x="128" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span><i class="mi">p</i><sub>θ</sub></span></div></foreignObject><rect class="node-rect sq" x="176" y="56" width="44" height="28"/><foreignObject x="184" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>Σ</span></div></foreignObject><text class="muted" x="116" y="24" font-size="11">오프라인</text><text class="muted" x="8" y="100" font-size="11">온라인</text></svg><figcaption class="figure-caption">지도: 색칠한 칸만 학습으로 갱신된다.</figcaption></figure>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">학습: 무엇을 갱신하는가<span class="paper-ref">논문 2.4절, 부록 G</span></h3>
+        <p>학습 데이터에는 질문 $x_j$와 정답 $y_j$의 쌍만 있고, 어떤 문서를 검색해야 하는지는 없다. 그래서 RAG는 문서를 주변화한 <span class="term" data-definition="주변 가능도(Marginal Likelihood): 잠재 변수의 모든 경우를 가중합해 얻은 정답의 확률. 여기서는 문서를 주변화한 p(y|x)임.">주변 가능도(Marginal Likelihood)</span>의 로그에 음수를 붙인 값을 손실로 삼아 <span class="term" data-definition="Adam(적응적 모멘트 추정 옵티마이저): 그래디언트의 평균과 크기를 함께 추적해 파라미터마다 갱신 폭을 조절하는 최적화 방법.">Adam</span>으로 최소화한다.</p>
+        <div class="math-equation">$$\mathcal{L} = \sum_{j} -\mathit{log}\, p(y_j|x_j)$$</div>
+        <p>3단원 따라가기 예시의 $p(y|x)\approx 0.0147$이면 손실은 $-\mathit{log}\,0.0147 \approx 4.22$이다. 이 값을 줄이려면 정답을 잘 설명하는 문서의 $p_\eta(z|x)$를 키워야 하므로, 정답 문서 레이블 없이도 retriever가 학습된다. 이것이 <span class="term" data-definition="end-to-end 학습(입력부터 출력까지 한 번에 학습): 여러 구성 요소를 하나의 손실로 함께 학습하는 방식. 중간 단계의 정답이 따로 필요 없음.">end-to-end 학습(입력부터 출력까지 한 번에 학습)</span>이다.</p>
+        <div class="svg-diagram animate-in" style="margin:var(--space-3) auto">
+          <svg viewBox="0 0 800 136" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="학습되는 부분은 query encoder 110M과 BART generator 406M이고, 고정되는 부분은 document encoder 110M과 2,100만 개 벡터의 문서 색인이다"><text class="accent-text" x="16" y="16" font-size="13">학습(갱신)</text><text class="muted" x="416" y="16" font-size="13" font-weight="700">고정</text><rect class="node-rect sq accent" x="16" y="28" width="176" height="56"/><foreignObject x="24" y="32" width="160" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>query encoder BERT<sub>q</sub></span></div></foreignObject><rect class="node-rect sq accent" x="216" y="28" width="176" height="56"/><foreignObject x="224" y="32" width="160" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35"><span>generator BART-large</span></div></foreignObject><rect class="guide-fill" x="416" y="28" width="176" height="56" rx="2"/><foreignObject x="424" y="32" width="160" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35; color:var(--color-text-secondary)"><span>document encoder BERT<sub>d</sub></span></div></foreignObject><rect class="guide-fill" x="616" y="28" width="176" height="56" rx="2"/><foreignObject x="624" y="32" width="160" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.35; color:var(--color-text-secondary)"><span>문서 색인</span></div></foreignObject><text x="104" y="104" text-anchor="middle" font-size="13" font-weight="700">110M</text><text x="304" y="104" text-anchor="middle" font-size="13" font-weight="700">406M</text><text x="504" y="104" text-anchor="middle" font-size="13" font-weight="700">110M</text><text x="704" y="104" text-anchor="middle" font-size="13" font-weight="700">벡터 2,100만 개</text><text class="muted" x="400" y="128" text-anchor="middle" font-size="12">논문 부록 G: 110M + 110M + 406M = 626M (문서 인코더는 실제로 갱신하지 않음, 색인은 파라미터가 아님)</text></svg>
+        </div>
+        <p><span class="term" data-definition="fine-tuning(미세 조정): 사전학습한 모델을 목표 과제의 데이터로 조금 더 학습시키는 것.">fine-tuning(미세 조정)</span> 동안 갱신하는 것은 query encoder와 BART뿐이다. 논문 부록 G는 학습 가능 파라미터를 626M으로 적지만, 그중 문서 인코더 110M은 실제로 갱신하지 않으므로 갱신되는 양은 110M + 406M = 516M이다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>RAG는 음의 주변 로그 가능도를 줄이며 query encoder와 BART만 갱신하고, 문서 인코더와 색인은 고정한다.</p></div>
+    </div>
+
+    <!-- 쪽 5: 문서 인코더 고정의 이유와 대가 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>문서 인코더를 고정하면 무엇을 얻는가?</li>
+          <li>그 대신 무엇을 포기하는가?</li>
+          <li>query encoder 학습은 실제로 도움이 되었는가?</li>
+        </ul>
+        <figure class="figure side" style="--figure-side-width:216px; margin:var(--space-4) 0 0"><svg viewBox="0 0 228 104" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RAG 구조도 축소판: 오프라인 문서 색인과 온라인 query encoder, MIPS, generator, 주변화. 색칠한 칸이 이 쪽에서 다루는 부분"><path class="edge-line" d="M86,32 V46"/><polygon class="edge-arrow" points="81,46 91,46 86,56"/><path class="edge-line" d="M52,70 H54"/><polygon class="edge-arrow" points="54,65 64,70 54,75"/><path class="edge-line" d="M108,70 H110"/><polygon class="edge-arrow" points="110,65 120,70 110,75"/><path class="edge-line" d="M164,70 H166"/><polygon class="edge-arrow" points="166,65 176,70 166,75"/><rect class="node-rect sq" x="64" y="8" width="44" height="24"/><foreignObject x="72" y="12" width="28" height="16"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>색인</span></div></foreignObject><rect class="node-rect sq accent" x="8" y="56" width="44" height="28"/><foreignObject x="16" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span><i class="mi">q</i></span></div></foreignObject><rect class="node-rect sq" x="64" y="56" width="44" height="28"/><foreignObject x="72" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>MIPS</span></div></foreignObject><rect class="node-rect sq accent" x="120" y="56" width="44" height="28"/><foreignObject x="128" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span><i class="mi">p</i><sub>θ</sub></span></div></foreignObject><rect class="node-rect sq" x="176" y="56" width="44" height="28"/><foreignObject x="184" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>Σ</span></div></foreignObject><text class="muted" x="116" y="24" font-size="11">오프라인</text><text class="muted" x="8" y="100" font-size="11">온라인</text></svg><figcaption class="figure-caption">지도: 색칠한 칸만 학습으로 갱신된다.</figcaption></figure>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>문서 인코더를 고정한 이유와 대가<span class="paper-ref">논문 2.4절, 표 6</span></h3>
+        <p>문서 인코더를 갱신하면 2,100만 개 문서 벡터가 모두 낡으므로 색인을 주기적으로 다시 만들어야 한다. REALM은 <span class="term" data-definition="사전학습(Pre-training): 특정 과제에 쓰기 전에 대량의 일반 텍스트로 모델을 먼저 학습시키는 단계.">사전학습(Pre-training)</span> 중에 이 작업을 했다. 논문은 이 단계가 좋은 성능에 꼭 필요하지 않았다고 보고한다.</p>
+        <table class="data-table animate-in">
+          <thead><tr><th>기준</th><th>REALM</th><th>RAG</th></tr></thead>
+          <tbody>
+            <tr><td>문서 인코더</td><td>갱신</td><td>고정</td></tr>
+            <tr><td>색인 다시 만들기</td><td>주기적으로 필요</td><td>필요 없음</td></tr>
+            <tr><td>대가</td><td>색인 재구축 비용</td><td>문서 벡터가 DPR이 학습한 그대로 남음</td></tr>
+          </tbody>
+          <caption>표는 문서 인코더를 다루는 두 방식의 차이를 나타낸 것이다.</caption>
+        </table>
+        <p class="diff-line"><strong>핵심 비교</strong> REALM은 문서 쪽도 학습하는 대신 색인을 다시 만들고, RAG는 질문 쪽만 학습해 색인을 그대로 쓴다.</p>
+        <table class="data-table animate-in">
+          <thead><tr><th>retriever 설정</th><th class="num">RAG-Token NQ</th><th class="num">RAG-Sequence NQ</th></tr></thead>
+          <tbody>
+            <tr><td>Frozen(retriever 전체 고정)</td><td class="num">37.8</td><td class="num">41.2</td></tr>
+            <tr class="hl"><td>query encoder 학습(기본)</td><td class="num">43.5</td><td class="num">44.0</td></tr>
+          </tbody>
+          <caption>표는 retriever 학습 여부에 따른 NQ 개발 세트 EM을 나타낸 것이다(논문 표 6, 6단원에서 자세히 다룸).</caption>
+        </table>
+        <p>query encoder만 학습해도 NQ에서 2.8~5.7점이 오른다. 문서 쪽까지 학습한 실험은 없으므로 고정의 대가는 이 표로 알 수 없다고 해석할 수 있다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>RAG는 색인 재구축 비용을 피하려고 문서 인코더를 고정하고, query encoder 학습만으로도 NQ 성능을 높였다.</p></div>
+    </div>
+
+    <!-- 쪽 6: 디코딩 의사코드 -->
+    <div class="screen cornell dense">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">보충 설명</strong>
+            <p>RAG-Token은 토큰마다 문서를 가중합한 확률 $p'_\theta(y_i|x,y_{1:i-1})$을 다음 토큰 확률로 보고 보통의 <span class="term" data-definition="beam search(빔 탐색): 매 단계 점수가 높은 후보 문장 몇 개만 남기며 출력을 만드는 디코딩 방법. 남기는 개수가 beam 크기임.">beam search(빔 탐색)</span>에 넣으면 된다.</p>
+          </div>
+        </div>
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>RAG-Sequence는 왜 beam search 한 번으로 안 되는가?</li>
+        </ul>
+        <figure class="figure side" style="--figure-side-width:216px; margin:var(--space-4) 0 0"><svg viewBox="0 0 228 104" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RAG 구조도 축소판: 오프라인 문서 색인과 온라인 query encoder, MIPS, generator, 주변화. 색칠한 칸이 이 쪽에서 다루는 부분"><path class="edge-line" d="M86,32 V46"/><polygon class="edge-arrow" points="81,46 91,46 86,56"/><path class="edge-line" d="M52,70 H54"/><polygon class="edge-arrow" points="54,65 64,70 54,75"/><path class="edge-line" d="M108,70 H110"/><polygon class="edge-arrow" points="110,65 120,70 110,75"/><path class="edge-line" d="M164,70 H166"/><polygon class="edge-arrow" points="166,65 176,70 166,75"/><rect class="node-rect sq" x="64" y="8" width="44" height="24"/><foreignObject x="72" y="12" width="28" height="16"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>색인</span></div></foreignObject><rect class="node-rect sq" x="8" y="56" width="44" height="28"/><foreignObject x="16" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span><i class="mi">q</i></span></div></foreignObject><rect class="node-rect sq" x="64" y="56" width="44" height="28"/><foreignObject x="72" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>MIPS</span></div></foreignObject><rect class="node-rect sq accent" x="120" y="56" width="44" height="28"/><foreignObject x="128" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span><i class="mi">p</i><sub>θ</sub></span></div></foreignObject><rect class="node-rect sq accent" x="176" y="56" width="44" height="28"/><foreignObject x="184" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>Σ</span></div></foreignObject><text class="muted" x="116" y="24" font-size="11">오프라인</text><text class="muted" x="8" y="100" font-size="11">온라인</text></svg><figcaption class="figure-caption">지도: 디코딩은 generator와 주변화를 함께 쓴다.</figcaption></figure>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>의사코드 단계별 풀이: RAG-Sequence 디코딩<span class="paper-ref">논문 2.5절</span></h3>
+        <p>RAG-Sequence의 확률은 토큰 단위로 나뉘지 않으므로, 문서마다 beam search를 돌려 후보를 모은 뒤 다시 점수를 매긴다. 버튼을 눌러 한 줄씩 보시오.</p>
+        <div class="pseudocode-translation animate-in" id="cp-pseudo">
+          <div class="pseudocode-block">
+            <span class="translation-label">알고리즘</span>
+            <span class="pseudocode-line">INPUT: x, z_1..z_k, b  // 입력</span>
+            <span class="pseudocode-line">FOR EACH z_i: B_i = BEAM(x, z_i, b)</span>
+            <span class="pseudocode-line">Y = UNION(B_1, ..., B_k)  // 후보</span>
+            <span class="pseudocode-line">FOR EACH y IN Y, z_i DO  // 모든 쌍</span>
+            <span class="pseudocode-line">  IF y IN B_i THEN s = 저장값</span>
+            <span class="pseudocode-line">  ELSE IF THOROUGH: s = FWD(y, x, z_i)</span>
+            <span class="pseudocode-line">  ELSE s = 0  // Fast</span>
+            <span class="pseudocode-line">score(y) = SUM(p_eta(z_i|x) * s)</span>
+            <span class="pseudocode-line">OUTPUT: ARGMAX score(y)  // 출력</span>
+          </div>
+          <div class="pseudocode-explanation">
+            <span class="translation-label">설명</span>
+            <div class="pseudocode-explanation-lines">
+              <p class="pe">질문, 문서 $k$개, beam 크기 $b$를 받는다.</p>
+              <p class="pe">문서 하나씩 따로 beam search를 돌려 후보 $b$개를 얻는다.</p>
+              <p class="pe">모든 문서의 후보를 합쳐 후보 집합 $Y$를 만든다.</p>
+              <p class="pe">주변화하려면 모든 (후보, 문서) 쌍의 확률이 필요하다.</p>
+              <p class="pe">그 문서의 beam에 있던 후보는 이미 계산했다.</p>
+              <p class="pe"><span class="term" data-definition="Thorough Decoding(빠진 후보도 다시 계산): 어떤 문서의 beam에 없던 후보 답도 그 문서로 확률을 다시 계산해 정확히 합산하는 RAG-Sequence 디코딩.">Thorough Decoding(빠진 후보도 다시 계산)</span>은 <span class="term" data-definition="forward pass(순전파): 입력을 모델에 한 번 통과시켜 출력 확률을 계산하는 일. 디코딩 비용을 세는 단위로 씀.">forward pass(순전파)</span>를 더 돌려 구한다.</p>
+              <p class="pe"><span class="term" data-definition="Fast Decoding(빠진 후보는 확률 0으로 근사): 어떤 문서의 beam에 없던 후보 답은 그 문서에서 확률이 0이라고 보고 추가 계산을 생략하는 RAG-Sequence 디코딩.">Fast Decoding(빠진 후보는 확률 0으로 근사)</span>은 0으로 두어 계산을 아낀다.</p>
+              <p class="pe">문서 확률로 가중합해 $p(y|x)$를 구한다.</p>
+              <p class="pe">점수가 가장 큰 후보를 답으로 낸다.</p>
+            </div>
+          </div>
+          <div class="pseudocode-controls">
+            <button class="btn pseudocode-prev-btn">이전 줄</button>
+            <button class="btn pseudocode-next-btn">다음 줄</button>
+            <button class="btn pseudocode-reset-btn">처음부터</button>
+            <span class="pseudocode-progress"></span>
+          </div>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>RAG-Sequence는 문서마다 beam search로 후보를 모은 뒤, 빠진 확률을 다시 계산하거나(Thorough) 0으로 두고(Fast) 주변화한다.</p></div>
+    </div>
+
+    <!-- 쪽 7: 디코딩 비용과 실제 설정 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>Thorough Decoding은 forward pass를 몇 번 더 쓰는가?</li>
+          <li>논문은 과제마다 어떤 디코딩을 골랐는가?</li>
+        </ul>
+        <figure class="figure side" style="--figure-side-width:216px; margin:var(--space-4) 0 0"><svg viewBox="0 0 228 104" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RAG 구조도 축소판: 오프라인 문서 색인과 온라인 query encoder, MIPS, generator, 주변화. 색칠한 칸이 이 쪽에서 다루는 부분"><path class="edge-line" d="M86,32 V46"/><polygon class="edge-arrow" points="81,46 91,46 86,56"/><path class="edge-line" d="M52,70 H54"/><polygon class="edge-arrow" points="54,65 64,70 54,75"/><path class="edge-line" d="M108,70 H110"/><polygon class="edge-arrow" points="110,65 120,70 110,75"/><path class="edge-line" d="M164,70 H166"/><polygon class="edge-arrow" points="166,65 176,70 166,75"/><rect class="node-rect sq" x="64" y="8" width="44" height="24"/><foreignObject x="72" y="12" width="28" height="16"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>색인</span></div></foreignObject><rect class="node-rect sq" x="8" y="56" width="44" height="28"/><foreignObject x="16" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span><i class="mi">q</i></span></div></foreignObject><rect class="node-rect sq" x="64" y="56" width="44" height="28"/><foreignObject x="72" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>MIPS</span></div></foreignObject><rect class="node-rect sq accent" x="120" y="56" width="44" height="28"/><foreignObject x="128" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span><i class="mi">p</i><sub>θ</sub></span></div></foreignObject><rect class="node-rect sq accent" x="176" y="56" width="44" height="28"/><foreignObject x="184" y="60" width="28" height="20"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:11px; line-height:1.35"><span>Σ</span></div></foreignObject><text class="muted" x="116" y="24" font-size="11">오프라인</text><text class="muted" x="8" y="100" font-size="11">온라인</text></svg><figcaption class="figure-caption">지도: 디코딩은 generator와 주변화를 함께 쓴다.</figcaption></figure>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">디코딩 비용과 실제 설정<span class="paper-ref">논문 2.5절, 부록 A</span></h3>
+        <p><strong>예시</strong>로 문서 $k=4$개, beam 크기 $b=2$이면 beam search에서 (후보, 문서) 쌍 8개의 확률이 나온다. 후보를 합친 결과가 $|Y|=5$개라면 주변화에 필요한 확률은 $5\times4=20$개이므로, Thorough Decoding은 forward pass를 $20-8=12$번 더 돌린다. Fast Decoding은 추가 계산이 0번이지만 빠진 12개를 0으로 두므로 확률을 낮게 어림한다.</p>
+        <div class="svg-diagram animate-in" style="margin:var(--space-2) auto">
+          <svg viewBox="0 0 800 112" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="예시에서 Fast Decoding은 beam 계산 8번만 쓰고, Thorough Decoding은 추가 forward pass 12번을 더해 20번을 쓴다"><path class="guide" d="M200,8 V84"/><text class="muted" x="200" y="104" text-anchor="middle" font-size="11">0</text><path class="guide" d="M296,8 V84"/><text class="muted" x="296" y="104" text-anchor="middle" font-size="11">4</text><path class="guide" d="M392,8 V84"/><text class="muted" x="392" y="104" text-anchor="middle" font-size="11">8</text><path class="guide" d="M488,8 V84"/><text class="muted" x="488" y="104" text-anchor="middle" font-size="11">12</text><path class="guide" d="M584,8 V84"/><text class="muted" x="584" y="104" text-anchor="middle" font-size="11">16</text><text x="184" y="34" text-anchor="end" font-size="13">Fast Decoding</text><rect class="ink-fill" x="200" y="16" width="192" height="24"/><text x="400" y="34" font-size="12">8 (추가 0)</text><text x="184" y="74" text-anchor="end" font-size="13">Thorough Decoding</text><rect class="ink-fill" x="200" y="56" width="192" height="24"/><rect class="accent-fill" x="392" y="56" width="288" height="24"/><text x="688" y="74" font-size="12">20 (추가 12)</text></svg>
+          <p class="figure-caption">그림은 예시에서 두 방식이 쓰는 forward pass 수를 나타낸 것이다(색칠한 부분이 추가 계산).</p>
+        </div>
+        <p>출력이 길수록 $|Y|$가 커져 추가 계산이 늘어난다. 오픈 도메인 QA에서는 문서 50개와 <span class="term" data-definition="greedy decoding(매 단계 가장 높은 토큰 선택): 후보를 하나만 남기는 디코딩. beam 크기가 1인 beam search와 같음.">greedy decoding(매 단계 가장 높은 토큰 선택)</span>를 썼으므로, 예를 들어 $|Y|=10$이면 $10\times50-50=450$번을 더 계산한다(예시 값).</p>
+        <table class="data-table animate-in">
+          <thead><tr><th>과제</th><th>모델</th><th class="num">문서 수</th><th>디코딩</th><th>이유</th></tr></thead>
+          <tbody>
+            <tr><td>오픈 도메인 QA</td><td>RAG-Token</td><td class="num">15</td><td>greedy</td><td>beam이 결과를 높이지 않음</td></tr>
+            <tr class="hl"><td>오픈 도메인 QA</td><td>RAG-Sequence</td><td class="num">50</td><td>greedy + Thorough</td><td>답이 짧음</td></tr>
+            <tr><td>MS MARCO, Jeopardy</td><td>RAG-Token</td><td class="num">10</td><td>beam 4</td><td>생성 과제</td></tr>
+            <tr><td>MS MARCO, Jeopardy</td><td>RAG-Sequence</td><td class="num">10</td><td>beam 4 + Fast</td><td>Thorough가 결과를 높이지 않음</td></tr>
+          </tbody>
+          <caption>표는 논문이 테스트 결과에 쓴 디코딩 설정을 나타낸 것이다(논문 부록 A).</caption>
+        </table>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>Thorough Decoding은 후보와 문서가 많을수록 추가 forward pass가 늘어 답이 짧은 QA에만 쓰고, 생성 과제에는 Fast Decoding을 썼다.</p></div>
+    </div>
+
+    <!-- 쪽 8: 핵심 정리와 확인 문제 1, 2 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-accent animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">핵심 정리</strong>
+            <ol>
+              <li>DPR은 BERT 두 개로 질문과 문서를 따로 벡터화하고, 내적이 큰 top-<i class="mi">k</i>를 FAISS의 HNSW 근사 MIPS로 찾는다.</li>
+              <li>BART generator는 [질문; 문서]를 읽고 답을 쓰며, 문서마다 따로 계산한다.</li>
+              <li>음의 주변 로그 가능도로 query encoder와 BART만 학습하고, 문서 인코더와 색인은 고정한다.</li>
+              <li>RAG-Token은 일반 beam search, RAG-Sequence는 Thorough 또는 Fast Decoding을 쓴다.</li>
+              <li>추가 계산량은 (후보 수 × 문서 수) − (beam에서 이미 구한 쌍 수)로 세라.</li>
+            </ol>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>retriever와 학습</h3>
+        <div class="quiz-container animate-in" id="cp-quiz-1">
+          <div class="quiz-question-block" data-correct="option-d"
+               data-explanation-right="④ | 내적은 $d_1$이 3, $d_2$가 5, $d_3$이 4이므로 top-2는 $d_2$, $d_3$이다."
+               data-explanation-wrong="| 정답은 ④이다. $(1,2)\cdot(3,0)=3$, $(1,2)\cdot(1,2)=5$, $(1,2)\cdot(2,1)=4$이므로 큰 순서는 $d_2$, $d_3$이다. ①은 첫째 성분만 비교한 결과이므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">1</span>질문 벡터가 $\boldsymbol{q}=(1,2)$이고 문서 벡터가 $\boldsymbol{d}_1=(3,0)$, $\boldsymbol{d}_2=(1,2)$, $\boldsymbol{d}_3=(2,1)$이다. DPR의 top-2 문서는?</h3>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① $d_1$, $d_3$</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② $d_1$, $d_2$</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ $d_2$, $d_1$</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ $d_2$, $d_3$</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ $d_3$, $d_1$</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <div class="quiz-question-block" data-correct="option-b"
+               data-explanation-right="② | RAG는 어떤 문서를 검색해야 하는지 직접 감독하지 않고, 정답의 주변 가능도만으로 retriever를 학습한다. 따라서 ②는 옳지 않다."
+               data-explanation-wrong="| 정답은 ②이다. 학습 데이터에는 질문과 정답의 쌍만 있고 정답 문서 레이블은 쓰지 않는다. ③은 문서 인코더를 고정하므로 옳은 설명이다.">
+            <h3 class="quiz-question"><span class="q-num">2</span>RAG의 학습에 대한 설명으로 옳지 <u>않은</u> 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 손실은 음의 주변 로그 가능도이다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 정답 문서 레이블로 retriever를 감독한다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 문서 인코더와 색인은 고정한다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ query encoder와 BART를 fine-tuning한다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 최적화에는 Adam을 쓴다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('cp-quiz-1')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('cp-quiz-1')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>DPR은 내적이 큰 순서로 문서를 고르고, RAG는 정답 문서 레이블 없이 주변 가능도로 retriever를 학습한다.</p></div>
+    </div>
+
+    <!-- 쪽 9: 확인 문제 3, 4 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>Thorough Decoding의 추가 계산량은 어떻게 세는가?</li>
+          <li>논문은 어느 과제에서 Fast Decoding을 썼는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>디코딩</h3>
+        <div class="quiz-container animate-in" id="cp-quiz-2">
+          <div class="quiz-question-block" data-correct="option-c"
+               data-explanation-right="③ | 필요한 확률은 4×3 = 12개이고 beam에서 6개를 이미 구했으므로 12 − 6 = 6번을 더 계산한다."
+               data-explanation-wrong="| 정답은 ③이다. 4×3 − 6 = 6이다. ④는 이미 구한 확률까지 센 값이므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">3</span>문서 3개, beam 크기 2로 쌍 6개, 후보 4개를 얻었다. Thorough Decoding의 추가 forward pass 수는? <span class="q-points">[3점]</span></h3>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 0</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 4</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 6</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 12</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 18</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <div class="quiz-question-block" data-correct="option-c"
+               data-explanation-right="③ | ㄱ, ㄴ은 옳다. ㄷ은 생성 과제에 Fast를 썼으므로 옳지 않다."
+               data-explanation-wrong="| 정답은 ③이다. ㄷ은 MS MARCO와 Jeopardy에서 Fast를 썼으므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">4</span>디코딩에 대한 설명으로 옳은 것만을 <span class="nobr">&lt;보기&gt;에서</span> 있는 대로 고른 것은?</h3>
+            <div class="bogi">
+              <p>ㄱ. RAG-Token은 일반 beam search를 쓴다.</p>
+              <p>ㄴ. Fast는 빠진 후보 확률을 0으로 둔다.</p>
+              <p>ㄷ. 생성 과제에는 Thorough를 썼다.</p>
+            </div>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① ㄱ</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② ㄷ</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ ㄱ, ㄴ</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ ㄴ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ ㄱ, ㄴ, ㄷ</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('cp-quiz-2')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('cp-quiz-2')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>Thorough Decoding의 추가 계산은 후보 수와 문서 수의 곱에서 beam에서 구한 쌍을 뺀 만큼이고, 생성 과제에는 Fast Decoding을 썼다.</p></div>
+    </div>
+
+  </div>
+</section>

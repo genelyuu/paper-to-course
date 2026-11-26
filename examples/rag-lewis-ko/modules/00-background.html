@@ -1,0 +1,583 @@
+<section class="module" id="module-0">
+  <div class="module-content">
+
+    <div class="module-header">
+      <span class="module-number">1</span>
+      <h2 class="module-title">서론과 배경</h2>
+      <p class="module-subtitle">RAG 논문을 쓴 이유와 읽기 전에 필요한 네 가지 개념을 정리한다</p>
+    </div>
+
+    <!-- 페이지 1: 쓴 이유와 새로운 점 (논문 1절) -->
+    <div class="screen cornell dense">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">학습 목표</strong>
+            <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
+            <ol>
+              <li>parametric memory와 non-parametric memory의 차이를 예를 들어 설명할 수 있다.</li>
+              <li>질문과 문서 임베딩의 내적으로 top-<i class="mi">k</i> 문서를 고를 수 있다.</li>
+              <li>문서별 확률을 주변화해 답의 확률을 계산할 수 있다.</li>
+            </ol>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">이 논문을 쓴 이유와 새로운 점<span class="paper-ref">논문 1절</span></h3>
+        <p><span class="term" data-definition="사전학습 언어 모델(Pre-trained Language Model): 대량의 텍스트로 먼저 학습해 둔 언어 모델. 이후 과제별 데이터로 조금 더 학습해 씀.">사전학습 언어 모델</span>(Pre-trained Language Model)은 사실 지식을 파라미터에 저장하지만, 이 <span class="term" data-definition="parametric memory(모델 파라미터에 저장된 기억): 학습 중 모델 가중치에 새겨진 지식. 따로 꺼내 보거나 고치기 어려움.">parametric memory</span>(모델 파라미터에 저장된 기억)는 쉽게 고칠 수 없고, 답의 <span class="term" data-definition="근거 출처(Provenance): 모델의 답이 어떤 문서나 자료에서 나왔는지를 가리키는 정보.">근거 출처</span>(Provenance)를 보이지 못하며, <span class="term" data-definition="환각(Hallucination): 모델이 사실이 아니거나 근거 없는 내용을 그럴듯하게 만들어 내는 현상.">환각</span>(Hallucination)을 낸다. 이 논문은 생성 모델에 문서 검색을 붙인 <span class="term" data-definition="검색 증강 생성(Retrieval-Augmented Generation, RAG): 질문으로 문서를 검색하고, 질문과 검색한 문서를 함께 생성 모델에 넣어 답을 만드는 방법.">검색 증강 생성</span>(Retrieval-Augmented Generation, RAG)으로 세 한계를 줄인다. 그림은 같은 질문을 두 방식이 처리하는 과정을 나타낸 것이다.</p>
+        <div class="svg-diagram animate-in" style="margin:var(--space-2) auto">
+          <svg viewBox="0 0 800 188" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="이전 방식은 질문을 seq2seq 모델의 파라미터만으로 답하고, RAG는 질문으로 문서를 검색한 뒤 질문과 문서를 함께 넣어 답을 생성한다">
+            <foreignObject x="16" y="0" width="360" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; font-weight:700"><span>이전 방식: closed-book seq2seq</span></div></foreignObject>
+            <path class="edge-line" d="M96,60 H118"/><polygon class="edge-arrow" points="118,55 128,60 118,65"/>
+            <path class="edge-line" d="M264,60 H286"/><polygon class="edge-arrow" points="286,55 296,60 286,65"/>
+            <rect class="node-rect" x="16" y="40" width="80" height="40" rx="8"/>
+            <foreignObject x="24" y="44" width="64" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>질문 <i class="mi">x</i></span></div></foreignObject>
+            <rect class="node-rect" x="128" y="40" width="136" height="40" rx="8"/>
+            <foreignObject x="136" y="44" width="120" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>seq2seq 파라미터</span></div></foreignObject>
+            <rect class="node-rect" x="296" y="40" width="80" height="40" rx="8"/>
+            <foreignObject x="304" y="44" width="64" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>답 <i class="mi">y</i></span></div></foreignObject>
+            <foreignObject x="16" y="104" width="360" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; color:var(--color-text-secondary)"><span>검색 없이 파라미터의 지식만 쓴다</span></div></foreignObject>
+
+            <foreignObject x="408" y="0" width="376" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; font-weight:700; color:var(--color-accent)"><span>제안 방식: RAG</span></div></foreignObject>
+            <path class="edge-line" d="M488,60 H510"/><polygon class="edge-arrow" points="510,55 520,60 510,65"/>
+            <path class="edge-line accent" d="M632,60 H654"/><polygon class="edge-arrow accent" points="654,55 664,60 654,65"/>
+            <path class="edge-line accent" d="M724,80 V94"/><polygon class="edge-arrow accent" points="719,94 729,94 724,104"/>
+            <path class="edge-line" d="M664,124 H642"/><polygon class="edge-arrow" points="642,119 632,124 642,129"/>
+            <path class="edge-line" d="M520,124 H498"/><polygon class="edge-arrow" points="498,119 488,124 498,129"/>
+            <rect class="node-rect" x="408" y="40" width="80" height="40" rx="8"/>
+            <foreignObject x="416" y="44" width="64" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>질문 <i class="mi">x</i></span></div></foreignObject>
+            <rect class="node-rect accent" x="520" y="40" width="112" height="40" rx="8"/>
+            <foreignObject x="528" y="44" width="96" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>retriever</span></div></foreignObject>
+            <rect class="node-rect sq" x="664" y="40" width="120" height="40"/>
+            <foreignObject x="672" y="44" width="104" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>문서 top-<i class="mi">k</i></span></div></foreignObject>
+            <rect class="node-rect sq" x="664" y="104" width="120" height="40"/>
+            <foreignObject x="672" y="108" width="104" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>질문 + 문서</span></div></foreignObject>
+            <rect class="node-rect" x="520" y="104" width="112" height="40" rx="8"/>
+            <foreignObject x="528" y="108" width="96" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>generator</span></div></foreignObject>
+            <rect class="node-rect" x="408" y="104" width="80" height="40" rx="8"/>
+            <foreignObject x="416" y="108" width="64" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>답 <i class="mi">y</i></span></div></foreignObject>
+
+            <foreignObject x="16" y="152" width="360" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; font-weight:700"><span>근거 문서 없음, 지식을 고치려면 다시 학습</span></div></foreignObject>
+            <foreignObject x="408" y="152" width="376" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; font-weight:700; color:var(--color-accent)"><span>검색한 문서가 근거, 색인을 바꾸면 지식도 바뀜</span></div></foreignObject>
+          </svg>
+        </div>
+        <div class="callout callout-accent animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">이 논문의 새로운 점</strong>
+            <ol>
+              <li><strong>사전학습한 두 기억의 결합:</strong> 사전학습한 생성 모델과 위키백과 검색 색인을 묶어 end-to-end로 학습한다.</li>
+              <li><strong>오픈 도메인 QA 최고 성능:</strong> <span class="term" data-definition="오픈 도메인 질의응답(Open-Domain QA): 정해진 지문 없이 위키백과 같은 넓은 자료에서 답을 찾아야 하는 질의응답.">오픈 도메인 질의응답</span>(Open-Domain QA) NQ에서 <span class="term" data-definition="exact match(완전 일치, EM): 모델의 답이 정답과 글자 그대로 같은 문항의 비율.">EM</span>(exact match, 완전 일치) 44.5로, 파라미터 110억 개인 <span class="term" data-definition="T5(Text-to-Text Transfer Transformer): 모든 과제를 글을 받아 글을 내는 형식으로 푸는 사전학습 seq2seq 모델.">T5</span>-11B의 34.5보다 높다.</li>
+              <li><strong>색인 교체로 지식 갱신:</strong> 2016년 색인을 2018년 색인으로 바꾸기만 해도 새 지도자 질문에 답한다(6단원).</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>RAG는 파라미터에만 든 지식의 세 한계를 줄이려고 생성 모델에 검색한 문서를 함께 넣는다.</p></div>
+    </div>
+
+    <!-- 페이지 2: parametric memory와 non-parametric memory -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">배경 지식</strong>
+            <p>이 화면은 논문의 주장이 아니라 논문을 읽기 위해 먼저 알아 둘 배경이다.</p>
+          </div>
+        </div>
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>외운 지식과 책장의 지식은 무엇이 다른가?</li>
+          <li>지식을 고치려면 각각 무엇을 바꿔야 하는가?</li>
+          <li>RAG에서 두 기억은 각각 어느 부품인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">parametric memory와 non-parametric memory</h3>
+        <div class="with-figure" style="--figure-side-width:176px">
+          <div>
+            <p>parametric memory는 사람이 <strong>외운 지식</strong>과 같다. 학습하는 동안 파라미터에 새겨지므로 빨리 꺼내 쓸 수 있지만, 어디서 배운 내용인지 보여 줄 수 없고 틀린 내용을 고치려면 다시 학습해야 한다.</p>
+            <p><span class="term" data-definition="non-parametric memory(외부 문서 색인에 있는 기억): 모델 밖에 문서 형태로 저장해 두고 필요할 때 검색해 읽는 지식.">non-parametric memory</span>(외부 문서 색인에 있는 기억)는 그림의 <strong>책장</strong>과 같다. 필요할 때 책을 꺼내 읽으므로 읽은 쪽을 근거로 보일 수 있고, 책을 바꾸면 지식도 바뀐다. 책장의 차례 구실을 하는 것이 <span class="term" data-definition="문서 색인(Document Index): 많은 문서를 빠르게 찾을 수 있도록 미리 정리해 둔 목록. RAG에서는 문서마다 계산한 벡터를 모아 둔 것.">문서 색인</span>(Document Index)이다.</p>
+          </div>
+          <figure class="figure side"><img src="assets/fig-shelf.svg" alt="백과사전이 가득 꽂힌 키 큰 책장"><figcaption class="figure-caption">문서 색인은 필요할 때 꺼내 읽는 책장이다.</figcaption></figure>
+        </div>
+        <table class="data-table animate-in">
+          <caption>표는 두 기억을 네 가지 기준으로 비교한 것이다. 마지막 행은 이 논문의 구성이다.</caption>
+          <thead><tr><th>기준</th><th>parametric memory</th><th>non-parametric memory</th></tr></thead>
+          <tbody>
+            <tr><td>저장 위치</td><td>모델 파라미터</td><td>모델 밖의 문서 색인</td></tr>
+            <tr><td>지식을 고치려면</td><td>다시 학습</td><td>문서를 바꾸고 색인을 다시 만듦</td></tr>
+            <tr><td>근거 제시</td><td>어려움</td><td>검색한 문서를 보여 줄 수 있음</td></tr>
+            <tr class="hl"><td>이 논문에서</td><td>generator(BART)의 파라미터</td><td>위키백과 문서 2,100만 개의 벡터 색인</td></tr>
+          </tbody>
+        </table>
+        <p class="diff-line"><strong>핵심 비교</strong> 외운 지식은 빠르지만 고칠 수 없고, 책장의 지식은 찾아야 하지만 근거를 보이고 바꿀 수 있다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>parametric memory는 파라미터에 외운 지식이고, non-parametric memory는 검색해 읽는 문서 색인이다.</p></div>
+    </div>
+
+    <!-- 페이지 3: seq2seq -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">배경 지식</strong>
+            <p>이 화면은 논문의 주장이 아니라 논문을 읽기 위해 먼저 알아 둘 배경이다.</p>
+          </div>
+        </div>
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>인코더와 디코더는 각각 무엇을 하는가?</li>
+          <li>답 문장 전체의 확률은 어떻게 계산하는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">seq2seq: 토큰을 하나씩 생성한다</h3>
+        <p><span class="term" data-definition="seq2seq(Sequence-to-Sequence, 입력 문장을 출력 문장으로 바꾸는 모델): 인코더가 입력 문장을 읽고 디코더가 출력 문장을 만드는 모델 구조.">seq2seq</span>(Sequence-to-Sequence, 입력 문장을 출력 문장으로 바꾸는 모델)는 <span class="term" data-definition="인코더(Encoder): 입력 문장을 읽어 벡터 표현으로 바꾸는 부분.">인코더</span>(Encoder)가 입력을 읽고 <span class="term" data-definition="디코더(Decoder): 인코더의 표현과 앞서 만든 토큰을 보고 다음 토큰을 하나씩 만드는 부분.">디코더</span>(Decoder)가 출력을 만든다. 디코더는 답을 한 번에 쓰지 않고, 앞에서 만든 토큰을 다시 보며 <strong>토큰을 하나씩</strong> 만든다. 그림은 입력 “Define middle ear”에서 답을 만드는 과정을 나타낸 것이다.</p>
+        <div class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 128" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="입력을 인코더가 읽고, 디코더가 The, middle, ear를 차례로 만들며 앞에서 만든 토큰을 다시 입력으로 받는다">
+            <path class="edge-line" d="M192,40 H214"/><polygon class="edge-arrow" points="214,35 224,40 214,45"/>
+            <path class="edge-line" d="M344,40 H366"/><polygon class="edge-arrow" points="366,35 376,40 366,45"/>
+            <path class="edge-line accent" d="M496,40 H518"/><polygon class="edge-arrow accent" points="518,35 528,40 518,45"/>
+            <path class="edge-line dashed" d="M564,64 V96 H436 V74"/><polygon class="edge-arrow" points="431,74 441,74 436,64"/>
+            <path class="edge-line dashed" d="M652,64 V96"/>
+            <rect class="node-rect sq" x="16" y="16" width="176" height="48"/>
+            <foreignObject x="24" y="20" width="160" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>입력 <i class="mi">x</i>: “Define middle ear”</span></div></foreignObject>
+            <rect class="node-rect" x="224" y="16" width="120" height="48" rx="8"/>
+            <foreignObject x="232" y="20" width="104" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>인코더</span></div></foreignObject>
+            <rect class="node-rect" x="376" y="16" width="120" height="48" rx="8"/>
+            <foreignObject x="384" y="20" width="104" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>디코더</span></div></foreignObject>
+            <rect class="node-rect sq" x="528" y="16" width="72" height="48"/>
+            <foreignObject x="532" y="20" width="64" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span><i class="mi">y</i><sub>1</sub> The</span></div></foreignObject>
+            <rect class="node-rect sq" x="616" y="16" width="72" height="48"/>
+            <foreignObject x="620" y="20" width="64" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span><i class="mi">y</i><sub>2</sub> middle</span></div></foreignObject>
+            <rect class="node-rect sq" x="704" y="16" width="80" height="48"/>
+            <foreignObject x="708" y="20" width="72" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span><i class="mi">y</i><sub>3</sub> ear …</span></div></foreignObject>
+            <text class="muted" x="664" y="116" font-size="12" text-anchor="middle">앞에서 만든 토큰을 다시 입력</text>
+          </svg>
+        </div>
+        <p>그래서 답 문장 $y$ 전체의 확률은 토큰마다의 확률을 곱한 값이다. 여기서 $y_{1:i-1}$은 $i$번째 토큰 앞까지 만든 토큰들이다.</p>
+        <div class="math-equation">
+          $$p(y|x) = \prod_{i=1}^{N} p(y_i|x, y_{1:i-1})$$
+        </div>
+        <p>예를 들어 세 토큰의 확률이 0.9, 0.6, 0.5이면 문장 확률은 $0.9 \times 0.6 \times 0.5 = 0.27$이다(예시 값). 토큰 하나만 확률이 낮아도 문장 전체의 확률이 크게 줄어든다. 3단원의 RAG 식은 이 곱에 문서를 더해 만든다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>seq2seq의 디코더는 앞 토큰을 보며 토큰을 하나씩 만들고, 문장 확률은 토큰 확률의 곱이다.</p></div>
+    </div>
+
+    <!-- 페이지 4: BART + 개념 체크 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">배경 지식</strong>
+            <p>이 화면은 논문의 주장이 아니라 논문을 읽기 위해 먼저 알아 둘 배경이다.</p>
+          </div>
+        </div>
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>BART는 어떻게 사전학습되었는가?</li>
+          <li>RAG에서 BART는 어떤 기억을 맡는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag outline">개념 체크</span>BART: 잡음을 지우며 배운 seq2seq</h3>
+        <p><span class="term" data-definition="BART(잡음 제거로 사전학습한 seq2seq 모델): 일부를 가리거나 뒤섞은 문장을 원래 문장으로 되돌리도록 사전학습한 seq2seq 트랜스포머.">BART</span>(잡음 제거로 사전학습한 seq2seq 모델)는 문장의 일부를 가린 입력을 받아 <strong>원래 문장을 되살리도록</strong> <span class="term" data-definition="사전학습(Pre-training): 특정 과제를 배우기 전에 대량의 일반 텍스트로 모델을 먼저 학습하는 단계.">사전학습</span>(Pre-training)되었다. 이 과정에서 많은 사실 지식이 파라미터에 쌓인다. RAG는 파라미터 400M 규모의 BART-large를 <span class="term" data-definition="generator(생성기): 질문과 검색한 문서를 받아 답 문장을 만드는 모델. RAG에서는 BART.">generator</span>(생성기)로 쓴다.</p>
+        <div class="svg-diagram animate-in" style="margin:var(--space-2) auto">
+          <svg viewBox="0 0 800 64" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="원래 문장에 잡음을 넣고 BART가 원래 문장으로 되돌린다">
+            <path class="edge-line" d="M208,32 H222"/><polygon class="edge-arrow" points="222,27 232,32 222,37"/>
+            <path class="edge-line" d="M424,32 H438"/><polygon class="edge-arrow" points="438,27 448,32 438,37"/>
+            <path class="edge-line accent" d="M568,32 H582"/><polygon class="edge-arrow accent" points="582,27 592,32 582,37"/>
+            <rect class="node-rect sq" x="16" y="8" width="192" height="48"/>
+            <foreignObject x="24" y="12" width="176" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>원문(예시): The middle ear is part of the ear</span></div></foreignObject>
+            <rect class="node-rect sq" x="232" y="8" width="192" height="48"/>
+            <foreignObject x="240" y="12" width="176" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>잡음: The ___ ear is ___ the ear</span></div></foreignObject>
+            <rect class="node-rect" x="448" y="8" width="120" height="48" rx="8"/>
+            <foreignObject x="456" y="12" width="104" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>BART</span></div></foreignObject>
+            <rect class="node-rect accent" x="592" y="8" width="192" height="48" rx="8"/>
+            <foreignObject x="600" y="12" width="176" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>복원: The middle ear is part of the ear</span></div></foreignObject>
+          </svg>
+        </div>
+        <div class="quiz-container animate-in" id="bg-check">
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="② | 디코더는 앞에서 만든 토큰을 다시 보며 다음 토큰을 하나씩 만든다."
+               data-explanation-wrong="| 정답은 ②이다. seq2seq의 디코더는 앞에서 만든 토큰을 다시 입력받아 다음 토큰을 하나씩 만든다. ①은 BART가 문서를 검색하지 않고 파라미터의 지식만 쓰므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">1</span>다음 중 BART 같은 seq2seq 모델에 대한 설명으로 옳은 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 답을 만들 때 스스로 위키백과를 검색한다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 앞에서 만든 토큰을 보며 다음 토큰을 하나씩 만든다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 사전학습에서 배운 지식은 파라미터 밖의 문서에 저장된다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+          <button class="quiz-check-btn" onclick="checkQuiz('bg-check')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('bg-check')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>BART는 잡음 제거로 사전학습한 seq2seq 모델이며 RAG에서 parametric memory를 맡는 generator이다.</p></div>
+    </div>
+
+    <!-- 페이지 5: dense retrieval과 내적 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">배경 지식</strong>
+            <p>이 화면은 논문의 주장이 아니라 논문을 읽기 위해 먼저 알아 둘 배경이다.</p>
+          </div>
+        </div>
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>문장을 어떻게 벡터로 비교하는가?</li>
+          <li>내적이 크다는 것은 무엇을 뜻하는가?</li>
+          <li>단어 일치 검색과 무엇이 다른가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">dense retrieval: 임베딩의 내적으로 찾는다</h3>
+        <div class="with-figure" style="--figure-side-width:240px">
+          <div>
+            <p><span class="term" data-definition="dense retrieval(임베딩 벡터 기반 검색): 질문과 문서를 실수 벡터로 바꾸고 벡터끼리의 점수로 관련 문서를 찾는 검색.">dense retrieval</span>(임베딩 벡터 기반 검색)은 질문과 문서를 각각 <span class="term" data-definition="임베딩(Embedding): 문장이나 단어의 뜻을 실수 여러 개로 이루어진 벡터로 나타낸 것.">임베딩</span>(Embedding) 벡터로 바꾸고, 두 벡터의 <span class="term" data-definition="내적(Inner Product): 두 벡터의 같은 위치 성분끼리 곱해 모두 더한 값. 방향이 비슷할수록 커짐.">내적</span>(Inner Product)을 관련도 점수로 쓴다. RAG의 <span class="term" data-definition="retriever(검색기): 질문을 받아 관련 문서를 찾아 주는 모델.">retriever</span>(검색기)가 이 방식이며, 같은 단어가 없어도 뜻이 가까우면 점수가 높다. 단어가 겹치는지로 찾는 방식은 <span class="term" data-definition="sparse retrieval(단어 일치 기반 검색): 질문과 문서에 같은 단어가 얼마나 겹치는지로 점수를 매기는 검색. TF-IDF, BM25가 대표적임.">sparse retrieval</span>(단어 일치 기반 검색)이라 한다.</p>
+            <p>그림은 질문 벡터 $\boldsymbol{q}=(2,1)$과 문서 벡터 세 개를 나타낸 예시이다. 괄호 안의 수는 $\boldsymbol{q}$와의 내적이다.</p>
+          </div>
+          <figure class="figure side">
+<svg viewBox="0 0 240 176" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="질문 q=(2,1), 문서 z1=(2,2), z2=(0,2), z3=(-1,1). 괄호 안은 q와의 내적 6, 2, -1">
+<defs><marker id="bg-ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ink-fill"/></marker><marker id="bg-acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="accent-fill"/></marker></defs>
+<path class="guide" d="M48,24 V168 M112,24 V168 M144,24 V168 M176,24 V168 M24,56 H200 M24,88 H200 M24,120 H200"/>
+<line class="guide-axis" x1="16" y1="152" x2="208" y2="152"/><line class="guide-axis" x1="80" y1="168" x2="80" y2="16"/>
+<text x="72" y="166" text-anchor="end" font-size="12" font-style="italic">O</text>
+<line class="ink accent strong" x1="80" y1="152" x2="144" y2="120" marker-end="url(#bg-acc)"/>
+<line class="ink" x1="80" y1="152" x2="144" y2="88" marker-end="url(#bg-ink)"/>
+<line class="ink" x1="80" y1="152" x2="80" y2="88" marker-end="url(#bg-ink)"/>
+<line class="ink" x1="80" y1="152" x2="48" y2="120" marker-end="url(#bg-ink)"/>
+<text x="150" y="132" font-size="13" font-style="italic" class="accent-text" font-weight="700">q</text>
+<text x="150" y="84" font-size="13" font-style="italic">z<tspan font-size="10" dy="3">1</tspan><tspan font-style="normal" dy="-3"> (6)</tspan></text>
+<text x="86" y="80" font-size="13" font-style="italic">z<tspan font-size="10" dy="3">2</tspan><tspan font-style="normal" dy="-3"> (2)</tspan></text>
+<text x="20" y="112" font-size="13" font-style="italic">z<tspan font-size="10" dy="3">3</tspan><tspan font-style="normal" dy="-3"> (−1)</tspan></text>
+<text x="204" y="146" text-anchor="end" font-size="12" font-style="italic">x</text>
+<text x="86" y="22" font-size="12" font-style="italic">y</text>
+</svg>
+            <figcaption class="figure-caption">예시 값: 모눈 한 칸은 1이다.</figcaption>
+          </figure>
+        </div>
+        <div class="math-derivation animate-in" id="bg-deriv-dot">
+          <div class="math-step" data-step="0">
+            <div class="math-equation">
+              $$\mathit{score}(x, z) = \boldsymbol{d}(z)^{\top}\boldsymbol{q}(x) = d_1 q_1 + d_2 q_2$$
+            </div>
+            <div class="math-explanation">
+              <p>질문 $x$의 벡터 $\boldsymbol{q}(x)$와 문서 $z$의 벡터 $\boldsymbol{d}(z)$를 성분끼리 곱해 더한다. 4단원의 DPR이 바로 이 점수를 쓴다.</p>
+            </div>
+          </div>
+          <div class="math-step" data-step="1" style="display:none">
+            <div class="math-equation">
+              $$(2,2)\cdot(2,1)=6,\quad (0,2)\cdot(2,1)=2,\quad (-1,1)\cdot(2,1)=-1$$
+            </div>
+            <div class="math-explanation">
+              <p>방향이 질문과 가장 비슷한 $z_1$의 점수가 6으로 가장 크고, 반대쪽을 향한 $z_3$의 점수는 음수이다. 따라서 검색 순위는 $z_1$, $z_2$, $z_3$ 순이다.</p>
+            </div>
+          </div>
+          <div class="math-controls">
+            <button class="btn math-prev-btn">이전 단계</button>
+            <button class="btn math-next-btn">다음 단계</button>
+            <button class="btn math-reset-btn">처음부터</button>
+            <span class="math-progress"></span>
+          </div>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>dense retrieval은 질문과 문서의 임베딩 내적으로 관련도를 매기며, 방향이 비슷할수록 점수가 크다.</p></div>
+    </div>
+
+    <!-- 페이지 6: top-k와 MIPS -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">배경 지식</strong>
+            <p>이 화면은 논문의 주장이 아니라 논문을 읽기 위해 먼저 알아 둘 배경이다.</p>
+          </div>
+        </div>
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>점수에서 top-<i class="mi">k</i> 문서는 어떻게 고르는가?</li>
+          <li>문서가 2,100만 개이면 무엇이 문제인가?</li>
+          <li>dense retrieval은 언제 불리한가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span>top-<i class="mi">k</i>와 MIPS</span></h3>
+        <div class="with-figure" style="--figure-side-width:280px">
+          <div>
+            <p>점수를 매긴 뒤에는 점수가 큰 순서로 <span class="term" data-definition="top-k(상위 k개): 점수가 가장 큰 것부터 k개만 고른 묶음.">top-<i class="mi">k</i></span>(상위 $k$개) 문서만 남긴다. 오른쪽 그림에서 $k=2$이면 $z_1$과 $z_2$가 남고, 이 두 문서만 generator에 넘어간다. 논문은 학습할 때 $k$를 5나 10으로 둔다.</p>
+            <p>문제는 문서 수이다. 위키백과를 100단어씩 자르면 문서가 <strong>2,100만 개</strong>이고, 질문마다 모든 문서와 내적을 계산하면 느리다. 그래서 내적이 가장 큰 문서를 찾는 일을 <span class="term" data-definition="MIPS(Maximum Inner Product Search, 최대 내적 검색): 많은 벡터 가운데 질문 벡터와의 내적이 가장 큰 것을 찾는 문제.">MIPS</span>(Maximum Inner Product Search, 최대 내적 검색) 문제로 보고, 전부 계산하지 않는 근사 방법으로 푼다(4단원).</p>
+          </div>
+          <figure class="figure side">
+<svg viewBox="0 0 280 144" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="점수 6, 2, -1의 막대. 위 두 개가 top-2">
+<text x="8" y="16" font-size="12" font-weight="700">문서</text>
+<text x="96" y="16" font-size="12" font-weight="700">점수</text>
+<line class="guide-axis" x1="96" y1="24" x2="96" y2="128"/>
+<text x="24" y="45" font-size="13" font-style="italic">z<tspan font-size="10" dy="3">1</tspan></text>
+<rect class="accent-fill" x="96" y="30" width="144" height="20"/>
+<text x="246" y="45" font-size="12" class="accent-text">6</text>
+<text x="24" y="77" font-size="13" font-style="italic">z<tspan font-size="10" dy="3">2</tspan></text>
+<rect class="accent-fill" x="96" y="62" width="48" height="20"/>
+<text x="150" y="77" font-size="12" class="accent-text">2</text>
+<text x="24" y="109" font-size="13" font-style="italic">z<tspan font-size="10" dy="3">3</tspan></text>
+<rect class="ink-fill" x="72" y="94" width="24" height="20"/>
+<text x="102" y="109" font-size="12">−1</text>
+<path class="guide" d="M8,88 H272"/>
+<text x="272" y="138" text-anchor="end" font-size="12" class="accent-text">위 두 문서가 top-2</text>
+</svg>
+            <figcaption class="figure-caption">앞 쪽의 예시 점수를 막대로 나타낸 것이다.</figcaption>
+          </figure>
+        </div>
+        <div class="callout callout-warning animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">더 알아보기</strong>
+            <p>근사 검색은 속도를 얻는 대신 진짜 최고 점수 문서를 놓칠 수 있다. 또 dense retrieval이 늘 이기지는 않는다. 6단원에서 보듯이 개체 이름이 중심인 FEVER 과제에서는 단어 일치 검색 BM25가 더 좋은 결과를 냈다.</p>
+          </div>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>RAG는 내적 점수가 큰 top-<i class="mi">k</i> 문서만 쓰고, 2,100만 개 문서에서 그 문서를 찾는 일을 MIPS로 근사한다.</p></div>
+    </div>
+
+    <!-- 페이지 7: 주변화와 잠재 변수 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">배경 지식</strong>
+            <p>이 화면은 논문의 주장이 아니라 논문을 읽기 위해 먼저 알아 둘 배경이다.</p>
+          </div>
+        </div>
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>어느 문서가 답을 도왔는지 모를 때 확률은 어떻게 구하는가?</li>
+          <li>잠재 변수란 무엇인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>주변화와 잠재 변수</h3>
+        <div class="with-figure" style="--figure-side-width:368px">
+          <div>
+            <p>학습 데이터에는 질문과 답만 있고 “어느 문서를 보고 답했는가”는 없다. 이렇게 관찰되지 않는 변수를 <span class="term" data-definition="잠재 변수(Latent Variable): 결과에 영향을 주지만 데이터에서 직접 관찰되지 않는 변수.">잠재 변수</span>(Latent Variable)라 한다. 모르는 변수는 가능한 경우마다 확률을 구해 가중합하면 없앨 수 있는데, 이를 <span class="term" data-definition="주변화(Marginalization): 모르는 변수의 모든 경우에 대해 확률을 가중합해 그 변수를 식에서 없애는 계산.">주변화</span>(Marginalization)라 한다.</p>
+          </div>
+          <figure class="figure side">
+<svg viewBox="0 0 368 128" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="질문 x에서 문서 z1로 0.7, z2로 0.3의 확률로 가고, 각 문서에서 답 y의 확률은 0.6과 0.2이다">
+<path class="edge-line" d="M56,64 H80 V32 H110"/><polygon class="edge-arrow" points="110,27 120,32 110,37"/>
+<path class="edge-line" d="M80,64 V96 H110"/><polygon class="edge-arrow" points="110,91 120,96 110,101"/>
+<path class="edge-line accent" d="M192,32 H222"/><polygon class="edge-arrow accent" points="222,27 232,32 222,37"/>
+<path class="edge-line" d="M192,96 H222"/><polygon class="edge-arrow" points="222,91 232,96 222,101"/>
+<rect class="node-rect" x="8" y="40" width="48" height="48" rx="8"/>
+<foreignObject x="12" y="44" width="40" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span><i class="mi">x</i></span></div></foreignObject>
+<rect class="node-rect sq" x="120" y="12" width="72" height="40"/>
+<foreignObject x="124" y="16" width="64" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span><i class="mi">z</i><sub>1</sub></span></div></foreignObject>
+<rect class="node-rect sq" x="120" y="76" width="72" height="40"/>
+<foreignObject x="124" y="80" width="64" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span><i class="mi">z</i><sub>2</sub></span></div></foreignObject>
+<rect class="node-rect accent" x="232" y="12" width="128" height="40" rx="8"/>
+<foreignObject x="236" y="16" width="120" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span><i class="mi">p</i>(<i class="mi">y</i>|<i class="mi">x</i>,<i class="mi">z</i><sub>1</sub>) = 0.6</span></div></foreignObject>
+<rect class="node-rect" x="232" y="76" width="128" height="40" rx="8"/>
+<foreignObject x="236" y="80" width="120" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span><i class="mi">p</i>(<i class="mi">y</i>|<i class="mi">x</i>,<i class="mi">z</i><sub>2</sub>) = 0.2</span></div></foreignObject>
+<text x="96" y="24" font-size="12" text-anchor="middle">0.7</text>
+<text x="96" y="114" font-size="12" text-anchor="middle">0.3</text>
+</svg>
+            <figcaption class="figure-caption">예시 값: 간선 위 수는 문서를 고를 확률 <i class="mi">p</i>(<i class="mi">z</i>|<i class="mi">x</i>)이다.</figcaption>
+          </figure>
+        </div>
+        <div class="math-derivation animate-in" id="bg-deriv-marg">
+          <div class="math-step" data-step="0">
+            <div class="math-equation">
+              $$p(y|x) = \sum_{z} p(z|x)\, p(y|x, z)$$
+            </div>
+            <div class="math-explanation">
+              <p>문서 $z$를 고를 확률 $p(z|x)$와 그 문서를 보고 답 $y$를 낼 확률 $p(y|x,z)$를 곱한 뒤 모든 문서에 대해 더한다. 결과에는 $z$가 남지 않는다.</p>
+            </div>
+          </div>
+          <div class="math-step" data-step="1" style="display:none">
+            <div class="math-equation">
+              $$p(y|x) = 0.7 \times 0.6 + 0.3 \times 0.2$$
+            </div>
+            <div class="math-explanation">
+              <p>그림의 예시 값을 넣는다. 문서 두 개의 경우를 각각 곱한 두 항이 생긴다.</p>
+            </div>
+          </div>
+          <div class="math-step" data-step="2" style="display:none">
+            <div class="math-equation">
+              $$p(y|x) = 0.42 + 0.06 = 0.48$$
+            </div>
+            <div class="math-explanation">
+              <p>답의 확률은 0.48이다. 고를 확률이 큰 $z_1$이 0.42를 보태 결과를 주도한다. 3단원의 RAG는 검색한 top-<i class="mi">k</i> 문서에 대해 이 합을 계산한다.</p>
+            </div>
+          </div>
+          <div class="math-controls">
+            <button class="btn math-prev-btn">이전 단계</button>
+            <button class="btn math-next-btn">다음 단계</button>
+            <button class="btn math-reset-btn">처음부터</button>
+            <span class="math-progress"></span>
+          </div>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>어느 문서를 봤는지 모르므로 문서별 답 확률을 문서 확률로 가중합해 답의 확률을 구한다.</p></div>
+    </div>
+
+    <!-- 페이지 8: 지식 지도 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">배경 지식</strong>
+            <p>이 화면은 논문의 주장이 아니라 논문을 읽기 위해 먼저 알아 둘 배경이다.</p>
+          </div>
+        </div>
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>네 가지 배경 지식은 RAG의 어느 부품으로 이어지는가?</li>
+          <li>주변화는 어디에서 쓰이는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>지식 지도</h3>
+        <p>그림은 이 단원의 네 개념이 RAG의 부품으로 이어지는 관계를 나타낸 것이다.</p>
+        <div class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 256" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="seq2seq와 BART는 generator로, 두 기억은 generator와 retriever로, dense retrieval과 MIPS는 retriever로 이어지고, generator와 retriever와 주변화가 RAG로 이어지는 지식 지도">
+            <path class="edge-line" d="M184,32 H262"/><polygon class="edge-arrow" points="262,27 272,32 262,37"/>
+            <path class="edge-line" d="M184,96 H228 V44 H262"/><polygon class="edge-arrow" points="262,39 272,44 262,49"/>
+            <path class="edge-line" d="M228,96 V148 H262"/><polygon class="edge-arrow" points="262,143 272,148 262,153"/>
+            <path class="edge-line" d="M184,168 H262"/><polygon class="edge-arrow" points="262,163 272,168 262,173"/>
+            <path class="edge-line" d="M504,32 H536 V88 H566"/><polygon class="edge-arrow" points="566,83 576,88 566,93"/>
+            <path class="edge-line" d="M504,160 H536 V128 H566"/><polygon class="edge-arrow" points="566,123 576,128 566,133"/>
+            <path class="edge-line accent" d="M184,224 H556 V148 H566"/><polygon class="edge-arrow accent" points="566,143 576,148 566,153"/>
+            <rect class="node-rect" x="16" y="8" width="168" height="48" rx="8"/>
+            <foreignObject x="24" y="12" width="152" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>② seq2seq와 BART</span></div></foreignObject>
+            <rect class="node-rect" x="16" y="72" width="168" height="48" rx="8"/>
+            <foreignObject x="24" y="76" width="152" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>① 두 기억</span></div></foreignObject>
+            <rect class="node-rect" x="16" y="136" width="168" height="48" rx="8"/>
+            <foreignObject x="24" y="140" width="152" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>③ dense retrieval과 MIPS</span></div></foreignObject>
+            <rect class="node-rect" x="16" y="200" width="168" height="48" rx="8"/>
+            <foreignObject x="24" y="204" width="152" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>④ 주변화와 잠재 변수</span></div></foreignObject>
+            <rect class="node-rect sq" x="272" y="8" width="232" height="56"/>
+            <foreignObject x="280" y="12" width="216" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>generator: parametric memory</span></div></foreignObject>
+            <rect class="node-rect sq" x="272" y="136" width="232" height="56"/>
+            <foreignObject x="280" y="140" width="216" height="48"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>retriever와 색인: non-parametric memory</span></div></foreignObject>
+            <rect class="node-rect accent" x="576" y="64" width="208" height="104" rx="12"/>
+            <foreignObject x="584" y="68" width="192" height="96"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; font-weight:700"><span>논문 내용: RAG(3단원)</span></div></foreignObject>
+            <text x="388" y="216" font-size="12" class="accent-text" text-anchor="middle">문서를 잠재 변수로 보고 주변화</text>
+          </svg>
+        </div>
+        <p>왼쪽 네 상자는 배경 지식이고, 가운데 두 상자는 RAG의 두 부품, 오른쪽 강조 상자는 논문의 제안이다. RAG 이전의 연구가 이 부품들을 어떻게 따로 썼는지는 2단원에서 다룬다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>seq2seq는 generator로, dense retrieval은 retriever로 이어지고, 주변화가 둘을 RAG 하나로 묶는다.</p></div>
+    </div>
+
+    <!-- 페이지 9: 핵심 정리 + 확인 문제 1~2 -->
+    <div class="screen cornell dense">
+      <aside class="cue">
+        <div class="callout callout-accent animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">핵심 정리</strong>
+            <ol>
+              <li>parametric memory는 파라미터에 외운 지식이고, non-parametric memory는 검색해 읽는 문서 색인이다.</li>
+              <li>seq2seq는 토큰을 하나씩 만들며 문장 확률은 토큰 확률의 곱이다.</li>
+              <li>dense retrieval은 임베딩 내적으로 top-<i class="mi">k</i> 문서를 고르고, 대규모 색인에서는 MIPS로 근사한다.</li>
+              <li>주변화는 모르는 문서 변수를 가중합으로 없앤다.</li>
+              <li>확률을 묻는 문항은 경우마다 곱한 뒤 더하라.</li>
+            </ol>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>두 기억과 dense retrieval</h3>
+        <div class="quiz-container animate-in" id="bg-quiz-1">
+          <div class="quiz-question-block"
+               data-correct="option-d"
+               data-explanation-right="④ | parametric memory는 파라미터에 흩어진 지식이라 답이 어느 문서에서 왔는지 보여 줄 수 없다."
+               data-explanation-wrong="| 정답은 ④이다. 근거 문서를 보일 수 있는 쪽은 non-parametric memory이다. ③은 색인만 바꿔도 읽는 내용이 바뀌므로 옳다.">
+            <h3 class="quiz-question"><span class="q-num">1</span>두 기억에 대한 설명으로 옳지 <u>않은</u> 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① BART의 파라미터에 저장된 지식은 parametric memory이다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 위키백과 문서의 벡터 색인은 non-parametric memory이다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 문서 색인을 바꾸면 다시 학습하지 않아도 꺼내 읽는 내용이 바뀐다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ parametric memory는 답의 근거 문서를 바로 보여 줄 수 있다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ RAG에서 두 기억은 모두 사전학습된 상태로 시작한다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="③ | 내적은 $z_1$이 2, $z_2$가 3, $z_3$이 4이므로 점수가 큰 두 문서는 $z_3$과 $z_2$이다."
+               data-explanation-wrong="| 정답은 ③이다. 내적이 2, 3, 4이므로 top-2는 $z_2$, $z_3$이다. ②는 점수가 가장 낮은 $z_1$을 넣었으므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">2</span>질문 벡터가 $\boldsymbol{q}=(1,2)$이고 문서 벡터가 $z_1=(2,0)$, $z_2=(1,1)$, $z_3=(0,2)$이다. 내적으로 고른 top-2 문서로 옳은 것은?<span class="q-points">[3점]</span></h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① $z_1$, $z_2$</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② $z_1$, $z_3$</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ $z_2$, $z_3$</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ $z_3$만</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 세 문서 모두</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('bg-quiz-1')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('bg-quiz-1')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>근거를 보이는 쪽은 문서 색인이고, top-<i class="mi">k</i>는 내적이 큰 순서로 고른다.</p></div>
+    </div>
+
+    <!-- 페이지 10: 확인 문제 3~4 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>문서 두 개의 경우를 어떻게 합치는가?</li>
+          <li>파라미터에만 든 지식은 세상이 바뀌면 어떻게 되는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>주변화와 closed-book</h3>
+        <div class="quiz-container animate-in" id="bg-quiz-2">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="③ | 가중합 $0.3+0.1=0.4$이다."
+               data-explanation-wrong="| 정답은 ③이다. ㄴ은 가중하지 않은 평균이다.">
+            <h3 class="quiz-question"><span class="q-num">3</span>$z_1$, $z_2$의 $p(z|x)$가 0.6, 0.4이고 $p(y|x,z)$가 0.5, 0.25일 때 옳은 것만을 <span class="nobr">&lt;보기&gt;에서</span> 있는 대로 고른 것은?</h3>
+            <div class="bogi">
+              <p>ㄱ. $p(y|x)$는 0.4이다.</p>
+              <p>ㄴ. $p(y|x)$는 두 값의 평균 0.375이다.</p>
+              <p>ㄷ. $z_1$의 기여가 $z_2$보다 크다.</p>
+            </div>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① ㄱ</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② ㄴ</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ ㄱ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ ㄴ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ ㄱ, ㄴ, ㄷ</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-a"
+               data-explanation-right="① | closed-book 모델의 지식은 학습할 때의 파라미터에 고정되므로 새 사실을 반영하려면 다시 학습해야 한다."
+               data-explanation-wrong="| 정답은 ①이다. 검색이 없으면 학습 시점의 지식만 쓴다. ④는 파라미터를 늘려도 새 사실이 생기지 않으므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">4</span>2016년 자료로만 학습한 closed-book 모델에 2018년에 바뀐 국가 지도자를 물었다. 이에 대한 설명으로 옳은 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 다시 학습하지 않으면 새 지도자를 답하기 어렵다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 인코더가 최신 문서를 자동으로 검색한다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 디코더가 답 전체를 한 번에 만들므로 영향이 없다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 파라미터 수만 늘리면 학습 없이 새 사실을 안다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 답과 함께 근거 문서를 출력한다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('bg-quiz-2')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('bg-quiz-2')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>주변화는 문서 확률로 가중합하며, 파라미터에만 든 지식은 다시 학습해야 바뀐다.</p></div>
+    </div>
+
+  </div>
+</section>
