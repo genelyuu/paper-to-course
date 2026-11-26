@@ -420,7 +420,10 @@ p:last-child { margin-bottom: 0; }
 /* ── PSEUDOCODE BLOCK ───────────────────────────────────────── */
 .pseudocode-translation {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* 두 열 비율은 style="--col-a:1.5fr" 처럼 바꾼다(인라인 grid-template-columns 금지, lint KO114) */
+  --col-a: 1fr;
+  --col-b: 1fr;
+  grid-template-columns: var(--col-a) var(--col-b);
   gap: 0;
   border-radius: var(--radius-md);
   overflow: hidden;
@@ -2904,6 +2907,8 @@ html { scroll-padding-top: var(--nav-height); }
 /* 좁은 화면: 오른쪽 아래의 .sidebar-toggle이 가리지 않도록 가운데 아래로 */
 @media (max-width: 1024px) {
   .pager { right: auto; left: 50%; transform: translateX(-50%); bottom: var(--space-4); }
+  /* 표지에서는 오른쪽 아래 목차 단추가 논문 초록 상자의 글자를 가리므로 숨긴다. 표지에는 단원 목차가 따로 있다 */
+  body:has(.pager.on-cover) .sidebar-toggle { opacity: 0; pointer-events: none; }
 }
 @media print {
   .nav, .sidebar, .sidebar-toggle, .progress-bar, .pager { display: none !important; }
@@ -3065,6 +3070,47 @@ html { scroll-padding-top: var(--nav-height); }
   .quiz-options.row .quiz-option { white-space: normal; }
   .katex, .katex-display, .math-equation, .math-block { position: relative; }
   .notes > *, .with-figure > *, .assumption-challenge { max-width: 100%; min-width: 0; }
-  .notes [style*="grid-template-columns"] { grid-template-columns: minmax(0, 1fr) !important; }
   .notes p .katex, .notes li .katex, .quiz-option .katex { display: inline-block; max-width: 100%; overflow-x: auto; overflow-y: hidden; vertical-align: middle; }
+}
+
+/* ── 단 나누기(.cols-*): 본문 안 여러 단 배치 ──────────────────
+   인라인 display:grid·grid-template-columns 대신 쓴다(lint KO114). 폭·비율만 인라인 변수로 바꾼다.
+   .cols-2 / .cols-3   같은 너비 2·3단. 비율은 --col-a·--col-b·--col-c (예: style="--col-a:1.2fr")
+   .cols-4 / .cols-5   같은 너비 4·5단(수치 카드 줄)
+   .cols-label         앞 열 고정 폭 + 나머지. 폭은 --col-w (기본 230px)
+   .cols-aside         나머지 + 뒤 열 고정 폭. 폭은 --col-w (기본 300px)
+   .cols-1             한 단 격자(간격만 필요할 때)
+   .cols-flex          가로 한 줄 flex. 자식에 flex:1을 주면 너비를 나눠 갖는다
+   간격 기본 var(--space-4), .gap-0·.gap-2·.gap-3·.gap-5·.gap-6. 세로 정렬 기본 stretch, .align-start·.align-center·.align-end
+   변수는 클래스마다 기본값을 다시 정해 둔다(바깥 단의 --col-a가 안쪽 단에 상속되지 않게). 640px 이하는 한 단. */
+.cols-1, .cols-2, .cols-3, .cols-4, .cols-5, .cols-label, .cols-aside {
+  display: grid;
+  gap: var(--space-4);
+}
+.cols-1 { grid-template-columns: minmax(0, 1fr); }
+.cols-2, .quiz-options.row.cols-2 {
+  --col-a: 1fr; --col-b: 1fr;
+  grid-template-columns: minmax(0, var(--col-a)) minmax(0, var(--col-b));
+}
+.cols-3, .quiz-options.row.cols-3 {
+  --col-a: 1fr; --col-b: 1fr; --col-c: 1fr;
+  grid-template-columns: minmax(0, var(--col-a)) minmax(0, var(--col-b)) minmax(0, var(--col-c));
+}
+.cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.cols-label { --col-w: 230px; grid-template-columns: var(--col-w) minmax(0, 1fr); }
+.cols-aside { --col-w: 300px; grid-template-columns: minmax(0, 1fr) var(--col-w); }
+.cols-flex { display: flex; gap: var(--space-4); }
+.gap-0 { gap: 0; }
+.gap-2 { gap: var(--space-2); }
+.gap-3 { gap: var(--space-3); }
+.gap-5 { gap: var(--space-5); }
+.gap-6 { gap: var(--space-6); }
+.align-start { align-items: start; }
+.align-center { align-items: center; }
+.align-end { align-items: end; }
+@media (max-width: 640px) {
+  .cols-2, .cols-3, .cols-4, .cols-5, .cols-label, .cols-aside,
+  .quiz-options.row.cols-2, .quiz-options.row.cols-3 { grid-template-columns: minmax(0, 1fr); }
+  .cols-flex { flex-direction: column; }
 }

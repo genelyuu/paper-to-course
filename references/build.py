@@ -20,6 +20,10 @@
 vendor/ 위치: <강의 폴더>/vendor → 이 스크립트 옆의 vendor → <강의 폴더>/../../references/vendor 순으로 찾는다.
 fontTools가 설치되어 있으면 본문 글꼴을 강의에 실제로 쓰인 글자만 남기도록 더 줄인다(없으면 그대로 넣음).
 
+node가 있으면 본문의 $…$·$$…$$ 수식을 vendor/katex로 미리 렌더링해 넣는다(첫 화면에 날 TeX가 안 보임).
+실행 중 KaTeX auto-render는 그대로 돌지만 남은 구분 기호가 없어 아무것도 바꾸지 않는다.
+node가 없거나 실패하면 경고 한 줄만 내고 예전처럼 실행 중 렌더링에 맡긴다. 끄려면 --no-prerender.
+
 "[작성 필요: …]" 자리(scaffold.py가 남김)가 하나라도 있으면 목록을 보이고 실패한다.
 미리 보기용으로 그대로 조립하려면 --allow-todo를 준다.
 """
@@ -29,8 +33,12 @@ import html as htmllib
 import io
 import json
 import mimetypes
+import os
 import re
+import shutil
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from urllib.parse import quote
 
@@ -197,7 +205,149 @@ def script_block(js: str) -> str:
     return "<script>" + js.replace("</script", "<\\/script") + "</script>"
 
 
-def build(course: Path, allow_todo: bool = False):
+# ── 수식 미리 렌더링 ─────────────────────────────────────────────
+# main.js의 renderMathInElement(document.body, {$$ display, $ inline, throwOnError:false})와 같은 결과를
+# 조립 때 만든다. 글 조각 나누기는 KaTeX auto-render 0.16.10(splitAtDelimiters·findEndOfMath)를 그대로 옮겼다.
+# auto-render가 들어가지 않는 태그(ignoredTags)·원문 텍스트 태그와 svg·math·template은 건너뛴다
+# (svg 안의 수식은 예전처럼 열 때 렌더링된다). 속성값(data-explanation-* 등)은 건드리지 않는다.
+MATH_DELIMS = (("$$", True), ("$", False))
+RAWTEXT_TAGS = ("script", "style", "textarea", "title", "xmp", "iframe", "noembed", "noframes", "noscript")
+MATH_SKIP = set(RAWTEXT_TAGS) | {"pre", "code", "option", "svg", "math", "template"}
+TAG_RE = re.compile(r"""<!--.*?-->|<![^>]*>|<\?[^>]*>|</?([A-Za-z][A-Za-z0-9:-]*)(?:[^>"']|"[^"]*"|'[^']*')*>""", re.S)
+AMS_RE = re.compile(r"^\\begin\{")
+KATEX_NODE = r"""
+const fs = require('fs');
+const katex = require(process.env.P2C_KATEX);
+const items = JSON.parse(fs.readFileSync(0, 'utf8'));
+const macros = {};   // auto-render처럼 문서 전체가 매크로 표 하나를 함께 쓴다(\gdef 등)
+const out = items.map(([tex, display]) => {
+  try {
+    return katex.renderToString(tex, {displayMode: display, throwOnError: false, macros: macros});
+  } catch (e) { return null; }   // ParseError가 아닌 예외: 원문을 남겨 열 때 렌더링에 맡긴다
+});
+process.stdout.write(JSON.stringify(out));
+"""
+
+
+def _end_of_math(delim: str, text: str, start: int) -> int:
+    """auto-render findEndOfMath: 중괄호 깊이 0에서 닫는 구분 기호 위치. 역슬래시 다음 글자는 건너뛴다."""
+    i, depth = start, 0
+    while i < len(text):
+        c = text[i]
+        if depth <= 0 and text.startswith(delim, i):
+            return i
+        if c == "\\":
+            i += 1
+        elif c == "{":
+            depth += 1
+        elif c == "}":
+            depth -= 1
+        i += 1
+    return -1
+
+
+def split_math(text: str):
+    """auto-render splitAtDelimiters: [("text", s) | ("math", tex, raw, display)]."""
+    out = []
+    while True:
+        k = text.find("$")
+        if k == -1:
+            break
+        if k > 0:
+            out.append(("text", text[:k]))
+            text = text[k:]
+        left, display = next(d for d in MATH_DELIMS if text.startswith(d[0]))
+        k = _end_of_math(left, text, len(left))
+        if k == -1:
+            break
+        raw = text[:k + len(left)]
+        out.append(("math", raw if AMS_RE.match(raw) else text[len(left):k], raw, display))
+        text = text[k + len(left):]
+    if text:
+        out.append(("text", text))
+    return out
+
+
+def _skip_element(html: str, name: str, pos: int) -> int:
+    """name 요소의 여는 태그 바로 뒤(pos)부터 짝이 맞는 닫는 태그 뒤까지 건너뛴 위치."""
+    if name == "option":  # 닫는 태그를 생략할 수 있다
+        m = re.compile(r"</option\s*>|<option\b|<optgroup\b|</select\s*>", re.I).search(html, pos)
+        return (m.end() if m.group(0).lower().startswith("</option") else m.start()) if m else len(html)
+    if name in RAWTEXT_TAGS:
+        m = re.compile(rf"</{name}\s*>", re.I).search(html, pos)
+        return m.end() if m else len(html)
+    depth = 1
+    for m in re.compile(rf"""<(/?){name}\b(?:[^>"']|"[^"]*"|'[^']*')*>""", re.I).finditer(html, pos):
+        if m.group(1):
+            depth -= 1
+            if depth == 0:
+                return m.end()
+        elif not m.group(0).endswith("/>"):
+            depth += 1
+    return len(html)
+
+
+def prerender_math(html: str, vendor: Path):
+    """<body> 텍스트의 수식을 KaTeX HTML로 바꾼다 → (새 html, 렌더링한 수식 수). 실패하면 예외."""
+    node = shutil.which("node")
+    katex_js = vendor / "katex" / "katex.min.js"
+    if not node:
+        raise RuntimeError("node가 없습니다")
+    if not katex_js.is_file():
+        raise RuntimeError(f"{katex_js} 가 없습니다")
+    body = re.search(r"""<body\b(?:[^>"']|"[^"]*"|'[^']*')*>""", html, re.I)
+    if not body:
+        return html, 0
+    # 1) 수식이 든 텍스트 조각 모으기: (시작, 끝, 나눈 결과)
+    runs, pos = [], body.end()
+    while pos < len(html):
+        m = TAG_RE.search(html, pos)
+        end = m.start() if m else len(html)
+        if "$" in html[pos:end]:
+            parts = split_math(htmllib.unescape(html[pos:end]))
+            if any(p[0] == "math" for p in parts):
+                runs.append((pos, end, parts))
+        if not m:
+            break
+        pos = m.end()
+        name = (m.group(1) or "").lower()
+        if name in MATH_SKIP and not m.group(0).startswith("</") and not m.group(0).endswith("/>"):
+            pos = _skip_element(html, name, pos)
+    items = [(p[1], p[3]) for _, _, parts in runs for p in parts if p[0] == "math"]
+    if not items:
+        return html, 0
+    # 2) node 한 번으로 전부 렌더링(수식 목록은 표준 입력 JSON으로)
+    with tempfile.TemporaryDirectory() as td:
+        script = Path(td) / "katex-prerender.js"
+        script.write_text(KATEX_NODE, encoding="utf-8")
+        r = subprocess.run([node, str(script)], input=json.dumps(items), capture_output=True,
+                           encoding="utf-8", timeout=300, env={**os.environ, "P2C_KATEX": str(katex_js)})
+    if r.returncode != 0:
+        raise RuntimeError((r.stderr.strip().splitlines() or ["node 실패"])[-1])
+    rendered = json.loads(r.stdout)
+    if len(rendered) != len(items):
+        raise RuntimeError("node 결과 개수가 맞지 않습니다")
+    # 3) 바꿔 넣기: 텍스트는 다시 이스케이프, 수식은 auto-render처럼 <span>으로 감싼다
+    esc = lambda t: t.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")  # noqa: E731
+    out, last, k, n = [], 0, 0, 0
+    for start, end, parts in runs:
+        out.append(html[last:start])
+        for p in parts:
+            if p[0] == "text":
+                out.append(esc(p[1]))
+                continue
+            h, k = rendered[k], k + 1
+            if h is None:
+                out.append(esc(p[2]))
+            else:
+                out.append("<span>" + h + "</span>")
+                n += 1
+        last = end
+    out.append(html[last:])
+    return "".join(out), n
+
+
+def build(course: Path, allow_todo: bool = False, prerender: bool = True):
     for f in ("_base.html", "_cover.html", "_footer.html"):
         if not (course / f).is_file():
             die(f"{f} 가 없습니다.")
@@ -242,6 +392,14 @@ def build(course: Path, allow_todo: bool = False):
             return NOTICES.get(p.name, "") + (strip_css_comments(src) if p.suffix == ".css" else src), p.parent
         # 작성자 JS는 그대로 넣는다(정규식 주석 지우기는 'figs/*.svg'·/a*/ 같은 문자열·정규식을 깨뜨린다)
         return (strip_css_comments(src) if p.suffix == ".css" else src), p.parent
+
+    # 수식 미리 렌더링(선택). 글꼴 부분 집합보다 먼저 한다(KaTeX 결과 글자까지 부분 집합에 들어가도록).
+    n_math = 0
+    if prerender:
+        try:
+            html, n_math = prerender_math(strip_html_comments(html), vendor)
+        except Exception as e:  # 조립은 멈추지 않는다: 예전처럼 열 때 렌더링
+            warn(f"수식 미리 렌더링을 건너뜁니다 ({e}). 열 때 KaTeX가 렌더링합니다.")
 
     # 본문 글꼴 부분 집합(선택)
     fonts = {}
@@ -332,13 +490,16 @@ def build(course: Path, allow_todo: bool = False):
     tmp.replace(out)
     kb = out.stat().st_size / 1024
     note = "본문 글꼴 부분 집합 적용" if fonts else "본문 글꼴 전체(KS X 1001) 포함 — fontTools를 설치하면 더 작아짐"
+    if n_math:
+        note += f", 수식 {n_math}개 미리 렌더링"
     print(f"Built index.html — 단독 파일 {kb:,.0f} KB ({note}). 이 파일 하나만 공유하면 됩니다.")
 
 
 if __name__ == "__main__":
     opts = [a for a in sys.argv[1:] if a.startswith("--")]
-    bad = [a for a in opts if a != "--allow-todo"]
+    bad = [a for a in opts if a not in ("--allow-todo", "--no-prerender")]
     if bad:
-        die(f"알 수 없는 옵션: {' '.join(bad)} (사용 가능: --allow-todo)")
+        die(f"알 수 없는 옵션: {' '.join(bad)} (사용 가능: --allow-todo, --no-prerender)")
     pos = [a for a in sys.argv[1:] if not a.startswith("--")]
-    build(Path(pos[0] if pos else ".").resolve(), allow_todo="--allow-todo" in opts)
+    build(Path(pos[0] if pos else ".").resolve(), allow_todo="--allow-todo" in opts,
+          prerender="--no-prerender" not in opts)

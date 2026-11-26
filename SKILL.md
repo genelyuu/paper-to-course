@@ -199,7 +199,7 @@ course-name/
 
 **여러 강의를 동시에 만들 때:** 강의마다 별도 디렉터리, 임시 파일은 그 강의의 `_tmp/`에만(`/tmp` 공유 금지). `illustrate.py`는 모든 에이전트가 같은 전역 잠금으로 한 번에 하나만(명령은 `illustration.md` "여러 강의를 동시에 만들 때"). 공통 지침은 파일 하나(`courses/_BRIEF.md` 등)에 두고 각 프롬프트에서 읽게 합니다.
 
-**Step 4 (공통): 조립.** `cd course-name && bash build.sh`. 로컬 `<link>`·`<script>`·`<img>`를 `index.html`에 넣고(글꼴·그림은 data URI), `main.js`·`styles.css`를 `vendor/`의 압축·난독화본으로 바꾸며, HTML·SVG 주석을 지웁니다. `fontTools`가 있으면 본문 글꼴을 쓰인 글자만 남겨 파일이 약 40% 줄어듭니다(없어도 됨). 시스템 Python에 설치할 수 없으면(PEP 668) 가상환경을 만들고 그 인터프리터를 `P2C_PYTHON`으로 넘깁니다: `python3 -m venv ~/.local/share/paper-to-course/venv && ~/.local/share/paper-to-course/venv/bin/pip install fonttools brotli`, 이후 `P2C_PYTHON=~/.local/share/paper-to-course/venv/bin/python bash build.sh`. 사용자에게 `index.html` 하나만 공유하면 되고, 브라우저 코드는 난독화해도 완전히 숨길 수 없다고 알립니다.
+**Step 4 (공통): 조립.** `cd course-name && bash build.sh`. 로컬 `<link>`·`<script>`·`<img>`를 `index.html`에 넣고(글꼴·그림은 data URI), `main.js`·`styles.css`를 `vendor/`의 압축·난독화본으로 바꾸며, HTML·SVG 주석을 지웁니다. `fontTools`가 있으면 본문 글꼴을 쓰인 글자만 남겨 파일이 약 40% 줄어듭니다(없어도 됨). `build.sh`는 `P2C_PYTHON` → `~/.local/share/paper-to-course/venv/bin/python` → `python3` 순으로 인터프리터를 고르므로, 시스템 Python에 설치할 수 없으면(PEP 668) 한 번만 `python3 -m venv ~/.local/share/paper-to-course/venv && ~/.local/share/paper-to-course/venv/bin/pip install fonttools brotli`를 실행해 둡니다. `node`가 있으면 `$…$`·`$$…$$` 수식을 빌드 때 KaTeX로 미리 렌더링해 첫 화면에 원문이 보이지 않습니다(수식 하나에 약 1KB 증가, 없으면 열 때 렌더링, `--no-prerender`로 끔). 사용자에게 `index.html` 하나만 공유하면 되고, 브라우저 코드는 난독화해도 완전히 숨길 수 없다고 알립니다.
 
 **핵심 규칙:**
 - `styles.css`, `main.js`는 **절대 새로 만들지 않고** references에서 복사합니다. 모듈 파일에는 `<section>` 내용만(보일러플레이트 없음). 스크롤 스냅(`proximity`)·`100dvh`는 `styles.css` 담당이므로 다시 정하지 않습니다.
@@ -214,10 +214,12 @@ course-name/
 ```bash
 python3 -I <skill-dir>/references/lint-ko.py course-name/ --strict
 python3 -I <skill-dir>/references/check-pages.py course-name/   # 헤드리스 Chrome, 1440×900, --chrome <path>
+python3 -I <skill-dir>/references/check-interact.py course-name/   # 퀴즈 채점·초기화, 내비·쪽 넘김, 툴팁(강의당 약 20~30초)
 ```
 
 - 린터는 **ERROR 0개, WARN 0개**여야 합니다. 예외는 `korean-style-guide.md` §3.3의 알려진 린터 한계(예: 약어 뒤 서술격 `이다`를 주격 `이`로 오판하는 KO104)뿐이며, 남으면 파일·줄과 이유를 보고합니다. 연구 대화의 해요체는 린터가 이미 제외합니다.
-- `check-pages.py` 요약은 `넘침 0개, 코넬 아닌 화면 0개, 그림 정렬 문제 0개, 배치 문제 0개`여야 합니다(문제가 있으면 종료 코드 1). Chrome이 없으면 건너뛰고 결과 보고에 "건너뜀"으로 적습니다.
+- `check-pages.py` 요약은 `넘침 0개, 코넬 아닌 화면 0개, 그림 정렬 문제 0개, 배치 문제 0개`여야 합니다(문제가 있으면 종료 코드 1). 모바일 폭 390px에서 페이지가 옆으로 밀리는지도 함께 재며(요약 끝 `모바일 390px 가로 밀림 0px`), 밀리면 원인 요소를 LAY로 보고합니다(`--no-mobile`로 끔).
+- `check-interact.py`는 모든 확인 문제를 오답·초기화·정답 순으로 풀고, 내비 점·방향키·쪽 넘김 단추·스페이스바·용어 툴팁·콘솔 오류를 실제 입력으로 검사합니다. 요약이 `상호작용 문제 0개`여야 합니다(`--quick`은 퀴즈 3개만). Chrome이 없으면 건너뛰고 결과 보고에 "건너뜀"으로 적습니다.
 - 통과할 때까지 고치고 다시 빌드합니다. 통과하면 표지를 포함한 모든 페이지를 렌더링해 하나씩 눈으로 확인합니다(검사는 필요조건일 뿐). 그다음 `index.html`을 브라우저로 열고 만든 내용을 한국어로 안내하며 피드백을 요청합니다.
 
 **검토 체크리스트:** Phase 1~4의 필수 항목(표지 구성, 모듈 순서와 EBS 구성, 첫 페이지, 계보, 그림·구조도·비교·논문 그림 재현, 삽화 3개, 출처·판·라이선스, 용어표 병합, 번호와 `.paper-ref`, 코넬·765px·퀴즈 2문항, 색상·직각 간선, EBS 문체·용어)을 하나씩 다시 확인하고, 다음도 봅니다.

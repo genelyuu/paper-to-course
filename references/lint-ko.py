@@ -9,6 +9,7 @@
 작업 폴더(_tmp/, _src/ 처럼 밑줄로 시작하는 폴더)와 vendor/ 안의 파일은 강의 본문이 아니므로 건너뛴다.
 <script>, <style>, <code>, <pre>, KaTeX 렌더 결과(class="katex"), $...$ / $$...$$ 수식은 본문 검사에서 제외한다.
 이모지(KO113)는 본문·속성·그림·코드 어디에도 쓰지 않는다(ERROR).
+인라인 배치 스타일(KO114: style 속성의 display:grid/flex, grid-template-columns)은 <svg> 밖에서 WARN. styles.css의 .cols-* 클래스를 쓴다.
 EBS 문체(KO102/108/109)는 chat/dialogue/message/bubble 클래스 요소와 lang이 ko가 아닌 요소 안에서는 검사하지 않는다.
 """
 import json
@@ -55,6 +56,7 @@ MATH_RE = re.compile(r"\$\$.*?\$\$|\$(?=\S)[^$\n]*?(?<=\S)\$(?!\d)", re.S)
 YEOREOBUN_RE = re.compile(r"여러분")
 OPERATOR_RE = re.compile(r"\\(cos|sin|tan|max|min|arg|argmax|log|exp|lim|det)(?![A-Za-z])")
 CHAT_WORDS = ("chat", "dialogue", "message", "bubble")
+LAYOUT_STYLE_RE = re.compile(r"grid-template-columns|display\s*:\s*(?:inline-)?(?:grid|flex)\b", re.I)
 PROSE_TAGS = {"p", "li", "td", "th"}
 PROSE_CLASS_PARTS = ("callout", "card", "quiz-question")
 PAREN_SPACE_RE = re.compile(r"([가-힣])\s+\((?=[A-Za-z])")
@@ -162,6 +164,14 @@ class Linter(HTMLParser):
             if k in a:
                 c = self.ctx(a)
                 self.check_text(a[k], line, self.lang_ok_now(a), attr=True, ctx=c[:2] + (True,), feedback=True)
+        # KO114: 본문 배치(display:grid/flex, grid-template-columns)는 인라인 대신 공통 단 나누기 클래스로.
+        # <svg> 안(foreignObject 라벨 등)은 그림 내부 배치라 제외한다.
+        m = LAYOUT_STYLE_RE.search(a.get("style", ""))
+        if m and tag != "svg" and not any(t == "svg" for t, _ in self.stack):
+            self.add(line, "WARN", "KO114", f"인라인 배치 스타일 '{m.group(0)}': 본문 배치는 공통 단 나누기 클래스로 씁니다",
+                     "class=\"cols-2\"(2단, 비율은 style=\"--col-a:1.2fr\")·cols-3·cols-4·cols-5·cols-label(앞 열 고정 폭 --col-w)·"
+                     "cols-aside(뒤 열 고정 폭)·cols-flex를 쓰세요. 간격은 gap-2~6, 정렬은 align-start/center/end. "
+                     "코드 블록 비율은 pseudocode-translation에 style=\"--col-a:1.5fr\"")
         if tag in VOID:
             return
         self.stack.append((tag, a))

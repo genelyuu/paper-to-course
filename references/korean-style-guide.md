@@ -383,3 +383,4 @@
 | KO111 | WARN | 용어 뜻풀이(`data-definition`)가 서술문으로 끝남 | §1.8 |
 | KO112 | WARN | 수식에 똑바른 글꼴 명령이나 이름 있는 연산자 | §7 |
 | KO113 | ERROR | 이모지(문자 참조 포함) | §5 |
+| KO114 | WARN | 인라인 배치 스타일(`display:grid`·`flex`, `grid-template-columns`, SVG 밖) → `cols-*` 단 나누기 클래스 | interactive-elements.md "단 나누기" |

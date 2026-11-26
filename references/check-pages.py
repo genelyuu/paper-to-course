@@ -3,6 +3,7 @@
 
 사용법:
     python3 check-pages.py <강의 폴더 또는 index.html> [--width 1440] [--height 900] [--chrome PATH]
+                           [--mobile-width 390] [--no-mobile]
 
 페이지 단위:
   - 단원 도입(.module-header) + 바로 뒤 첫 화면 = 1페이지
@@ -16,8 +17,12 @@ min-height(100vh)를 풀고 내용의 실제 높이를 잰다.
 배치도 검사한다(LAY): 화면·노트 칸 밖으로 가로로 넘친 요소, overflow로 잘린 내용, SVG 글자의 그림 경계 이탈,
 SVG 글자끼리 겹침, 상자 라벨(foreignObject)의 넘침, 페이지 가로 스크롤, 잘린 사이드바 목차 라벨, 색칠되지 않은 코드 칸.
 단원 첫 페이지는 단원 맨 위(내비 아래 여백 포함)부터 잰다.
+모바일 배치도 검사한다(LAY): 폭 390px(--mobile-width)로 한 번 더 열고(headless 창은 500px보다 좁아지지 않아 그 폭의 iframe 안에서 연다) KaTeX가 그려질 때까지(약 2초) 기다린 뒤
+페이지 전체가 옆으로 밀리는지(scrollWidth > clientWidth) 잰다. 밀리면 원인 요소를 5개까지 알린다
+(화면 오른쪽 밖으로 나간 가장 안쪽 요소; 화면 안에 들어오는 가로 스크롤·잘림 상자 안의 요소는 빼고,
+absolute 요소는 스크롤 상자를 빠져나간 경우만). --no-mobile로 건너뛴다(Chrome을 한 번 덜 띄운다).
 
-종료 코드: 넘치는 페이지나 그림 정렬 문제가 있으면 1, 아니면 0. 표준 라이브러리와 Chrome만 쓴다.
+종료 코드: 넘치는 페이지, 그림 정렬 문제, 배치 문제(모바일 포함)가 있으면 1, 아니면 0. 표준 라이브러리와 Chrome만 쓴다.
 """
 import argparse, html as htmllib, json, os, re, shutil, subprocess, sys, tempfile
 
@@ -226,6 +231,110 @@ window.addEventListener('load', function () {
 </script>
 """
 
+# 모바일 폭 검사: 페이지가 옆으로 밀리는지와 그 원인 요소
+MOBILE_PROBE = r"""
+<style id="__fit_style">
+  .animate-in, .animate-in *:not(svg, svg *) { opacity: 1 !important; transform: none !important; transition: none !important; }
+</style>
+<script>
+window.addEventListener('load', function () {
+  setTimeout(function () {   // KaTeX·글꼴이 자리 잡을 때까지 기다린다
+    var de = document.documentElement, W = de.clientWidth, dw = de.scrollWidth - W, found = [];
+    function nm(el) { var c = el.className && el.className.baseVal !== undefined ? el.className.baseVal : el.className; return el.tagName.toLowerCase() + (c ? '.' + String(c).trim().split(/\s+/)[0] : ''); }
+    function tx(el) {   // 보이는 글자만(KaTeX의 숨은 MathML·TeX 원문은 뺀다)
+      if (el.querySelector && el.querySelector('.katex-mathml')) { el = el.cloneNode(true); el.querySelectorAll('.katex-mathml').forEach(function (k) { k.remove(); }); }
+      return (el.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 24);
+    }
+    // 화면 안에 들어오는 가로 스크롤·잘림 상자(조상)를 찾는다
+    function scroller(e) {
+      for (var p = e.parentElement; p && p !== document.body && p !== de; p = p.parentElement) {
+        var s = getComputedStyle(p);
+        if (/(auto|scroll|hidden|clip)/.test(s.overflowX) && p.getBoundingClientRect().right <= W + 1) return p;
+      }
+      return null;
+    }
+    if (dw > 2) {
+      var seen = {};
+      document.querySelectorAll('body *').forEach(function (e) {
+        var r = e.getBoundingClientRect();
+        if (r.width === 0 || r.right <= W + 2) return;
+        if (e.closest('svg') && e.tagName.toLowerCase() !== 'svg') return;
+        var cs = getComputedStyle(e);
+        if (cs.position === 'fixed' || cs.display === 'none' || cs.visibility === 'hidden') return;
+        var sc = scroller(e);
+        if (cs.position === 'absolute') {
+          // 기준 상자(offsetParent)가 스크롤 상자 안이면 그 안에서 잘리므로 괜찮다
+          var op = e.offsetParent;
+          if (sc && op && (sc === op || sc.contains(op))) return;
+        } else {
+          if (sc) return;
+          // 가장 안쪽 요소만: 자식이 함께 넘치면 자식을 알린다
+          if (Array.prototype.some.call(e.children, function (k) { return k.getBoundingClientRect().right > W + 2 && !(k.closest('svg') && k.tagName.toLowerCase() !== 'svg'); })) return;
+        }
+        // 선택자 요약: 요소 + 클래스가 있는 조상 둘(tr·tbody 같은 맨 태그는 건너뛴다)
+        var chain = [], p = e.parentElement;
+        for (; chain.length < 2 && p && p !== document.body; p = p.parentElement) if (nm(p).indexOf('.') > 0) chain.push(nm(p));
+        var key = (cs.position === 'absolute' ? '[absolute] ' : '') + nm(e) + (chain.length ? ' < ' + chain.join(' < ') : '');
+        var mod = e.closest('.module'), scr = e.closest('.screen');
+        var where = mod ? (mod.id || 'module') + (scr ? ' p' + (Array.prototype.indexOf.call(mod.querySelectorAll('.screen'), scr) + 1) : '') : '';
+        if (!seen[key]) { seen[key] = { key: key, where: where, right: 0, n: 0, text: tx(e) }; found.push(seen[key]); }
+        seen[key].n++; seen[key].right = Math.max(seen[key].right, Math.round(r.right));
+      });
+      found.sort(function (a, b) { return b.right - a.right; });
+    }
+    // 바깥 틀(MOBILE_FRAME)에 결과를 넘긴다
+    parent.postMessage('__fit_result' + JSON.stringify({ width: W, inner: window.innerWidth, dw: dw, culprits: found.slice(0, 5), total: found.length }), '*');
+  }, 2000);
+});
+</script>
+"""
+
+# headless Chrome 창은 폭 500px보다 좁아지지 않는다. 그래서 모바일 폭은 그 폭의 iframe 안에서 연다.
+MOBILE_FRAME = """<!doctype html><meta charset="utf-8"><body style="margin:0">
+<iframe src="{src}" width="{w}" height="{h}" style="border:0;display:block"></iframe>
+<script>
+window.addEventListener('message', function (e) {{
+  if (typeof e.data !== 'string' || e.data.indexOf('__fit_result') !== 0) return;
+  var pre = document.createElement('pre'); pre.id = '__fit_result';
+  pre.textContent = e.data.slice(12); document.body.appendChild(pre);
+}});
+</script></body>"""
+
+
+def render(chrome, src_path, html, width, height, frame=False):
+    """html을 src_path와 같은 폴더의 임시 파일로 써서 Chrome으로 열고 결과 JSON을 돌려준다.
+    frame=True면 폭 width의 iframe에 넣어 연다(창 최소 폭보다 좁은 모바일 폭)."""
+    # 상대 경로(styles.css, main.js)를 그대로 쓰려고 같은 폴더에 임시 파일을 만든다
+    d = os.path.dirname(os.path.abspath(src_path))
+    tmps = []
+    try:
+        fd, tmp = tempfile.mkstemp(prefix=".fit-", suffix=".html", dir=d)
+        tmps.append(tmp)
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(html)
+        open_path, win = tmp, (width, height)
+        if frame:
+            fd, open_path = tempfile.mkstemp(prefix=".fit-frame-", suffix=".html", dir=d)
+            tmps.append(open_path)
+            with os.fdopen(fd, "w", encoding="utf-8") as f:
+                f.write(MOBILE_FRAME.format(src=htmllib.escape(os.path.basename(tmp)), w=width, h=height))
+            win = (max(width, 500) + 20, height + 20)
+        try:
+            out = subprocess.run(
+                [chrome, "--headless=new", "--disable-gpu", "--hide-scrollbars",
+                 f"--window-size={win[0]},{win[1]}", "--virtual-time-budget=10000",
+                 "--dump-dom", "file://" + os.path.abspath(open_path)],
+                capture_output=True, text=True, timeout=120).stdout
+        except subprocess.TimeoutExpired:
+            sys.exit(f"Chrome이 120초 안에 끝나지 않았다(폭 {width}px 측정 실패).")
+    finally:
+        for t in tmps:
+            os.remove(t)
+    m = re.search(r'<pre id="__fit_result">(.*?)</pre>', out, re.S)
+    if not m:
+        sys.exit(f"측정 결과를 읽지 못했다(폭 {width}px, 페이지 로드 실패).")
+    return json.loads(htmllib.unescape(m.group(1)))
+
 
 def find_chrome(explicit):
     for c in ([explicit] if explicit else []) + CHROME_CANDIDATES:
@@ -240,6 +349,8 @@ def main():
     ap.add_argument("--width", type=int, default=1440)
     ap.add_argument("--height", type=int, default=900)
     ap.add_argument("--chrome")
+    ap.add_argument("--mobile-width", type=int, default=390, help="모바일 검사 폭(기본 390px, 높이 844px)")
+    ap.add_argument("--no-mobile", action="store_true", help="모바일 폭 가로 밀림 검사를 건너뛴다")
     a = ap.parse_args()
 
     path = a.target
@@ -247,7 +358,8 @@ def main():
         path = os.path.join(path, "index.html")
     if not os.path.isfile(path):
         sys.exit(f"파일이 없다: {path}")
-    html = open(path, encoding="utf-8").read()
+    html = orig = open(path, encoding="utf-8").read()
+    chrome = find_chrome(a.chrome)
     # 빌드 전 페이지의 <img src="….svg">: 색 검사용으로 SVG 원문을 미리 읽어 넣는다(file://에서는 fetch가 막힘)
     base = os.path.dirname(os.path.abspath(path))
     svgs = {}
@@ -257,27 +369,30 @@ def main():
             svgs[src] = open(f, encoding="utf-8", errors="replace").read()
     pre = "<script>window.__p2cSvg = " + json.dumps(svgs).replace("</", "<\\/") + ";</script>" if svgs else ""
     html = re.sub(r"</body>", lambda _: pre + PROBE + "</body>", html, count=1, flags=re.I)
+    data = render(chrome, path, html, a.width, a.height)
+    lay = data.get("lay", [])
 
-    # 상대 경로(styles.css, main.js)를 그대로 쓰려고 같은 폴더에 임시 파일을 만든다
-    fd, tmp = tempfile.mkstemp(prefix=".fit-", suffix=".html", dir=os.path.dirname(os.path.abspath(path)))
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8") as f:
-            f.write(html)
-        try:
-            out = subprocess.run(
-                [find_chrome(a.chrome), "--headless=new", "--disable-gpu", "--hide-scrollbars",
-                 f"--window-size={a.width},{a.height}", "--virtual-time-budget=10000",
-                 "--dump-dom", "file://" + os.path.abspath(tmp)],
-                capture_output=True, text=True, timeout=120).stdout
-        except subprocess.TimeoutExpired:
-            sys.exit("Chrome이 120초 안에 끝나지 않았다(측정 실패).")
-    finally:
-        os.remove(tmp)
+    # 모바일 폭: 페이지 전체가 옆으로 밀리는지
+    mobile_note = "모바일 검사 건너뜀"
+    if not a.no_mobile:
+        mhtml = re.sub(r"</body>", lambda _: MOBILE_PROBE + "</body>", orig, count=1, flags=re.I)
+        mob = render(chrome, path, mhtml, a.mobile_width, 844, frame=True)
+        mw = a.mobile_width
+        if abs(mob["inner"] - mw) > 1:
+            print(f"주의: 모바일 창 폭이 {mob['inner']}px로 열렸다(요청 {mw}px)")
+        mobile_note = f"모바일 {mob['inner']}px 가로 밀림 {max(mob['dw'], 0)}px"
+        if mob["dw"] > 2:
+            fix = "(좁은 화면 CSS나 상자 폭을 고친다)"
+            head = f"모바일({mw}px)에서 페이지가 옆으로 {mob['dw']}px 밀린다: "
+            for c in mob["culprits"]:
+                where = f"[{c['where']}] " if c["where"] else ""
+                more = f" 외 {c['n'] - 1}곳" if c["n"] > 1 else ""
+                lay.append(f"{head}{where}{c['key']} \"{c['text']}\"{more} {fix}")
+            if not mob["culprits"]:
+                lay.append(f"{head}원인 요소를 특정하지 못했다 {fix}")
+            elif mob["total"] > len(mob["culprits"]):
+                lay.append(f"{head}원인 요소가 {mob['total'] - len(mob['culprits'])}종 더 있다 {fix}")
 
-    m = re.search(r'<pre id="__fit_result">(.*?)</pre>', out, re.S)
-    if not m:
-        sys.exit("측정 결과를 읽지 못했다(페이지 로드 실패).")
-    data = json.loads(htmllib.unescape(m.group(1)))
     limit = data["limit"]
     over = 0
     print(f"기준: {a.width}×{a.height}, 페이지 허용 높이 {limit}px")
@@ -294,7 +409,6 @@ def main():
         print("\n그림 정렬:")
         for f in fig:
             print("FIG  " + f)
-    lay = data.get("lay", [])
     if lay:
         print("\n배치:")
         for f in lay:
@@ -302,7 +416,7 @@ def main():
     images = data.get("images", 0)
     if images < MIN_IMAGES:
         print(f"\nIMG  삽화(assets/ 선화)가 {images}개다 (최소 {MIN_IMAGES}개, references/illustrate.py로 만든다)")
-    print(f"\n요약: 페이지 {len(data['pages'])}개, 넘침 {over}개, 코넬 아닌 화면 {plain}개, 그림 정렬 문제 {len(fig)}개, 배치 문제 {len(lay)}개, 삽화 {images}개")
+    print(f"\n요약: 페이지 {len(data['pages'])}개, 넘침 {over}개, 코넬 아닌 화면 {plain}개, 그림 정렬 문제 {len(fig)}개, 배치 문제 {len(lay)}개, 삽화 {images}개, {mobile_note}")
     sys.exit(1 if over or fig or lay or images < MIN_IMAGES else 0)
 
 

@@ -248,6 +248,7 @@ paper-to-course 튜토리얼의 인터랙티브 요소 구현 패턴이다.
 **Rules:**
 - `.pseudocode-line`과 `.pe`는 1:1로 대응한다.
 - `.pseudocode-controls`는 반드시 `.pseudocode-translation` **안**에 둔다(밖에 두면 동작하지 않는다).
+- 두 열 비율은 `style="--col-a:1.5fr"`(왼쪽 코드)·`--col-b`(오른쪽 설명)로 바꾼다. 인라인 `grid-template-columns`는 쓰지 않는다(lint KO114).
 - **코드 색:** IDE 토큰 색(Catppuccin, `.code-keyword`·`.code-function`·`.code-comment`·`.code-number`·`.code-operator`·`.code-string`)을 `main.js`가 자동으로 칠한다(대문자 제어어 INPUT, FOR, DO, END, OUTPUT …은 키워드, `이름(`은 함수, `//` 뒤는 주석, 숫자, `= / * + -`). 줄은 일반 텍스트로 쓴다. 직접 `<span class="code-…">`로 칠한 줄은 건드리지 않는다. 새 색을 정하지 않는다.
 - 언어 중립으로 쓴다. `INPUT`, `OUTPUT`, `FOR EACH`, `IF...THEN` 키워드는 영어(Python/C++ 문법 금지), 주석과 설명만 한국어.
 - 설명은 "무엇을"과 "왜"를 한다체로 쓴다.
@@ -575,6 +576,30 @@ paper-to-course 튜토리얼의 인터랙티브 요소 구현 패턴이다.
   <!-- 화살표 + 단계 반복 -->
 </div>
 ```
+
+## 단 나누기 (Column Layout)
+
+본문 안에서 그림과 설명, 카드 여러 개를 나란히 둘 때 쓴다. 인라인 `display:grid`·`display:flex`·`grid-template-columns`는 쓰지 않는다(lint KO114). 폭·비율만 인라인 변수로 바꾸고, `margin`은 인라인으로 둬도 된다. 640px 이하에서는 모두 한 단(`.cols-flex`는 세로)으로 바뀐다.
+
+| 클래스 | 배치 | 바꾸는 변수 |
+|---|---|---|
+| `.cols-2` · `.cols-3` | 같은 너비 2·3단 | 비율 `--col-a`·`--col-b`·`--col-c` (기본 `1fr`) |
+| `.cols-4` · `.cols-5` | 같은 너비 4·5단(수치 카드 줄) | 없음 |
+| `.cols-label` | 앞 열 고정 폭 + 나머지 | `--col-w` (기본 `230px`) |
+| `.cols-aside` | 나머지 + 뒤 열 고정 폭 | `--col-w` (기본 `300px`) |
+| `.cols-1` | 한 단 격자(간격만) | 없음 |
+| `.cols-flex` | 가로 한 줄 flex, 자식 `flex:1`로 나눔 | 없음 |
+
+간격은 기본 `var(--space-4)`, `.gap-0`·`.gap-2`·`.gap-3`·`.gap-5`·`.gap-6`으로 바꾼다(토큰에 없는 값만 인라인 `gap:`). 세로 정렬은 기본 늘이기(stretch), `.align-start`·`.align-center`·`.align-end`. 기존 카드 묶음(`.contribution-cards`·`.step-cards`·`.dnd-zones`·`.quiz-options.row`)도 같은 클래스를 덧붙여 2·3단으로 만든다.
+```html
+<div class="cols-2 gap-5 align-start" style="--col-a:1.2fr">
+  <figure class="figure">…</figure>
+  <div>…설명…</div>
+</div>
+<div class="cols-label align-center" style="--col-w:300px; margin-top:var(--space-2)">…</div>
+<div class="contribution-cards cols-2 gap-3">…</div>
+```
+의사코드 두 열의 비율은 `.pseudocode-translation`에 같은 변수로 준다: `<div class="pseudocode-translation" style="--col-a:1.5fr">`.
 
 ## 데이터 표 (Data Table)
 
