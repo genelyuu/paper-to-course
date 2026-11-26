@@ -3040,3 +3040,31 @@ html { scroll-padding-top: var(--nav-height); }
 
 /* SVG 상자 라벨: 본문 줄 간격(1.75)을 물려받으면 두 줄 라벨이 상자를 넘는다 */
 .svg-diagram foreignObject > div, svg foreignObject > div.node-label { line-height: 1.35; }
+
+/* 좁은 화면(768px 이하): 표와 블록 수식은 자기 상자 안에서 가로로 스크롤해 페이지가 옆으로 밀리지 않게 하고,
+   고정된 쪽 번호·목차 단추가 마지막 줄을 가리지 않도록 화면 아래를 비운다. 데스크톱 쪽 높이(765px)에는 영향 없음. */
+@media (max-width: 768px) {
+  .data-table { display: block; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .katex-display { max-width: 100%; overflow-x: auto; overflow-y: hidden; padding-bottom: 2px; }
+  .screen.cornell { padding-bottom: calc(var(--space-6) + 56px); }
+}
+@media (max-width: 768px) {
+  .math-equation, .math-block { max-width: 100%; min-width: 0; overflow-x: auto; overflow-y: hidden; }
+  .result-metric-toggle { flex-wrap: wrap; }
+  .contribution-card, .contribution-text { min-width: 0; }
+  .contribution-text { overflow-wrap: anywhere; }
+  .figure svg, .figure img, .svg-diagram svg { max-width: 100%; height: auto; }
+  .notes, .cue, .summary { min-width: 0; }
+}
+@media (max-width: 640px) {
+  .with-figure > * { min-width: 0; }
+  .figure.side { width: 100%; max-width: var(--figure-side-width, 200px); }
+  .with-figure .svg-diagram, .with-figure figure { max-width: 100%; }
+  .quiz-options, .quiz-option { min-width: 0; }
+  .quiz-option { overflow-wrap: anywhere; }
+  .quiz-options.row .quiz-option { white-space: normal; }
+  .katex, .katex-display, .math-equation, .math-block { position: relative; }
+  .notes > *, .with-figure > *, .assumption-challenge { max-width: 100%; min-width: 0; }
+  .notes [style*="grid-template-columns"] { grid-template-columns: minmax(0, 1fr) !important; }
+  .notes p .katex, .notes li .katex, .quiz-option .katex { display: inline-block; max-width: 100%; overflow-x: auto; overflow-y: hidden; vertical-align: middle; }
+}

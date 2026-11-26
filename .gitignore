@@ -19,3 +19,4 @@ onepage_output.*
 # 삽화 생성 중간 파일 (최종 assets/*.svg와 재현용 .json만 올린다)
 *.clean.png
 *.raw.svg
+.gstack/

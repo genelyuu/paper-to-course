@@ -199,7 +199,7 @@ course-name/
 
 **여러 강의를 동시에 만들 때:** 강의마다 별도 디렉터리, 임시 파일은 그 강의의 `_tmp/`에만(`/tmp` 공유 금지). `illustrate.py`는 모든 에이전트가 같은 전역 잠금으로 한 번에 하나만(명령은 `illustration.md` "여러 강의를 동시에 만들 때"). 공통 지침은 파일 하나(`courses/_BRIEF.md` 등)에 두고 각 프롬프트에서 읽게 합니다.
 
-**Step 4 (공통): 조립.** `cd course-name && bash build.sh`. 로컬 `<link>`·`<script>`·`<img>`를 `index.html`에 넣고(글꼴·그림은 data URI), `main.js`·`styles.css`를 `vendor/`의 압축·난독화본으로 바꾸며, HTML·SVG 주석을 지웁니다. `fontTools`(`pip install fonttools brotli`)가 있으면 본문 글꼴을 쓰인 글자만 남겨 약 1.2MB 줄입니다(없어도 됨). 사용자에게 `index.html` 하나만 공유하면 되고, 브라우저 코드는 난독화해도 완전히 숨길 수 없다고 알립니다.
+**Step 4 (공통): 조립.** `cd course-name && bash build.sh`. 로컬 `<link>`·`<script>`·`<img>`를 `index.html`에 넣고(글꼴·그림은 data URI), `main.js`·`styles.css`를 `vendor/`의 압축·난독화본으로 바꾸며, HTML·SVG 주석을 지웁니다. `fontTools`가 있으면 본문 글꼴을 쓰인 글자만 남겨 파일이 약 40% 줄어듭니다(없어도 됨). 시스템 Python에 설치할 수 없으면(PEP 668) 가상환경을 만들고 그 인터프리터를 `P2C_PYTHON`으로 넘깁니다: `python3 -m venv ~/.local/share/paper-to-course/venv && ~/.local/share/paper-to-course/venv/bin/pip install fonttools brotli`, 이후 `P2C_PYTHON=~/.local/share/paper-to-course/venv/bin/python bash build.sh`. 사용자에게 `index.html` 하나만 공유하면 되고, 브라우저 코드는 난독화해도 완전히 숨길 수 없다고 알립니다.
 
 **핵심 규칙:**
 - `styles.css`, `main.js`는 **절대 새로 만들지 않고** references에서 복사합니다. 모듈 파일에는 `<section>` 내용만(보일러플레이트 없음). 스크롤 스냅(`proximity`)·`100dvh`는 `styles.css` 담당이므로 다시 정하지 않습니다.

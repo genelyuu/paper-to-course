@@ -8,4 +8,4 @@ cd "$(dirname "$0")"
 if [ -f build.py ]; then PY=build.py
 elif [ -f ../../references/build.py ]; then PY=../../references/build.py
 else echo "ERROR: build.py 가 없습니다. references/build.py를 강의 폴더에 복사하세요." >&2; exit 1; fi
-python3 "$PY" . "$@"   # --allow-todo: [작성 필요: …] 자리를 남긴 채 미리 보기로 조립
+"${P2C_PYTHON:-python3}" "$PY" . "$@"   # P2C_PYTHON: fontTools가 있는 인터프리터(글꼴 부분 집합). --allow-todo: [작성 필요: …] 자리를 남긴 채 미리 보기로 조립
