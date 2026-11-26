@@ -1,0 +1,574 @@
+<section class="module" id="module-0">
+  <div class="module-content">
+
+    <div class="module-header">
+      <span class="module-number">1</span>
+      <h2 class="module-title">서론과 배경</h2>
+      <p class="module-subtitle">논문을 쓴 이유와 읽기 전에 알아 둘 다섯 가지 개념을 정리한다</p>
+    </div>
+
+    <!-- 페이지 1: 쓴 이유와 새로운 점 (논문 1절) -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">학습 목표</strong>
+            <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
+            <ol>
+              <li>중간 언어가 번역기 수를 줄이는 까닭을 계산할 수 있다.</li>
+              <li>평가 스택의 변화를 단계별로 그릴 수 있다.</li>
+              <li>CLI, CLR, CIL의 관계와 JIT의 역할을 구분할 수 있다.</li>
+            </ol>
+          </div>
+        </div>
+        <span class="cue-label">용어 정리</span>
+        <dl>
+          <dt>CLI</dt><dd>표준 명세의 이름.</dd>
+          <dt>CLR</dt><dd>Microsoft의 CLI 구현.</dd>
+          <dt>CIL</dt><dd>CLI의 중간 언어.</dd>
+        </dl>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">이 논문을 쓴 이유와 새로운 점<span class="paper-ref">논문 1절</span></h3>
+        <p><span class="term" data-definition="자바 가상 머신(Java Virtual Machine, JVM): Java 프로그램의 바이트코드를 실행하는 가상 머신.">자바 가상 머신</span>(Java Virtual Machine, JVM)은 여러 언어 구현자가 실행 환경으로 택했지만, 저자들은 JVM이 <strong>다중 언어 플랫폼으로는 본질적으로 최적이 아니라고</strong> 주장한다. 이 논문은 처음부터 다중 언어용으로 설계한 <span class="term" data-definition="공통 언어 기반(Common Language Infrastructure, CLI): 여러 언어를 한 실행 환경에서 돌리려고 정한 표준 명세. ECMA-335로 표준화됨.">공통 언어 기반</span>(Common Language Infrastructure, CLI)를 JVM과 비교한다. 논문은 명세인 CLI와 Microsoft의 구현인 <span class="term" data-definition="공통 언어 런타임(Common Language Runtime, CLR): Microsoft가 만든 CLI 구현. 논문은 CLI와 섞어 씀.">공통 언어 런타임</span>(Common Language Runtime, CLR)을 섞어 쓰며, CLI용 코드는 <span class="term" data-definition="공통 중간 언어(Common Intermediate Language, CIL): CLI의 명령어로 쓴 중간 언어. MSIL 또는 IL이라고도 부름.">공통 중간 언어</span>(Common Intermediate Language, CIL)이다.</p>
+        <div class="svg-diagram animate-in" style="margin:0 auto">
+          <svg viewBox="0 0 800 184" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="이전에는 Scheme과 Pascal이 trampoline이나 원소 1개 배열 같은 우회책을 거쳐 JVM에 올라가고, CLI에서는 세 언어가 필요한 명령어로 바로 대응한다">
+            <foreignObject x="16" y="0" width="368" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; font-weight:700"><span>이전: JVM 위의 여러 언어</span></div></foreignObject>
+            <path class="edge-line" d="M112,48 H286"/><polygon class="edge-arrow" points="286,43 296,48 286,53"/>
+            <path class="edge-line" d="M112,92 H134"/><polygon class="edge-arrow" points="134,87 144,92 134,97"/>
+            <path class="edge-line" d="M264,92 H286"/><polygon class="edge-arrow" points="286,87 296,92 286,97"/>
+            <path class="edge-line" d="M112,136 H134"/><polygon class="edge-arrow" points="134,131 144,136 134,141"/>
+            <path class="edge-line" d="M264,136 H286"/><polygon class="edge-arrow" points="286,131 296,136 286,141"/>
+            <rect class="node-rect" x="16" y="32" width="96" height="32" rx="8"/>
+            <foreignObject x="24" y="36" width="80" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>Java</span></div></foreignObject>
+            <rect class="node-rect" x="16" y="76" width="96" height="32" rx="8"/>
+            <foreignObject x="24" y="80" width="80" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>Scheme</span></div></foreignObject>
+            <rect class="node-rect" x="16" y="120" width="96" height="32" rx="8"/>
+            <foreignObject x="24" y="124" width="80" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>Pascal</span></div></foreignObject>
+            <rect class="node-rect sq" x="144" y="76" width="120" height="32"/>
+            <foreignObject x="152" y="80" width="104" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>우회: trampoline</span></div></foreignObject>
+            <rect class="node-rect sq" x="144" y="120" width="120" height="32"/>
+            <foreignObject x="152" y="124" width="104" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>우회: 원소 1개 배열</span></div></foreignObject>
+            <rect class="node-rect" x="296" y="32" width="88" height="120" rx="8"/>
+            <foreignObject x="304" y="36" width="72" height="112"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:15px; font-weight:700"><span>JVM</span></div></foreignObject>
+            <foreignObject x="16" y="160" width="368" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; color:var(--color-text-secondary)"><span>Java에 없는 기능은 우회책으로 흉내 낸다</span></div></foreignObject>
+
+            <foreignObject x="416" y="0" width="368" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; font-weight:700; color:var(--color-accent)"><span>제안: CLI(처음부터 다중 언어)</span></div></foreignObject>
+            <path class="edge-line" d="M512,48 H678"/><polygon class="edge-arrow" points="678,43 688,48 678,53"/>
+            <path class="edge-line" d="M512,92 H678"/><polygon class="edge-arrow" points="678,87 688,92 678,97"/>
+            <path class="edge-line" d="M512,136 H678"/><polygon class="edge-arrow" points="678,131 688,136 678,141"/>
+            <text class="mono" x="596" y="84" font-size="12" text-anchor="middle">tail. call</text>
+            <text class="mono" x="596" y="128" font-size="12" text-anchor="middle">int32&amp; 인수</text>
+            <rect class="node-rect" x="416" y="32" width="96" height="32" rx="8"/>
+            <foreignObject x="424" y="36" width="80" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>C#</span></div></foreignObject>
+            <rect class="node-rect" x="416" y="76" width="96" height="32" rx="8"/>
+            <foreignObject x="424" y="80" width="80" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>Scheme</span></div></foreignObject>
+            <rect class="node-rect" x="416" y="120" width="96" height="32" rx="8"/>
+            <foreignObject x="424" y="124" width="80" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>Pascal</span></div></foreignObject>
+            <rect class="node-rect accent" x="688" y="32" width="96" height="120" rx="8"/>
+            <foreignObject x="696" y="36" width="80" height="112"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:15px; font-weight:700"><span>CLI</span></div></foreignObject>
+            <foreignObject x="416" y="160" width="368" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; color:var(--color-accent)"><span>필요한 기본 연산을 명령어로 직접 제공한다</span></div></foreignObject>
+          </svg>
+        </div>
+        <div class="callout callout-accent animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">이 논문의 새로운 점</strong>
+            <ol>
+              <li><strong>처음부터 다중 언어 설계:</strong> 개발 초기부터 언어 구현자와 협력했고, <span class="term" data-definition="tail call(꼬리 호출): 함수가 마지막 동작으로 다른 함수를 부르는 호출. 호출한 쪽의 프레임을 버려도 됨.">tail call</span>(꼬리 호출) 명령어는 그 의견으로 추가했다(1절).</li>
+              <li><strong>JVM에 없는 기본 연산:</strong> 참조 전달용 포인터, 값 타입과 공용체, 오버플로 감지 산술, tail call을 명령어 수준에서 제공한다(4~10절).</li>
+              <li><strong>검증과 비검증의 공존:</strong> 검증 가능한 부분집합으로 안전을 보장하고, 필요하면 포인터도 허용한다(11절).</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>저자들은 JVM이 여러 언어를 올리기에 최적이 아니라고 보고, 처음부터 다중 언어용으로 설계한 CLI를 소개한다.</p></div>
+    </div>
+
+    <!-- 페이지 2: 컴파일러, 인터프리터, 가상 머신, 중간 언어 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">배경 지식</strong>
+            <p>이 화면은 논문의 주장이 아니라 논문을 읽기 위해 먼저 알아 둘 배경이다.</p>
+          </div>
+        </div>
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>컴파일러와 인터프리터는 무엇이 다른가?</li>
+          <li>가상 머신은 왜 필요한가?</li>
+          <li>중간 언어는 번역 과정의 어디에 놓이는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">컴파일러, 인터프리터, 가상 머신</h3>
+        <p><span class="term" data-definition="컴파일러(Compiler): 원천 코드를 실행 전에 다른 언어(보통 기계어)로 한꺼번에 번역하는 프로그램.">컴파일러</span>(Compiler)는 원천 코드를 실행 전에 <span class="term" data-definition="네이티브 코드(Native Code): 특정 CPU가 바로 실행할 수 있는 기계어 코드. CPU 종류마다 다름.">네이티브 코드</span>(Native Code, 특정 CPU의 기계어)로 한꺼번에 번역한다. <span class="term" data-definition="인터프리터(Interpreter): 코드를 미리 번역하지 않고 명령을 하나씩 읽으며 바로 실행하는 프로그램.">인터프리터</span>(Interpreter)는 번역해 두지 않고 명령을 하나씩 읽으며 바로 실행한다. 기계어는 CPU마다 달라서, 컴파일한 프로그램은 다른 CPU에서 돌지 않는다.</p>
+        <p><span class="term" data-definition="가상 머신(Virtual Machine, VM): 실제 CPU 대신 소프트웨어로 만든 가상의 기계. 자기만의 명령어 집합이 있음.">가상 머신</span>(Virtual Machine, VM)은 소프트웨어로 만든 가상의 기계이고, 그 기계의 명령어로 쓴 코드가 <span class="term" data-definition="중간 언어(Intermediate Language): 원천 코드와 기계어 사이에 두는 언어. 특정 CPU에 묶이지 않음.">중간 언어</span>(Intermediate Language)이다. JVM의 <span class="term" data-definition="바이트코드(Bytecode): JVM이 실행하는 중간 코드. 명령 하나가 주로 1바이트 부호로 시작함.">바이트코드</span>(Bytecode)와 CLI의 CIL이 그 예이다. 컴파일러는 중간 언어까지만 번역하고, 기계어로 바꾸는 마지막 단계는 실행하는 기계의 VM이 맡는다.</p>
+        <div class="svg-diagram animate-in" style="margin:var(--space-3) auto 0">
+          <svg viewBox="0 0 800 172" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="컴파일 방식은 원천 코드를 컴파일러가 기계어로 바꾸고, 인터프리트 방식은 인터프리터가 읽으며 실행하고, 가상 머신 방식은 컴파일러가 중간 언어를 만들고 VM이 실행 직전에 기계어로 바꾼다">
+            <text x="16" y="35" font-size="13" font-weight="700">컴파일</text>
+            <text x="16" y="91" font-size="13" font-weight="700">인터프리트</text>
+            <text x="16" y="147" font-size="13" font-weight="700">가상 머신</text>
+            <path class="edge-line" d="M224,30 H238"/><polygon class="edge-arrow" points="238,25 248,30 238,35"/>
+            <path class="edge-line" d="M384,30 H398"/><polygon class="edge-arrow" points="398,25 408,30 398,35"/>
+            <path class="edge-line" d="M224,86 H238"/><polygon class="edge-arrow" points="238,81 248,86 238,91"/>
+            <path class="edge-line" d="M224,142 H238"/><polygon class="edge-arrow" points="238,137 248,142 238,147"/>
+            <path class="edge-line" d="M384,142 H398"/><polygon class="edge-arrow" points="398,137 408,142 398,147"/>
+            <path class="edge-line accent" d="M544,142 H558"/><polygon class="edge-arrow accent" points="558,137 568,142 558,147"/>
+            <rect class="node-rect sq" x="112" y="8" width="112" height="44"/>
+            <foreignObject x="120" y="12" width="96" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>원천 코드</span></div></foreignObject>
+            <rect class="node-rect" x="248" y="8" width="136" height="44" rx="8"/>
+            <foreignObject x="256" y="12" width="120" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>컴파일러</span></div></foreignObject>
+            <rect class="node-rect sq" x="408" y="8" width="136" height="44"/>
+            <foreignObject x="416" y="12" width="120" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>기계어(CPU 전용)</span></div></foreignObject>
+            <rect class="node-rect sq" x="112" y="64" width="112" height="44"/>
+            <foreignObject x="120" y="68" width="96" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>원천 코드</span></div></foreignObject>
+            <rect class="node-rect" x="248" y="64" width="296" height="44" rx="8"/>
+            <foreignObject x="256" y="68" width="280" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>인터프리터: 한 줄씩 읽고 바로 실행</span></div></foreignObject>
+            <rect class="node-rect sq" x="112" y="120" width="112" height="44"/>
+            <foreignObject x="120" y="124" width="96" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>원천 코드</span></div></foreignObject>
+            <rect class="node-rect" x="248" y="120" width="136" height="44" rx="8"/>
+            <foreignObject x="256" y="124" width="120" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>컴파일러</span></div></foreignObject>
+            <rect class="node-rect sq accent" x="408" y="120" width="136" height="44"/>
+            <foreignObject x="416" y="124" width="120" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; font-weight:700"><span>중간 언어(CIL)</span></div></foreignObject>
+            <rect class="node-rect" x="568" y="120" width="216" height="44" rx="8"/>
+            <foreignObject x="576" y="124" width="200" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>VM: 실행 직전에 기계어로 번역</span></div></foreignObject>
+          </svg>
+          <p class="figure-caption">그림은 같은 원천 코드를 실행하는 세 가지 방식을 나타낸 것이다. CLI는 셋째 줄의 방식이다.</p>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>가상 머신 방식은 컴파일러가 CPU와 무관한 중간 언어를 만들고, 실행하는 기계의 VM이 마지막 번역을 맡는다.</p></div>
+    </div>
+
+    <!-- 페이지 3: 중간 언어를 쓰는 여섯 가지 이유 (논문 1절) -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">배경 지식</strong>
+            <p>이 화면은 논문을 읽기 위한 배경이다. 표의 여섯 가지 이유는 논문 1절이 든 것이다.</p>
+          </div>
+        </div>
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>기계어로 바로 컴파일하지 않고 왜 중간 언어를 거치는가?</li>
+          <li>여섯 가지 이유 가운데 다중 언어와 직접 관련된 것은 무엇인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">중간 언어를 쓰는 여섯 가지 이유<span class="paper-ref">논문 1절</span></h3>
+        <p>논문은 네이티브 컴파일러 대신 중간 경로를 찾는 이유를 여섯 가지로 든다. 표는 그 여섯 가지를 쉬운 말과 이 강의의 해당 단원으로 정리한 것이다.</p>
+        <table class="data-table animate-in">
+          <caption>표는 논문 1절이 든 중간 언어의 장점 여섯 가지를 나타낸 것이다.</caption>
+          <thead><tr><th>이유</th><th>뜻</th><th>예</th></tr></thead>
+          <tbody>
+            <tr><td><span class="term" data-definition="이식성(Portability): 프로그램을 다른 기계나 운영 체제로 옮겨 실행하기 쉬운 정도.">이식성</span>(Portability)</td><td>언어 <i class="mi">n</i>개를 플랫폼 <i class="mi">m</i>개에 올리는 번역기가 <i class="mi">n</i>×<i class="mi">m</i>개가 아니라 <i class="mi">n</i>+<i class="mi">m</i>개면 된다</td><td>다음 쪽 계산</td></tr>
+            <tr><td>간결성(Compactness)</td><td>중간 코드는 원천 코드보다 작은 경우가 많다</td><td>내려받아 실행하는 코드</td></tr>
+            <tr><td>효율(Efficiency)</td><td>기계어로 묶는 시점을 늦춰 실행 기계와 프로그램의 동작에 맞게 최적화한다</td><td>JIT(이 단원)</td></tr>
+            <tr><td>보안(Security)</td><td>배포·실행 시점에 보안 제약과 타입 제약을 강제하기 쉽다</td><td>검증(7단원)</td></tr>
+            <tr class="hl"><td><span class="term" data-definition="상호 운용성(Interoperability): 서로 다른 언어나 시스템으로 만든 부품이 함께 동작하는 능력.">상호 운용성</span>(Interoperability)</td><td>공통 타입 시스템과 <span class="term" data-definition="가비지 컬렉션(Garbage Collection, GC): 더 쓰지 않는 객체의 메모리를 실행 환경이 자동으로 회수하는 기능.">가비지 컬렉션</span>(Garbage Collection, GC) 힙, 스레딩, 보안을 공유해 언어끼리 섞어 쓰기 쉽다</td><td>여러 언어가 함께 쓰는 라이브러리</td></tr>
+            <tr><td>유연성(Flexibility)</td><td>중간 코드에 <span class="term" data-definition="메타데이터(Metadata): 코드가 정의한 타입, 메서드, 필드 같은 정보를 기계가 읽을 수 있게 적어 둔 데이터.">메타데이터</span>(Metadata)를 더해 타입 안전한 메타프로그래밍을 한다</td><td><span class="term" data-definition="reflection(실행 중에 타입 정보를 조회·사용): 프로그램이 실행 중에 자기 타입과 메서드 정보를 읽고 그것으로 동작하는 기능.">reflection</span>(실행 중에 타입 정보를 조회·사용), 직렬화</td></tr>
+          </tbody>
+        </table>
+        <p class="diff-line"><strong>핵심 비교</strong> 다섯 가지는 어느 VM에나 해당하지만, 상호 운용성은 여러 언어가 <strong>같은 타입 시스템과 힙</strong>을 공유할 때만 얻는다. 이 논문이 다중 언어 설계를 강조하는 까닭이 여기에 있다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>중간 언어는 이식성, 간결성, 효율, 보안, 상호 운용성, 유연성을 주며, 다중 언어 플랫폼의 핵심은 상호 운용성이다.</p></div>
+    </div>
+
+    <!-- 페이지 4: n+m 대 n×m 수식 유도 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">배경 지식</strong>
+            <p>이 화면은 논문의 주장이 아니라 논문을 읽기 위해 먼저 알아 둘 배경이다.</p>
+          </div>
+        </div>
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>직접 번역하면 번역기가 몇 개 필요한가?</li>
+          <li>중간 언어를 두면 왜 덧셈이 되는가?</li>
+        </ul>
+        <table class="data-table animate-in" style="margin-top:var(--space-4)">
+          <caption>표는 <i class="mi">n</i>=<i class="mi">m</i>일 때 번역기 수를 계산한 것이다.</caption>
+          <thead><tr><th class="num"><i class="mi">n</i>=<i class="mi">m</i></th><th class="num"><i class="mi">n</i>×<i class="mi">m</i></th><th class="num"><i class="mi">n</i>+<i class="mi">m</i></th></tr></thead>
+          <tbody>
+            <tr><td class="num">2</td><td class="num">4</td><td class="num">4</td></tr>
+            <tr class="hl"><td class="num">3</td><td class="num">9</td><td class="num">6</td></tr>
+            <tr><td class="num">5</td><td class="num">25</td><td class="num">10</td></tr>
+            <tr><td class="num">10</td><td class="num">100</td><td class="num">20</td></tr>
+          </tbody>
+        </table>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span>번역기 수 세기: <i class="mi">n</i>×<i class="mi">m</i> 대 <i class="mi">n</i>+<i class="mi">m</i></span></h3>
+        <p>그림은 논문 1절의 이식성 주장을 언어 3개, 플랫폼 3개의 예시로 센 것이다.</p>
+        <div class="svg-diagram animate-in" style="margin:var(--space-2) auto">
+          <svg viewBox="0 0 800 192" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="직접 번역은 언어 3개와 플랫폼 3개의 모든 짝마다 번역기가 있어 9개이고, 중간 언어를 두면 앞단 3개와 뒷단 3개로 6개이다">
+            <foreignObject x="16" y="0" width="352" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; font-weight:700"><span>직접 번역: 3 × 3 = 9개</span></div></foreignObject>
+            <text class="mono" x="144" y="52" font-size="12" text-anchor="middle">x86</text>
+            <text class="mono" x="232" y="52" font-size="12" text-anchor="middle">IA64</text>
+            <text class="mono" x="320" y="52" font-size="12" text-anchor="middle">ARM</text>
+            <text x="16" y="83" font-size="13" font-weight="700">C#</text>
+            <text x="16" y="127" font-size="13" font-weight="700">Pascal</text>
+            <text x="16" y="171" font-size="13" font-weight="700">Scheme</text>
+            <rect class="node-rect sq" x="104" y="60" width="80" height="36"/><foreignObject x="108" y="64" width="72" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>번역기</span></div></foreignObject>
+            <rect class="node-rect sq" x="192" y="60" width="80" height="36"/><foreignObject x="196" y="64" width="72" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>번역기</span></div></foreignObject>
+            <rect class="node-rect sq" x="280" y="60" width="80" height="36"/><foreignObject x="284" y="64" width="72" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>번역기</span></div></foreignObject>
+            <rect class="node-rect sq" x="104" y="104" width="80" height="36"/><foreignObject x="108" y="108" width="72" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>번역기</span></div></foreignObject>
+            <rect class="node-rect sq" x="192" y="104" width="80" height="36"/><foreignObject x="196" y="108" width="72" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>번역기</span></div></foreignObject>
+            <rect class="node-rect sq" x="280" y="104" width="80" height="36"/><foreignObject x="284" y="108" width="72" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>번역기</span></div></foreignObject>
+            <rect class="node-rect sq" x="104" y="148" width="80" height="36"/><foreignObject x="108" y="152" width="72" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>번역기</span></div></foreignObject>
+            <rect class="node-rect sq" x="192" y="148" width="80" height="36"/><foreignObject x="196" y="152" width="72" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>번역기</span></div></foreignObject>
+            <rect class="node-rect sq" x="280" y="148" width="80" height="36"/><foreignObject x="284" y="152" width="72" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>번역기</span></div></foreignObject>
+
+            <foreignObject x="432" y="0" width="352" height="24"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; font-weight:700; color:var(--color-accent)"><span>중간 언어: 3 + 3 = 6개(화살표 = 번역기)</span></div></foreignObject>
+            <text class="muted" x="540" y="52" font-size="12" text-anchor="middle">앞단 3개</text>
+            <text class="muted" x="664" y="52" font-size="12" text-anchor="middle">뒷단 3개</text>
+            <path class="edge-line" d="M520,78 H550"/><polygon class="edge-arrow" points="550,73 560,78 550,83"/>
+            <path class="edge-line" d="M520,122 H550"/><polygon class="edge-arrow" points="550,117 560,122 550,127"/>
+            <path class="edge-line" d="M520,166 H550"/><polygon class="edge-arrow" points="550,161 560,166 550,171"/>
+            <path class="edge-line" d="M632,78 H686"/><polygon class="edge-arrow" points="686,73 696,78 686,83"/>
+            <path class="edge-line" d="M632,122 H686"/><polygon class="edge-arrow" points="686,117 696,122 686,127"/>
+            <path class="edge-line" d="M632,166 H686"/><polygon class="edge-arrow" points="686,161 696,166 686,171"/>
+            <rect class="node-rect" x="432" y="60" width="88" height="36" rx="8"/><foreignObject x="440" y="64" width="72" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>C#</span></div></foreignObject>
+            <rect class="node-rect" x="432" y="104" width="88" height="36" rx="8"/><foreignObject x="440" y="108" width="72" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>Pascal</span></div></foreignObject>
+            <rect class="node-rect" x="432" y="148" width="88" height="36" rx="8"/><foreignObject x="440" y="152" width="72" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>Scheme</span></div></foreignObject>
+            <rect class="node-rect sq accent" x="560" y="60" width="72" height="124"/><foreignObject x="564" y="64" width="64" height="116"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px; font-weight:700"><span>CIL</span></div></foreignObject>
+            <rect class="node-rect" x="696" y="60" width="88" height="36" rx="8"/><foreignObject x="704" y="64" width="72" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>x86</span></div></foreignObject>
+            <rect class="node-rect" x="696" y="104" width="88" height="36" rx="8"/><foreignObject x="704" y="108" width="72" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>IA64</span></div></foreignObject>
+            <rect class="node-rect" x="696" y="148" width="88" height="36" rx="8"/><foreignObject x="704" y="152" width="72" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>ARM</span></div></foreignObject>
+          </svg>
+        </div>
+        <div class="math-derivation animate-in" id="bg-deriv-nm">
+          <div class="math-step" data-step="0">
+            <div class="math-equation">$$T_{\mathit{direct}} = n \times m$$</div>
+            <div class="math-explanation"><p>직접 번역하면 언어 하나와 플랫폼 하나의 짝마다 번역기를 따로 만든다. 왼쪽 그림처럼 행이 $n$개, 열이 $m$개인 표의 모든 칸이 번역기이다.</p></div>
+          </div>
+          <div class="math-step" data-step="1" style="display:none">
+            <div class="math-equation">$$T_{\mathit{IL}} = n + m$$</div>
+            <div class="math-explanation"><p>중간 언어를 두면 언어마다 “원천 코드 → 중간 언어” 앞단 하나, 플랫폼마다 “중간 언어 → 기계어” 뒷단 하나만 있으면 된다. 곱이 덧셈으로 바뀐다.</p></div>
+          </div>
+          <div class="math-step" data-step="2" style="display:none">
+            <div class="math-equation">$$n = m = 3:\quad 3 \times 3 = 9, \qquad 3 + 3 = 6$$</div>
+            <div class="math-explanation"><p>그림의 예시 값을 넣으면 9개와 6개이다. 3개 차이는 작아 보이지만, 단서 칸의 표처럼 $n$과 $m$이 커지면 차이가 빠르게 벌어진다.</p></div>
+          </div>
+          <div class="math-step" data-step="3" style="display:none">
+            <div class="math-equation">$$n \times m - (n + m) = (n-1)(m-1) - 1$$</div>
+            <div class="math-explanation"><p>아낀 번역기 수는 $(n-1)(m-1)-1$개이다. $n=m=10$이면 80개를 아낀다. 새 언어 하나를 더할 때도 직접 번역은 번역기 $m$개, 중간 언어는 앞단 1개만 새로 만들면 된다.</p></div>
+          </div>
+          <div class="math-controls">
+            <button class="btn math-prev-btn">이전 단계</button>
+            <button class="btn math-next-btn">다음 단계</button>
+            <button class="btn math-reset-btn">처음부터</button>
+            <span class="math-progress"></span>
+          </div>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>중간 언어를 두면 언어 <i class="mi">n</i>개와 플랫폼 <i class="mi">m</i>개를 잇는 번역기가 <i class="mi">n</i>×<i class="mi">m</i>개에서 <i class="mi">n</i>+<i class="mi">m</i>개로 준다.</p></div>
+    </div>
+
+    <!-- 페이지 5: 스택 머신과 평가 스택 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">배경 지식</strong>
+            <p>이 화면은 논문의 주장이 아니라 논문을 읽기 위해 먼저 알아 둘 배경이다.</p>
+          </div>
+        </div>
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>스택 머신은 중간값을 어디에 두는가?</li>
+          <li>2+3*4를 계산할 때 스택은 어떻게 변하는가?</li>
+          <li>스택은 최대 몇 칸까지 쌓이는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">스택 머신과 평가 스택</h3>
+        <div class="with-figure" style="--figure-side-width:168px">
+          <div>
+            <p><span class="term" data-definition="스택 머신(Stack Machine): 계산의 중간값을 레지스터 대신 스택에 쌓아 두고 명령어가 스택 맨 위의 값으로 계산하는 기계.">스택 머신</span>(Stack Machine)은 계산의 중간값을 <span class="term" data-definition="평가 스택(Evaluation Stack): 명령어가 계산에 쓸 값과 결과를 잠시 쌓아 두는 스택. JVM에서는 operand stack이라 부름.">평가 스택</span>(Evaluation Stack)에 쌓는다. 명령어는 스택 맨 위의 값을 꺼내 계산하고 결과를 다시 맨 위에 올린다. 그림의 접시 더미처럼 넣고 빼는 곳은 <strong>맨 위 한 곳</strong>뿐이다.</p>
+            <p>2+3*4는 곱셈을 먼저 해야 하므로 세 수를 모두 올린 뒤 <code>mul</code>, <code>add</code> 순으로 계산한다. <span class="nobr"><code>ldc.i4</code>는</span> 32비트 정수 상수를 스택에 올리는 CIL 명령어이다(4단원). CLI와 JVM은 모두 스택 머신이다.</p>
+          </div>
+          <figure class="figure side"><img src="assets/fig-plates.svg" alt="주방 조리대 위에 높이 쌓아 올린 접시 더미"><figcaption class="figure-caption">접시 더미: ldc는 맨 위에 접시를 올리고, mul·add는 위 두 장을 내려 결과 한 장을 올린다.</figcaption></figure>
+        </div>
+        <div class="svg-diagram animate-in" style="margin:var(--space-3) auto 0">
+          <svg viewBox="0 0 800 184" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ldc.i4 2, ldc.i4 3, ldc.i4 4를 차례로 실행하면 스택이 2, 2 3, 2 3 4가 되고 mul 뒤 2 12, add 뒤 14가 된다">
+            <text class="mono" x="88" y="20" font-size="13" text-anchor="middle">① ldc.i4 2</text>
+            <text class="mono" x="244" y="20" font-size="13" text-anchor="middle">② ldc.i4 3</text>
+            <text class="mono" x="400" y="20" font-size="13" text-anchor="middle">③ ldc.i4 4</text>
+            <text class="mono" x="556" y="20" font-size="13" text-anchor="middle">④ mul</text>
+            <text class="mono" x="712" y="20" font-size="13" text-anchor="middle">⑤ add</text>
+            <path class="guide" d="M32,36 V152 H144 V36"/>
+            <path class="guide" d="M188,36 V152 H300 V36"/>
+            <path class="guide" d="M344,36 V152 H456 V36"/>
+            <path class="guide" d="M500,36 V152 H612 V36"/>
+            <path class="guide" d="M656,36 V152 H768 V36"/>
+            <rect class="node-rect sq" x="36" y="116" width="104" height="32"/><foreignObject x="40" y="118" width="96" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>2 : int32</span></div></foreignObject>
+            <rect class="node-rect sq" x="192" y="116" width="104" height="32"/><foreignObject x="196" y="118" width="96" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>2 : int32</span></div></foreignObject>
+            <rect class="node-rect sq" x="192" y="80" width="104" height="32"/><foreignObject x="196" y="82" width="96" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>3 : int32</span></div></foreignObject>
+            <rect class="node-rect sq" x="348" y="116" width="104" height="32"/><foreignObject x="352" y="118" width="96" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>2 : int32</span></div></foreignObject>
+            <rect class="node-rect sq" x="348" y="80" width="104" height="32"/><foreignObject x="352" y="82" width="96" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>3 : int32</span></div></foreignObject>
+            <rect class="node-rect sq" x="348" y="44" width="104" height="32"/><foreignObject x="352" y="46" width="96" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>4 : int32</span></div></foreignObject>
+            <rect class="node-rect sq" x="504" y="116" width="104" height="32"/><foreignObject x="508" y="118" width="96" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>2 : int32</span></div></foreignObject>
+            <rect class="node-rect sq" x="504" y="80" width="104" height="32"/><foreignObject x="508" y="82" width="96" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>12 : int32</span></div></foreignObject>
+            <rect class="node-rect sq accent" x="660" y="116" width="104" height="32"/><foreignObject x="664" y="118" width="96" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; font-weight:700"><span>14 : int32</span></div></foreignObject>
+            <text class="muted" x="88" y="176" font-size="12" text-anchor="middle">높이 1</text>
+            <text class="muted" x="244" y="176" font-size="12" text-anchor="middle">높이 2</text>
+            <text class="muted" x="400" y="176" font-size="12" text-anchor="middle">높이 3(최대)</text>
+            <text class="muted" x="556" y="176" font-size="12" text-anchor="middle">높이 2</text>
+            <text class="muted" x="712" y="176" font-size="12" text-anchor="middle">높이 1</text>
+          </svg>
+          <p class="figure-caption">그림은 각 명령어를 실행한 직후의 평가 스택을 나타낸 것이다. 아래가 바닥, 위가 맨 위이다. 최대 높이 3을 CIL은 <code>.maxstack</code>으로 미리 적는다.</p>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>스택 머신은 값을 평가 스택 맨 위에 올리고 꺼내며 계산하므로, 2+3*4는 세 수를 올린 뒤 mul과 add로 14가 된다.</p></div>
+    </div>
+
+    <!-- 페이지 6: JIT 컴파일 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">배경 지식</strong>
+            <p>이 화면은 논문의 주장이 아니라 논문을 읽기 위해 먼저 알아 둘 배경이다.</p>
+          </div>
+        </div>
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>JIT는 언제 기계어로 번역하는가?</li>
+          <li>같은 메서드를 여러 번 부르면 인터프리터와 무엇이 다른가?</li>
+          <li>JIT의 대가는 무엇인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">JIT 컴파일: 실행 직전에 기계어로</h3>
+        <p><span class="term" data-definition="JIT(Just-In-Time) 컴파일러: 중간 코드를 실행 직전에 그 기계의 기계어로 번역하는 컴파일러.">JIT</span>(Just-In-Time) 컴파일러(실행 직전에 기계어로 번역)는 메서드가 처음 불릴 때 그 메서드의 CIL을 기계어로 번역해 두고, 다음 호출부터는 번역한 기계어를 바로 실행한다. 인터프리터는 같은 명령을 실행할 때마다 다시 읽고 해석한다. 그림은 같은 메서드를 세 번 부를 때 두 방식이 쓰는 시간을 나타낸 것이다.</p>
+        <div class="svg-diagram animate-in" style="margin:var(--space-2) auto">
+          <svg viewBox="0 0 800 120" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="인터프리터는 세 번 모두 해석과 실행을 하고, JIT는 처음에 한 번 번역한 뒤 세 번 실행만 해서 전체 시간이 짧다">
+            <text x="16" y="41" font-size="13" font-weight="700">인터프리터</text>
+            <text x="16" y="93" font-size="13" font-weight="700">JIT</text>
+            <rect class="node-rect sq" x="112" y="16" width="200" height="40"/><foreignObject x="116" y="20" width="192" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>1회: 해석 + 실행</span></div></foreignObject>
+            <rect class="node-rect sq" x="320" y="16" width="200" height="40"/><foreignObject x="324" y="20" width="192" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>2회: 해석 + 실행</span></div></foreignObject>
+            <rect class="node-rect sq" x="528" y="16" width="200" height="40"/><foreignObject x="532" y="20" width="192" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>3회: 해석 + 실행</span></div></foreignObject>
+            <rect class="node-rect sq accent" x="112" y="68" width="152" height="40"/><foreignObject x="116" y="72" width="144" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; font-weight:700"><span>CIL → 기계어 번역</span></div></foreignObject>
+            <rect class="node-rect sq" x="272" y="68" width="96" height="40"/><foreignObject x="276" y="72" width="88" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>1회 실행</span></div></foreignObject>
+            <rect class="node-rect sq" x="376" y="68" width="96" height="40"/><foreignObject x="380" y="72" width="88" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>2회 실행</span></div></foreignObject>
+            <rect class="node-rect sq" x="480" y="68" width="96" height="40"/><foreignObject x="484" y="72" width="88" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>3회 실행</span></div></foreignObject>
+            <text class="muted" x="784" y="94" font-size="12" text-anchor="end">가로 길이 = 걸린 시간(예시)</text>
+          </svg>
+        </div>
+        <table class="data-table animate-in">
+          <caption>표는 인터프리터와 JIT를 네 가지 기준으로 비교한 것이다.</caption>
+          <thead><tr><th>기준</th><th>인터프리터</th><th>JIT</th></tr></thead>
+          <tbody>
+            <tr><td>첫 실행까지</td><td>바로 시작한다</td><td>번역 시간만큼 늦다</td></tr>
+            <tr><td>같은 코드 반복</td><td>매번 다시 해석한다</td><td>번역한 기계어를 다시 쓴다</td></tr>
+            <tr class="hl"><td>기계에 맞춘 최적화</td><td>어렵다</td><td>실행할 CPU를 보고 번역한다(논문의 효율 이유)</td></tr>
+            <tr><td>대가</td><td>반복 실행이 느리다</td><td>번역 시간과 기계어를 둘 메모리가 든다</td></tr>
+          </tbody>
+        </table>
+        <p class="diff-line"><strong>핵심 비교</strong> 인터프리터는 시작이 빠르고, JIT는 반복이 빠르다. 4단원에서 보듯 CIL 명령어는 타입을 적지 않는 경우가 많아 JIT가 할 일이 그만큼 늘어난다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>JIT는 처음 호출 때 CIL을 그 기계의 기계어로 번역해 두고 다시 써서, 번역 비용을 내고 반복 실행 속도를 얻는다.</p></div>
+    </div>
+
+    <!-- 페이지 7: 타입 안전성, GC, managed code -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">배경 지식</strong>
+            <p>이 화면은 논문의 주장이 아니라 논문을 읽기 위해 먼저 알아 둘 배경이다.</p>
+          </div>
+        </div>
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>타입 안전성은 무엇을 막는가?</li>
+          <li>GC는 어떤 객체를 회수하는가?</li>
+          <li>managed code는 누가 관리하는 코드인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">타입 안전성, GC, managed code</h3>
+        <p><span class="term" data-definition="타입 안전성(Type Safety): 모든 값을 선언한 타입에 맞게만 쓰도록 보장하는 성질. 정수를 주소로 쓰는 일 등을 막음.">타입 안전성</span>(Type Safety)은 값을 선언한 타입대로만 쓰게 보장하는 성질이다. 정수를 주소처럼 쓰거나 객체에 없는 필드를 읽는 일을 막으므로, 엉뚱한 메모리를 건드리는 오류가 생기지 않는다.</p>
+        <p>실행 중에 만든 객체는 <span class="term" data-definition="힙(Heap): 실행 중에 만든 객체를 두는 메모리 영역. 함수가 끝나도 객체가 남음.">힙</span>(Heap)에 놓인다. GC는 어떤 변수에서도 닿지 않는 객체를 찾아 자동으로 회수하고, 빈틈을 줄이려고 살아 있는 객체를 <strong>옮기기도</strong> 한다. 그래서 GC 힙 안의 주소는 고정되어 있지 않다(4단원 포인터의 전제).</p>
+        <div class="svg-diagram animate-in" style="margin:var(--space-2) auto">
+          <svg viewBox="0 0 800 168" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="활성 레코드의 지역 변수 a와 b가 GC 힙의 객체 A와 B를 가리키고, A는 B도 가리킨다. 아무도 가리키지 않는 객체 C는 회수 대상이다">
+            <rect class="guide-fill" x="16" y="8" width="256" height="152" rx="4"/>
+            <text class="muted" x="28" y="28" font-size="12">메서드의 지역 변수</text>
+            <rect class="guide-fill" x="304" y="8" width="480" height="152" rx="4"/>
+            <text class="muted" x="316" y="28" font-size="12">GC 힙</text>
+            <path class="edge-line" d="M248,64 H350"/><polygon class="edge-arrow" points="350,59 360,64 350,69"/>
+            <path class="edge-line" d="M248,120 H350"/><polygon class="edge-arrow" points="350,115 360,120 350,125"/>
+            <path class="edge-line" d="M420,84 V90"/><polygon class="edge-arrow" points="415,90 425,90 420,100"/>
+            <rect class="node-rect sq" x="40" y="44" width="208" height="40"/><foreignObject x="48" y="48" width="192" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>지역 변수 a</span></div></foreignObject>
+            <rect class="node-rect sq" x="40" y="100" width="208" height="40"/><foreignObject x="48" y="104" width="192" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>지역 변수 b</span></div></foreignObject>
+            <rect class="node-rect" x="360" y="44" width="120" height="40" rx="8"/><foreignObject x="368" y="48" width="104" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>객체 A</span></div></foreignObject>
+            <rect class="node-rect" x="360" y="100" width="120" height="40" rx="8"/><foreignObject x="368" y="104" width="104" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span>객체 B</span></div></foreignObject>
+            <rect class="node-rect accent" x="576" y="72" width="168" height="40" rx="8"/><foreignObject x="584" y="76" width="152" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; font-weight:700"><span>객체 C</span></div></foreignObject>
+            <text class="accent-text" x="660" y="136" font-size="12" text-anchor="middle">닿는 참조 없음 → GC가 회수</text>
+          </svg>
+        </div>
+        <p><span class="term" data-definition="managed code(CLR이 관리하는 코드): 메모리 회수, 타입 검사, 보안을 CLR이 맡아 관리하는 코드.">managed code</span>(CLR이 관리하는 코드)는 GC, 타입 검사, 보안을 CLR이 맡아 관리하는 코드이다. C의 포인터 연산처럼 CLR이 관리하지 않는 코드는 unmanaged code라 부른다. CLI는 두 코드가 함께 동작하도록 설계했다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>타입 안전성은 값을 타입대로만 쓰게 하고, GC는 닿지 않는 객체를 회수하며 객체를 옮길 수 있고, managed code는 이 관리를 CLR에 맡긴 코드이다.</p></div>
+    </div>
+
+    <!-- 페이지 8: 지식 지도 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">배경 지식</strong>
+            <p>이 화면은 논문의 주장이 아니라 논문을 읽기 위해 먼저 알아 둘 배경이다.</p>
+          </div>
+        </div>
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>다섯 가지 배경은 논문의 어느 부분으로 이어지는가?</li>
+          <li>이식성 계산은 무엇을 정당화하는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>지식 지도</h3>
+        <p>그림은 이 단원의 다섯 개념이 이후 단원의 논문 내용으로 이어지는 관계를 나타낸 것이다.</p>
+        <div class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 284" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="VM과 중간 언어는 3단원 구조로, 스택 머신과 JIT는 4~6단원 명령어로, 타입 안전성과 GC는 7단원 검증으로 이어지고, 이식성 계산과 세 단원이 모두 논문의 CLI로 모인다">
+            <path class="edge-line" d="M216,30 H270"/><polygon class="edge-arrow" points="270,25 280,30 270,35"/>
+            <path class="edge-line accent" d="M216,86 H534"/><polygon class="edge-arrow accent" points="534,81 544,86 534,91"/>
+            <path class="edge-line" d="M216,142 H270"/><polygon class="edge-arrow" points="270,137 280,142 270,147"/>
+            <path class="edge-line" d="M216,198 H270"/><polygon class="edge-arrow" points="270,193 280,198 270,203"/>
+            <path class="edge-line" d="M216,254 H270"/><polygon class="edge-arrow" points="270,249 280,254 270,259"/>
+            <path class="edge-line" d="M480,30 H534"/><polygon class="edge-arrow" points="534,25 544,30 534,35"/>
+            <path class="edge-line" d="M480,170 H534"/><polygon class="edge-arrow" points="534,165 544,170 534,175"/>
+            <path class="edge-line" d="M480,254 H534"/><polygon class="edge-arrow" points="534,249 544,254 534,259"/>
+            <rect class="node-rect" x="16" y="8" width="200" height="44" rx="8"/><foreignObject x="24" y="12" width="184" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>① VM과 중간 언어</span></div></foreignObject>
+            <rect class="node-rect" x="16" y="64" width="200" height="44" rx="8"/><foreignObject x="24" y="68" width="184" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>② <i class="mi">n</i>+<i class="mi">m</i> 번역기</span></div></foreignObject>
+            <rect class="node-rect" x="16" y="120" width="200" height="44" rx="8"/><foreignObject x="24" y="124" width="184" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>③ 스택 머신</span></div></foreignObject>
+            <rect class="node-rect" x="16" y="176" width="200" height="44" rx="8"/><foreignObject x="24" y="180" width="184" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>④ JIT 컴파일</span></div></foreignObject>
+            <rect class="node-rect" x="16" y="232" width="200" height="44" rx="8"/><foreignObject x="24" y="236" width="184" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>⑤ 타입 안전성과 GC</span></div></foreignObject>
+            <rect class="node-rect sq" x="280" y="8" width="200" height="44"/><foreignObject x="288" y="12" width="184" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>3단원: 활성 레코드·어셈블리</span></div></foreignObject>
+            <rect class="node-rect sq" x="280" y="132" width="200" height="76"/><foreignObject x="288" y="136" width="184" height="68"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>4~6단원: 타입과 CIL 명령어</span></div></foreignObject>
+            <rect class="node-rect sq" x="280" y="232" width="200" height="44"/><foreignObject x="288" y="236" width="184" height="36"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:14px"><span>7단원: 검증</span></div></foreignObject>
+            <rect class="node-rect accent" x="544" y="8" width="240" height="268" rx="12"/><foreignObject x="552" y="12" width="224" height="260"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:15px; font-weight:700"><span>논문: 다중 언어 플랫폼 CLI</span></div></foreignObject>
+          </svg>
+        </div>
+        <p>왼쪽 다섯 상자는 배경 지식이고, 가운데 세 상자는 그 배경이 쓰이는 단원, 오른쪽 강조 상자는 논문의 대상이다. 이식성 계산은 특정 단원보다 “중간 언어 하나에 여러 언어를 모은다”는 CLI 전체의 출발점이므로 곧바로 이어진다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>VM과 중간 언어는 구조로, 스택 머신과 JIT는 명령어로, 타입 안전성과 GC는 검증으로 이어지며, 이식성은 CLI 전체의 출발점이다.</p></div>
+    </div>
+
+    <!-- 페이지 9: 핵심 정리 + 확인 문제 1~2 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-accent animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">핵심 정리</strong>
+            <ol>
+              <li>중간 언어를 두면 번역기가 <i class="mi">n</i>×<i class="mi">m</i>개에서 <i class="mi">n</i>+<i class="mi">m</i>개로 준다.</li>
+              <li>스택 머신은 평가 스택 맨 위에서 값을 꺼내고 올리며 계산한다.</li>
+              <li>JIT는 번역 비용을 내고 반복 실행 속도와 기계별 최적화를 얻는다.</li>
+              <li>GC는 객체를 옮길 수 있으므로 힙 안 주소는 고정되지 않는다.</li>
+              <li>스택 문항은 명령어마다 스택 그림을 그려 높이를 세라.</li>
+            </ol>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>중간 언어와 번역기 수</h3>
+        <div class="quiz-container animate-in" id="bg-quiz-1">
+          <div class="quiz-question-block"
+               data-correct="option-e"
+               data-explanation-right="⑤ | 상호 운용성은 공통 타입 시스템과 GC 힙을 공유할 때 쉬워진다."
+               data-explanation-wrong="| 정답은 ⑤이다. 힙을 공유해야 섞어 쓰기 쉽다. ③은 논문의 효율 이유이므로 옳다.">
+            <h3 class="quiz-question"><span class="q-num">1</span>논문 1절이 든 중간 언어의 장점에 대한 설명으로 옳지 <u>않은</u> 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 이식성: 번역기가 <i class="mi">n</i>+<i class="mi">m</i>개면 된다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 간결성: 중간 코드는 원천 코드보다 작은 경우가 많다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 효율: 실행 기계에 맞게 늦게 최적화한다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 보안: 타입 제약을 강제하기 쉽다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 상호 운용성: 언어마다 GC 힙을 따로 둔다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="③ | 20개에서 9개로 줄어 11개를 아낀다."
+               data-explanation-wrong="| 정답은 ③이다. 4×5−(4+5)=11이다. ②는 중간 언어의 번역기 수이므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">2</span>언어 4개를 플랫폼 5개에 올린다. 중간 언어를 두면 직접 번역할 때보다 번역기를 몇 개 덜 만드는가?<span class="q-points">[3점]</span></h3>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 1개</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 9개</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 11개</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 20개</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 29개</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('bg-quiz-1')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('bg-quiz-1')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>상호 운용성은 하나의 타입 시스템과 힙을 공유할 때 생기고, 번역기 차이는 <i class="mi">n</i>×<i class="mi">m</i>−(<i class="mi">n</i>+<i class="mi">m</i>)로 구한다.</p></div>
+    </div>
+
+    <!-- 페이지 10: 확인 문제 3~4 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>명령어마다 평가 스택은 어떻게 변하는가?</li>
+          <li>JIT는 같은 메서드를 여러 번 부를 때 무엇을 다시 쓰는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">확인 문제</span>평가 스택과 JIT</h3>
+        <div class="quiz-container animate-in" id="bg-quiz-2">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="③ | add로 [6], mul로 [12]가 된다."
+               data-explanation-wrong="| 정답은 ③이다. 최대 높이가 2이므로 ㄴ은 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">3</span><code>ldc.i4 5</code>, <code>ldc.i4 1</code>, <code>add</code>, <code>ldc.i4 2</code>, <code>mul</code>을 실행할 때 옳은 것만을 <span class="nobr">&lt;보기&gt;에서</span> 있는 대로 고른 것은?</h3>
+            <div class="bogi">
+              <p>ㄱ. <code>add</code> 직후 스택에는 6 하나만 있다.</p>
+              <p>ㄴ. 스택은 최대 3칸까지 쌓인다.</p>
+              <p>ㄷ. <code>mul</code> 직후 스택 맨 위 값은 12이다.</p>
+            </div>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① ㄱ</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② ㄴ</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ ㄱ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ ㄴ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ ㄱ, ㄴ, ㄷ</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="② | 첫 호출에 번역한 기계어를 이후 호출에서 다시 쓴다."
+               data-explanation-wrong="| 정답은 ②이다. ①은 매번 다시 해석하는 인터프리터에 가까우므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">4</span>같은 메서드를 1,000번 부를 때 JIT에 대한 설명으로 옳은 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 호출할 때마다 CIL을 다시 번역한다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 첫 호출에 번역하고, 이후에는 그 기계어를 실행한다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 첫 호출이 인터프리터보다 늘 빠르다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 배포 전에 모든 CPU용 기계어가 필요하다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 실행 기계의 CPU 정보를 쓸 수 없다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('bg-quiz-2')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('bg-quiz-2')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>평가 스택은 명령어마다 그려 높이를 세고, JIT는 한 번 번역한 기계어를 반복 호출에 다시 쓴다.</p></div>
+    </div>
+
+  </div>
+</section>

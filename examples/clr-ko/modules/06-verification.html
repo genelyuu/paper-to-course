@@ -1,0 +1,440 @@
+<section class="module" id="module-6">
+  <div class="module-content">
+
+    <div class="module-header">
+      <span class="module-number">7</span>
+      <h2 class="module-title">검증</h2>
+      <p class="module-subtitle">검증기가 CIL에서 무엇을 확인하고 무엇을 거부하는지, 그리고 논문의 결론을 어떻게 읽을지 살핀다</p>
+    </div>
+
+    <!-- 페이지 1: 검증이 보장하는 것 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-info animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">학습 목표</strong>
+            <p>이 모듈을 학습하면 다음을 할 수 있다.</p>
+            <ol>
+              <li>검증이 보장하는 것과 런타임 검사로 넘기는 것을 구분할 수 있다.</li>
+              <li>합류 지점에서 평가 스택의 높이와 타입을 판정할 수 있다.</li>
+              <li>논문의 결론을 실험 없는 주장으로 비판적으로 읽을 수 있다.</li>
+            </ol>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">검증은 언제, 누구를 믿지 않고 하는가<span class="paper-ref">논문 11절</span></h3>
+        <p><span class="term" data-definition="검증(Verification): 코드를 실행하기 전에 분석해 타입 안전성과 메모리 안전성을 해치지 않는지 확인하는 일. 이 일을 하는 프로그램이 검증기(Verifier)임.">검증(Verification)</span>은 <span class="term" data-definition="공통 중간 언어(Common Intermediate Language, CIL): CLI의 스택 기반 중간 언어. MSIL 또는 IL이라고도 부름.">공통 중간 언어(Common Intermediate Language, CIL)</span> 코드가 메모리 안전성을 해치지 않는지 실행 전에 분석하는 일이다. 논문에 따르면 검증은 배포나 로드 때 하며 만든 사람을 신뢰하지 않는다. JVM처럼 분석은 보수적이지만 특정 종류의 런타임 오류가 없다는 강한 보장을 준다.</p>
+        <figure class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 112" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="컴파일러가 만든 CIL을 검증기가 배포 또는 로드 시점에 분석해 통과하면 JIT와 실행으로 넘기고 실패하면 거부한다">
+<path class="edge-line" d="M178,40 H208"/><polygon class="edge-arrow" points="208,35 218,40 208,45"/>
+<path class="edge-line" d="M380,40 H410"/><polygon class="edge-arrow" points="410,35 420,40 410,45"/>
+<path class="edge-line accent" d="M582,40 H612"/><polygon class="edge-arrow accent" points="612,35 622,40 612,45"/>
+<text class="accent-text" x="602" y="30" text-anchor="middle" font-size="11">통과</text>
+<rect class="node-rect" x="16" y="16" width="162" height="48" rx="8"/>
+<foreignObject x="24" y="20" width="146" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span>컴파일러<br/>(신뢰하지 않음)</span></div></foreignObject>
+<rect class="node-rect sq" x="218" y="16" width="162" height="48" rx="2"/>
+<foreignObject x="226" y="20" width="146" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span>CIL + 메타데이터</span></div></foreignObject>
+<rect class="node-rect accent" x="420" y="16" width="162" height="48" rx="8"/>
+<foreignObject x="428" y="20" width="146" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span>검증기<br/>배포·로드 시점</span></div></foreignObject>
+<rect class="node-rect" x="622" y="16" width="162" height="48" rx="8"/>
+<foreignObject x="630" y="20" width="146" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span>JIT · 실행</span></div></foreignObject>
+<path class="edge-line" d="M501,64 V70"/><polygon class="edge-arrow" points="496,70 501,78 506,70"/>
+<text class="muted" x="510" y="75" font-size="11">실패</text>
+<rect class="node-rect" x="420" y="78" width="162" height="30" rx="8"/>
+<foreignObject x="428" y="79" width="146" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>거부(실행하지 않음)</span></div></foreignObject>
+          </svg>
+          <figcaption class="figure-caption">그림은 CIL이 실행되기 전에 검증기를 거치는 위치를 나타낸 것이다.</figcaption>
+        </figure>
+        <div class="with-figure" style="--figure-side-width:108px; align-items:start">
+          <div>
+            <p>논문은 검증의 보장이 엄격한 정적 타입 언어의 보장과 비슷하다고 쓴다.</p>
+            <ul>
+              <li><span class="term" data-definition="객체 참조(Object Reference): GC 힙에 있는 객체를 가리키는 값.">객체 참조(Object Reference)</span>를 담는 위치는 선언한 타입의 계약을 만족하는 객체만 가리킨다.</li>
+              <li><span class="term" data-definition="필드(Field): 객체나 값 타입 안에 이름을 붙여 저장한 데이터 칸.">필드(Field)</span> 선택은 알려진 타입에 실제로 있는 필드만 접근한다.</li>
+            </ul>
+          </div>
+          <figure class="figure side"><img src="assets/fig-inspector.svg" alt="서류철을 들고 여행 가방을 검사하는 검사관: 짐을 보낸 사람을 믿지 않고 내용물을 직접 확인하는 검증기에 빗댐"><figcaption class="figure-caption">보낸 이를 믿지 않고 짐(CIL)을 직접 연다.</figcaption></figure>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>검증기는 배포나 로드 때 생산자를 믿지 않고 CIL을 분석해, 참조와 필드 접근이 타입에 맞는지 보장한다.</p></div>
+    </div>
+
+    <!-- 페이지 2: 정적으로 못 하는 것 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>검증기가 미리 증명하지 못하는 것은 무엇인가?</li>
+          <li>그런 경우 검증기는 무엇을 확인하는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">정적 보장과 런타임 검사<span class="paper-ref">논문 11절</span></h3>
+        <p>배열 인덱스가 늘 배열 크기 안에 있음을 미리 증명하기는 거의 불가능하다. 그래서 검증기는 이런 접근이 <span class="term" data-definition="범위 검사(Bounds Check): 배열 인덱스가 0 이상이고 길이보다 작은지 실행 중에 확인하는 검사.">범위 검사(Bounds Check)</span>로 보호되는지를 확인한다. <span class="term" data-definition="축소 형변환(Narrowing Cast, 상위 타입을 하위 타입으로 바꾸기): 예를 들어 Foo 참조를 Bar로 바꾸는 형변환. 실제 객체가 Bar가 아니면 실패함.">축소 형변환(Narrowing Cast, 상위 타입을 하위 타입으로 바꾸기)</span>이 성공해야만 가능한 필드·메서드 접근도 같은 원리를 따른다.</p>
+        <figure class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 136" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="길이 4인 배열에서 인덱스 2는 범위 검사를 통과해 원소를 읽고, 인덱스 5는 예외가 된다">
+<path class="edge-line" d="M200,64 H262"/><polygon class="edge-arrow" points="262,59 272,64 262,69"/>
+<path class="edge-line accent" d="M488,48 H530 V32 H566"/><polygon class="edge-arrow accent" points="566,27 576,32 566,37"/>
+<path class="edge-line" d="M488,80 H530 V96 H566"/><polygon class="edge-arrow" points="566,91 576,96 566,101"/>
+<text class="accent-text" x="494" y="40" font-size="11">예</text>
+<text class="muted" x="494" y="100" font-size="11">아니요</text>
+<rect class="node-rect sq" x="16" y="40" width="184" height="48" rx="2"/>
+<foreignObject x="24" y="44" width="168" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>배열 길이 4<br/>인덱스 <i class="mi">i</i></span></div></foreignObject>
+<rect class="node-rect accent" x="272" y="32" width="216" height="64" rx="8"/>
+<foreignObject x="280" y="36" width="200" height="56"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.4"><span>범위 검사<br/>0 ≤ <i class="mi">i</i> &lt; 4 인가?</span></div></foreignObject>
+<rect class="node-rect" x="576" y="12" width="208" height="40" rx="8"/>
+<foreignObject x="584" y="16" width="192" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span><i class="mi">i</i> = 2: 원소를 읽음</span></div></foreignObject>
+<rect class="node-rect" x="576" y="76" width="208" height="40" rx="8"/>
+<foreignObject x="584" y="80" width="192" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span><i class="mi">i</i> = 5: 예외 발생</span></div></foreignObject>
+          </svg>
+          <figcaption class="figure-caption">그림은 배열 접근이 범위 검사로 보호되는 흐름을 나타낸 것이다. 배열 길이와 인덱스 값은 예시이다.</figcaption>
+        </figure>
+        <table class="data-table animate-in">
+          <thead><tr><th>확인할 것</th><th>언제 확인하나</th><th>방법</th></tr></thead>
+          <tbody>
+            <tr><td>참조가 선언 타입에 맞는가</td><td>검증 때(정적)</td><td>타입 흐름 분석</td></tr>
+            <tr><td>필드가 그 타입에 있는가</td><td>검증 때(정적)</td><td>메타데이터와 대조</td></tr>
+            <tr class="hl"><td>배열 인덱스가 범위 안인가</td><td>실행 때</td><td>범위 검사가 있는지 검증기가 확인</td></tr>
+            <tr class="hl"><td>축소 형변환이 맞는가</td><td>실행 때</td><td>형변환 검사 뒤에만 접근 허용</td></tr>
+          </tbody>
+          <caption>표는 검증기가 정적으로 보장하는 것과 런타임 검사에 맡기는 것을 나타낸 것이다. (논문 11절)</caption>
+        </table>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>정적으로 증명할 수 없는 배열 인덱스와 축소 형변환은 런타임 검사로 보호되는지를 검증기가 확인한다.</p></div>
+    </div>
+
+    <!-- 페이지 3: 합류 지점 규칙 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>두 경로가 만나는 곳에서 스택은 어떤 조건을 지켜야 하는가?</li>
+          <li>서로 다른 객체 타입이 만나면 정적 타입은 무엇이 되는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag">탐구 자료</span>합류 지점의 평가 스택<span class="paper-ref">논문 11절</span></h3>
+        <p>if/else처럼 <span class="term" data-definition="제어 흐름(Control Flow): 명령어가 실행되는 순서. 분기로 갈라지고 다시 만남.">제어 흐름(Control Flow)</span>이 갈라졌다가 만나는 곳을 <span class="term" data-definition="합류 지점(Merge Point): 둘 이상의 실행 경로가 만나는 명령어 위치.">합류 지점(Merge Point)</span>이라 한다. 여기서 모든 경로의 평가 스택은 <strong>높이가 같고 타입이 호환</strong>되어야 한다. 객체 참조는 들어오는 타입들의 <span class="term" data-definition="최소 공통 조상(Least Common Ancestor): 클래스 계층에서 주어진 타입들을 모두 하위로 두는 가장 가까운 상위 타입.">최소 공통 조상(Least Common Ancestor)</span>이 정적 타입이 된다. 아래 예에서 Bar와 Baz는 모두 Foo를 상속한다(Baz는 예시). 탭을 눌러 비교하시오.</p>
+        <div class="ablation-demo animate-in" style="margin:16px 0 0">
+          <div class="ablation-tabs">
+            <button class="ablation-tab active" onclick="showLayer('ve-merge-ok', this)">통과</button>
+            <button class="ablation-tab" onclick="showLayer('ve-merge-height', this)">실패: 높이</button>
+            <button class="ablation-tab" onclick="showLayer('ve-merge-type', this)">실패: 타입</button>
+          </div>
+          <div class="ablation-viewport" style="padding:16px">
+            <div class="ablation-layer" id="ve-merge-ok" style="display:block">
+              <div class="svg-diagram"><svg viewBox="0 0 640 216" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="한 경로는 Bar, 다른 경로는 Baz를 스택에 올리고 합류 지점에서 스택은 Foo 하나가 된다">
+<path class="edge-line" d="M320,48 V64 H128 V78"/><polygon class="edge-arrow" points="123,78 133,78 128,88"/>
+<path class="edge-line" d="M320,64 H512 V78"/><polygon class="edge-arrow" points="507,78 517,78 512,88"/>
+<path class="edge-line accent" d="M128,136 V180 H214"/><polygon class="edge-arrow accent" points="214,175 224,180 214,185"/>
+<path class="edge-line accent" d="M512,136 V180 H426"/><polygon class="edge-arrow accent" points="426,175 416,180 426,185"/>
+<rect class="node-rect sq" x="224" y="8" width="192" height="40" rx="2"/>
+<foreignObject x="232" y="12" width="176" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>조건 분기</span></div></foreignObject>
+<rect class="node-rect sq" x="32" y="88" width="192" height="48" rx="2"/>
+<foreignObject x="40" y="92" width="176" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span><code>newobj Bar</code><br/>스택 [Bar], 높이 1</span></div></foreignObject>
+<rect class="node-rect sq" x="416" y="88" width="192" height="48" rx="2"/>
+<foreignObject x="424" y="92" width="176" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span><code>newobj Baz</code><br/>스택 [Baz], 높이 1</span></div></foreignObject>
+<rect class="node-rect sq accent" x="224" y="156" width="192" height="48" rx="2"/>
+<foreignObject x="232" y="160" width="176" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>합류: 스택 [Foo]<br/>통과</span></div></foreignObject>
+              </svg></div>
+              <p class="ablation-description">높이가 1로 같고 두 타입이 모두 객체 참조이다. 정적 타입은 최소 공통 조상인 Foo가 되므로, 합류 뒤에는 Foo의 필드와 메서드만 쓸 수 있다.</p>
+            </div>
+            <div class="ablation-layer" id="ve-merge-height" style="display:none">
+              <div class="svg-diagram"><svg viewBox="0 0 640 216" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="한 경로는 스택 높이 2, 다른 경로는 높이 1로 합류해 검증에 실패한다">
+<path class="edge-line" d="M320,48 V64 H128 V78"/><polygon class="edge-arrow" points="123,78 133,78 128,88"/>
+<path class="edge-line" d="M320,64 H512 V78"/><polygon class="edge-arrow" points="507,78 517,78 512,88"/>
+<path class="edge-line" d="M128,136 V180 H214"/><polygon class="edge-arrow" points="214,175 224,180 214,185"/>
+<path class="edge-line" d="M512,136 V180 H426"/><polygon class="edge-arrow" points="426,175 416,180 426,185"/>
+<rect class="node-rect sq" x="224" y="8" width="192" height="40" rx="2"/>
+<foreignObject x="232" y="12" width="176" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>조건 분기</span></div></foreignObject>
+<rect class="node-rect sq" x="32" y="88" width="192" height="48" rx="2"/>
+<foreignObject x="40" y="92" width="176" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span><code>ldc.i4 1</code>, <code>newobj Bar</code><br/>스택 [int32, Bar], 높이 2</span></div></foreignObject>
+<rect class="node-rect sq" x="416" y="88" width="192" height="48" rx="2"/>
+<foreignObject x="424" y="92" width="176" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span><code>newobj Baz</code><br/>스택 [Baz], 높이 1</span></div></foreignObject>
+<rect class="node-rect sq accent" x="224" y="156" width="192" height="48" rx="2"/>
+<foreignObject x="232" y="160" width="176" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>합류: 높이 2 ≠ 1<br/>거부</span></div></foreignObject>
+              </svg></div>
+              <p class="ablation-description">한 경로만 값을 하나 더 올렸다. 합류 뒤 명령어가 스택에서 몇 개를 꺼낼지 정할 수 없으므로 검증기는 이 코드를 거부한다.</p>
+            </div>
+            <div class="ablation-layer" id="ve-merge-type" style="display:none">
+              <div class="svg-diagram"><svg viewBox="0 0 640 216" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="한 경로는 int32, 다른 경로는 Baz 참조를 올려 타입이 호환되지 않아 검증에 실패한다">
+<path class="edge-line" d="M320,48 V64 H128 V78"/><polygon class="edge-arrow" points="123,78 133,78 128,88"/>
+<path class="edge-line" d="M320,64 H512 V78"/><polygon class="edge-arrow" points="507,78 517,78 512,88"/>
+<path class="edge-line" d="M128,136 V180 H214"/><polygon class="edge-arrow" points="214,175 224,180 214,185"/>
+<path class="edge-line" d="M512,136 V180 H426"/><polygon class="edge-arrow" points="426,175 416,180 426,185"/>
+<rect class="node-rect sq" x="224" y="8" width="192" height="40" rx="2"/>
+<foreignObject x="232" y="12" width="176" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>조건 분기</span></div></foreignObject>
+<rect class="node-rect sq" x="32" y="88" width="192" height="48" rx="2"/>
+<foreignObject x="40" y="92" width="176" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span><code>ldc.i4 7</code><br/>스택 [int32], 높이 1</span></div></foreignObject>
+<rect class="node-rect sq" x="416" y="88" width="192" height="48" rx="2"/>
+<foreignObject x="424" y="92" width="176" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span><code>newobj Baz</code><br/>스택 [Baz], 높이 1</span></div></foreignObject>
+<rect class="node-rect sq accent" x="224" y="156" width="192" height="48" rx="2"/>
+<foreignObject x="232" y="160" width="176" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>합류: int32와 Baz<br/>거부</span></div></foreignObject>
+              </svg></div>
+              <p class="ablation-description">높이는 같지만 정수와 객체 참조는 공통 조상이 없어 호환되지 않는다. 정수를 참조로 쓰는 길이 열리므로 검증기는 거부한다.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>합류 지점에서는 스택 높이가 같고 타입이 호환되어야 하며, Bar와 Baz가 만나면 정적 타입은 최소 공통 조상 Foo가 된다.</p></div>
+    </div>
+
+    <!-- 페이지 4: 검증할 수 없는 것 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>어떤 명령어와 사용법이 검증을 통과하지 못하는가?</li>
+          <li>공용체는 왜 일부만 검증할 수 있는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">검증할 수 없는 코드<span class="paper-ref">논문 11절, 각주 3</span></h3>
+        <p>CLI는 타입 안전한 기능과 타입 안전하지 않은 기능을 모두 제공한다. 검증 가능한 CIL을 만들려면 컴파일러가 다음을 피해야 한다. 이것이 4~5단원에서 본 unmanaged pointer, 주소 산술, 공용체의 대가이다.</p>
+        <table class="data-table animate-in">
+          <thead><tr><th>피해야 할 것</th><th>왜 검증할 수 없나</th></tr></thead>
+          <tbody>
+            <tr><td>block copy 명령어</td><td>본질적으로 검증할 수 없는 명령어임</td></tr>
+            <tr><td><code>add</code>를 주소 산술에 쓰기</td><td>덧셈 자체는 괜찮지만 결과 주소가 어디를 가리킬지 모름</td></tr>
+            <tr><td>타입 안전하지 않은 대입</td><td>선언 타입의 계약을 깨는 값이 들어감</td></tr>
+            <tr class="hl"><td>판별자 없는 <span class="term" data-definition="공용체(Union, 필드가 같은 메모리를 겹쳐 쓰는 타입): 여러 필드가 같은 바이트를 공유하는 값 타입. CLI에서는 명시적 배치로 만듦.">공용체(Union)</span>의 일부 사용</td><td>참조와 다른 타입이 겹치면 정수로 가짜 참조를 만들 수 있음</td></tr>
+          </tbody>
+          <caption>표는 검증 가능한 코드를 만들 때 피해야 할 것을 나타낸 것이다. (논문 11절)</caption>
+        </table>
+        <figure class="svg-diagram fit animate-in" style="--diagram-max:640px">
+          <svg viewBox="0 0 640 128" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="같은 4바이트를 FloatOrInt는 float와 int로 겹쳐 쓰고, 예시 공용체는 객체 참조와 int를 겹쳐 써서 정수로 참조를 위조할 수 있다">
+<text class="muted" x="16" y="20" font-size="12">FloatOrInt(5단원): 참조 없음</text>
+<rect class="node-rect sq" x="16" y="32" width="280" height="36" rx="2"/>
+<foreignObject x="24" y="36" width="264" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>[0] <code>float32 f</code></span></div></foreignObject>
+<rect class="node-rect sq" x="16" y="72" width="280" height="36" rx="2"/>
+<foreignObject x="24" y="76" width="264" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>[0] <code>int32 n</code></span></div></foreignObject>
+<text class="muted" x="16" y="124" font-size="12">각주 3의 조건(참조를 겹치지 않음)에 해당</text>
+<text class="muted" x="344" y="20" font-size="12">참조를 겹친 공용체(예시)</text>
+<rect class="node-rect sq accent" x="344" y="32" width="280" height="36" rx="2"/>
+<foreignObject x="352" y="36" width="264" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>[0] <code>object o</code></span></div></foreignObject>
+<rect class="node-rect sq" x="344" y="72" width="280" height="36" rx="2"/>
+<foreignObject x="352" y="76" width="264" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>[0] <code>int32 n</code> = 임의의 주소</span></div></foreignObject>
+<text class="muted" x="344" y="124" font-size="12">n에 쓴 정수를 o로 읽으면 가짜 참조</text>
+          </svg>
+          <figcaption class="figure-caption">그림은 같은 바이트를 겹쳐 쓰는 두 공용체를 비교한 것이다. 오른쪽 공용체는 설명을 위한 예시이다.</figcaption>
+        </figure>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>block copy, 주소 산술, 타입 안전하지 않은 대입, 참조를 겹치는 공용체는 검증을 통과하지 못한다.</p></div>
+    </div>
+
+    <!-- 페이지 5: reference surrogate -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>값 배열을 쓰는 언어는 어떻게 검증 가능한 CIL을 만드는가?</li>
+          <li>reference surrogate의 대가는 무엇인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">값을 참조로 대신하기: reference surrogate<span class="paper-ref">논문 11절</span></h3>
+        <p>논문은 정적으로 타입 안전한 언어라면 늘 검증 가능한 CIL로 컴파일할 수 있다고 본다. 다만 데이터 타입을 옮길 때 궁리가 필요하다. 예는 크기가 정적으로 정해진 값 배열이다(Pascal의 <code>ARRAY [0..3] OF INTEGER</code> 같은 것, 예시).</p>
+        <figure class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 176" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="검증하지 않는 방식은 값 클래스 덩어리를 주소 산술로 읽고, 검증 가능한 방식은 지역 변수의 참조가 GC 힙의 int32 배열을 가리켜 내장 범위 검사를 쓴다">
+<rect class="guide-fill" x="16" y="8" width="368" height="160" rx="4"/>
+<text class="muted" x="28" y="28" font-size="12">검증하지 않는 문맥: 값 클래스 + 주소 산술</text>
+<rect class="node-rect sq" x="40" y="48" width="80" height="40" rx="2"/>
+<foreignObject x="44" y="52" width="72" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>[0]</span></div></foreignObject>
+<rect class="node-rect sq" x="120" y="48" width="80" height="40" rx="2"/>
+<foreignObject x="124" y="52" width="72" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>[1]</span></div></foreignObject>
+<rect class="node-rect sq" x="200" y="48" width="80" height="40" rx="2"/>
+<foreignObject x="204" y="52" width="72" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>[2]</span></div></foreignObject>
+<rect class="node-rect sq" x="280" y="48" width="80" height="40" rx="2"/>
+<foreignObject x="284" y="52" width="72" height="32"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px"><span>[3]</span></div></foreignObject>
+<text class="mono" x="40" y="116" font-size="12">주소 = 시작 + 4 × i</text>
+<text class="muted" x="40" y="140" font-size="12">컴파일러가 범위를 검사하면 안전하지만,</text>
+<text class="muted" x="40" y="158" font-size="12">검증기는 주소 산술을 허용하지 않음</text>
+<rect class="guide-fill" x="416" y="8" width="368" height="160" rx="4"/>
+<text class="muted" x="428" y="28" font-size="12">검증 가능: 참조 배열(reference surrogate)</text>
+<path class="edge-line accent" d="M552,72 H586"/><polygon class="edge-arrow accent" points="586,67 596,72 586,77"/>
+<rect class="node-rect sq" x="440" y="48" width="112" height="48" rx="2"/>
+<foreignObject x="448" y="52" width="96" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>지역 변수<br/>참조 하나</span></div></foreignObject>
+<rect class="node-rect sq accent" x="596" y="48" width="168" height="48" rx="2"/>
+<foreignObject x="604" y="52" width="152" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:12px; line-height:1.3"><span>GC 힙의 <code>int32[4]</code><br/>내장 범위 검사</span></div></foreignObject>
+<text class="muted" x="440" y="140" font-size="12">CLI 내장 배열 명령어로 접근하므로</text>
+<text class="muted" x="440" y="158" font-size="12">검증기가 받아들임</text>
+          </svg>
+          <figcaption class="figure-caption">그림은 같은 크기 4의 값 배열을 두 방식으로 표현한 것을 비교한 것이다. 크기와 원소 타입은 예시이다.</figcaption>
+        </figure>
+        <p>값 객체를 참조 타입으로 나타내는 이 관용구를 논문은 <span class="term" data-definition="reference surrogate(값을 대신하는 참조 객체): 값 의미를 가진 데이터를 검증 가능한 참조 타입 객체로 대신 표현하는 관용구. Gough의 용어임.">reference surrogate(값을 대신하는 참조 객체)</span>라 부르고, 자세한 대응은 [10]에 미룬다. 대가로 힙 할당이 생기고, 대입할 때 값처럼 복사되도록 컴파일러가 따로 맞춰야 한다고 해석할 수 있다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>검증기가 주소 산술을 막으므로, 값 배열은 같은 크기의 참조 배열(reference surrogate)로 바꿔 CLI 내장 배열을 쓴다.</p></div>
+    </div>
+
+    <!-- 페이지 6: peverify와 부트스트랩 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>검증기는 컴파일러 작성자에게 어떤 도움을 주는가?</li>
+          <li>검증된 환경에서도 남는 CLR의 기능은 무엇인가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">peverify와 첫 시도 부트스트랩<span class="paper-ref">논문 11절</span></h3>
+        <p>오프라인 검증기 <code>peverify</code>는 CIL을 만드는 코드에서 흔히 생기는 오류 대부분을 찾아 진단한다. 논문은 Project 7 컴파일러 중 하나인 Gardens Point Component Pascal이, <code>peverify</code>가 CIL을 검증 가능하다고 확인하자 <strong>첫 시도에</strong> 자기 자신을 <span class="term" data-definition="부트스트랩(Bootstrap, 컴파일러가 자기 자신을 컴파일): 어떤 언어로 쓴 컴파일러가 자기 소스 코드를 컴파일해 새 컴파일러를 만드는 일.">부트스트랩(Bootstrap, 컴파일러가 자기 자신을 컴파일)</span>했다고 소개한다.</p>
+        <figure class="svg-diagram animate-in">
+          <svg viewBox="0 0 800 112" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="컴파일러가 만든 CIL을 peverify로 검사해 오류가 있으면 고치고, 통과하면 컴파일러가 자기 자신을 컴파일한다">
+<path class="edge-line" d="M200,40 H254"/><polygon class="edge-arrow" points="254,35 264,40 254,45"/>
+<path class="edge-line accent" d="M448,40 H566"/><polygon class="edge-arrow accent" points="566,35 576,40 566,45"/>
+<text class="accent-text" x="464" y="30" font-size="12">검증 가능</text>
+<path class="edge-line" d="M356,64 V104 H108 V74"/><polygon class="edge-arrow" points="103,74 108,64 113,74"/>
+<text class="muted" x="124" y="98" font-size="12">오류 진단 → 생성기 수정</text>
+<rect class="node-rect" x="16" y="16" width="184" height="48" rx="8"/>
+<foreignObject x="24" y="20" width="168" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span>컴파일러의 CIL 생성기</span></div></foreignObject>
+<rect class="node-rect accent" x="264" y="16" width="184" height="48" rx="8"/>
+<foreignObject x="272" y="20" width="168" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px"><span><code>peverify</code></span></div></foreignObject>
+<rect class="node-rect" x="576" y="16" width="208" height="48" rx="8"/>
+<foreignObject x="584" y="20" width="192" height="40"><div xmlns="http://www.w3.org/1999/xhtml" class="node-label" style="font-size:13px; line-height:1.3"><span>자기 자신을 컴파일<br/>(첫 시도에 성공)</span></div></foreignObject>
+          </svg>
+          <figcaption class="figure-caption">그림은 peverify를 CIL 생성기의 시험 도구로 쓰는 흐름을 나타낸 것이다.</figcaption>
+        </figure>
+        <p>논문이 강조하는 점은 CLR 혁신의 대부분이 검증된 환경에서도 유지된다는 것이다. 값 클래스(5단원), managed pointer로 넘기는 참조 매개변수(4단원 Swap), 참조를 다른 타입과 겹치지 않는 공용체가 그 예이다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p><code>peverify</code>는 CIL 생성기의 오류를 잡아 주며, 값 클래스·참조 매개변수·타입 안전한 공용체는 검증된 환경에서도 쓸 수 있다.</p></div>
+    </div>
+
+    <!-- 페이지 7: 결론과 한계 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>논문의 결론은 어떤 종류의 근거에 기대는가?</li>
+          <li>이 결론을 읽을 때 무엇을 감안해야 하는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading">결론과 읽을 때의 주의<span class="paper-ref">논문 12절</span></h3>
+        <p>저자들은 앞 절들의 논증으로 CLI가 다중 언어 플랫폼으로서 이미 <strong>JVM보다 엄밀히 더 강력하다</strong>고 주장한다. 그리고 지금 JVM을 대상으로 하는 사람까지 포함한 언어 구현자들에게 CLI를 대상으로 삼아 의견을 달라고 요청한다.</p>
+        <table class="data-table animate-in">
+          <thead><tr><th>살필 점</th><th>내용</th><th>읽는 법</th></tr></thead>
+          <tbody>
+            <tr><td>근거의 종류</td><td>명령어와 설계의 비교 설명. 실험이나 수치 비교가 없음</td><td>“더 강력하다”는 저자의 주장으로 읽는다</td></tr>
+            <tr><td>저자의 이해관계</td><td>Microsoft 소속과 CLR 컴파일러 저자(Gough는 [10]의 저자)</td><td>이해관계가 있는 비교임을 감안한다</td></tr>
+            <tr><td>시점</td><td>2001년, JVM 명세 2판 기준</td><td>이후 바뀐 점은 8단원에서 확인한다</td></tr>
+            <tr class="hl"><td>저자가 인정한 한계</td><td>명령형·정적 타입 OO 언어 지원은 좋고, 비표준 패러다임 지원은 개선 중([16])</td><td>“완벽한 다중 언어 플랫폼”은 아니라는 단서</td></tr>
+          </tbody>
+          <caption>표는 12절 결론을 읽을 때 살필 점을 정리한 것이다. (논문 1, 12절과 해석)</caption>
+        </table>
+        <p class="diff-line"><strong>핵심 비교</strong> 논문이 보인 것은 “CLI에는 이런 명령어가 있고 JVM에는 없다”는 설계 비교이며, 그 차이가 실제 언어 구현에서 얼마나 이득인지는 측정하지 않았다.</p>
+        <p>그래도 tail call, 값 타입, 참조 매개변수처럼 논문이 짚은 차이는 구체적인 명령어로 확인할 수 있다. 이 점에서 논문은 다중 언어 실행 환경이 갖출 기본 연산의 목록을 제시한 문서로 해석할 수 있다.</p>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>“JVM보다 엄밀히 더 강력하다”는 결론은 실험 없는 설계 비교에 기댄 저자의 주장이며, 이해관계와 2001년 시점을 감안해 읽는다.</p></div>
+    </div>
+
+    <!-- 페이지 8: 핵심 정리 + 확인 문제 1, 2 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <div class="callout callout-accent animate-in">
+          <div class="callout-content">
+            <strong class="callout-title">핵심 정리</strong>
+            <ol>
+              <li>검증은 배포나 로드 때 생산자를 믿지 않고 하며, 증명할 수 없는 것은 런타임 검사로 보호되는지 확인한다.</li>
+              <li>합류 지점에서는 스택 높이가 같고 타입이 호환되어야 하며, 객체 참조는 최소 공통 조상이 정적 타입이 된다.</li>
+              <li>주소 산술 같은 기능은 검증할 수 없으므로 reference surrogate 같은 대응이 필요하다.</li>
+            </ol>
+            <p>합류 문항은 경로마다 스택을 아래부터 적어 높이와 타입을 맞춰 보라.</p>
+          </div>
+        </div>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag outline">확인 문제</span>검증의 범위와 합류 지점</h3>
+        <div class="quiz-container animate-in" id="ve-quiz-a">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="③ | 두 경로의 높이가 1로 같고 둘 다 객체 참조이므로, 정적 타입은 Bar와 Baz의 최소 공통 조상인 Foo이다."
+               data-explanation-wrong="| 정답은 ③이다. 객체 참조가 합류하면 최소 공통 조상 Foo가 정적 타입이 된다. ⑤는 높이나 타입이 맞지 않을 때의 결과이므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">1</span>Bar와 Baz는 모두 Foo를 상속한다. 한 경로는 Bar 객체 하나를, 다른 경로는 Baz 객체 하나를 평가 스택에 올린 뒤 합류한다. 합류 지점에서 스택 원소의 정적 타입은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① Bar</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② Baz</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ Foo</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 실행할 때까지 정할 수 없다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 타입이 달라 검증에 실패한다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="③ | 배열 인덱스는 정적으로 증명하기 어려우므로 검증기는 범위 검사로 보호되는지를 확인한다. ③은 옳지 않다."
+               data-explanation-wrong="| 정답은 ③이다. 검증기는 인덱스를 미리 증명하지 않고 범위 검사가 있는지를 확인한다. ②는 논문 11절의 설명과 같으므로 옳다.">
+            <h3 class="quiz-question"><span class="q-num">2</span>CLI의 검증에 대한 설명으로 옳지 <u>않은</u> 것은?</h3>
+            <div class="quiz-options">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 컴포넌트를 배포하거나 로드할 때 한다.</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 컴포넌트를 만든 사람을 신뢰하는 데 기대지 않는다.</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 모든 배열 인덱스가 범위 안에 있음을 정적으로 증명한다.</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 분석이 보수적이어서 안전한 코드도 거부할 수 있다.</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ 필드 선택이 알려진 타입의 필드만 접근함을 보장한다.</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('ve-quiz-a')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('ve-quiz-a')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>검증기는 인덱스를 증명하지 않고 범위 검사를 확인하며, 합류한 참조는 최소 공통 조상 타입이 된다.</p></div>
+    </div>
+
+    <!-- 페이지 9: 확인 문제 3, 4 -->
+    <div class="screen cornell">
+      <aside class="cue">
+        <span class="cue-label">핵심 질문</span>
+        <ul>
+          <li>검증할 수 없는 코드와 그 대응을 구분할 수 있는가?</li>
+        </ul>
+      </aside>
+      <div class="notes">
+        <h3 class="screen-heading"><span class="corner-tag outline">확인 문제</span>검증할 수 없는 코드</h3>
+        <div class="quiz-container animate-in" id="ve-quiz-b">
+          <div class="quiz-question-block"
+               data-correct="option-c"
+               data-explanation-right="③ | ㄱ, ㄴ은 검증할 수 없다. 값 클래스와 참조 매개변수는 허용되므로 ㄷ은 옳지 않다."
+               data-explanation-wrong="| 정답은 ③이다. 값 클래스와 참조 매개변수는 검증된 환경에서도 허용되므로 ㄷ은 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">3</span>검증을 통과하지 못하는 것만을 <span class="nobr">&lt;보기&gt;에서</span> 있는 대로 고른 것은?</h3>
+            <div class="bogi">
+              <p>ㄱ. block copy 명령어</p>
+              <p>ㄴ. <code>add</code>로 주소를 계산하기</p>
+              <p>ㄷ. 값 클래스와 참조 매개변수 쓰기</p>
+            </div>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① ㄱ</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② ㄷ</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ ㄱ, ㄴ</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ ㄴ, ㄷ</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ ㄱ, ㄴ, ㄷ</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <div class="quiz-question-block"
+               data-correct="option-b"
+               data-explanation-right="② | 같은 크기의 참조 배열로 CLI 내장 배열을 쓰는 reference surrogate이다."
+               data-explanation-wrong="| 정답은 ②이다. ①은 검증기가 허용하지 않는 주소 산술이므로 옳지 않다.">
+            <h3 class="quiz-question"><span class="q-num">4</span>값 배열을 검증 가능한 CIL로 옮기는 방법으로 논문이 제시한 것은?</h3>
+            <div class="quiz-options row">
+              <button class="quiz-option" data-value="option-a" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>① 주소 산술로 원소 접근</span></button>
+              <button class="quiz-option" data-value="option-b" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>② 참조 배열로 대체</span></button>
+              <button class="quiz-option" data-value="option-c" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>③ 범위 검사 생략</span></button>
+              <button class="quiz-option" data-value="option-d" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>④ 공용체로 원소 겹치기</span></button>
+              <button class="quiz-option" data-value="option-e" onclick="selectOption(this)"><div class="quiz-option-radio"></div><span>⑤ block copy로 통째 복사</span></button>
+            </div>
+            <div class="quiz-feedback"></div>
+          </div>
+
+          <button class="quiz-check-btn" onclick="checkQuiz('ve-quiz-b')">정답 확인</button>
+          <button class="quiz-reset-btn" onclick="resetQuiz('ve-quiz-b')">다시 풀기</button>
+        </div>
+      </div>
+      <div class="summary"><span class="summary-label">요약</span><p>block copy와 주소 산술은 검증할 수 없고, 값 배열은 reference surrogate로 바꿔 검증을 통과한다.</p></div>
+    </div>
+
+  </div>
+</section>
